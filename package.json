@@ -1,0 +1,33 @@
+{
+  "name": "ixo-block-sync",
+  "version": "1.0.0",
+  "description": "Block synchronizer to mongoDB",
+  "main": "index.js",
+  "scripts": {
+    "start": "tsc && node build/dist/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "blockchain"
+  ],
+  "author": "Nicolaas Vercuiel",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "body-parser": "^1.18.3",
+    "clui": "^0.3.6",
+    "cors": "^2.8.4",
+    "dotenv": "^5.0.1",
+    "express": "^4.16.3",
+    "express-winston": "^2.5.1",
+    "http": "0.0.0",
+    "jayson": "^2.0.6",
+    "mongoose": "^5.1.2",
+    "winston": "^2.4.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.11.1",
+    "@types/express-winston": "^2.4.3",
+    "@types/node": "^9.6.2"
+  }
+}
