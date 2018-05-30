@@ -47,7 +47,7 @@ export class SyncBlocks {
             sync.message('Syncing block number ' + event.getBlockHeight());
             if (event.getBlock().hasTransactions()) {
                 let buf = Buffer.from(event.getBlock().getTransaction(), 'base64');
-                console.log("TX RECIEVED!!!!!!!!" + buf.toString());
+                console.log("TX DATA: " + buf.toString());
                 let project = JSON.parse(buf.toString());
                 let projectDoc: IProject = project.payload[1].ProjectDoc;
                 this.projectHandler.create(projectDoc);
