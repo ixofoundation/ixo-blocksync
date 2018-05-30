@@ -5,26 +5,16 @@ export interface IProjectModel extends IProject, Document {
 }
 
 export var ProjectSchema: Schema = new Schema({
-    txHash: {
+    ownerName: {
         type: String,
-        index: true,
-        unique: true
     },
-    senderDid: {
+    ownerEmail: {
         type: String,
-        index: true,
     },
     projectDid: {
         type: String,
         index: true,
-    },
-    pubKey: {
-        type: String,
-        required: true,
-    },
-    title: {
-        type: String,
-        required: true
+        unique: true
     },
     shortDescription: {
         type: String,
@@ -44,18 +34,20 @@ export var ProjectSchema: Schema = new Schema({
     },
     createdBy: {
         type: String,
-        index: true,
     },
-    country: {
+    projectLocation: {
         type: String,
-        index: true,
+        required: true
+    },
+    estimatedProjectDuration: {
+        type: Number,
         required: true
     },
     sdgs: {
-        type: [String],
+        type: [Number],
         required: true
     },
-    impactsRequired: {
+    claimsRequired: {
         type: Number,
         required: true
     },
@@ -79,6 +71,11 @@ export var ProjectSchema: Schema = new Schema({
             type: String,
             required: false,
             default: ''
+        },
+        webLink: {
+            type: String,
+            required: false,
+            default: ''
         }
     },
     serviceEndpoint: {
@@ -88,6 +85,32 @@ export var ProjectSchema: Schema = new Schema({
     imageLink: {
         type: String,
         required: false
+    },
+    founder: {
+        name: {
+            type: String,
+            required: true
+        },
+        email: {
+            type: String,
+            required: true
+        },
+        countryOfOrigin: {
+            type: String,
+            required: true
+        },
+        shortDescription: {
+            type: String,
+            required: false
+        },
+        websiteURL: {
+            type: String,
+            required: false
+        },
+        logoLink: {
+            type: String,
+            required: false
+        }
     }
 }, { strict: false });
 

@@ -17,7 +17,7 @@ export class ProjectHandler {
         });
     }
 
-    list = () => {
+    listAllProjects = (numberOfProjects: number) => {
         return new Promise((resolve: Function, reject: Function) => {
             return ProjectDB.find({}, (err, res) => {
                 if (err) {
@@ -28,4 +28,20 @@ export class ProjectHandler {
             });
         });
     }
+
+    listProjectByDid = (params: any) => {
+        if (params.projectDid == undefined) {
+            return new Promise((resolve: Function, reject: Function) => {
+                reject(new Error("'projectDid' not specified in params"));
+            })
+        } else {
+            return ProjectDB.find({ "projectDid": params.projectDid })
+                .exec();
+        }
+    }
+
+    listProjectStats = () => {
+
+    }
+
 }

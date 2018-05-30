@@ -21,7 +21,9 @@ var ProjectRouter = /** @class */ (function (_super) {
         var config = {};
         var handler = new project_handler_1.ProjectHandler();
         this.register(config, 'create', handler.create);
-        this.register(config, 'listProjects', handler.list);
+        this.register(config, 'listProjects', handler.listAllProjects);
+        this.register(config, 'listProjectByDid', handler.listProjectByDid);
+        this.register(config, 'listProjectStats', handler.listProjectStats);
         return config;
     };
     return ProjectRouter;

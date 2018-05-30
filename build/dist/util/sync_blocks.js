@@ -3,13 +3,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var connection_1 = require("./connection");
 var block_1 = require("../models/block");
 var chain_handler_1 = require("../handlers/chain_handler");
+var project_handler_1 = require("../handlers/project_handler");
 var CLI = require('clui'), Spinner = CLI.Spinner;
 var SyncBlocks = /** @class */ (function () {
     function SyncBlocks() {
         this.chainHandler = new chain_handler_1.ChainHandler();
+        this.projectHandler = new project_handler_1.ProjectHandler();
     }
     SyncBlocks.prototype.startSync = function (chainUri) {
         var _this = this;
+        console.log("CHAIN_URI: " + chainUri);
         var conn = new connection_1.Connection(chainUri);
         this.chainHandler.getChainInfo().then(function (chain) {
             if (!chain) {
@@ -41,6 +44,13 @@ var SyncBlocks = /** @class */ (function () {
         blockQueue.onBlock(function (event) {
             _this.chainHandler.setBlockHeight(event.getBlockHeight(), event.getChainId());
             sync.message('Syncing block number ' + event.getBlockHeight());
+            if (event.getBlock().hasTransactions()) {
+                var buf = Buffer.from(event.getBlock().getTransaction(), 'base64');
+                console.log("TX RECIEVED!!!!!!!!" + buf.toString());
+                var project = JSON.parse(buf.toString());
+                var projectDoc = project.payload[1].ProjectDoc;
+                _this.projectHandler.create(projectDoc);
+            }
         });
         sync.start();
         blockQueue.start();

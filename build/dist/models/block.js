@@ -48,6 +48,9 @@ var Block = /** @class */ (function () {
     Block.prototype.hasTransactions = function () {
         return (this.block.data.txs.length !== 0);
     };
+    Block.prototype.getTransaction = function () {
+        return (this.block.data.txs[0]);
+    };
     return Block;
 }());
 exports.Block = Block;

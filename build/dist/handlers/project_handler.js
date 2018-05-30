@@ -15,7 +15,7 @@ var ProjectHandler = /** @class */ (function () {
                 });
             });
         };
-        this.list = function () {
+        this.listAllProjects = function (numberOfProjects) {
             return new Promise(function (resolve, reject) {
                 return project_1.ProjectDB.find({}, function (err, res) {
                     if (err) {
@@ -26,6 +26,19 @@ var ProjectHandler = /** @class */ (function () {
                     }
                 });
             });
+        };
+        this.listProjectByDid = function (params) {
+            if (params.projectDid == undefined) {
+                return new Promise(function (resolve, reject) {
+                    reject(new Error("'projectDid' not specified in params"));
+                });
+            }
+            else {
+                return project_1.ProjectDB.find({ "projectDid": params.projectDid })
+                    .exec();
+            }
+        };
+        this.listProjectStats = function () {
         };
     }
     return ProjectHandler;

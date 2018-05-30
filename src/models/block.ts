@@ -18,6 +18,9 @@ export class Block {
         return (this.block.data.txs.length !== 0);
     }
 
+    getTransaction(): string {
+        return (this.block.data.txs[0]);
+    }
 }
 
 export class NewBlockEvent {

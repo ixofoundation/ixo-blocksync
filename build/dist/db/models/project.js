@@ -2,26 +2,16 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var mongoose_1 = require("mongoose");
 exports.ProjectSchema = new mongoose_1.Schema({
-    txHash: {
+    ownerName: {
         type: String,
-        index: true,
-        unique: true
     },
-    senderDid: {
+    ownerEmail: {
         type: String,
-        index: true,
     },
     projectDid: {
         type: String,
         index: true,
-    },
-    pubKey: {
-        type: String,
-        required: true,
-    },
-    title: {
-        type: String,
-        required: true
+        unique: true
     },
     shortDescription: {
         type: String,
@@ -41,18 +31,20 @@ exports.ProjectSchema = new mongoose_1.Schema({
     },
     createdBy: {
         type: String,
-        index: true,
     },
-    country: {
+    projectLocation: {
         type: String,
-        index: true,
+        required: true
+    },
+    estimatedProjectDuration: {
+        type: Number,
         required: true
     },
     sdgs: {
-        type: [String],
+        type: [Number],
         required: true
     },
-    impactsRequired: {
+    claimsRequired: {
         type: Number,
         required: true
     },
@@ -76,6 +68,11 @@ exports.ProjectSchema = new mongoose_1.Schema({
             type: String,
             required: false,
             default: ''
+        },
+        webLink: {
+            type: String,
+            required: false,
+            default: ''
         }
     },
     serviceEndpoint: {
@@ -85,6 +82,32 @@ exports.ProjectSchema = new mongoose_1.Schema({
     imageLink: {
         type: String,
         required: false
+    },
+    founder: {
+        name: {
+            type: String,
+            required: true
+        },
+        email: {
+            type: String,
+            required: true
+        },
+        countryOfOrigin: {
+            type: String,
+            required: true
+        },
+        shortDescription: {
+            type: String,
+            required: false
+        },
+        websiteURL: {
+            type: String,
+            required: false
+        },
+        logoLink: {
+            type: String,
+            required: false
+        }
     }
 }, { strict: false });
 exports.ProjectSchema.pre('save', function (next) {
