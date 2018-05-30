@@ -4,7 +4,9 @@
   "description": "Block synchronizer to mongoDB",
   "main": "index.js",
   "scripts": {
-    "start": "tsc && node build/dist/server.js",
+    "start": "node build/dist/server.js",
+    "build": "tsc",
+    "run-dev": "tsc && node build/dist/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
