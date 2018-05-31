@@ -12,7 +12,6 @@ export class SyncBlocks {
     private projectHandler = new ProjectHandler();
 
     startSync(chainUri: string) {
-        console.log("CHAIN_URI: " + chainUri);
         let conn = new Connection(chainUri);
         this.chainHandler.getChainInfo().then((chain: IChain) => {
             conn.getLastBlock().then((block: any) => {
@@ -39,7 +38,7 @@ export class SyncBlocks {
         return new Promise((resolve: Function, reject: Function) => {
             connection.getLastBlock().then((block: any) => {
                 let chain: IChain = { chainId: block.header.chain_id, blockHeight: 0 };
-                if(isUpdate){
+                if (isUpdate) {
                     resolve(this.chainHandler.update(chain));
                 } else {
                     resolve(this.chainHandler.create(chain));
