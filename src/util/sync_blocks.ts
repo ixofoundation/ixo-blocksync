@@ -15,13 +15,19 @@ export class SyncBlocks {
         console.log("CHAIN_URI: " + chainUri);
         let conn = new Connection(chainUri);
         this.chainHandler.getChainInfo().then((chain: IChain) => {
-            if (!chain) {
-                this.initChainInfo(conn).then((chain: IChain) => {
+            conn.getLastBlock().then((block: any) => {
+                if (!chain) {
+                    this.initChainInfo(conn, false).then((chain: IChain) => {
+                        this.startQueue(conn, chain);
+                    });
+                } else if (block.header.chain_id !== chain.chainId) {
+                    this.initChainInfo(conn, true).then((chain: IChain) => {
+                        this.startQueue(conn, chain);
+                    });
+                } else {
                     this.startQueue(conn, chain);
-                });
-            } else {
-                this.startQueue(conn, chain);
-            }
+                }
+            });
         });
     }
 
@@ -29,11 +35,16 @@ export class SyncBlocks {
         return blockQueue.stop();
     }
 
-    initChainInfo(connection: Connection): Promise<IChain> {
+    initChainInfo(connection: Connection, isUpdate: boolean): Promise<IChain> {
         return new Promise((resolve: Function, reject: Function) => {
             connection.getLastBlock().then((block: any) => {
                 let chain: IChain = { chainId: block.header.chain_id, blockHeight: 0 };
-                resolve(this.chainHandler.create(chain));
+                if(isUpdate){
+                    resolve(this.chainHandler.update(chain));
+                } else {
+                    resolve(this.chainHandler.create(chain));
+
+                }
             })
         });
     }
@@ -49,8 +60,10 @@ export class SyncBlocks {
                 let buf = Buffer.from(event.getBlock().getTransaction(), 'base64');
                 console.log("TX DATA: " + buf.toString());
                 let project = JSON.parse(buf.toString());
-                let projectDoc: IProject = project.payload[1].ProjectDoc;
-                this.projectHandler.create(projectDoc);
+                if (project.payload[1].projectDoc) {
+                    let projectDoc: IProject = project.payload[1].projectDoc;
+                    this.projectHandler.create(projectDoc);
+                }
             }
         });
 

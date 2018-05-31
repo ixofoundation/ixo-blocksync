@@ -14,6 +14,18 @@ export class ChainHandler {
         });
     }
 
+    update = (chain: IChain) => {
+        return new Promise((resolve: Function, reject: Function) => {
+            return ChainDB.update({}, { $set: { blockHeight: chain.blockHeight, chainId: chain.chainId } }, (err, res) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(res);
+                }
+            });
+        });
+    }
+
     setBlockHeight = (blockHeight: Number, chainId: string) => {
         return new Promise((resolve: Function, reject: Function) => {
             return ChainDB.update({ chainId: chainId }, { $set: { blockHeight: blockHeight } }, (err, res) => {
