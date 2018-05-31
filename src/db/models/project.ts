@@ -5,16 +5,19 @@ export interface IProjectModel extends IProject, Document {
 }
 
 export var ProjectSchema: Schema = new Schema({
-    ownerName: {
+    title: {
         type: String,
-    },
-    ownerEmail: {
-        type: String,
+        required: true
     },
     projectDid: {
         type: String,
         index: true,
-        unique: true
+        unique: true,
+        required: true
+    },
+    ownerName: {
+        type: String,
+        required: true
     },
     shortDescription: {
         type: String,
@@ -39,22 +42,65 @@ export var ProjectSchema: Schema = new Schema({
         type: String,
         required: true
     },
-    estimatedProjectDuration: {
-        type: Number,
-        required: true
-    },
     sdgs: {
         type: [Number],
         required: true
     },
-    claimsRequired: {
-        type: Number,
-        required: true
+    claims: {
+        required: {
+            type: Number,
+            required: true,
+            default: 0
+        },
+        currentSucessful: {
+            type: Number,
+            required: true,
+            default: 0
+        },
+        currentRejected: {
+            type: Number,
+            required: true,
+            default: 0
+        }
     },
-    claimTemplate: {
-        type: String,
-        required: false,
-        default: 'default'
+    templates: {
+        claim: {
+            type: String,
+            required: true,
+            default: 'default'
+        }
+    },
+    agents: {
+        evaluatorsCount: {
+            type: Number,
+            required: true,
+            default: 0
+        },
+        evaluatorsPendingCount: {
+            type: Number,
+            required: true,
+            default: 0
+        },
+        serviceProviders: {
+            type: Number,
+            required: true,
+            default: 0
+        },
+        serviceProvidersPendingCount: {
+            type: Number,
+            required: true,
+            default: 0
+        },
+        investors: {
+            type: Number,
+            required: true,
+            default: 0
+        },
+    },
+    evaluatorPayPerClaim: {
+        type: Number,
+        required: true,
+        default: 0
     },
     socialMedia: {
         facebookLink: {
@@ -78,6 +124,18 @@ export var ProjectSchema: Schema = new Schema({
             default: ''
         }
     },
+    ixo: {
+        totalStaked: {
+            type: Number,
+            required: true,
+            default: 0
+        },
+        totalUsed: {
+            type: Number,
+            required: true,
+            default: 0
+        }
+    },
     serviceEndpoint: {
         type: String,
         required: false
@@ -88,10 +146,6 @@ export var ProjectSchema: Schema = new Schema({
     },
     founder: {
         name: {
-            type: String,
-            required: true
-        },
-        email: {
             type: String,
             required: true
         },

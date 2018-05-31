@@ -1,21 +1,28 @@
 export interface IProject {
-    ownerName: string;
-    ownerEmail: string;
+    title: string;
     projectDid: string;
+    ownerName: string;
     shortDescription: string;
     longDescription: string;
     impactAction: string;
     createdOn: Date;
     createdBy: string;
     projectLocation: string;
-    estimatedProjectDuration: number,
     sdgs: number[];
-    claimsRequired: number;
-    claimTemplate: string;
+    claims: IClaims;
+    templates: ITemplates;
+    agents: IAgents;
+    evaluatorPayPerClaim: number;
     socialMedia: ISocialMedia;
+    ixo: IIxo;
     serviceEndpoint: string;
     imageLink: string;
     founder: IFounder;
+}
+
+interface IIxo {
+    totalStaked: number;
+    totalUsed: number;
 }
 
 interface ISocialMedia {
@@ -26,31 +33,27 @@ interface ISocialMedia {
 }
 
 interface IFounder {
-    name: string,
-    email: string,
-    countryOfOrigin: string,
-    shortDescription: string,
-    websiteURL: string,
-    logoLink: string
-}
-
-/* interface IAllProjects {
-    totalServiceProviders: number,
-    totalProjects: number,
-    totalEvaluationAgents: number,
-    claims: IClaims
+    name: string;
+    countryOfOrigin: string;
+    shortDescription: string;
+    websiteURL: string;
+    logoLink: string;
 }
 
 interface IClaims {
-    total: number,
-    totalSuccesul: number,
-    totalSubmitted: number,
-    totalPending: number,
-    totalRejected: number,
-    claimLocations: ILocation[]
+    required: number;
+    currentSucessful: number;
+    currentRejected: number
 }
 
-interface ILocation {
-    long: string,
-    lat: string
-} */
+interface ITemplates {
+    claim: string;
+}
+
+interface IAgents {
+    evaluatorsCount: number;
+    EvaluatorsPendingCount: number;
+    ServiceProviders: number;
+    ServiceProvidersPendingCount: number;
+    Investors: number;
+}
