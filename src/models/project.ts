@@ -51,9 +51,9 @@ interface ITemplates {
 }
 
 interface IAgents {
-    evaluatorsCount: number;
-    EvaluatorsPendingCount: number;
+    evaluators: number;
+    EvaluatorsPending: number;
     ServiceProviders: number;
-    ServiceProvidersPendingCount: number;
+    ServiceProvidersPending: number;
     Investors: number;
 }

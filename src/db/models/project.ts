@@ -71,12 +71,12 @@ export var ProjectSchema: Schema = new Schema({
         }
     },
     agents: {
-        evaluatorsCount: {
+        evaluators: {
             type: Number,
             required: true,
             default: 0
         },
-        evaluatorsPendingCount: {
+        evaluatorsPending: {
             type: Number,
             required: true,
             default: 0
@@ -86,7 +86,7 @@ export var ProjectSchema: Schema = new Schema({
             required: true,
             default: 0
         },
-        serviceProvidersPendingCount: {
+        serviceProvidersPending: {
             type: Number,
             required: true,
             default: 0
