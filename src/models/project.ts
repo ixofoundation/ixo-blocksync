@@ -2,6 +2,7 @@ export interface IProject {
     title: string;
     projectDid: string;
     ownerName: string;
+    ownerEmail: string;
     shortDescription: string;
     longDescription: string;
     impactAction: string;

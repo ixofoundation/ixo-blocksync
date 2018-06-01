@@ -19,6 +19,10 @@ export var ProjectSchema: Schema = new Schema({
         type: String,
         required: true
     },
+    ownerEmail: {
+        type: String,
+        required: true
+    },
     shortDescription: {
         type: String,
         required: true
