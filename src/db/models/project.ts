@@ -153,6 +153,10 @@ export var ProjectSchema: Schema = new Schema({
             type: String,
             required: true
         },
+        email: {
+            type: String,
+            required: true
+        },
         countryOfOrigin: {
             type: String,
             required: true

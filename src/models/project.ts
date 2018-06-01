@@ -35,6 +35,7 @@ interface ISocialMedia {
 
 interface IFounder {
     name: string;
+    email: string;
     countryOfOrigin: string;
     shortDescription: string;
     websiteURL: string;
