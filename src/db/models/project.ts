@@ -56,7 +56,7 @@ export var ProjectSchema: Schema = new Schema({
             required: true,
             default: 0
         },
-        currentSucessful: {
+        currentSuccessful: {
             type: Number,
             required: true,
             default: 0
@@ -102,9 +102,8 @@ export var ProjectSchema: Schema = new Schema({
         },
     },
     evaluatorPayPerClaim: {
-        type: Number,
-        required: true,
-        default: 0
+        type: String,
+        required: true
     },
     socialMedia: {
         facebookLink: {

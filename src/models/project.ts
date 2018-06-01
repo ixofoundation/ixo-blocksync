@@ -13,7 +13,7 @@ export interface IProject {
     claims: IClaims;
     templates: ITemplates;
     agents: IAgents;
-    evaluatorPayPerClaim: number;
+    evaluatorPayPerClaim: string;
     socialMedia: ISocialMedia;
     ixo: IIxo;
     serviceEndpoint: string;
@@ -44,7 +44,7 @@ interface IFounder {
 
 interface IClaims {
     required: number;
-    currentSucessful: number;
+    currentSuccessful: number;
     currentRejected: number
 }
 
