@@ -1,4 +1,12 @@
 export interface IProject {
+    data: IData;
+    projectDid: string;
+    pubKey: string;
+    senderDid: string;
+    txHash: string;
+}
+
+interface IData {
     title: string;
     projectDid: string;
     ownerName: string;
