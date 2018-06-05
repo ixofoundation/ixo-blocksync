@@ -2,14 +2,16 @@ import { Connection } from "./connection";
 import { BlockQueue, NewBlockEvent } from "../models/block";
 import { ChainHandler } from "../handlers/chain_handler";
 import { IChain } from "../models/chain";
-import { ProjectHandler } from "../handlers/project_handler";
-import { IProject } from "../models/project";
+import { TransactionHandler } from "../handlers/txn_handler";
+import { StatsHandler } from "../handlers/stats_handler";
+import { IStats } from "../models/stats";
 const CLI = require('clui'),
     Spinner = CLI.Spinner;
 
 export class SyncBlocks {
     private chainHandler = new ChainHandler();
-    private projectHandler = new ProjectHandler();
+    private txnHandler = new TransactionHandler();
+    private statsHandler = new StatsHandler();
 
     startSync(chainUri: string) {
         let conn = new Connection(chainUri);
@@ -28,6 +30,11 @@ export class SyncBlocks {
                 }
             });
         });
+        this.statsHandler.getStatsInfo().then((stats: IStats) => {
+            if (!stats) {
+                this.statsHandler.create();
+            }
+        });
     }
 
     stopSync(blockQueue: BlockQueue) {
@@ -42,7 +49,6 @@ export class SyncBlocks {
                     resolve(this.chainHandler.update(chain));
                 } else {
                     resolve(this.chainHandler.create(chain));
-
                 }
             })
         });
@@ -58,20 +64,10 @@ export class SyncBlocks {
             if (event.getBlock().hasTransactions()) {
                 let buf = Buffer.from(event.getBlock().getTransaction(), 'base64');
                 console.log("TX DATA: " + buf.toString());
-                let project = JSON.parse(buf.toString());
-                if (project.payload[1].projectDid) {
-                    let projectDoc: IProject = project.payload[1];
-                    this.projectHandler.create(projectDoc);
-                }
+                this.txnHandler.routeTransaction(JSON.parse(buf.toString()))
             }
         });
-
         sync.start();
         blockQueue.start();
     }
 }
-
-
-
-
-
