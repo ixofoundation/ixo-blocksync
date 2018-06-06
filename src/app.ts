@@ -3,6 +3,7 @@ import * as cors from 'cors';
 import * as bodyParser from 'body-parser';
 import * as logger from './util/logger';
 import ProjectRouter from './routers/project_router';
+import StatsRouter from './routers/stats_router';
 
 class App {
 
@@ -30,6 +31,7 @@ class App {
             res.send('API is running');
         });
         this.express.use('/api/project', ProjectRouter);
+        this.express.use('/api/stats', StatsRouter);
 
         this.express.use(logger.after);
     }
