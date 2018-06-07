@@ -8,8 +8,9 @@ export class TransactionHandler {
     private statsHandler = new StatsHandler();
 
     routeTransaction(txData: any) {
+        let txIdentifier = txData.payload[0];
         let payload = txData.payload[1];
-        if (payload.hasOwnProperty('projectDid')) {
+        if (txIdentifier == 16) {
             let projectDoc: IProject = payload;
             this.projectHandler.create(projectDoc);
             this.statsHandler.getStatsInfo().then((stats: IStats) => {
@@ -17,8 +18,22 @@ export class TransactionHandler {
                 newStats.totalProjects++;
                 this.statsHandler.update(newStats);
             })
-        } else if (payload.hasOwnProperty('didDoc')) {
+        } else if (txIdentifier == 10) {
             console.log("Skipping DID Doc...");
+        } else if (txIdentifier == 17) {
+            let projectDid = payload.projectDid;
+            let agentRole = payload.data.role;
+            switch (agentRole) {
+                case "EA": {
+                    this.projectHandler.updateEvaluationCount(projectDid);
+                };
+                case "IA": {
+                    this.projectHandler.updateInvestmentAgentCount(projectDid);
+                }
+                case "SA": {
+                    this.projectHandler.updateServiceAgentCount(projectDid);
+                }
+            }
         }
     }
 }

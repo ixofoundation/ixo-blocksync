@@ -29,19 +29,51 @@ export class ProjectHandler {
         });
     }
 
-    listProjectByDid = (params: any) => {
-        if (params.projectDid == undefined) {
+    listProjectByDid = (projectDid: string) => {
+        if (projectDid == undefined) {
             return new Promise((resolve: Function, reject: Function) => {
                 reject(new Error("'projectDid' not specified in params"));
             })
         } else {
-            return ProjectDB.find({ "projectDid": params.projectDid })
+            return ProjectDB.find({ "projectDid": projectDid })
                 .exec();
         }
     }
 
-    listProjectStats = () => {
+    updateEvaluationCount = (projectDid: string) => {
+        return new Promise((resolve: Function, reject: Function) => {
+            return ProjectDB.findOneAndUpdate({ "projectDid": projectDid }, { $inc: { 'agents.evaluatorsPending': 1 } }, (err, res) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(res);
+                }
+            });
+        });
+    }
 
+    updateServiceAgentCount = (projectDid: string) => {
+        return new Promise((resolve: Function, reject: Function) => {
+            return ProjectDB.findOneAndUpdate({ "projectDid": projectDid }, { $inc: { 'agents.serviceProvidersPending': 1 } }, (err, res) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(res);
+                }
+            });
+        });
+    }
+
+    updateInvestmentAgentCount = (projectDid: string) => {
+        return new Promise((resolve: Function, reject: Function) => {
+            return ProjectDB.findOneAndUpdate({ "projectDid": projectDid }, { $inc: { 'agents.investorsPending': 1 } }, (err, res) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(res);
+                }
+            });
+        });
     }
 
 }
