@@ -40,13 +40,21 @@ export class TransactionHandler {
         } else if (txIdentifier == 18) {
             let projectDid = payload.projectDid;
             let agentRole = payload.data.role;
+            let approved: boolean;
+
+            if (payload.data.status === "1") {
+                approved = true;
+            } else {
+                approved = false;
+            }
+
             switch (agentRole) {
                 case "EA": {
-                    this.projectHandler.updateEvaluationStatus(projectDid);
+                    this.projectHandler.updateEvaluationStatus(projectDid, approved);
                     break;
                 };
                 case "SA": {
-                    this.projectHandler.updateServiceAgentStatus(projectDid);
+                    this.projectHandler.updateServiceAgentStatus(projectDid, approved);
                     break;
                 }
             }

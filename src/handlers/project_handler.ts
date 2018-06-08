@@ -83,9 +83,9 @@ export class ProjectHandler {
         });
     }
 
-    updateEvaluationStatus = (projectDid: string) => {
+    updateEvaluationStatus = (projectDid: string, approved: boolean) => {
         return new Promise((resolve: Function, reject: Function) => {
-            return ProjectDB.findOneAndUpdate({ "projectDid": projectDid }, { $inc: { 'data.agents.evaluatorsPending': -1, 'data.agents.evaluators' : 1 } }, (err, res) => {
+            return ProjectDB.findOneAndUpdate({ "projectDid": projectDid }, approved ? { $inc: { 'data.agents.evaluatorsPending': -1, 'data.agents.evaluators': 1 } } : { $inc: { 'data.agents.evaluatorsPending': -1 } }, (err, res) => {
                 if (err) {
                     reject(err);
                 } else {
@@ -95,9 +95,9 @@ export class ProjectHandler {
         });
     }
 
-    updateServiceAgentStatus = (projectDid: string) => {
+    updateServiceAgentStatus = (projectDid: string, approved: boolean) => {
         return new Promise((resolve: Function, reject: Function) => {
-            return ProjectDB.findOneAndUpdate({ "projectDid": projectDid }, { $inc: { 'data.agents.serviceProvidersPending': -1, 'data.agents.serviceProviders' : 1 } }, (err, res) => {
+            return ProjectDB.findOneAndUpdate({ "projectDid": projectDid }, approved ? { $inc: { 'data.agents.serviceProvidersPending': -1, 'data.agents.serviceProviders': 1 } } : { $inc: { 'data.agents.serviceProvidersPending': -1 } }, (err, res) => {
                 if (err) {
                     reject(err);
                 } else {
