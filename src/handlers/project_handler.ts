@@ -49,7 +49,7 @@ export class ProjectHandler {
 
     updateEvaluationCount = (projectDid: string) => {
         return new Promise((resolve: Function, reject: Function) => {
-            return ProjectDB.findOneAndUpdate({ "projectDid": projectDid }, { $inc: { 'agents.evaluatorsPending': 1 } }, (err, res) => {
+            return ProjectDB.findOneAndUpdate({ "projectDid": projectDid }, { $inc: { 'data.agents.evaluatorsPending': 1 } }, (err, res) => {
                 if (err) {
                     reject(err);
                 } else {
@@ -61,7 +61,7 @@ export class ProjectHandler {
 
     updateServiceAgentCount = (projectDid: string) => {
         return new Promise((resolve: Function, reject: Function) => {
-            return ProjectDB.findOneAndUpdate({ "projectDid": projectDid }, { $inc: { 'agents.serviceProvidersPending': 1 } }, (err, res) => {
+            return ProjectDB.findOneAndUpdate({ "projectDid": projectDid }, { $inc: { 'data.agents.serviceProvidersPending': 1 } }, (err, res) => {
                 if (err) {
                     reject(err);
                 } else {
@@ -73,7 +73,31 @@ export class ProjectHandler {
 
     updateInvestmentAgentCount = (projectDid: string) => {
         return new Promise((resolve: Function, reject: Function) => {
-            return ProjectDB.findOneAndUpdate({ "projectDid": projectDid }, { $inc: { 'agents.investorsPending': 1 } }, (err, res) => {
+            return ProjectDB.findOneAndUpdate({ "projectDid": projectDid }, { $inc: { 'data.agents.investors': 1 } }, (err, res) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(res);
+                }
+            });
+        });
+    }
+
+    updateEvaluationStatus = (projectDid: string) => {
+        return new Promise((resolve: Function, reject: Function) => {
+            return ProjectDB.findOneAndUpdate({ "projectDid": projectDid }, { $inc: { 'data.agents.evaluatorsPending': -1, 'data.agents.evaluators' : 1 } }, (err, res) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(res);
+                }
+            });
+        });
+    }
+
+    updateServiceAgentStatus = (projectDid: string) => {
+        return new Promise((resolve: Function, reject: Function) => {
+            return ProjectDB.findOneAndUpdate({ "projectDid": projectDid }, { $inc: { 'data.agents.serviceProvidersPending': -1, 'data.agents.serviceProviders' : 1 } }, (err, res) => {
                 if (err) {
                     reject(err);
                 } else {

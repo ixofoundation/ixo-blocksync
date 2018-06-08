@@ -26,12 +26,28 @@ export class TransactionHandler {
             switch (agentRole) {
                 case "EA": {
                     this.projectHandler.updateEvaluationCount(projectDid);
+                    break;
                 };
                 case "IA": {
                     this.projectHandler.updateInvestmentAgentCount(projectDid);
+                    break;
                 }
                 case "SA": {
                     this.projectHandler.updateServiceAgentCount(projectDid);
+                    break;
+                }
+            }
+        } else if (txIdentifier == 18) {
+            let projectDid = payload.projectDid;
+            let agentRole = payload.data.role;
+            switch (agentRole) {
+                case "EA": {
+                    this.projectHandler.updateEvaluationStatus(projectDid);
+                    break;
+                };
+                case "SA": {
+                    this.projectHandler.updateServiceAgentStatus(projectDid);
+                    break;
                 }
             }
         }
