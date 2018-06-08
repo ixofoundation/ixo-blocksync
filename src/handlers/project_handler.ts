@@ -17,7 +17,7 @@ export class ProjectHandler {
         });
     }
 
-    listAllProjects = (numberOfProjects: number) => {
+    listAllProjects = () => {
         return new Promise((resolve: Function, reject: Function) => {
             return ProjectDB.find({}, (err, res) => {
                 if (err) {
@@ -82,5 +82,4 @@ export class ProjectHandler {
             });
         });
     }
-
 }
