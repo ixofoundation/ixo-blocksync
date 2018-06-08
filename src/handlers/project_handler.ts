@@ -29,14 +29,21 @@ export class ProjectHandler {
         });
     }
 
-    listProjectByDid = (projectDid: string) => {
-        if (projectDid == undefined) {
+    listProjectByDid = (params: any) => {
+        if (params.projectDid == undefined) {
             return new Promise((resolve: Function, reject: Function) => {
                 reject(new Error("'projectDid' not specified in params"));
             })
         } else {
-            return ProjectDB.find({ "projectDid": projectDid })
-                .exec();
+            return new Promise((resolve: Function, reject: Function) => {
+                ProjectDB.findOne({ "projectDid": params.projectDid }, (err, res) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(res);
+                    }
+                });
+            })
         }
     }
 
