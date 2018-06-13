@@ -4,21 +4,31 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Program",
-            "program": "${workspaceFolder}/build/dist/server.js"
+            "name": "Mocha Tests",
+            "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+            "args": [
+                "-u",
+                "tdd",
+                "--timeout",
+                "999999",
+                "--colors",
+                "-r", 
+                "ts-node/register",
+                "-r",
+                "src/test/util/init.ts",
+                "${workspaceFolder}/src/test/**/*.spec.ts"
+            ],
+            "internalConsoleOptions": "openOnSessionStart"
         },
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Program",
-            "program": "${workspaceFolder}/index.js",
-            "preLaunchTask": "tsc: build - tsconfig.json",
-            "outFiles": [
-                "${workspaceFolder}/build/dist/**/*.js"
-            ]
+            "name": "Launch SYNC",
+            "program": "${workspaceFolder}/build/dist/server.js"
         }
     ]
 }

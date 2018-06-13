@@ -7,10 +7,12 @@ export class TransactionHandler {
     private projectHandler = new ProjectHandler();
     private statsHandler = new StatsHandler();
 
+    TXN_TYPE = Object.freeze({ "PROJECT": 16, "DID": 10, "AGENT_CREATE": 17, "AGENT_UPDATE": 18 });
+
     routeTransaction(txData: any) {
         let txIdentifier = txData.payload[0];
         let payload = txData.payload[1];
-        if (txIdentifier == 16) {
+        if (txIdentifier == this.TXN_TYPE.PROJECT) {
             let projectDoc: IProject = payload;
             this.projectHandler.create(projectDoc);
             this.statsHandler.getStatsInfo().then((stats: IStats) => {
@@ -18,9 +20,9 @@ export class TransactionHandler {
                 newStats.totalProjects++;
                 this.statsHandler.update(newStats);
             })
-        } else if (txIdentifier == 10) {
+        } else if (txIdentifier == this.TXN_TYPE.DID) {
             console.log("Skipping DID Doc...");
-        } else if (txIdentifier == 17) {
+        } else if (txIdentifier == this.TXN_TYPE.AGENT_CREATE) {
             let projectDid = payload.projectDid;
             let agentRole = payload.data.role;
             switch (agentRole) {
@@ -37,7 +39,7 @@ export class TransactionHandler {
                     break;
                 }
             }
-        } else if (txIdentifier == 18) {
+        } else if (txIdentifier == this.TXN_TYPE.AGENT_UPDATE) {
             let projectDid = payload.projectDid;
             let agentRole = payload.data.role;
             let approved: boolean;
