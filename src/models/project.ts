@@ -17,10 +17,13 @@ interface IData {
     createdOn: Date;
     createdBy: string;
     projectLocation: string;
+    requiredClaims: number,
     sdgs: number[];
-    claims: IClaims;
+    claimStats: IClaimStats;
+    claims: IClaims[];
     templates: ITemplates;
-    agents: IAgents;
+    agentsStats: IAgentStats;
+    agents: IAgent[];
     evaluatorPayPerClaim: string;
     socialMedia: ISocialMedia;
     ixo: IIxo;
@@ -50,20 +53,36 @@ interface IFounder {
     logoLink: string;
 }
 
-interface IClaims {
-    required: number;
+interface IClaimStats {
     currentSuccessful: number;
-    currentRejected: number
+    currentRejected: number;
+}
+
+interface IClaims {
+    date: Date;
+    location: string;
+    claimId: string;
+    status: string;
+    saDid: string;
+    eaDid: string;
 }
 
 interface ITemplates {
     claim: string;
 }
 
-interface IAgents {
+interface IAgentStats {
     evaluators: number;
-    EvaluatorsPending: number;
-    ServiceProviders: number;
-    ServiceProvidersPending: number;
-    Investors: number;
+    evaluatorsPending: number;
+    serviceProviders: number;
+    serviceProvidersPending: number;
+    investors: number;
+    investorsPending: number;
+}
+
+export interface IAgent {
+    did: string;
+    status: string;
+    kyc?: boolean;
+    role: string;
 }

@@ -15,24 +15,26 @@ export var ProjectSchema: Schema = new Schema({
         createdOn: Date,
         createdBy: String,
         projectLocation: String,
+        requiredClaims: Number,
         sdgs: [Number],
-        claims: {
-            required: {
-                type: Number,
-                required: true,
-                default: 0
-            },
+        claimStats: {
             currentSuccessful: {
                 type: Number,
-                required: true,
                 default: 0
             },
             currentRejected: {
                 type: Number,
-                required: true,
                 default: 0
             }
         },
+        claims: [{
+            date: Date,
+            location: String,
+            claimId: String,
+            status: String,
+            saDid: String,
+            eaDid: String
+        }],
         templates: {
             claim: {
                 type: String,
@@ -40,33 +42,44 @@ export var ProjectSchema: Schema = new Schema({
                 default: 'default'
             }
         },
-        agents: {
+        agentStats: {
             evaluators: {
                 type: Number,
-                required: true,
                 default: 0
             },
             evaluatorsPending: {
                 type: Number,
-                required: true,
                 default: 0
             },
             serviceProviders: {
                 type: Number,
-                required: true,
                 default: 0
             },
             serviceProvidersPending: {
                 type: Number,
-                required: true,
                 default: 0
             },
             investors: {
                 type: Number,
-                required: true,
                 default: 0
             },
+            investorsPending: {
+                type: Number,
+                default: 0
+            }
         },
+        agents: [{
+            did: String,
+            status: {
+                type: String,
+                default: "0"
+            },
+            kyc: {
+                type: Boolean,
+                default: false
+            },
+            role: String
+        }],
         evaluatorPayPerClaim: String,
         socialMedia: {
             facebookLink: {

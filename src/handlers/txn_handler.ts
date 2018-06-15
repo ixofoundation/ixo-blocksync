@@ -1,5 +1,5 @@
 import { ProjectHandler } from "./project_handler";
-import { IProject } from "../models/project";
+import { IProject, IAgent } from "../models/project";
 import { StatsHandler } from "./stats_handler";
 import { IStats } from "../models/stats";
 
@@ -19,47 +19,18 @@ export class TransactionHandler {
                 let newStats = stats;
                 newStats.totalProjects++;
                 this.statsHandler.update(newStats);
-            })
+            });
         } else if (txIdentifier == this.TXN_TYPE.DID) {
             console.log("Skipping DID Doc...");
         } else if (txIdentifier == this.TXN_TYPE.AGENT_CREATE) {
-            let projectDid = payload.projectDid;
-            let agentRole = payload.data.role;
-            switch (agentRole) {
-                case "EA": {
-                    this.projectHandler.updateEvaluationCount(projectDid);
-                    break;
-                };
-                case "IA": {
-                    this.projectHandler.updateInvestmentAgentCount(projectDid);
-                    break;
-                }
-                case "SA": {
-                    this.projectHandler.updateServiceAgentCount(projectDid);
-                    break;
-                }
-            }
+            let agent: IAgent = {
+                did: payload.data.did,
+                role: payload.data.role,
+                status: "0"
+            };
+            this.projectHandler.addAgent(payload.projectDid, agent);
         } else if (txIdentifier == this.TXN_TYPE.AGENT_UPDATE) {
-            let projectDid = payload.projectDid;
-            let agentRole = payload.data.role;
-            let approved: boolean;
-
-            if (payload.data.status === "1") {
-                approved = true;
-            } else {
-                approved = false;
-            }
-
-            switch (agentRole) {
-                case "EA": {
-                    this.projectHandler.updateEvaluationStatus(projectDid, approved);
-                    break;
-                };
-                case "SA": {
-                    this.projectHandler.updateServiceAgentStatus(projectDid, approved);
-                    break;
-                }
-            }
+            this.projectHandler.updateAgentStatus(payload.data.did, payload.data.status, payload.projectDid, payload.data.role);
         }
     }
 }
