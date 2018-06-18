@@ -84,11 +84,11 @@ export class ProjectHandler {
                 if (err) {
                     reject(err);
                 } else {
-                    if(status === "1"){
+                    if (status === "1") {
                         this.updateAgentStats(role, "0", projectDid);
                         this.updateAgentStats(role, status, projectDid);
-                    } 
-                    else if(status === "2"){
+                    }
+                    else if (status === "2") {
                         this.updateAgentStats(role, "0", projectDid);
                         this.updateAgentStats(role, "1", projectDid);
                     } else {
@@ -174,8 +174,7 @@ export class ProjectHandler {
                 if (err) {
                     reject(err);
                 } else {
-                   // this.updateClaimStats(agent.role, agent.status, projectDid);
-
+                    this.updateClaimStats(claim.status, projectDid);
                     resolve(res);
                 }
             });
@@ -188,44 +187,24 @@ export class ProjectHandler {
                 if (err) {
                     reject(err);
                 } else {
-                   /*  if(status === "1"){
-                        this.updateAgentStats(role, "0", projectDid);
-                        this.updateAgentStats(role, status, projectDid);
-                    } 
-                    else if(status === "2"){
-                        this.updateAgentStats(role, "0", projectDid);
-                        this.updateAgentStats(role, "1", projectDid);
-                    } else {
-                        this.updateAgentStats(role, status, projectDid);
-                    } */
+                    this.updateClaimStats(status, projectDid);
                     resolve(res);
                 }
             });
         });
     }
 
-    updateClaimStats = (role: string, status: string, projectDid: string) => {
+    updateClaimStats = (status: string, projectDid: string) => {
 
-        this.getAgentCount(status, projectDid, role).then((count: number) => {
+        this.getClaimCount(status, projectDid).then((count: number) => {
             let statsProp;
-            if (status === "0" && role === "SA") {
-                statsProp = { "data.agentStats.serviceProvidersPending": count };
+            if (status === "1") {
+                statsProp = { "data.claimStats.currentSuccessful": count };
             }
-            else if (status === "1" && role === "SA") {
-                statsProp = { "data.agentStats.serviceProviders": count };
+            else if (status === "2") {
+                statsProp = { "data.claimStats.currentRejected": count };
             }
-            else if (status === "0" && role === "EA") {
-                statsProp = { "data.agentStats.evaluatorsPending": count };
-            }
-            else if (status === "1" && role === "EA") {
-                statsProp = { "data.agentStats.evaluators": count };
-            }
-            else if (status === "0" && role === "IA") {
-                statsProp = { "data.agentStats.investorsPending": count };
-            }
-            else if (status === "1" && role === "IA") {
-                statsProp = { "data.agentStats.investors": count };
-            }
+
 
             return new Promise((resolve: Function, reject: Function) => {
                 return ProjectDB.findOneAndUpdate({ "projectDid": projectDid }, statsProp, (err, res) => {
@@ -238,6 +217,34 @@ export class ProjectHandler {
             });
         })
 
+    }
+
+    getClaimCount = (status: string, projectDid: string): Promise<number> => {
+        return new Promise((resolve: Function, reject: Function) => {
+            return ProjectDB.aggregate([
+                { $match: { "projectDid": projectDid } },
+                { $unwind: '$data.claims' },
+                {
+                    $group: {
+                        _id: 0,
+                        count: {
+                            $sum: {
+                                $cond: [{ $eq: ["$data.claims.status", status] },
+                                    1,
+                                    0]
+                            }
+                        }
+                    }
+                }
+            ], (err, res) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(res[0].count);
+                }
+            });
+
+        });
     }
 
 }
