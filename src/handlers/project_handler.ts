@@ -1,5 +1,5 @@
 import { ProjectDB } from '../db/models/project';
-import { IProject, IAgent } from '../models/project';
+import { IProject, IAgent, IClaim } from '../models/project';
 
 declare var Promise: any;
 
@@ -168,5 +168,76 @@ export class ProjectHandler {
 
     }
 
+    addClaim = (projectDid: string, claim: IClaim) => {
+        return new Promise((resolve: Function, reject: Function) => {
+            return ProjectDB.findOneAndUpdate({ "projectDid": projectDid }, { $push: { "data.claims": claim } }, (err, res) => {
+                if (err) {
+                    reject(err);
+                } else {
+                   // this.updateClaimStats(agent.role, agent.status, projectDid);
+
+                    resolve(res);
+                }
+            });
+        });
+    }
+
+    updateClaimStatus = (status: string, projectDid: string, claimId: string, agentDid: string) => {
+        return new Promise((resolve: Function, reject: Function) => {
+            return ProjectDB.findOneAndUpdate({ "projectDid": projectDid, "data.claims.claimId": claimId }, { $set: { "data.claims.$.status": status, "data.claims.$.eaDid": agentDid } }, (err, res) => {
+                if (err) {
+                    reject(err);
+                } else {
+                   /*  if(status === "1"){
+                        this.updateAgentStats(role, "0", projectDid);
+                        this.updateAgentStats(role, status, projectDid);
+                    } 
+                    else if(status === "2"){
+                        this.updateAgentStats(role, "0", projectDid);
+                        this.updateAgentStats(role, "1", projectDid);
+                    } else {
+                        this.updateAgentStats(role, status, projectDid);
+                    } */
+                    resolve(res);
+                }
+            });
+        });
+    }
+
+    updateClaimStats = (role: string, status: string, projectDid: string) => {
+
+        this.getAgentCount(status, projectDid, role).then((count: number) => {
+            let statsProp;
+            if (status === "0" && role === "SA") {
+                statsProp = { "data.agentStats.serviceProvidersPending": count };
+            }
+            else if (status === "1" && role === "SA") {
+                statsProp = { "data.agentStats.serviceProviders": count };
+            }
+            else if (status === "0" && role === "EA") {
+                statsProp = { "data.agentStats.evaluatorsPending": count };
+            }
+            else if (status === "1" && role === "EA") {
+                statsProp = { "data.agentStats.evaluators": count };
+            }
+            else if (status === "0" && role === "IA") {
+                statsProp = { "data.agentStats.investorsPending": count };
+            }
+            else if (status === "1" && role === "IA") {
+                statsProp = { "data.agentStats.investors": count };
+            }
+
+            return new Promise((resolve: Function, reject: Function) => {
+                return ProjectDB.findOneAndUpdate({ "projectDid": projectDid }, statsProp, (err, res) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(res);
+                    }
+                });
+            });
+        })
+
+    }
 
 }

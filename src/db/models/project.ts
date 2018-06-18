@@ -29,7 +29,10 @@ export var ProjectSchema: Schema = new Schema({
         },
         claims: [{
             date: Date,
-            location: String,
+            location: {
+                long: String,
+                lat: String
+            },
             claimId: String,
             status: String,
             saDid: String,

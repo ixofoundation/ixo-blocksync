@@ -20,7 +20,7 @@ interface IData {
     requiredClaims: number,
     sdgs: number[];
     claimStats: IClaimStats;
-    claims: IClaims[];
+    claims: IClaim[];
     templates: ITemplates;
     agentsStats: IAgentStats;
     agents: IAgent[];
@@ -58,13 +58,18 @@ interface IClaimStats {
     currentRejected: number;
 }
 
-interface IClaims {
+export interface IClaim {
     date: Date;
-    location: string;
+    location: ILocation;
     claimId: string;
     status: string;
     saDid: string;
-    eaDid: string;
+    eaDid?: string;
+}
+
+interface ILocation {
+    long: string,
+    lat: string
 }
 
 interface ITemplates {
