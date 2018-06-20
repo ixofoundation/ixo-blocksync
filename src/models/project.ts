@@ -19,12 +19,12 @@ interface IData {
     projectLocation: string;
     requiredClaims: number,
     sdgs: number[];
+    templates: ITemplates;
+    evaluatorPayPerClaim: string;
     claimStats: IClaimStats;
     claims: IClaim[];
-    templates: ITemplates;
     agentsStats: IAgentStats;
     agents: IAgent[];
-    evaluatorPayPerClaim: string;
     socialMedia: ISocialMedia;
     ixo: IIxo;
     serviceEndpoint: string;
@@ -73,7 +73,12 @@ interface ILocation {
 }
 
 interface ITemplates {
-    claim: string;
+    claim: IClaimTemplate;
+}
+
+interface IClaimTemplate {
+    schema: string,
+    form: string
 }
 
 interface IAgentStats {

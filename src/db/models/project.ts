@@ -40,9 +40,8 @@ export var ProjectSchema: Schema = new Schema({
         }],
         templates: {
             claim: {
-                type: String,
-                required: true,
-                default: 'default'
+                schema: String,
+                form: String
             }
         },
         agentStats: {
