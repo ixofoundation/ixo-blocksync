@@ -22,7 +22,7 @@ export var StatsSchema: Schema = new Schema({
             type: Number,
             default: 0
         },
-        totalSuccesul: {
+        totalSuccessful: {
             type: Number,
             default: 0
         },
