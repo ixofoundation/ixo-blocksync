@@ -8,8 +8,8 @@ export class ProjectRouter extends AbstractRouter {
         const handler = new ProjectHandler();
         this.register(config, 'create', handler.create);
         this.register(config, 'listProjects', handler.listAllProjects);
-        this.register(config, 'listProjectByDid', handler.listProjectByDid);
-        //this.register(config, 'listProjectStats', handler.listProjectStats);
+        this.register(config, 'listProjectByProjectDid', handler.listProjectByProjectDid);
+        this.register(config, 'listProjectBySenderDid', handler.listProjectBySenderDid);
         return config;
     }
 }

@@ -65,6 +65,42 @@ export class ProjectHandler {
         }
     }
 
+    listProjectByProjectDid = (params: any) => {
+        if (params.projectDid == undefined) {
+            return new Promise((resolve: Function, reject: Function) => {
+                reject(new Error("'projectDid' not specified in params"));
+            })
+        } else {
+            return new Promise((resolve: Function, reject: Function) => {
+                ProjectDB.findOne({ "projectDid": params.projectDid }, (err, res) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(res);
+                    }
+                });
+            })
+        }
+    }
+
+    listProjectBySenderDid = (params: any) => {
+        if (params.senderDid == undefined) {
+            return new Promise((resolve: Function, reject: Function) => {
+                reject(new Error("'senderDid' not specified in params"));
+            })
+        } else {
+            return new Promise((resolve: Function, reject: Function) => {
+                ProjectDB.find({ "senderDid": params.senderDid }, (err, res) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(res);
+                    }
+                });
+            })
+        }
+    }
+
     addAgent = (projectDid: string, agent: IAgent) => {
         return new Promise((resolve: Function, reject: Function) => {
             return ProjectDB.findOneAndUpdate({ "projectDid": projectDid }, { $push: { "data.agents": agent } }, (err, res) => {
