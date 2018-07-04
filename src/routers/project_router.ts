@@ -9,7 +9,6 @@ export class ProjectRouter extends AbstractRouter {
         this.register(config, 'create', handler.create);
         this.register(config, 'listProjects', handler.listAllProjects);
         this.register(config, 'listProjectByProjectDid', handler.listProjectByProjectDid);
-        this.register(config, 'listProjectBySenderDid', handler.listProjectBySenderDid);
         return config;
     }
 }

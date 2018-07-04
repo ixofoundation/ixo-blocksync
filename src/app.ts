@@ -5,6 +5,7 @@ import * as logger from './util/logger';
 import * as compression from 'compression';
 import ProjectRouter from './routers/project_router';
 import StatsRouter from './routers/stats_router';
+import DidRouter from './routers/did_router';
 
 class App {
 	// ref to Express instance
@@ -33,6 +34,7 @@ class App {
 		});
 		this.express.use('/api/project', ProjectRouter);
 		this.express.use('/api/stats', StatsRouter);
+		this.express.use('/api/did', DidRouter);
 
 		this.express.use(logger.after);
 	}

@@ -2,10 +2,13 @@ import { ProjectHandler } from "./project_handler";
 import { IProject, IAgent, IClaim } from "../models/project";
 import { StatsHandler } from "./stats_handler";
 import { IStats } from "../models/stats";
+import { IDid } from "../models/did";
+import { DidHandler } from "./did_handler";
 
 export class TransactionHandler {
     private projectHandler = new ProjectHandler();
     private statsHandler = new StatsHandler();
+    private didHandler = new DidHandler();
 
     TXN_TYPE = Object.freeze({ "PROJECT": 16, "DID": 10, "AGENT_CREATE": 17, "AGENT_UPDATE": 18, "CAPTURE_CLAIM": 19, "CLAIM_UPDATE": 20 });
     AGENT_TYPE = Object.freeze({ "SERVICE": "SA", "EVALUATOR": "EA", "INVESTOR": "IA" });
@@ -19,7 +22,11 @@ export class TransactionHandler {
             this.projectHandler.create(projectDoc);
             this.updateGlobalStats(this.TXN_TYPE.PROJECT, "", "", projectDoc.data.requiredClaims);
         } else if (txIdentifier == this.TXN_TYPE.DID) {
-            console.log("Skipping DID Doc...");
+            let didDoc : IDid = {
+                did: payload.didDoc.did,
+                publicKey: payload.didDoc.pubKey
+            }
+            this.didHandler.create(didDoc); 
         } else if (txIdentifier == this.TXN_TYPE.AGENT_CREATE) {
             let agent: IAgent = {
                 did: payload.data.did,
