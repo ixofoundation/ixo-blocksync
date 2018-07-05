@@ -72,7 +72,7 @@ export class ProjectHandler {
             })
         } else {
             return new Promise((resolve: Function, reject: Function) => {
-                ProjectDB.find({ "senderDid": params.senderDid }, (err, res) => {
+                ProjectDB.find({ senderDid: params.senderDid }, (err, res) => {
                     if (err) {
                         reject(err);
                     } else {
@@ -85,7 +85,7 @@ export class ProjectHandler {
 
     addAgent = (projectDid: string, agent: IAgent) => {
         return new Promise((resolve: Function, reject: Function) => {
-            return ProjectDB.findOneAndUpdate({ "projectDid": projectDid }, { $push: { "data.agents": agent } }, (err, res) => {
+            return ProjectDB.findOneAndUpdate({ projectDid: projectDid }, { $push: { "data.agents": agent } }, (err, res) => {
                 if (err) {
                     reject(err);
                 } else {
@@ -98,7 +98,7 @@ export class ProjectHandler {
 
     updateAgentStatus = (agentDid: string, status: string, projectDid: string, role: string) => {
         return new Promise((resolve: Function, reject: Function) => {
-            return ProjectDB.findOneAndUpdate({ "projectDid": projectDid, "data.agents.did": agentDid, "data.agents.role": role }, { $set: { "data.agents.$.status": status } }, (err, res) => {
+            return ProjectDB.findOneAndUpdate({ projectDid: projectDid, "data.agents.did": agentDid, "data.agents.role": role }, { $set: { "data.agents.$.status": status } }, (err, res) => {
                 if (err) {
                     reject(err);
                 } else {
@@ -121,7 +121,7 @@ export class ProjectHandler {
     getAgentCount = (status: string, projectDid: string, role: string): Promise<number> => {
         return new Promise((resolve: Function, reject: Function) => {
             return ProjectDB.aggregate([
-                { $match: { "projectDid": projectDid } },
+                { $match: { projectDid: projectDid } },
                 { $unwind: '$data.agents' },
                 {
                     $group: {
@@ -174,7 +174,7 @@ export class ProjectHandler {
             }
 
             return new Promise((resolve: Function, reject: Function) => {
-                return ProjectDB.findOneAndUpdate({ "projectDid": projectDid }, statsProp, (err, res) => {
+                return ProjectDB.findOneAndUpdate({ projectDid: projectDid }, statsProp, (err, res) => {
                     if (err) {
                         reject(err);
                     } else {
@@ -188,7 +188,7 @@ export class ProjectHandler {
 
     addClaim = (projectDid: string, claim: IClaim) => {
         return new Promise((resolve: Function, reject: Function) => {
-            return ProjectDB.findOneAndUpdate({ "projectDid": projectDid }, { $push: { "data.claims": claim } }, (err, res) => {
+            return ProjectDB.findOneAndUpdate({ projectDid: projectDid }, { $push: { "data.claims": claim } }, (err, res) => {
                 if (err) {
                     reject(err);
                 } else {
@@ -201,7 +201,7 @@ export class ProjectHandler {
 
     updateClaimStatus = (status: string, projectDid: string, claimId: string, agentDid: string) => {
         return new Promise((resolve: Function, reject: Function) => {
-            return ProjectDB.findOneAndUpdate({ "projectDid": projectDid, "data.claims.claimId": claimId }, { $set: { "data.claims.$.status": status, "data.claims.$.eaDid": agentDid } }, (err, res) => {
+            return ProjectDB.findOneAndUpdate({ projectDid: projectDid, "data.claims.claimId": claimId }, { $set: { "data.claims.$.status": status, "data.claims.$.eaDid": agentDid } }, (err, res) => {
                 if (err) {
                     reject(err);
                 } else {
@@ -225,7 +225,7 @@ export class ProjectHandler {
 
 
             return new Promise((resolve: Function, reject: Function) => {
-                return ProjectDB.findOneAndUpdate({ "projectDid": projectDid }, statsProp, (err, res) => {
+                return ProjectDB.findOneAndUpdate({ projectDid: projectDid }, statsProp, (err, res) => {
                     if (err) {
                         reject(err);
                     } else {
@@ -240,7 +240,7 @@ export class ProjectHandler {
     getClaimCount = (status: string, projectDid: string): Promise<number> => {
         return new Promise((resolve: Function, reject: Function) => {
             return ProjectDB.aggregate([
-                { $match: { "projectDid": projectDid } },
+                { $match: { projectDid: projectDid } },
                 { $unwind: '$data.claims' },
                 {
                     $group: {
