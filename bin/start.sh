@@ -15,16 +15,16 @@ docker build -t trustlab/ixo-block-sync $ROOT_DIR
 
 docker-compose up --no-start
 # docker-compose create
-docker-compose start db
+docker-compose start block-sync-db
 
 # attempting to wait for mongodb to be ready
-$ROOT_DIR/bin/wait-for-service.sh db 'waiting for connections on port' 10
-docker-compose start app
+$ROOT_DIR/bin/wait-for-service.sh block-sync-db 'waiting for connections on port' 10
+docker-compose start ixo-block-sync
 
 echo -n "Starting IXO Block Sync ..."
 sleep 5
 echo ${green} "done"
-docker-compose logs --tail 13 app
+docker-compose logs --tail 13 ixo-block-sync
 echo ""
 echo "***********************************"
 echo "* IXO BLOCK SYNC COMPLETE          *"
