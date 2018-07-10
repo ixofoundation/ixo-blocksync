@@ -1,0 +1,29 @@
+version: "2"
+services:
+  app:
+    container_name: block-sync
+    image: trustlab/ixo-block-sync:latest
+    environment:
+      - PORT=8080
+      - MONGODB_URI=mongodb://db:27017/block-sync
+      - CHAIN_URI=beta.cosmos.ixo.world:46657
+    restart: always
+    build: .
+    ports:
+      - "8080:8080"
+    links:
+      - db
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1m"
+        max-file: "1"
+      
+  db:
+    container_name: db
+    image: mongo
+    ports:
+      - "27017:27017"
+
+
+
