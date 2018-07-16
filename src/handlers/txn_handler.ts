@@ -14,32 +14,43 @@ export class TransactionHandler {
 	AGENT_TYPE = Object.freeze({ SERVICE: 'SA', EVALUATOR: 'EA', INVESTOR: 'IA' });
 	CLAIM_STATUS = Object.freeze({ SUCCESS: '1', REJECTED: '2', PENDING: '0' });
 
+	routeTransactions(txDataArray: any[]) {
+		var result = Promise.resolve();
+		txDataArray.forEach(txData => {
+			result = result.then(() => {
+				let buf = Buffer.from(txData, 'base64');
+				console.log('TX DATA: ' + buf.toString());
+				return this.routeTransaction(JSON.parse(buf.toString()));
+			});
+		});
+	}
+
 	routeTransaction(txData: any) {
 		let txIdentifier = txData.payload[0];
 		let payload = txData.payload[1];
 		if (txIdentifier == this.TXN_TYPE.PROJECT) {
 			let projectDoc: IProject = payload;
-			this.projectHandler.create(projectDoc);
 			this.updateGlobalStats(this.TXN_TYPE.PROJECT, '', '', projectDoc.data.requiredClaims);
+			return this.projectHandler.create(projectDoc);
 		} else if (txIdentifier == this.TXN_TYPE.DID) {
 			let didDoc: IDid = {
 				did: payload.didDoc.did,
-                publicKey: payload.didDoc.pubKey
+				publicKey: payload.didDoc.pubKey
 			};
-			this.didHandler.create(didDoc);
+			return this.didHandler.create(didDoc);
 		} else if (txIdentifier == this.TXN_TYPE.AGENT_CREATE) {
 			let agent: IAgent = {
 				did: payload.data.did,
 				role: payload.data.role,
 				status: '0'
 			};
-			this.projectHandler.addAgent(payload.projectDid, agent);
 			this.updateGlobalStats(this.TXN_TYPE.AGENT_CREATE, payload.data.role);
+			return this.projectHandler.addAgent(payload.projectDid, agent);
 		} else if (txIdentifier == this.TXN_TYPE.AGENT_UPDATE) {
-			this.projectHandler.updateAgentStatus(payload.data.did, payload.data.status, payload.projectDid, payload.data.role);
 			if (payload.data.status === '1') {
 				this.updateGlobalStats(this.TXN_TYPE.AGENT_UPDATE, payload.data.role);
 			}
+			return this.projectHandler.updateAgentStatus(payload.data.did, payload.data.status, payload.projectDid, payload.data.role);
 		} else if (txIdentifier == this.TXN_TYPE.CAPTURE_CLAIM) {
 			let claim: IClaim = {
 				claimId: payload.data.claimID,
@@ -51,19 +62,19 @@ export class TransactionHandler {
 				saDid: payload.senderDid,
 				status: '0'
 			};
-			this.projectHandler.addClaim(payload.projectDid, claim);
 			this.updateGlobalStats(this.TXN_TYPE.CAPTURE_CLAIM, '', '0');
+			return this.projectHandler.addClaim(payload.projectDid, claim);
 		} else if (txIdentifier == this.TXN_TYPE.CLAIM_UPDATE) {
-			this.projectHandler.updateClaimStatus(payload.data.status, payload.projectDid, payload.data.claimID, payload.senderDid);
 			this.updateGlobalStats(this.TXN_TYPE.CLAIM_UPDATE, '', payload.data.status);
+			return this.projectHandler.updateClaimStatus(payload.data.status, payload.projectDid, payload.data.claimID, payload.senderDid);
 		} else if (txIdentifier == this.TXN_TYPE.ADD_CREDENTIAL) {
-            let credential : ICredential = {
-                type: payload.credential.type,
-                data: payload.credential.data,
-                signer: payload.credential.signer
-            }
-            this.didHandler.addCredential(payload.did, credential);
-        }
+			let credential: ICredential = {
+				type: payload.credential.type,
+				data: payload.credential.data,
+				signer: payload.credential.signer
+			};
+			return this.didHandler.addCredential(payload.did, credential);
+		}
 	}
 
 	updateGlobalStats(txnType: number, agentType?: string, claimStatus?: string, claimsRequired?: number) {

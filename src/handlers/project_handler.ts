@@ -89,7 +89,6 @@ export class ProjectHandler {
                 if (err) {
                     reject(err);
                 } else {
-                    this.updateAgentStats(agent.role, agent.status, projectDid);
                     resolve(res);
                 }
             });
@@ -98,7 +97,7 @@ export class ProjectHandler {
 
     updateAgentStatus = (agentDid: string, status: string, projectDid: string, role: string) => {
         return new Promise((resolve: Function, reject: Function) => {
-            return ProjectDB.findOneAndUpdate({ projectDid: projectDid, "data.agents.did": agentDid, "data.agents.role": role }, { $set: { "data.agents.$.status": status } }, (err, res) => {
+            return ProjectDB.findOneAndUpdate({ "projectDid": projectDid, "data.agents.did": agentDid, "data.agents.role": role }, { $set: { "data.agents.$.status": status } }, (err, res) => {
                 if (err) {
                     reject(err);
                 } else {
