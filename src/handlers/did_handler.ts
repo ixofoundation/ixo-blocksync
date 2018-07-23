@@ -26,9 +26,9 @@ export class DidHandler {
 		});
 	};
 
-	getDidDocByDid = (params: any) => {
+	getDidDocByDid = (did: string) => {
 		return new Promise((resolve: Function, reject: Function) => {
-			return DidDB.find({ did: params.did }, (err, res) => {
+			return DidDB.find({ did: did }, (err, res) => {
 				if (err) {
 					reject(err);
 				} else {

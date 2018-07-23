@@ -3,9 +3,9 @@ import * as cors from 'cors';
 import * as bodyParser from 'body-parser';
 import * as logger from './util/logger';
 import * as compression from 'compression';
-import ProjectRouter from './routers/project_router';
-import StatsRouter from './routers/stats_router';
-import DidRouter from './routers/did_router';
+import { ProjectHandler } from './handlers/project_handler';
+import { DidHandler } from './handlers/did_handler';
+import { StatsHandler } from './handlers/stats_handler';
 
 class App {
 	// ref to Express instance
@@ -15,7 +15,7 @@ class App {
 	constructor() {
 		this.express = express();
 		this.middleware();
-		this.routes();
+		this.routes(new ProjectHandler(), new DidHandler(), new StatsHandler());
 	}
 
 	// Configure Express middleware.
@@ -28,13 +28,35 @@ class App {
 	}
 
 	// Configure API endpoints.
-	private routes(): void {
-		this.express.get('/', (req, res, next) => {
+	private routes(projectHandler: ProjectHandler, didHandler: DidHandler, statsHandler: StatsHandler): void {
+		// GET REQUESTS
+		this.express.get('/', (req, res) => {
 			res.send('API is running');
 		});
-		this.express.use('/api/project', ProjectRouter);
-		this.express.use('/api/stats', StatsRouter);
-		this.express.use('/api/did', DidRouter);
+
+		this.express.get('/api/project/listProjects', (req, res) => {
+			projectHandler.listAllProjects().then((projectList: any) => {
+				res.send(projectList);
+			});
+		});
+
+		this.express.get('/api/project/getByProjectDid/:projectDid', (req, res) => {
+			projectHandler.listProjectByProjectDid(req.params.projectDid).then((projectData: any) => {
+				res.send(projectData);
+			});
+		});
+
+		this.express.get('/api/did/getByDid/:did', (req, res) => {
+			didHandler.getDidDocByDid(req.params.did).then((didDoc: any) => {
+				res.send(didDoc);
+			});
+		});
+
+		this.express.get('/api/stats/listStats', (req, res) => {
+			statsHandler.getStatsInfo().then((stats: any) => {
+				res.send(stats);
+			});
+		});
 
 		this.express.use(logger.after);
 	}
