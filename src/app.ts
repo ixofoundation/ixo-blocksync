@@ -34,27 +34,39 @@ class App {
 			res.send('API is running');
 		});
 
-		this.express.get('/api/project/listProjects', (req, res) => {
+		this.express.get('/api/project/listProjects', (req, res, next) => {
 			projectHandler.listAllProjects().then((projectList: any) => {
 				res.send(projectList);
+			}).
+			catch((err) => {
+				next(err);
 			});
 		});
 
-		this.express.get('/api/project/getByProjectDid/:projectDid', (req, res) => {
+		this.express.get('/api/project/getByProjectDid/:projectDid', (req, res, next) => {
 			projectHandler.listProjectByProjectDid(req.params.projectDid).then((projectData: any) => {
 				res.send(projectData);
+			}).
+			catch((err) => {
+				next(err);
 			});
 		});
 
-		this.express.get('/api/did/getByDid/:did', (req, res) => {
+		this.express.get('/api/did/getByDid/:did', (req, res, next) => {
 			didHandler.getDidDocByDid(req.params.did).then((didDoc: any) => {
 				res.send(didDoc);
+			}).
+			catch((err) => {
+				next(err);
 			});
 		});
 
-		this.express.get('/api/stats/listStats', (req, res) => {
+		this.express.get('/api/stats/listStats', (req, res, next) => {
 			statsHandler.getStatsInfo().then((stats: any) => {
 				res.send(stats);
+			}).
+			catch((err) => {
+				next(err);
 			});
 		});
 

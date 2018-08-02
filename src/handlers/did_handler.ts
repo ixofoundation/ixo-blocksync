@@ -32,7 +32,11 @@ export class DidHandler {
 				if (err) {
 					reject(err);
 				} else {
-					resolve(res[0]);
+					if(res.length === 1){
+						resolve(res[0]);
+					}else{
+						resolve({error:"DID not found"});
+					}
 				}
 			});
 		});
