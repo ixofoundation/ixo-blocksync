@@ -35,7 +35,7 @@ export class DidHandler {
 					if(res.length === 1){
 						resolve(res[0]);
 					}else{
-						resolve({error:"DID not found"});
+						resolve({error: "DID: '" + did + "' not found"});
 					}
 				}
 			});
