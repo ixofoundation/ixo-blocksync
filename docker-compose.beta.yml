@@ -1,9 +1,0 @@
-version: "2"
-services:
-  block-sync:
-    environment:
-      - PORT=8080
-      - MONGODB_URI=mongodb://block-sync-db:27017/block-sync
-      - CHAIN_URI=blockchain:46657
-    ports:
-      - "80:8080"
