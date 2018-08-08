@@ -4,12 +4,10 @@ services:
     container_name: block-sync
     image: trustlab/ixo-block-sync:latest
     environment:
-      - PORT=8080
-      - MONGODB_URI=mongodb://block-sync-db:27017/block-sync
-      - CHAIN_URI=blockchain:46657
+      - PORT=
+      - MONGODB_URI=
+      - CHAIN_URI=
     restart: always
-    ports:
-      - "8080:8080"
     links:
       - block-sync-db
       - blockchain
@@ -22,8 +20,3 @@ services:
   block-sync-db:
     container_name: block-sync-db
     image: mongo
-    ports:
-      - "27017:27017"
-
-
-

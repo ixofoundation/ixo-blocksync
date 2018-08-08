@@ -10,11 +10,21 @@ echo "Build IXO Block Sync"
 CURRENT_DIR=`dirname $0`
 ROOT_DIR=$CURRENT_DIR/..
 
-$ROOT_DIR/node_modules/typescript/bin/tsc 
-docker build -t trustlab/ixo-block-sync $ROOT_DIR
+if [ "$1" = "dev" ]
+then
+  echo "Building Developer images"
+  $ROOT_DIR/node_modules/typescript/bin/tsc 
+  docker build -t trustlab/ixo-block-sync $ROOT_DIR
+  docker-compose -f $ROOT_DIR/docker-compose.yml -f $ROOT_DIR/docker-compose.dev.yml up --no-start
+elif [ "$1" = "beta" ]
+then
+  echo "Building Beta images"
+  docker-compose -f $ROOT_DIR/docker-compose.yml -f $ROOT_DIR/docker-compose.beta.yml up --no-start
+else
+  echo "Building Production images"
+  docker-compose -f $ROOT_DIR/docker-compose.yml -f $ROOT_DIR/docker-compose.prod.yml up --no-start
+fi
 
-docker-compose up --no-start
-# docker-compose create
 docker-compose start block-sync-db
 
 # attempting to wait for mongodb to be ready
