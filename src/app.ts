@@ -6,6 +6,7 @@ import * as compression from 'compression';
 import { ProjectHandler } from './handlers/project_handler';
 import { DidHandler } from './handlers/did_handler';
 import { StatsHandler } from './handlers/stats_handler';
+import { Connection } from './util/connection';
 
 class App {
 	// ref to Express instance
@@ -64,6 +65,16 @@ class App {
 		this.express.get('/api/stats/listStats', (req, res, next) => {
 			statsHandler.getStatsInfo().then((stats: any) => {
 				res.send(stats);
+			}).
+			catch((err) => {
+				next(err);
+			});
+		});
+
+		this.express.get('/api/blockchain/:tx', (req, res, next) => {
+			let blockChainConnection = new Connection(this.express.get('chainURL'))
+			blockChainConnection.sendTransaction(req.params.tx).then((result: any) => {
+				res.send(result);
 			}).
 			catch((err) => {
 				next(err);

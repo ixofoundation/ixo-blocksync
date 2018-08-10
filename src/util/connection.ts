@@ -8,6 +8,23 @@ export class Connection {
         this.chainUri = chainUri;
     }
 
+    sendTransaction(txData: string) {
+        var url = 'http://' + this.chainUri + '//broadcast_tx_sync?tx=' + txData;
+
+        return axios
+            .get(url)
+            .then(response => {
+                if (response.data.result) {
+                    return response.data.result;
+                } else {
+                    throw new Error('Could not submit did');
+                }
+            })
+            .catch(error => {
+                return '';
+            });
+    }
+ 
     getBlock(height: Number): AxiosPromise {
         var url = 'http://' + this.chainUri + '/block?height=';
         if (height > 0) {
