@@ -40,4 +40,10 @@ node {
             app.push("latest")
         }
     }
+
+    stage('Removing Images') {
+        sh "docker rmi ${app.id}"
+        sh "docker rmi registry.hub.docker.com/${app.id}"
+        sh "docker rmi registry.hub.docker.com/${app.id}:${env.BUILD_NUMBER}"
+    }
 }
