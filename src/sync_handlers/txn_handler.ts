@@ -1,14 +1,14 @@
-import { ProjectHandler } from './project_handler';
+import { ProjectSyncHandler } from './project_sync_handler';
 import { IProject, IAgent, IClaim } from '../models/project';
-import { StatsHandler } from './stats_handler';
+import { StatsSyncHandler } from './stats_sync_handler';
 import { IStats } from '../models/stats';
 import { IDid, ICredential } from '../models/did';
-import { DidHandler } from './did_handler';
+import { DidSyncHandler } from './did_sync_handler';
 
 export class TransactionHandler {
-	private projectHandler = new ProjectHandler();
-	private statsHandler = new StatsHandler();
-	private didHandler = new DidHandler();
+	private projectSyncHandler = new ProjectSyncHandler();
+	private statsSyncHandler = new StatsSyncHandler();
+	private didSyncHandler = new DidSyncHandler();
 
 	TXN_TYPE = Object.freeze({ PROJECT: 16, DID: 10, AGENT_CREATE: 17, AGENT_UPDATE: 18, CAPTURE_CLAIM: 19, CLAIM_UPDATE: 20, ADD_CREDENTIAL: 24 });
 	AGENT_TYPE = Object.freeze({ SERVICE: 'SA', EVALUATOR: 'EA', INVESTOR: 'IA' });
@@ -31,13 +31,13 @@ export class TransactionHandler {
 		if (txIdentifier == this.TXN_TYPE.PROJECT) {
 			let projectDoc: IProject = payload;
 			this.updateGlobalStats(this.TXN_TYPE.PROJECT, '', '', projectDoc.data.requiredClaims);
-			return this.projectHandler.create(projectDoc);
+			return this.projectSyncHandler.create(projectDoc);
 		} else if (txIdentifier == this.TXN_TYPE.DID) {
 			let didDoc: IDid = {
 				did: payload.didDoc.did,
 				publicKey: payload.didDoc.pubKey
 			};
-			return this.didHandler.create(didDoc);
+			return this.didSyncHandler.create(didDoc);
 		} else if (txIdentifier == this.TXN_TYPE.AGENT_CREATE) {
 			let agent: IAgent = {
 				did: payload.data.did,
@@ -45,12 +45,12 @@ export class TransactionHandler {
 				status: '0'
 			};
 			this.updateGlobalStats(this.TXN_TYPE.AGENT_CREATE, payload.data.role);
-			return this.projectHandler.addAgent(payload.projectDid, agent);
+			return this.projectSyncHandler.addAgent(payload.projectDid, agent);
 		} else if (txIdentifier == this.TXN_TYPE.AGENT_UPDATE) {
 			if (payload.data.status === '1') {
 				this.updateGlobalStats(this.TXN_TYPE.AGENT_UPDATE, payload.data.role);
 			}
-			return this.projectHandler.updateAgentStatus(payload.data.did, payload.data.status, payload.projectDid, payload.data.role);
+			return this.projectSyncHandler.updateAgentStatus(payload.data.did, payload.data.status, payload.projectDid, payload.data.role);
 		} else if (txIdentifier == this.TXN_TYPE.CAPTURE_CLAIM) {
 			let claim: IClaim = {
 				claimId: payload.data.claimID,
@@ -63,22 +63,22 @@ export class TransactionHandler {
 				status: '0'
 			};
 			this.updateGlobalStats(this.TXN_TYPE.CAPTURE_CLAIM, '', '0');
-			return this.projectHandler.addClaim(payload.projectDid, claim);
+			return this.projectSyncHandler.addClaim(payload.projectDid, claim);
 		} else if (txIdentifier == this.TXN_TYPE.CLAIM_UPDATE) {
 			this.updateGlobalStats(this.TXN_TYPE.CLAIM_UPDATE, '', payload.data.status);
-			return this.projectHandler.updateClaimStatus(payload.data.status, payload.projectDid, payload.data.claimID, payload.senderDid);
+			return this.projectSyncHandler.updateClaimStatus(payload.data.status, payload.projectDid, payload.data.claimID, payload.senderDid);
 		} else if (txIdentifier == this.TXN_TYPE.ADD_CREDENTIAL) {
 			let credential: ICredential = {
 				type: payload.credential.type,
 				data: payload.credential.data,
 				signer: payload.credential.signer
 			};
-			return this.didHandler.addCredential(payload.did, credential);
+			return this.didSyncHandler.addCredential(payload.did, credential);
 		}
 	}
 
 	updateGlobalStats(txnType: number, agentType?: string, claimStatus?: string, claimsRequired?: number) {
-		this.statsHandler.getStatsInfo().then((stats: IStats) => {
+		this.statsSyncHandler.getStatsInfo().then((stats: IStats) => {
 			let newStats = stats;
 
 			if (claimsRequired) {
@@ -116,7 +116,7 @@ export class TransactionHandler {
 					break;
 				}
 			}
-			this.statsHandler.update(newStats);
+			this.statsSyncHandler.update(newStats);
 		});
 	}
 }
