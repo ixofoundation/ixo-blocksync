@@ -16,7 +16,6 @@ export class SyncBlocks {
 	startSync(chainUri: string) {
 		let conn = new Connection(chainUri);
 		this.chainHandler.getChainInfo().then((chain: IChain) => {
-			console.log(chain);
 			conn.getLastBlock().then((block: any) => {
 				if (!chain) {
 					this.initChainInfo(conn, false).then((chain: IChain) => {
