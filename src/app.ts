@@ -7,6 +7,7 @@ import { ProjectHandler } from './handlers/project_handler';
 import { DidHandler } from './handlers/did_handler';
 import { StatsHandler } from './handlers/stats_handler';
 import { Connection } from './util/connection';
+import axios from 'axios';
 
 class App {
 	// ref to Express instance
@@ -39,36 +40,46 @@ class App {
 			projectHandler.listAllProjects().then((projectList: any) => {
 				res.send(projectList);
 			}).
-			catch((err) => {
-				next(err);
-			});
+				catch((err) => {
+					next(err);
+				});
 		});
 
 		this.express.get('/api/project/getByProjectDid/:projectDid', (req, res, next) => {
 			projectHandler.listProjectByProjectDid(req.params.projectDid).then((projectData: any) => {
 				res.send(projectData);
 			}).
-			catch((err) => {
-				next(err);
-			});
+				catch((err) => {
+					next(err);
+				});
+		});
+
+		this.express.get('/api/project/getProjectAccounts/:projectDid', (req, res, next) => {
+			this.getProjectAccountsFromChain(req.params.projectDid)
+				.then((response: any) => {
+					res.send(response);
+				})
+				.catch((error) => {
+					res.send(error);
+				})
 		});
 
 		this.express.get('/api/did/getByDid/:did', (req, res, next) => {
 			didHandler.getDidDocByDid(req.params.did).then((didDoc: any) => {
 				res.send(didDoc);
 			}).
-			catch((err) => {
-				next(err);
-			});
+				catch((err) => {
+					next(err);
+				});
 		});
 
 		this.express.get('/api/stats/listStats', (req, res, next) => {
 			statsHandler.getStatsInfo().then((stats: any) => {
 				res.send(stats);
 			}).
-			catch((err) => {
-				next(err);
-			});
+				catch((err) => {
+					next(err);
+				});
 		});
 
 		this.express.get('/api/blockchain/:tx', (req, res, next) => {
@@ -76,12 +87,26 @@ class App {
 			blockChainConnection.sendTransaction(req.params.tx).then((result: any) => {
 				res.send(result);
 			}).
-			catch((err) => {
-				next(err);
-			});
+				catch((err) => {
+					next(err);
+				});
 		});
 
 		this.express.use(logger.after);
+	}
+
+	private getProjectAccountsFromChain(projectDid: string) {
+		return new Promise((resolve: Function, reject: Function) => {
+			let rest = (process.env.BC_REST)
+			axios.get(rest + '/projectAccounts/' + projectDid)
+				.then((response) => {
+					if(response.status == 200) resolve(response.data);
+					reject(response.statusText);
+				})
+				.catch((reason) => {
+					reject(reason);
+				});
+		})
 	}
 }
 
