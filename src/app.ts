@@ -8,6 +8,7 @@ import { DidHandler } from './handlers/did_handler';
 import { StatsHandler } from './handlers/stats_handler';
 import { Connection } from './util/connection';
 
+
 class App {
 	// ref to Express instance
 	public express: express.Application;
@@ -39,36 +40,46 @@ class App {
 			projectHandler.listAllProjects().then((projectList: any) => {
 				res.send(projectList);
 			}).
-			catch((err) => {
-				next(err);
-			});
+				catch((err) => {
+					next(err);
+				});
 		});
 
 		this.express.get('/api/project/getByProjectDid/:projectDid', (req, res, next) => {
 			projectHandler.listProjectByProjectDid(req.params.projectDid).then((projectData: any) => {
 				res.send(projectData);
 			}).
-			catch((err) => {
-				next(err);
-			});
+				catch((err) => {
+					next(err);
+				});
+		});
+
+		this.express.get('/api/project/getProjectAccounts/:projectDid', (req, res, next) => {
+			projectHandler.getProjectAccountsFromChain(req.params.projectDid)
+				.then((response: any) => {
+					res.send(response);
+				})
+				.catch((error) => {
+					res.send(error);
+				})
 		});
 
 		this.express.get('/api/did/getByDid/:did', (req, res, next) => {
 			didHandler.getDidDocByDid(req.params.did).then((didDoc: any) => {
 				res.send(didDoc);
 			}).
-			catch((err) => {
-				next(err);
-			});
+				catch((err) => {
+					next(err);
+				});
 		});
 
 		this.express.get('/api/stats/listStats', (req, res, next) => {
 			statsHandler.getStatsInfo().then((stats: any) => {
 				res.send(stats);
 			}).
-			catch((err) => {
-				next(err);
-			});
+				catch((err) => {
+					next(err);
+				});
 		});
 
 		this.express.get('/api/blockchain/:tx', (req, res, next) => {
@@ -76,9 +87,9 @@ class App {
 			blockChainConnection.sendTransaction(req.params.tx).then((result: any) => {
 				res.send(result);
 			}).
-			catch((err) => {
-				next(err);
-			});
+				catch((err) => {
+					next(err);
+				});
 		});
 
 		this.express.use(logger.after);

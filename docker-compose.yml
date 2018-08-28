@@ -7,12 +7,14 @@ services:
       - PORT=8080
       - MONGODB_URI=mongodb://block-sync-db:27017/block-sync
       - CHAIN_URI=blockchain:46657
+      - BC_REST=http://rest:1317
     restart: always
     ports:
       - "8080:8080"
     links:
       - block-sync-db
       - blockchain
+      - rest
     logging:
       driver: "json-file"
       options:
