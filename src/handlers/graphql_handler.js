@@ -9,7 +9,7 @@ import { PubSub } from 'graphql-subscriptions';
 // TODO: Get subscriptions working, check express-graphql PR for adding subscriptions to their NPM package, once that's implemented this can continue
 // https://github.com/graphql/express-graphql/pull/436#issue-186508682
 // http://www.lbxhq.com/graphql-js/9-subscriptions/
-
+// Graphcool can be used for easier filtering, investigate -> https://www.graph.cool/
 /* ================= ================= */
 // graphiql queries below
 /* ================= ================= */
