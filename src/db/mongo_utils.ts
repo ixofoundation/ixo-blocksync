@@ -37,6 +37,7 @@ export default class MongoUtils {
 			// 	console.log(`Hackernews GraphQL server running on port ${self.port}.`)
 			// });
 
+			self.server.listen(self.port);
             self.server.on('error', self.onError);
             self.server.on('listening', self.onListening);
         });
