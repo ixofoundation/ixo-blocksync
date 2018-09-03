@@ -15,6 +15,18 @@ export class ProjectHandler {
 		});
 	};
 
+	listProjects = (filter: any) => {
+		return new Promise((resolve: Function, reject: Function) => {
+			return ProjectDB.find(filter, (err, res) => {
+				if (err) {
+					reject(err);
+				} else {
+					resolve(res);
+				}
+			});
+		});
+	};
+
 	listAgentByDid = (params: any) => {
 		if (params.projectDid == undefined || params.agentDid == undefined) {
 			return new Promise((resolve: Function, reject: Function) => {
