@@ -20,6 +20,7 @@
     "compression": "^1.7.2",
     "cors": "^2.8.4",
     "dotenv": "^5.0.1",
+    "ethjs-util": "^0.1.6",
     "express": "^4.16.3",
     "express-graphql": "^0.6.12",
     "express-winston": "^2.5.1",

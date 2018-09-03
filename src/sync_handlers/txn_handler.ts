@@ -4,6 +4,7 @@ import { StatsSyncHandler } from './stats_sync_handler';
 import { IStats } from '../models/stats';
 import { IDid, ICredential } from '../models/did';
 import { DidSyncHandler } from './did_sync_handler';
+import ethjs from 'ethjs-util';
 
 export class TransactionHandler {
 	private projectSyncHandler = new ProjectSyncHandler();
@@ -28,6 +29,12 @@ export class TransactionHandler {
 	routeTransaction(txData: any) {
 		let txIdentifier = txData.payload[0];
 		let payload = txData.payload[1];
+
+		if (typeof payload == 'string'){
+			// The payload is a string then it is in hex format 
+			payload = JSON.parse(ethjs.toAscii(payload))
+		}
+		
 		if (txIdentifier == this.TXN_TYPE.PROJECT) {
 			let projectDoc: IProject = payload;
 			this.updateGlobalStats(this.TXN_TYPE.PROJECT, '', '', projectDoc.data.requiredClaims);
