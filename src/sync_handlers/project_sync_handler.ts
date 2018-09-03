@@ -86,7 +86,7 @@ export class ProjectSyncHandler {
 			);
 		});
 	};
-	
+
 	updateAgentStats = (role: string, status: string, projectDid: string) => {
 		this.getAgentCount(status, projectDid, role).then((count: number) => {
 			let statsProp;
@@ -129,35 +129,6 @@ export class ProjectSyncHandler {
 		});
 	};
 
-
-	getClaimCount = (status: string, projectDid: string): Promise<number> => {
-		return new Promise((resolve: Function, reject: Function) => {
-			return ProjectDB.aggregate(
-				[
-					{ $match: { projectDid: projectDid } },
-					{ $unwind: '$data.claims' },
-					{
-						$group: {
-							_id: 0,
-							count: {
-								$sum: {
-									$cond: [{ $eq: ['$data.claims.status', status] }, 1, 0]
-								}
-							}
-						}
-					}
-				],
-				(err, res) => {
-					if (err) {
-						reject(err);
-					} else {
-						resolve(res[0].count);
-					}
-				}
-			);
-		});
-	};
-	
 	updateClaimStatus = (status: string, projectDid: string, claimId: string, agentDid: string) => {
 		return new Promise((resolve: Function, reject: Function) => {
 			return ProjectDB.findOneAndUpdate(
@@ -195,5 +166,34 @@ export class ProjectSyncHandler {
 			});
 		});
 	};
+
+	getClaimCount = (status: string, projectDid: string): Promise<number> => {
+		return new Promise((resolve: Function, reject: Function) => {
+			return ProjectDB.aggregate(
+				[
+					{ $match: { projectDid: projectDid } },
+					{ $unwind: '$data.claims' },
+					{
+						$group: {
+							_id: 0,
+							count: {
+								$sum: {
+									$cond: [{ $eq: ['$data.claims.status', status] }, 1, 0]
+								}
+							}
+						}
+					}
+				],
+				(err, res) => {
+					if (err) {
+						reject(err);
+					} else {
+						resolve(res[0].count);
+					}
+				}
+			);
+		});
+	};
+
 
 }
