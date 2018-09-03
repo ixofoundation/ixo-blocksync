@@ -6,6 +6,7 @@ import * as compression from 'compression';
 import { ProjectHandler } from './handlers/project_handler';
 import { DidHandler } from './handlers/did_handler';
 import { StatsHandler } from './handlers/stats_handler';
+//import { GraphQLHandler } from './handlers/graphql_handler';
 import { Connection } from './util/connection';
 
 
@@ -91,6 +92,8 @@ class App {
 					next(err);
 				});
 		});
+
+//		(new GraphQLHandler()).configure(this.express);
 
 		this.express.use(logger.after);
 	}

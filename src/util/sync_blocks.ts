@@ -1,9 +1,9 @@
 import { Connection } from './connection';
 import { BlockQueue, NewBlockEvent } from '../models/block';
-import { ChainHandler } from '../handlers/chain_handler';
+import { ChainHandler } from '../sync_handlers/chain_handler';
 import { IChain } from '../models/chain';
-import { TransactionHandler } from '../handlers/txn_handler';
-import { StatsHandler } from '../handlers/stats_handler';
+import { TransactionHandler } from '../sync_handlers/txn_handler';
+import { StatsSyncHandler } from '../sync_handlers/stats_sync_handler';
 import { IStats } from '../models/stats';
 const CLI = require('clui'),
 	Spinner = CLI.Spinner;
@@ -11,7 +11,7 @@ const CLI = require('clui'),
 export class SyncBlocks {
 	private chainHandler = new ChainHandler();
 	private txnHandler = new TransactionHandler();
-	private statsHandler = new StatsHandler();
+	private statsHandler = new StatsSyncHandler();
 
 	startSync(chainUri: string) {
 		let conn = new Connection(chainUri);
