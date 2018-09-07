@@ -1,5 +1,6 @@
 import { StatsDB } from "../db/models/stats";
 import { IStats } from "../models/stats";
+import { io } from '../server';
 
 export class StatsSyncHandler {
     create = () => {
@@ -20,6 +21,7 @@ export class StatsSyncHandler {
                 if (err) {
                     reject(err);
                 } else {
+					io.emit('global stats updated', stats);
                     resolve(res);
                 }
             });

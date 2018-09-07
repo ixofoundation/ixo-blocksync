@@ -11,6 +11,11 @@ const chainURL = (process.env.CHAIN_URI || 'localhost:46657');
 App.set('port', port);
 App.set('chainURL', chainURL);
 const server = http.createServer(App);
+export var io = require('socket.io')(server);
+
+io.on('connection', function(socket){
+	io.emit('success', 'app to explorer connected');
+});
 
 let mongoDB = new MongoUtils(server, Number(port));
 
