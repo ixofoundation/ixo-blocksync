@@ -1,5 +1,6 @@
 import { ProjectDB } from '../db/models/project';
 import axios from 'axios';
+import { io } from '../server';
 
 declare var Promise: any;
 
@@ -10,6 +11,7 @@ export class ProjectHandler {
 				if (err) {
 					reject(err);
 				} else {
+					io.emit('list all projects', res);
 					resolve(res);
 				}
 			});
@@ -22,6 +24,7 @@ export class ProjectHandler {
 				if (err) {
 					reject(err);
 				} else {
+					io.emit('list projects', res);
 					resolve(res);
 				}
 			});
@@ -57,6 +60,7 @@ export class ProjectHandler {
 					if (err) {
 						reject(err);
 					} else {
+						io.emit('list project', res);
 						resolve(res);
 					}
 				});

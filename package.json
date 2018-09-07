@@ -29,6 +29,7 @@
     "http": "0.0.0",
     "jayson": "^2.0.6",
     "mongoose": "^5.1.2",
+    "socket.io": "^2.1.1",
     "subscriptions-transport-ws": "^0.9.14",
     "ts-node": "^6.1.1",
     "typescript": "^2.8.3",
