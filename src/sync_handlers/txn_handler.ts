@@ -10,7 +10,7 @@ export class TransactionHandler {
 	private statsSyncHandler = new StatsSyncHandler();
 	private didSyncHandler = new DidSyncHandler();
 
-	TXN_TYPE = Object.freeze({ PROJECT: 16, DID: 10, AGENT_CREATE: 17, AGENT_UPDATE: 18, CAPTURE_CLAIM: 19, CLAIM_UPDATE: 20, ADD_CREDENTIAL: 24 });
+	TXN_TYPE = Object.freeze({ PROJECT: 16, DID: 10, AGENT_CREATE: 17, AGENT_UPDATE: 18, CAPTURE_CLAIM: 19, CLAIM_UPDATE: 20, PROJECT_UPDATE: 21, ADD_CREDENTIAL: 24 });
 	AGENT_TYPE = Object.freeze({ SERVICE: 'SA', EVALUATOR: 'EA', INVESTOR: 'IA' });
 	CLAIM_STATUS = Object.freeze({ SUCCESS: '1', REJECTED: '2', PENDING: '0' });
 
@@ -97,6 +97,8 @@ export class TransactionHandler {
 				signer: payload.credential.signer
 			};
 			return this.didSyncHandler.addCredential(payload.did, credential);
+		} else if (txIdentifier == this.TXN_TYPE.PROJECT_UPDATE) {
+			return this.projectSyncHandler.updateProjectStatus(payload.data.status, payload.projectDid);
 		}
 	}
 
