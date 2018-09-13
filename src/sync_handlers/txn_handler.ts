@@ -4,16 +4,32 @@ import { StatsSyncHandler } from './stats_sync_handler';
 import { IStats } from '../models/stats';
 import { IDid, ICredential } from '../models/did';
 import { DidSyncHandler } from './did_sync_handler';
-import ethjs from 'ethjs-util';
 
 export class TransactionHandler {
 	private projectSyncHandler = new ProjectSyncHandler();
 	private statsSyncHandler = new StatsSyncHandler();
 	private didSyncHandler = new DidSyncHandler();
 
-	TXN_TYPE = Object.freeze({ PROJECT: 16, DID: 10, AGENT_CREATE: 17, AGENT_UPDATE: 18, CAPTURE_CLAIM: 19, CLAIM_UPDATE: 20, ADD_CREDENTIAL: 24 });
+	TXN_TYPE = Object.freeze({ PROJECT: 16, DID: 10, AGENT_CREATE: 17, AGENT_UPDATE: 18, CAPTURE_CLAIM: 19, CLAIM_UPDATE: 20, PROJECT_STATUS_UPDATE: 25, ADD_CREDENTIAL: 24 });
 	AGENT_TYPE = Object.freeze({ SERVICE: 'SA', EVALUATOR: 'EA', INVESTOR: 'IA' });
 	CLAIM_STATUS = Object.freeze({ SUCCESS: '1', REJECTED: '2', PENDING: '0' });
+
+	convertHexToAscii(hex: string) : string {
+		let str = '';
+		let i = 0;
+		let l = hex.length;
+
+		if (hex.substring(0, 2) === '0x') {
+			i = 2;
+		}
+
+		for (; i < l; i += 2) {
+			const code = parseInt(hex.substr(i, 2), 16);
+			str += String.fromCharCode(code);
+		}
+
+		return str;
+	}
 
 	routeTransactions(txDataArray: any[]) {
 		var result = Promise.resolve();
@@ -32,7 +48,7 @@ export class TransactionHandler {
 
 		if (typeof payload == 'string'){
 			// The payload is a string then it is in hex format 
-			payload = JSON.parse(ethjs.toAscii(payload))
+			payload = JSON.parse(this.convertHexToAscii(payload))
 		}
 		
 		if (txIdentifier == this.TXN_TYPE.PROJECT) {
@@ -81,6 +97,8 @@ export class TransactionHandler {
 				signer: payload.credential.signer
 			};
 			return this.didSyncHandler.addCredential(payload.did, credential);
+		} else if (txIdentifier == this.TXN_TYPE.PROJECT_STATUS_UPDATE) {
+			return this.projectSyncHandler.updateProjectStatus(payload.data.status, payload.projectDid);
 		}
 	}
 

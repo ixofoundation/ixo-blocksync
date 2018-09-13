@@ -202,5 +202,20 @@ export class ProjectSyncHandler {
 		});
 	};
 
-
+	updateProjectStatus = (status: string, projectDid: string) => {
+		return new Promise((resolve: Function, reject: Function) => {
+			return ProjectDB.findOneAndUpdate(
+				{ projectDid: projectDid },
+				{ $set: { 'status': status } },
+				(err, res) => {
+					if (err) {
+						reject(err);
+					} else {
+						io.emit('project status updated', {projectDid: projectDid, status: status});
+						resolve(res);
+					}
+				}
+			);
+		});
+	};
 }

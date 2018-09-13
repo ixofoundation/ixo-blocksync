@@ -139,7 +139,8 @@ export var ProjectSchema: Schema = new Schema(
 		},
 		pubKey: String,
 		senderDid: String,
-		txHash: String
+		txHash: String,
+		status: String
 	},
 	{ strict: false }
 );
