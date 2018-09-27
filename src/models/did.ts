@@ -4,7 +4,7 @@ export interface IDid {
 	credentials?: ICredential[];
 }
 export interface ICredential {
-	type: string;
-	data: string;
-	signer: string;
+	type: [string];
+	claim: {};
+	issuer: string;
 }
