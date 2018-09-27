@@ -4,7 +4,7 @@ import { DidDB } from '../db/models/did';
 export class DidSyncHandler {
 	create = (didDoc: IDid) => {
 		return new Promise((resolve: Function, reject: Function) => {
-			return DidDB.create({}, didDoc, (err, res) => {
+			return DidDB.create(didDoc, (err, res) => {
 				if (err) {
 					reject(err);
 				} else {
