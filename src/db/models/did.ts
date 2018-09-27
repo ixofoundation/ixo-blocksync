@@ -14,10 +14,12 @@ export var DidSchema: Schema = new Schema(
 		did: {
 			type: String,
 			index: true,
-			unique: true
+			unique: true,
+			required: true,
 		},
 		publicKey: {
-			type: String
+			type: String,
+			required: true
 		},
 		credentials: [credentialsSchema]
 	},
