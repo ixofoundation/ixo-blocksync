@@ -2,12 +2,13 @@ import * as winston from 'winston';
 import * as expressWinston from 'express-winston';
 import { Logger } from 'winston';
 
+//@ts-ignore
 export let before = expressWinston.logger({
-  winstonInstance: winston
+	winstonInstance: winston
 });
-
+//@ts-ignore
 export let after = expressWinston.errorLogger({
-  winstonInstance: winston
+	winstonInstance: winston
 });
 
 const logger = new (Logger)({
