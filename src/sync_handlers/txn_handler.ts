@@ -93,10 +93,10 @@ export class TransactionHandler {
 		} else if (txIdentifier == this.TXN_TYPE.ADD_CREDENTIAL) {
 			let credential: ICredential = {
 				type: payload.credential.type,
-				data: payload.credential.data,
-				signer: payload.credential.signer
+				claim: payload.credential.claim,
+				issuer: payload.credential.issuer
 			};
-			return this.didSyncHandler.addCredential(payload.did, credential);
+			return this.didSyncHandler.addCredential(payload.credential.claim.id, credential);
 		} else if (txIdentifier == this.TXN_TYPE.PROJECT_STATUS_UPDATE) {
 			return this.projectSyncHandler.updateProjectStatus(payload.data.status, payload.projectDid);
 		}
