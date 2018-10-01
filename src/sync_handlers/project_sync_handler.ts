@@ -31,7 +31,7 @@ export class ProjectSyncHandler {
 	updateAgentStatus = (agentDid: string, status: string, projectDid: string, role: string) => {
 		return new Promise((resolve: Function, reject: Function) => {
 			return ProjectDB.findOneAndUpdate(
-				{ projectDid: projectDid, 'data.agents.did': agentDid, 'data.agents.role': role },
+				{ projectDid: projectDid, 'data.agents.did': agentDid},
 				{ $set: { 'data.agents.$.status': status } },
 				(err, res) => {
 					if (err) {
