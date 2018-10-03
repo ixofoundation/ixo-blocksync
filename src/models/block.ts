@@ -15,11 +15,11 @@ export class Block {
     }
 
     hasTransactions(): boolean {
-        return (this.getTransactionAmount() !== 0);
+        return (this.getTransactionAmount() > 0);
     }
 
     getTransactionAmount(): number {
-        return this.block.data.txs.length;
+        return this.block.header.num_txs;
     }
 
     getTransactions(): string[] {
