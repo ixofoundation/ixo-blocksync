@@ -1,5 +1,6 @@
 import { ProjectDB } from '../db/models/project';
 import { IProject, IAgent, IClaim } from '../models/project';
+import { io } from '../server';
 
 declare var Promise: any;
 
@@ -22,6 +23,7 @@ export class ProjectSyncHandler {
 				if (err) {
 					reject(err);
 				} else {
+					io.emit('agent added', {projectDid: projectDid, agent: agent});
 					resolve(res);
 				}
 			});
@@ -46,6 +48,7 @@ export class ProjectSyncHandler {
 						} else {
 							this.updateAgentStats(role, status, projectDid);
 						}
+						io.emit('agent updated', {agentDid: agentDid, status: status});
 						resolve(res);
 					}
 				}
@@ -109,6 +112,7 @@ export class ProjectSyncHandler {
 					if (err) {
 						reject(err);
 					} else {
+						io.emit('agent stats updated', { projectDid: projectDid, updatedStats: statsProp});
 						resolve(res);
 					}
 				});
@@ -123,6 +127,7 @@ export class ProjectSyncHandler {
 					reject(err);
 				} else {
 					this.updateClaimStats(claim.status, projectDid);
+					io.emit('claim added', {projectDid: projectDid, claim: claim});
 					resolve(res);
 				}
 			});
@@ -168,6 +173,7 @@ export class ProjectSyncHandler {
 						reject(err);
 					} else {
 						this.updateClaimStats(status, projectDid);
+						io.emit('claim updated', {projectDid: projectDid, status: status});
 						resolve(res);
 					}
 				}
@@ -189,6 +195,7 @@ export class ProjectSyncHandler {
 					if (err) {
 						reject(err);
 					} else {
+						io.emit('claim stats updated', { projectDid: projectDid, updatedStats: statsProp});
 						resolve(res);
 					}
 				});

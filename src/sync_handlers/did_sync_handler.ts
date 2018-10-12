@@ -1,5 +1,6 @@
 import { IDid, ICredential } from '../models/did';
 import { DidDB } from '../db/models/did';
+import { io } from '../server';
 
 export class DidSyncHandler {
 	create = (didDoc: IDid) => {
@@ -8,6 +9,7 @@ export class DidSyncHandler {
 				if (err) {
 					reject(err);
 				} else {
+					io.emit('did created', didDoc);
 					resolve(res);
 				}
 			});
@@ -20,6 +22,7 @@ export class DidSyncHandler {
 				if (err) {
 					reject(err);
 				} else {
+					io.emit('did updated', { did: did, credental: credential});
 					resolve(res);
 				}
 			});

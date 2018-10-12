@@ -2,9 +2,6 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 import * as http from 'http';
 import { MONGODB_URI } from '../util/secrets';
-import { schema } from '../handlers/graphql_handler';
-const {execute, subscribe} = require('graphql');
-const {SubscriptionServer} = require('subscriptions-transport-ws');
 
 export default class MongoUtils {
 
@@ -28,15 +25,7 @@ export default class MongoUtils {
         db.once('open', function () {
             console.log('MongDB connected!');
 
-            // Once connected listen on server
-			self.server.listen(self.port, () => {
-				new SubscriptionServer(
-					{execute, subscribe, schema},
-					{server: self.server, path: '/subscriptions'},
-				);
-				console.log(`Hackernews GraphQL server running on port ${self.port}.`)
-			});
-
+			self.server.listen(self.port);
             self.server.on('error', self.onError);
             self.server.on('listening', self.onListening);
         });
