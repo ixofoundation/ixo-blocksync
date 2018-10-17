@@ -12,7 +12,7 @@ export class TransactionHandler {
 
 	TXN_TYPE = Object.freeze({ PROJECT: "project/CreateProject", DID: "did/AddDid", 
 							AGENT_CREATE: "project/CreateAgent", AGENT_UPDATE: "project/UpdateAgent", CAPTURE_CLAIM: "project/CreateClaim", 
-							CLAIM_UPDATE: "project/CreateEvaluation", PROJECT_STATUS_UPDATE: "project/UpdateProject", ADD_CREDENTIAL: "did/AddCredential" });
+							CLAIM_UPDATE: "project/CreateEvaluation", PROJECT_STATUS_UPDATE: "project/UpdateProjectStatus", ADD_CREDENTIAL: "did/AddCredential" });
 
 	AGENT_TYPE = Object.freeze({ SERVICE: 'SA', EVALUATOR: 'EA', INVESTOR: 'IA' });
 	CLAIM_STATUS = Object.freeze({ SUCCESS: '1', REJECTED: '2', PENDING: '0' });
