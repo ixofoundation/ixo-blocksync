@@ -50,6 +50,25 @@ export class NewBlockEvent {
     }
 }
 
+export class BlockResult {
+    blockResult: any;
+    constructor(block: any) {
+        this.blockResult = block;
+    }
+
+    getBlockHeight(): number {
+        return this.blockResult.height;
+    }
+
+    getTransactions() {
+        return this.blockResult.results.DeliverTx;
+    }
+
+    getTransactionCode(txnNumber: number): string {
+        return (this.blockResult.results.DeliverTx[txnNumber].code);
+    }
+}
+
 export class BlockQueue {
 
     conn: Connection;
@@ -78,9 +97,12 @@ export class BlockQueue {
             if (noBlocks) {
                 await this.sleep(500);
             }
-            await this.conn.getBlock(this.curBlock).then((block) => {
-                if (block) {
-                    this.callback(new NewBlockEvent(block));
+            await this.conn.getBlockResult(this.curBlock).then((blockResult) => {
+                if (blockResult) {
+                    this.conn.getBlock(this.curBlock).then((block) => {
+                        this.callback(new BlockResult(blockResult), new NewBlockEvent(block));
+                    })
+                    
                     ++this.curBlock;
                 } else {
                     noBlocks = true;

@@ -24,6 +24,26 @@ export class Connection {
                 return '';
             });
     }
+
+    getBlockResult(height: Number): AxiosPromise {
+        var url = 'http://' + this.chainUri + '/block_results?height=';
+        if (height > 0) {
+            url = url + height;
+        }
+
+        return axios
+            .get(url)
+            .then(response => {
+                if (response.data.result) {
+                    return response.data.result;
+                } else {
+                    throw new Error('No more blocks');
+                }
+            })
+            .catch(() => {
+                return '';
+            });
+    }
  
     getBlock(height: Number): AxiosPromise {
         var url = 'http://' + this.chainUri + '/block?height=';
