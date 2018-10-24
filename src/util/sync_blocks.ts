@@ -1,5 +1,5 @@
 import { Connection } from './connection';
-import { BlockQueue, NewBlockEvent } from '../models/block';
+import { BlockQueue, BlockResult, NewBlockEvent } from '../models/block';
 import { ChainHandler } from '../sync_handlers/chain_handler';
 import { IChain } from '../models/chain';
 import { TransactionHandler } from '../sync_handlers/txn_handler';
@@ -58,11 +58,16 @@ export class SyncBlocks {
 		let blockQueue = new BlockQueue(connection, chain.blockHeight);
 		var sync = new Spinner('Syncing Blocks...  ', ['⣾', '⣽', '⣻', '⢿', '⡿', '⣟', '⣯', '⣷']);
 
-		blockQueue.onBlock((event: NewBlockEvent) => {
-			this.chainHandler.setBlockHeight(event.getBlockHeight(), event.getChainId());
-			sync.message('Syncing block number ' + event.getBlockHeight());
-			if (event.getBlock().hasTransactions()) {
-				this.txnHandler.routeTransactions(event.block.getTransactions());
+		blockQueue.onBlock((result: BlockResult, event: NewBlockEvent) => {
+			this.chainHandler.setBlockHeight(result.getBlockHeight(), chain.chainId);
+			sync.message('Syncing block number ' + result.getBlockHeight());
+			if (result.getTransactions() != null) {
+				console.log('Block Result  ' + JSON.stringify(result.getTransactions()))
+				for (var i: number = 0; i < result.getTransactions().length; i++) {
+					if (result.getTransactionCode(i) == undefined || 0) {
+						this.txnHandler.routeTransactions(event.block.getTransaction(i));
+					}
+				}
 			}
 		});
 		sync.start();
