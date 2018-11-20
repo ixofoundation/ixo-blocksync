@@ -69,7 +69,7 @@ export class SyncBlocks {
 					resolve(this.chainHandler.create(chain));
 				}
 			})
-			.catch(err=>{
+			.catch((err: any)=>{
 				console.log("err: " + err);
 			});
 		});

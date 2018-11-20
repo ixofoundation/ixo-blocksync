@@ -99,7 +99,7 @@ export class Connection {
         return this.getLastBlock().then((block: any) => {
             return block.header.height;
         })
-        .catch(error => {
+        .catch((error: any) => {
             console.log(error);
             return -1;
         });
