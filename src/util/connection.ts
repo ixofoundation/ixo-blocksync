@@ -3,9 +3,32 @@ import axios, { AxiosPromise } from 'axios';
 export class Connection {
     THRESHHOLD_FOR_WEBSOCKET = 10;
     chainUri: string;
+    _isConnected: boolean;
+    _confirmConnectionTimer : NodeJS.Timer;
 
     constructor(chainUri: string) {
+        this._isConnected = false;
         this.chainUri = chainUri;
+        this.confirmConnection();
+    }
+
+    confirmConnection() {
+        const self = this;
+        this._confirmConnectionTimer = setInterval( function() {
+            self.getLastBlock().then((block: any) => {
+                self._isConnected = true;
+                clearTimeout(self._confirmConnectionTimer);
+                console.log("block: " + JSON.stringify(block));
+            })
+            .catch((error: any) => {
+                console.log("error: " + error);
+            });;
+        }, 3000)
+    }
+
+    isConnected() {
+        // console.log("_isConnected: " + this._isConnected)
+        return this._isConnected;
     }
 
     sendTransaction(txData: string) {
@@ -45,24 +68,27 @@ export class Connection {
             });
     }
  
-    getBlock(height: Number): AxiosPromise {
+    getBlock(height: Number): Promise<any> {
         var url = 'http://' + this.chainUri + '/block?height=';
         if (height > 0) {
             url = url + height;
         }
 
-        return axios
+        return new Promise((resolve: Function, reject: Function) => {
+            axios
             .get(url)
             .then(response => {
                 if (response.data.result) {
-                    return response.data.result.block;
+                    resolve(response.data.result.block);
                 } else {
-                    throw new Error('No more blocks');
+                    reject(new Error('No more blocks'));
                 }
             })
             .catch(error => {
-                return '';
+                console.log("\n***\n***\nerror: " + error);
+                reject(error);
             });
+        })
     }
 
     getLastBlock() {
@@ -73,10 +99,10 @@ export class Connection {
         return this.getLastBlock().then((block: any) => {
             return block.header.height;
         })
-            .catch(error => {
-                console.log(error);
-                return -1;
-            });
+        .catch(error => {
+            console.log(error);
+            return -1;
+        });
 
     }
     subscribeToChain(callback: Function) {
