@@ -23,7 +23,7 @@ export class SyncBlocks {
 				clearTimeout(confirmationInterval);
 				self.performSyncing(conn);
 			}
-		}, 250); 		
+		}, 2500); 		
 	}
 
 	stopSync(blockQueue: BlockQueue) {

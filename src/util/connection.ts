@@ -23,7 +23,7 @@ export class Connection {
             .catch((error: any) => {
                 console.log("error: " + error);
             });;
-        }, 3000)
+        }, 2000)
     }
 
     isConnected() {
