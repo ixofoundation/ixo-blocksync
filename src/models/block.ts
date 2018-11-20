@@ -99,7 +99,8 @@ export class BlockQueue {
             }
             await this.conn.getBlockResult(this.curBlock).then((blockResult) => {
                 if (blockResult) {
-                    this.conn.getBlock(this.curBlock).then((block) => {
+                    this.conn.getBlock(this.curBlock)
+                    .then((block) => {
                         this.callback(new BlockResult(blockResult), new NewBlockEvent(block));
                     })
                     
