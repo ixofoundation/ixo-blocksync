@@ -78,7 +78,7 @@ export class Connection {
             axios
             .get(url)
             .then(response => {
-                if (response.data.result) {
+                if (response.data.result.block) {
                     resolve(response.data.result.block);
                 } else {
                     reject(new Error('No more blocks'));
