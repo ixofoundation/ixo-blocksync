@@ -107,12 +107,12 @@ export class TransactionHandler {
 		}
 	}
 
-	updateGlobalStats(txnType: string, agentType?: string, claimStatus?: string, claimsRequired?: number) {
+	updateGlobalStats(txnType: string, agentType?: string, claimStatus?: string, claimsRequired?: string) {
 		this.statsSyncHandler.getStatsInfo().then((stats: IStats) => {
 			let newStats = stats;
 
 			if (claimsRequired) {
-				newStats.claims.total = newStats.claims.total + claimsRequired;
+				newStats.claims.total = newStats.claims.total + +claimsRequired;
 			}
 
 			switch (txnType) {
