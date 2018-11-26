@@ -25,7 +25,7 @@ export default class MongoUtils {
         db.once('open', function () {
             console.log('MongDB connected!');
 
-            self.server.listen(self.port);
+			self.server.listen(self.port);
             self.server.on('error', self.onError);
             self.server.on('listening', self.onListening);
         });

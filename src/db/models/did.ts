@@ -15,7 +15,7 @@ export var DidSchema: Schema = new Schema(
 			type: String,
 			index: true,
 			unique: true,
-			required: true,
+			required: true
 		},
 		publicKey: {
 			type: String,
