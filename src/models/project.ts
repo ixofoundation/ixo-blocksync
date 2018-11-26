@@ -4,6 +4,7 @@ export interface IProject {
     pubKey: string;
     senderDid: string;
     txHash: string;
+    status: string;
 }
 
 interface IData {
@@ -17,8 +18,8 @@ interface IData {
     createdOn: Date;
     createdBy: string;
     projectLocation: string;
-    requiredClaims: number,
-    sdgs: number[];
+    requiredClaims: string,
+    sdgs: string[];
     templates: ITemplates;
     evaluatorPayPerClaim: string;
     claimStats: IClaimStats;

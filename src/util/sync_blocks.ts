@@ -1,5 +1,5 @@
 import { Connection } from './connection';
-import { BlockQueue, NewBlockEvent } from '../models/block';
+import { BlockQueue, BlockResult, NewBlockEvent } from '../models/block';
 import { ChainHandler } from '../sync_handlers/chain_handler';
 import { IChain } from '../models/chain';
 import { TransactionHandler } from '../sync_handlers/txn_handler';
@@ -14,9 +14,27 @@ export class SyncBlocks {
 	private statsHandler = new StatsSyncHandler();
 
 	startSync(chainUri: string) {
-		let conn = new Connection(chainUri);
+		let conn = new Connection(chainUri);	
+		const self = this;	
+		var confirmationInterval = setInterval(function () { 
+			var isConnected = conn.isConnected();
+			console.log("Blockchain CONNECTED: " + isConnected);
+			if (isConnected) {
+				clearTimeout(confirmationInterval);
+				self.performSyncing(conn);
+			}
+		}, 2500); 		
+	}
+
+	stopSync(blockQueue: BlockQueue) {
+		return blockQueue.stop();
+	}
+
+	performSyncing(conn: Connection) {
 		this.chainHandler.getChainInfo().then((chain: IChain) => {
 			conn.getLastBlock().then((block: any) => {
+				console.log("block: " + JSON.stringify(block));
+
 				if (!chain) {
 					this.initChainInfo(conn, false).then((chain: IChain) => {
 						this.startQueue(conn, chain);
@@ -28,8 +46,11 @@ export class SyncBlocks {
 				} else {
 					this.startQueue(conn, chain);
 				}
-			});
-		});
+			})
+			.catch((error: any) => {
+				console.log("\n!!!!\nerror: " + error);
+			});;
+		})
 		this.statsHandler.getStatsInfo().then((stats: IStats) => {
 			if (!stats) {
 				this.statsHandler.create();
@@ -37,19 +58,19 @@ export class SyncBlocks {
 		});
 	}
 
-	stopSync(blockQueue: BlockQueue) {
-		return blockQueue.stop();
-	}
-
 	initChainInfo(connection: Connection, isUpdate: boolean): Promise<IChain> {
 		return new Promise((resolve: Function, reject: Function) => {
-			connection.getLastBlock().then((block: any) => {
+			connection.getLastBlock()
+			.then((block: any) => {
 				let chain: IChain = { chainId: block.header.chain_id, blockHeight: 0 };
 				if (isUpdate) {
 					resolve(this.chainHandler.update(chain));
 				} else {
 					resolve(this.chainHandler.create(chain));
 				}
+			})
+			.catch((err: any)=>{
+				console.log("err: " + err);
 			});
 		});
 	}
@@ -58,11 +79,16 @@ export class SyncBlocks {
 		let blockQueue = new BlockQueue(connection, chain.blockHeight);
 		var sync = new Spinner('Syncing Blocks...  ', ['⣾', '⣽', '⣻', '⢿', '⡿', '⣟', '⣯', '⣷']);
 
-		blockQueue.onBlock((event: NewBlockEvent) => {
-			this.chainHandler.setBlockHeight(event.getBlockHeight(), event.getChainId());
-			sync.message('Syncing block number ' + event.getBlockHeight());
-			if (event.getBlock().hasTransactions()) {
-				this.txnHandler.routeTransactions(event.block.getTransactions());
+		blockQueue.onBlock((result: BlockResult, event: NewBlockEvent) => {
+			this.chainHandler.setBlockHeight(result.getBlockHeight(), chain.chainId);
+			sync.message('Syncing block number ' + result.getBlockHeight());
+			if (result.getTransactions() != null) {
+				console.log('Block Result  ' + JSON.stringify(result.getTransactions()))
+				for (var i: number = 0; i < result.getTransactions().length; i++) {
+					if (result.getTransactionCode(i) == undefined || 0) {
+						this.txnHandler.routeTransactions(event.block.getTransaction(i));
+					}
+				}
 			}
 		});
 		sync.start();

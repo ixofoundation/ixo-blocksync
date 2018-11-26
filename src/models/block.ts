@@ -15,11 +15,11 @@ export class Block {
     }
 
     hasTransactions(): boolean {
-        return (this.getTransactionAmount() !== 0);
+        return (this.getTransactionAmount() > 0);
     }
 
     getTransactionAmount(): number {
-        return this.block.data.txs.length;
+        return this.block.header.num_txs;
     }
 
     getTransactions(): string[] {
@@ -47,6 +47,25 @@ export class NewBlockEvent {
 
     getChainId(): string {
         return this.getBlock().getChainId();
+    }
+}
+
+export class BlockResult {
+    blockResult: any;
+    constructor(block: any) {
+        this.blockResult = block;
+    }
+
+    getBlockHeight(): number {
+        return this.blockResult.height;
+    }
+
+    getTransactions() {
+        return this.blockResult.results.DeliverTx;
+    }
+
+    getTransactionCode(txnNumber: number): string {
+        return (this.blockResult.results.DeliverTx[txnNumber].code);
     }
 }
 
@@ -78,9 +97,13 @@ export class BlockQueue {
             if (noBlocks) {
                 await this.sleep(500);
             }
-            await this.conn.getBlock(this.curBlock).then((block) => {
-                if (block) {
-                    this.callback(new NewBlockEvent(block));
+            await this.conn.getBlockResult(this.curBlock).then((blockResult) => {
+                if (blockResult) {
+                    this.conn.getBlock(this.curBlock)
+                    .then((block) => {
+                        this.callback(new BlockResult(blockResult), new NewBlockEvent(block));
+                    })
+                    
                     ++this.curBlock;
                 } else {
                     noBlocks = true;

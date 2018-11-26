@@ -10,24 +10,52 @@ export class TransactionHandler {
 	private statsSyncHandler = new StatsSyncHandler();
 	private didSyncHandler = new DidSyncHandler();
 
-	TXN_TYPE = Object.freeze({ PROJECT: 16, DID: 10, AGENT_CREATE: 17, AGENT_UPDATE: 18, CAPTURE_CLAIM: 19, CLAIM_UPDATE: 20, ADD_CREDENTIAL: 24 });
+	TXN_TYPE = Object.freeze({
+		PROJECT: "project/CreateProject", DID: "did/AddDid",
+		AGENT_CREATE: "project/CreateAgent", AGENT_UPDATE: "project/UpdateAgent", CAPTURE_CLAIM: "project/CreateClaim",
+		CLAIM_UPDATE: "project/CreateEvaluation", PROJECT_STATUS_UPDATE: "project/UpdateProjectStatus", ADD_CREDENTIAL: "did/AddCredential"
+	});
+
 	AGENT_TYPE = Object.freeze({ SERVICE: 'SA', EVALUATOR: 'EA', INVESTOR: 'IA' });
 	CLAIM_STATUS = Object.freeze({ SUCCESS: '1', REJECTED: '2', PENDING: '0' });
 
-	routeTransactions(txDataArray: any[]) {
+	convertHexToAscii(hex: string): string {
+		let str = '';
+		let i = 0;
+		let l = hex.length;
+
+		if (hex.substring(0, 2) === '0x') {
+			i = 2;
+		}
+
+		for (; i < l; i += 2) {
+			const code = parseInt(hex.substr(i, 2), 16);
+			str += String.fromCharCode(code);
+		}
+
+		return str;
+	}
+
+	routeTransactions(txData: string) {
 		var result = Promise.resolve();
-		txDataArray.forEach(txData => {
-			result = result.then(() => {
-				let buf = Buffer.from(txData, 'base64');
-				console.log('TX DATA: ' + buf.toString());
-				return this.routeTransaction(JSON.parse(buf.toString()));
-			});
+
+		result = result.then(() => {
+			let buf = Buffer.from(txData, 'base64');
+			console.log('TX DATA: ' + buf.toString());
+			return this.routeTransaction(JSON.parse(buf.toString()));
 		});
+
 	}
 
 	routeTransaction(txData: any) {
-		let txIdentifier = txData.payload[0];
-		let payload = txData.payload[1];
+		let txIdentifier = txData.payload[0].type;
+		let payload = txData.payload[0].value;
+
+		if (typeof payload == 'string') {
+			// The payload is a string then it is in hex format 
+			payload = JSON.parse(this.convertHexToAscii(payload))
+		}
+
 		if (txIdentifier == this.TXN_TYPE.PROJECT) {
 			let projectDoc: IProject = payload;
 			this.updateGlobalStats(this.TXN_TYPE.PROJECT, '', '', projectDoc.data.requiredClaims);
@@ -74,15 +102,17 @@ export class TransactionHandler {
 				issuer: payload.credential.issuer
 			};
 			return this.didSyncHandler.addCredential(payload.credential.claim.id, credential);
+		} else if (txIdentifier == this.TXN_TYPE.PROJECT_STATUS_UPDATE) {
+			return this.projectSyncHandler.updateProjectStatus(payload.data.status, payload.projectDid);
 		}
 	}
 
-	updateGlobalStats(txnType: number, agentType?: string, claimStatus?: string, claimsRequired?: number) {
+	updateGlobalStats(txnType: string, agentType?: string, claimStatus?: string, claimsRequired?: string) {
 		this.statsSyncHandler.getStatsInfo().then((stats: IStats) => {
 			let newStats = stats;
 
 			if (claimsRequired) {
-				newStats.claims.total = newStats.claims.total + claimsRequired;
+				newStats.claims.total = newStats.claims.total + +claimsRequired;
 			}
 
 			switch (txnType) {
