@@ -22,7 +22,7 @@ export class Block {
         return this.block.header.num_txs;
     }
 
-    getTransactions(): string[] {
+    getTransactions() {
         return this.block.data.txs;
     }
 
@@ -48,6 +48,18 @@ export class NewBlockEvent {
     getChainId(): string {
         return this.getBlock().getChainId();
     }
+
+    getTransactions() {
+        return this.getBlock().getTransactions();
+    }
+
+    getTransaction(txnNumber: number): string {
+        return (this.getBlock().getTransactions()[txnNumber]);
+    }
+
+    getTransactionCode(txnNumber: number): string {
+        return (this.getBlock().getTransactions()[txnNumber].code);
+    }
 }
 
 export class BlockResult {
@@ -60,13 +72,13 @@ export class BlockResult {
         return this.blockResult.height;
     }
 
-    getTransactions() {
-        return this.blockResult.results.DeliverTx;
-    }
+    // getTransactions() {
+    //     return this.blockResult.results.DeliverTx;
+    // }
 
-    getTransactionCode(txnNumber: number): string {
-        return (this.blockResult.results.DeliverTx[txnNumber].code);
-    }
+    // getTransactionCode(txnNumber: number): string {
+    //     return (this.blockResult.results.DeliverTx[txnNumber].code);
+    // }
 }
 
 export class BlockQueue {

@@ -1,0 +1,188 @@
+swagger: '2.0'
+info:
+  version: '0.1'
+  title: 'IXO'
+  description: ''
+# Added by API Auto Mocking Plugin
+host: virtserver.swaggerhub.com
+basePath: /phillipgibb/IXO/0.1
+
+schemes:
+ - https
+ - http
+paths:
+  '/listProjects':
+    get:
+      description: Returns a list of projects
+      operationId: listProjects
+      tags:
+        [projects]
+      responses:
+        200:
+          description: List of Projects
+          schema:
+            $ref: '#/definitions/Projects'
+definitions: 
+  Projects:
+    type: object
+    properties:
+      projects:
+        type: array
+        items:
+           $ref: '#/definitions/Project'
+  Project:
+    type: object
+    properties:
+      data:
+        $ref: '#/definitions/ProjectData'
+      projectDid:
+        type: string
+      pubKey:
+        type: string
+      senderDid:
+        type: string
+      txHash:
+        type: string
+      status:
+        type: string
+  	  
+  ProjectData:
+    type: object
+    properties:
+      title: 
+        type: string
+      ownerName:
+        type: string
+      ownerEmail:
+        type: string
+      shortDescription:
+        type: string
+      longDescription:
+        type: string
+      impactAction:
+        type: string
+      createdOn:
+        type: string
+      createdBy:
+        type: string
+      projectLocation:
+        type: string
+      requiredClaims:
+        type: number
+      sdgs:
+        type: array
+        items:
+          type: number
+      claimStats:
+        $ref: '#/definitions/ClaimStats'
+      claims:
+        type: array
+        items:
+          $ref: '#/definitions/Claim'
+      templates:
+        type: object
+        properties:
+          claim:
+            $ref: '#/definitions/ClaimTemplate'
+      agents:
+        $ref: '#/definitions/Agents'
+      socialMedia:
+        $ref: '#/definitions/SocialMedia'
+      ixo:
+        $ref: '#/definitions/Ixo'
+      serviceEndpoint:
+        type: string
+      imageLink:
+        type: string
+      founder:
+        $ref: '#/definitions/Founder'
+        
+  Founder:
+    type: object
+    properties:
+      name:
+        type: string
+      email:
+        type: string
+      countryOfOrigin:
+        type: string
+      shortDescription:
+        type: string
+      websiteURL:
+        type: string
+      logoLink:
+        type: string
+  Ixo:
+    type: object
+    properties:
+      totalStaked: 
+        type: number
+      totalUsed: 
+        type: number
+  SocialMedia:
+    type: object
+    properties:
+      facebookLink:
+        type: string
+      instagramLink:
+        type: string
+      twitterLink:
+        type: string
+      webLink:
+        type: string
+  Agents:
+    type: object
+    properties:
+      evaluators: 
+        type: number
+      evaluatorsPending: 
+        type: number
+      serviceProviders: 
+        type: number
+      serviceProvidersPending: 
+        type: number
+      investors: 
+        type: number
+      investorsPending: 
+        type: number
+
+  ClaimTemplate:
+    type: object
+    properties:
+      schema:
+        type: string
+      form:
+        type: string
+          
+  ClaimStats:
+    type: object
+    properties:
+      currentSuccessful:
+        type: number
+        default: 0
+      currentRejected:
+        type: number
+        default: 0
+  
+  Claim:
+    type: object
+    properties:
+      date:
+        type: string
+      location:
+        $ref: '#/definitions/Location'
+      claimId:
+        type: string
+      status:
+        type: string
+      saDid:
+        type: string
+      eaDid:
+        type: string
+  Location:
+    type: object
+    properties:
+      long:
+        type: number
+      lat:
+        type: number
