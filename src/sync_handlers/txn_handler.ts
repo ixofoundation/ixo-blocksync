@@ -48,13 +48,15 @@ export class TransactionHandler {
 	}
 
 	routeTransaction(txData: any) {
+
+
+		if (typeof txData == 'string') {
+			// The payload is a string then it is in hex format 
+			txData = JSON.parse(this.convertHexToAscii(txData))
+		}
+
 		let txIdentifier = txData.payload[0].type;
 		let payload = txData.payload[0].value;
-
-		if (typeof payload == 'string') {
-			// The payload is a string then it is in hex format 
-			payload = JSON.parse(this.convertHexToAscii(payload))
-		}
 
 		if (txIdentifier == this.TXN_TYPE.PROJECT) {
 			let projectDoc: IProject = payload;

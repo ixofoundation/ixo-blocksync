@@ -32,19 +32,18 @@ export class Connection {
     }
 
     sendTransaction(txData: string) {
-        var url = 'http://' + this.chainUri + '//broadcast_tx_sync?tx=' + txData;
-
+        var url = 'http://' + this.chainUri + '/broadcast_tx_sync?tx=' + txData;
         return axios
             .get(url)
             .then(response => {
                 if (response.data.result) {
                     return response.data.result;
                 } else {
-                    throw new Error('Could not submit did');
+                    throw new Error('Could not submit did ' + JSON.stringify(response.data.error));
                 }
             })
             .catch(error => {
-                return '';
+                return error;
             });
     }
 

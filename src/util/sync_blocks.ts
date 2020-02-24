@@ -33,8 +33,6 @@ export class SyncBlocks {
 	performSyncing(conn: Connection) {
 		this.chainHandler.getChainInfo().then((chain: IChain) => {
 			conn.getLastBlock().then((block: any) => {
-				console.log("block: " + JSON.stringify(block));
-
 				if (!chain) {
 					this.initChainInfo(conn, false).then((chain: IChain) => {
 						this.startQueue(conn, chain);
@@ -82,10 +80,12 @@ export class SyncBlocks {
 		blockQueue.onBlock((result: BlockResult, event: NewBlockEvent) => {
 			this.chainHandler.setBlockHeight(result.getBlockHeight(), chain.chainId);
 			sync.message('Syncing block number ' + result.getBlockHeight());
-			if (result.getTransactions() != null) {
-				console.log('Block Result  ' + JSON.stringify(result.getTransactions()))
-				for (var i: number = 0; i < result.getTransactions().length; i++) {
-					if (result.getTransactionCode(i) == undefined || 0) {
+			//console.log('Syncing block number ' + JSON.stringify(result));
+
+			if (event.getTransactions() != null) {
+				console.log('Block Result  ' + JSON.stringify(event.getTransactions()))
+				for (var i: number = 0; i < event.getTransactions().length; i++) {
+					if (event.getTransactionCode(i) == undefined || 0) {
 						this.txnHandler.routeTransactions(event.block.getTransaction(i));
 					}
 				}
