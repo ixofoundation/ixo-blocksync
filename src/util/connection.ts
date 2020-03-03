@@ -39,11 +39,14 @@ export class Connection {
                 if (response.data.result) {
                     return response.data.result;
                 } else {
-                    throw new Error('Could not submit did ' + JSON.stringify(response.data.error));
+                    return response.data.error;
+
+                    //throw new Error('Could not submit did ' + response.data.error);
                 }
             })
             .catch(error => {
-                return error;
+                console.log(error)
+                return error.response.data.error;
             });
     }
 

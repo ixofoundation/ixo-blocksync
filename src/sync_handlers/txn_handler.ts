@@ -47,6 +47,19 @@ export class TransactionHandler {
 
 	}
 
+	checkNodeDid = (projectNodeDid: string): boolean => {
+        let nodeDidIncluded: boolean = false;
+        if (process.env.NODEDID_LIST != undefined) {
+            let nodeDids: string[] = (process.env.NODEDID_LIST.split(' '));
+			if (nodeDids.length === 0 || nodeDids.some(nodeDid => nodeDid === projectNodeDid)) {
+				nodeDidIncluded = true;
+			}
+        } else {
+			return true;
+		}
+        return nodeDidIncluded;
+    }
+
 	routeTransaction(txData: any) {
 
 
@@ -54,14 +67,16 @@ export class TransactionHandler {
 			// The payload is a string then it is in hex format 
 			txData = JSON.parse(this.convertHexToAscii(txData))
 		}
-
+		console.log('routeTransaction::: Found ' + JSON.stringify(txData));
 		let txIdentifier = txData.payload[0].type;
 		let payload = txData.payload[0].value;
-
+ ///// add node did check
 		if (txIdentifier == this.TXN_TYPE.PROJECT) {
 			let projectDoc: IProject = payload;
-			this.updateGlobalStats(this.TXN_TYPE.PROJECT, '', '', projectDoc.data.requiredClaims);
-			return this.projectSyncHandler.create(projectDoc);
+			if (this.checkNodeDid(projectDoc.data.nodeDid)){
+				this.updateGlobalStats(this.TXN_TYPE.PROJECT, '', '', projectDoc.data.requiredClaims);
+				return this.projectSyncHandler.create(projectDoc);
+			}
 		} else if (txIdentifier == this.TXN_TYPE.DID) {
 			let didDoc: IDid = {
 				did: payload.didDoc.did,

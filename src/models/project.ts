@@ -31,6 +31,7 @@ interface IData {
     serviceEndpoint: string;
     imageLink: string;
     founder: IFounder;
+    nodeDid: string
 }
 
 interface IIxo {
