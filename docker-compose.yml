@@ -21,7 +21,7 @@ services:
       options:
         max-size: "1m"
         max-file: "1"
-      
+
   block-sync-db:
     container_name: block-sync-db
     image: mongo
