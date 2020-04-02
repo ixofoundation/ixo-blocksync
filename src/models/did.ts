@@ -1,10 +1,11 @@
 export interface IDid {
-	did: string;
-	publicKey: string;
-	credentials?: ICredential[];
+  did: string;
+  publicKey: string;
+  credentials?: ICredential[];
 }
+
 export interface ICredential {
-	type: [string];
-	claim: {};
-	issuer: string;
+  type: [string];
+  claim: {};
+  issuer: string;
 }

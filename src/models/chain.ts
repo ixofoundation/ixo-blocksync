@@ -1,5 +1,4 @@
-
 export interface IChain {
-    chainId: string;
-    blockHeight: number;
+  chainId: string;
+  blockHeight: number;
 }
