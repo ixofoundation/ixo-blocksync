@@ -17,7 +17,7 @@ export class StatsSyncHandler {
 
   update = (stats: IStats) => {
     return new Promise((resolve: Function, reject: Function) => {
-      return StatsDB.update({}, stats, (err, res) => {
+      return StatsDB.updateOne({}, stats, (err, res) => {
         if (err) {
           reject(err);
         } else {

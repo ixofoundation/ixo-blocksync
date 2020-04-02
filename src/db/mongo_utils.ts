@@ -19,6 +19,9 @@ export default class MongoUtils {
   connectToDb() {
     var self = this;
     require('mongoose').Promise = global.Promise;
+    mongoose.set('useNewUrlParser', true);
+    mongoose.set('useCreateIndex', true);
+    mongoose.set('useUnifiedTopology', true);
     mongoose.connect(MONGODB_URI || '');
     let db = mongoose.connection;
     db.on('error', console.error.bind(console, 'Mongo connection error: Cannot start'));
