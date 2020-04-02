@@ -75,13 +75,33 @@ export class BlockResult {
     return this.blockResult.height;
   }
 
-  // getTransactions() {
-  //     return this.blockResult.results.DeliverTx;
-  // }
+  getEndBlockEvents(): Array<any> {
+    return this.blockResult.results.end_block.events || [];
+  }
 
-  // getTransactionCode(txnNumber: number): string {
-  //     return (this.blockResult.results.DeliverTx[txnNumber].code);
-  // }
+  getEndBlockEvent(i): any {
+    return this.blockResult.results.end_block.events[i];
+  }
+
+  getBeginBlockEvents(): Array<any> {
+    return this.blockResult.results.begin_block.events || [];
+  }
+
+  getBeginBlockEvent(i): any {
+    return this.blockResult.results.begin_block.events[i];
+  }
+
+  getTransactionCount(): any {
+    return this.blockResult.results.deliver_tx ? this.blockResult.results.deliver_tx.length : 0;
+  }
+
+  getDeliverTxEvents(tx: number): Array<any> {
+    return this.blockResult.results.deliver_tx[tx].events;
+  }
+
+  getDeliverTxEvent(tx: number, i): any {
+    return this.blockResult.results.deliver_tx[tx].events[i];
+  }
 }
 
 export class BlockQueue {

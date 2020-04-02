@@ -6,6 +6,7 @@ import * as compression from 'compression';
 import {ProjectHandler} from './handlers/project_handler';
 import {DidHandler} from './handlers/did_handler';
 import {StatsHandler} from './handlers/stats_handler';
+import {EventHandler} from "./handlers/event_handler";
 import {Connection} from './util/connection';
 
 
@@ -17,7 +18,7 @@ class App {
   constructor() {
     this.express = express();
     this.middleware();
-    this.routes(new ProjectHandler(), new DidHandler(), new StatsHandler());
+    this.routes(new ProjectHandler(), new DidHandler(), new EventHandler(), new StatsHandler());
   }
 
   // Configure Express middleware.
@@ -30,7 +31,8 @@ class App {
   }
 
   // Configure API endpoints.
-  private routes(projectHandler: ProjectHandler, didHandler: DidHandler, statsHandler: StatsHandler): void {
+  private routes(projectHandler: ProjectHandler, didHandler: DidHandler,
+                 eventHandler: EventHandler, statsHandler: StatsHandler): void {
     // GET REQUESTS
     this.express.get('/', (req, res) => {
       res.send('API is running');
@@ -65,6 +67,14 @@ class App {
     this.express.get('/api/did/getByDid/:did', (req, res, next) => {
       didHandler.getDidDocByDid(req.params.did).then((didDoc: any) => {
         res.send(didDoc);
+      }).catch((err) => {
+        next(err);
+      });
+    });
+
+    this.express.get('/api/event/getEventByType/:type', (req, res, next) => {
+      eventHandler.getEventsByType(req.params.type).then((event: any) => {
+        res.send(event);
       }).catch((err) => {
         next(err);
       });
