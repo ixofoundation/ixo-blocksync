@@ -26,7 +26,7 @@ export default class MongoUtils {
     let db = mongoose.connection;
     db.on('error', console.error.bind(console, 'Mongo connection error: Cannot start'));
     db.once('open', function () {
-      console.log('MongDB connected!');
+      console.log('MongoDB connected!');
 
       self.server.listen(self.port);
       self.server.on('error', self.onError);
