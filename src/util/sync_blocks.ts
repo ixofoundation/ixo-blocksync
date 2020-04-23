@@ -82,7 +82,6 @@ export class SyncBlocks {
     blockQueue.onBlock((result: BlockResult, event: NewBlockEvent) => {
       this.chainHandler.setBlockHeight(result.getBlockHeight(), chain.chainId);
       sync.message('Syncing block number ' + result.getBlockHeight());
-      //console.log('Syncing block number ' + JSON.stringify(result));
 
       if (event.getTransactions() != null) {
         console.log('Block Result  ' + JSON.stringify(event.getTransactions()));
