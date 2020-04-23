@@ -84,7 +84,7 @@ export class SyncBlocks {
       sync.message('Syncing block number ' + result.getBlockHeight());
 
       if (event.getTransactions() != null) {
-        console.log('Block Result  ' + JSON.stringify(event.getTransactions()));
+        // console.log('Block Result  ' + JSON.stringify(event.getTransactions()));
         for (var i: number = 0; i < event.getTransactions().length; i++) {
           if (event.getTransactionCode(i) == undefined || 0) {
             this.txnHandler.routeTransactions(event.block.getTransaction(i));
