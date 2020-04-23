@@ -22,6 +22,7 @@ export default class MongoUtils {
     mongoose.set('useNewUrlParser', true);
     mongoose.set('useCreateIndex', true);
     mongoose.set('useUnifiedTopology', true);
+    mongoose.set('useFindAndModify', false);
     mongoose.connect(MONGODB_URI || '');
     let db = mongoose.connection;
     db.on('error', console.error.bind(console, 'Mongo connection error: Cannot start'));
