@@ -5,6 +5,7 @@ import {IChain} from '../models/chain';
 import {TransactionHandler} from '../sync_handlers/txn_handler';
 import {StatsSyncHandler} from '../sync_handlers/stats_sync_handler';
 import {IStats} from '../models/stats';
+import {EventHandler} from "../sync_handlers/event_handler";
 
 const CLI = require('clui'),
   Spinner = CLI.Spinner;
@@ -12,6 +13,7 @@ const CLI = require('clui'),
 export class SyncBlocks {
   private chainHandler = new ChainHandler();
   private txnHandler = new TransactionHandler();
+  private eventHandler = new EventHandler();
   private statsHandler = new StatsSyncHandler();
 
   startSync(chainUri: string) {
@@ -81,15 +83,35 @@ export class SyncBlocks {
 
     blockQueue.onBlock((result: BlockResult, event: NewBlockEvent) => {
       this.chainHandler.setBlockHeight(result.getBlockHeight(), chain.chainId);
-      sync.message('Syncing block number ' + result.getBlockHeight());
-      //console.log('Syncing block number ' + JSON.stringify(result));
+      const height = result.getBlockHeight();
+      sync.message('Syncing block number ' + height);
 
+      // Route transactions
       if (event.getTransactions() != null) {
-        console.log('Block Result  ' + JSON.stringify(event.getTransactions()));
+        // console.log('Block Result  ' + JSON.stringify(event.getTransactions()));
         for (var i: number = 0; i < event.getTransactions().length; i++) {
           if (event.getTransactionCode(i) == undefined || 0) {
             this.txnHandler.routeTransactions(event.block.getTransaction(i));
           }
+        }
+      }
+
+      // Route events from deliver_tx
+      if (result.getBeginBlockEvents() != null) {
+        for (var i: number = 0; i < result.getTransactionCount(); i++) {
+          for (var j: number = 0; j < result.getDeliverTxEvents(i).length; j++) {
+            this.eventHandler.routeEvent(result.getDeliverTxEvent(i, j), height, 'deliver_tx', `${i},${j}`);
+          }
+        }
+
+        // Route events from begin_block
+        for (var i: number = 0; i < result.getBeginBlockEvents().length; i++) {
+          this.eventHandler.routeEvent(result.getBeginBlockEvent(i), height, 'begin_block', `${i}`);
+        }
+
+        // Route events from end_block
+        for (var i: number = 0; i < result.getEndBlockEvents().length; i++) {
+          this.eventHandler.routeEvent(result.getEndBlockEvent(i), height, 'end_block', `${i}`);
         }
       }
     });

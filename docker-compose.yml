@@ -9,6 +9,8 @@ services:
       - CHAIN_URI=blockchain:46657
       - BC_REST=http://rest:1317
       - NODEDID_LIST=
+      - IGNORE_EVENTS="message,rewards,proposer_reward,commission,mint,transfer"
+      # - ONLY_EVENTS=""
       restart: always
     ports:
       - "8080:8080"
@@ -21,7 +23,7 @@ services:
       options:
         max-size: "1m"
         max-file: "1"
-      
+
   block-sync-db:
     container_name: block-sync-db
     image: mongo

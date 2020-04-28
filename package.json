@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "tsc && node build/dist/server.js",
+    "dropdb": "tsc && node build/dist/dropdb.js",
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
