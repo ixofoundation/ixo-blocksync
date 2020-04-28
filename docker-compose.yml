@@ -11,7 +11,7 @@ services:
       - NODEDID_LIST=
       - IGNORE_EVENTS="message,rewards,proposer_reward,commission,mint,transfer"
       # - ONLY_EVENTS=""
-      restart: always
+    restart: always
     ports:
       - "8080:8080"
     links:
