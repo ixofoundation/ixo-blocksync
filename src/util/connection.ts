@@ -18,7 +18,7 @@ export class Connection {
       self.getLastBlock().then((block: any) => {
         self._isConnected = true;
         clearTimeout(self._confirmConnectionTimer);
-        console.log("block: " + JSON.stringify(block));
+        // console.log("block: " + JSON.stringify(block));
       })
         .catch((error: any) => {
           console.log("error: " + error);

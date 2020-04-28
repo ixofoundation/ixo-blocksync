@@ -44,7 +44,7 @@ export class TransactionHandler {
 
     result = result.then(() => {
       let buf = Buffer.from(txData, 'base64');
-      console.log('TX DATA: ' + buf.toString());
+      // console.log('TX DATA: ' + buf.toString());
       return this.routeTransaction(JSON.parse(buf.toString()));
     });
 
@@ -65,12 +65,13 @@ export class TransactionHandler {
 
   routeTransaction(txData: any) {
 
-
     if (typeof txData == 'string') {
       // The payload is a string then it is in hex format
       txData = JSON.parse(this.convertHexToAscii(txData))
     }
-    console.log('routeTransaction::: Found ' + JSON.stringify(txData));
+
+    // console.log('routeTransaction::: Found ' + JSON.stringify(txData));
+
     let txIdentifier = txData.payload[0].type;
     let payload = txData.payload[0].value;
     ///// add node did check
