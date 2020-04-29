@@ -14,7 +14,6 @@ echo "* IXO BLOCK SYNC                  *"
 echo "***********************************"
 echo ""
 echo "Build IXO Block Sync"
-$ROOT_DIR/node_modules/typescript/bin/tsc
 docker build -t trustlab/ixo-blocksync $ROOT_DIR
 
 docker-compose up --no-start
