@@ -9,14 +9,6 @@ reset=`tput sgr0`
 CURRENT_DIR=`dirname $0`
 ROOT_DIR=$CURRENT_DIR/..
 
-echo "***********************************"
-echo "* IXO BLOCK SYNC                  *"
-echo "***********************************"
-echo ""
-echo "Build IXO Block Sync"
-$ROOT_DIR/node_modules/typescript/bin/tsc
-docker build -t trustlab/ixo-blocksync $ROOT_DIR
-
 docker-compose up --no-start
 docker-compose start block-sync-db
 
