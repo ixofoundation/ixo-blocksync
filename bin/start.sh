@@ -19,12 +19,12 @@ docker-compose start block-sync-db
 
 # attempting to wait for mongodb to be ready
 $ROOT_DIR/bin/wait-for-service.sh block-sync-db 'waiting for connections on port' 10
-docker-compose start ixo-blocksync
+docker-compose start block-sync
 
 echo -n "Starting IXO Block Sync ..."
 sleep 5
 echo ${green} "done"
-docker-compose logs --tail 13 ixo-blocksync
+docker-compose logs --tail 13 block-sync
 echo ""
 echo "***********************************"
 echo "* IXO BLOCK SYNC COMPLETE          *"
