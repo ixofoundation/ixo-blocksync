@@ -12,13 +12,13 @@ export class EventHandler {
       return;
     }
 
-    console.log('routeEvent::: Found ' + JSON.stringify(event));
+    // console.log('routeEvent::: Found ' + JSON.stringify(event));
     let eventType = event.type;
     let eventAttributes = event.attributes;
 
     for (let i: number = 0; i < eventAttributes.length; i++) {
-      eventAttributes[i].key = Buffer.from(eventAttributes[i].key, 'base64').toString();
-      eventAttributes[i].value = Buffer.from(eventAttributes[i].value, 'base64').toString();
+      eventAttributes[i].key = eventAttributes[i].key ? Buffer.from(eventAttributes[i].key, 'base64').toString() : "";
+      eventAttributes[i].value = eventAttributes[i].value ? Buffer.from(eventAttributes[i].value, 'base64').toString() : "";
     }
 
     let toCreate: IEvent = {

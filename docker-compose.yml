@@ -2,15 +2,15 @@ version: "2"
 services:
   block-sync:
     container_name: block-sync
-    image: trustlab/ixo-block-sync:latest
+    image: trustlab/ixo-blocksync:latest
     environment:
       - PORT=8080
       - MONGODB_URI=mongodb://block-sync-db:27017/block-sync
       - CHAIN_URI=blockchain:46657
       - BC_REST=http://rest:1317
       - NODEDID_LIST=
-      - IGNORE_EVENTS="message,rewards,proposer_reward,commission,mint,transfer"
-      # - ONLY_EVENTS=""
+      - IGNORE_EVENTS=message,rewards,proposer_reward,commission,mint,transfer
+      # - ONLY_EVENTS=
     restart: always
     ports:
       - "8080:8080"
