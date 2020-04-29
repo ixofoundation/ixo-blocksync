@@ -1,7 +1,11 @@
 #!/bin/bash
-#git clone https://github.com/ixofoundation/ixo-blocksync.git
-#cd ixo-blocksync
-#green=`tput setaf 2`
+
+# git clone https://github.com/ixofoundation/ixo-blocksync.git
+# cd ixo-blocksync
+
+green=`tput setaf 2`
+reset=`tput sgr0`
+
 echo "***********************************"
 echo "* IXO BLOCK SYNC                  *"
 echo "***********************************"
@@ -23,7 +27,7 @@ docker-compose start block-sync
 
 echo -n "Starting IXO Block Sync ..."
 sleep 5
-echo ${green} "done"
+echo ${green} "done" ${reset}
 docker-compose logs --tail 13 block-sync
 echo ""
 echo "***********************************"
