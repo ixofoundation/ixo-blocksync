@@ -54,6 +54,20 @@ class App {
       });
     });
 
+    this.express.get('/api/project/shields/status/:projectDid', (req, res, next) => {
+      projectHandler.listProjectByProjectDid(req.params.projectDid).then((projectData: any) => {
+        res.send({
+          "schemaVersion": 1,
+          "label": "status",
+          "message": projectData.status ? projectData.status : "null",
+          "color": "blue",
+          "cacheSeconds": 300
+        });
+      }).catch((err) => {
+        next(err);
+      });
+    });
+
     this.express.get('/api/project/getProjectAccounts/:projectDid', (req, res, next) => {
       projectHandler.getProjectAccountsFromChain(req.params.projectDid)
         .then((response: any) => {
