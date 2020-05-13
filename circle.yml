@@ -1,0 +1,15 @@
+machine:
+  environment:
+    MONGODB_URI: mongodb://localhost:27017
+    PORT: 8080
+    CHAIN_URI: 35.225.6.178:46657
+  node:
+    version: 9.3.0
+test:
+  override:
+    - echo "test"
+deployment:
+  staging:
+    branch: master
+    heroku:
+      appname: ixo-block-sync
