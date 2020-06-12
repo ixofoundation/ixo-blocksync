@@ -88,7 +88,7 @@ export class ProjectHandler {
 
   getProjectAccountsFromChain = (projectDid: string) => {
     return new Promise((resolve: Function, reject: Function) => {
-      let rest = (process.env.BC_REST || 'localhost:1317');
+      let rest = 'http://' + (process.env.BC_REST || 'localhost:1317');
       axios.get(rest + '/projectAccounts/' + projectDid)
         .then((response) => {
           if (response.status == 200) resolve(response.data);

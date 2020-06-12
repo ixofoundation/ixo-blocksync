@@ -103,8 +103,8 @@ class App {
     });
 
     this.express.get('/api/blockchain/:tx', (req, res, next) => {
-      let blockChainConnection = new Connection(this.express.get('chainURL'));
-      blockChainConnection.sendTransaction(req.params.tx).then((result: any) => {
+      let blockChainConnection = new Connection(this.express.get('chainURL'), this.express.get('restURL'));
+      blockChainConnection.sendTransactionRest(req.params.tx, true).then((result: any) => {
         res.send(result);
       }).catch((err) => {
         next(err);
