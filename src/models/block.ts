@@ -132,9 +132,9 @@ export class BlockQueue {
       if (noBlocks) {
         await this.sleep(500);
       }
-      await this.conn.getBlockResultRpc(this.curBlock).then((blockResult) => {
+      await this.conn.getBlockResult(this.curBlock).then((blockResult) => {
         if (blockResult) {
-          this.conn.getBlockRpc(this.curBlock)
+          this.conn.getBlock(this.curBlock)
             .then((block) => {
               this.callback(new BlockResult(blockResult), new NewBlockEvent(block));
             });

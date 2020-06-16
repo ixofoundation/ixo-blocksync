@@ -2,32 +2,26 @@ import axios, {AxiosPromise} from 'axios';
 
 export class Connection {
   THRESHHOLD_FOR_WEBSOCKET = 10;
-  chainURL: string;
-  restURL: string;
+  chainUri: string;
   _isConnected: boolean;
   _confirmConnectionTimer: NodeJS.Timer;
 
-  constructor(chainURL: string, restURL: string) {
+  constructor(chainUri: string) {
     this._isConnected = false;
-    this.chainURL = chainURL;
-    this.restURL = restURL;
+    this.chainUri = chainUri;
     this.confirmConnection();
   }
 
   confirmConnection() {
     const self = this;
     this._confirmConnectionTimer = setInterval(function () {
-      self.getLastBlockRpc()
+      self.getLastBlock()
         .then((block: any) => {
-          self.getNodeInfoRest().then((block: any) => {
-            self._isConnected = true;
-            clearTimeout(self._confirmConnectionTimer);
-          }).catch((error: any) => {
-            console.log("error (rest): " + error);
-          });
+          self._isConnected = true;
+          clearTimeout(self._confirmConnectionTimer);
         })
         .catch((error: any) => {
-          console.log("error (rpc): " + error);
+          console.log("error: " + error);
         });
     }, 2000)
   }
@@ -36,8 +30,8 @@ export class Connection {
     return this._isConnected;
   }
 
-  sendTransactionRpc(txData: string) {
-    const url = 'http://' + this.chainURL + '/broadcast_tx_sync?tx=' + txData;
+  sendTransaction(txData: string) {
+    const url = 'http://' + this.chainUri + '/broadcast_tx_sync?tx=' + txData;
     return axios
       .get(url)
       .then(response => {
@@ -53,29 +47,8 @@ export class Connection {
       });
   }
 
-  sendTransactionRest(txData: string, autoGas: boolean) {
-    const broadcastFormat = {
-      "mode": "sync",
-      "tx": txData
-    }
-    const url = 'http://' + this.restURL + (autoGas ? '/txs_auto_gas' : '/txs');
-    return axios
-      .post(url, JSON.stringify(broadcastFormat))
-      .then(response => {
-        if (response.data) {
-          return response.data;
-        } else {
-          return response;
-        }
-      })
-      .catch(error => {
-        console.log(error);
-        return error.response.data.error;
-      });
-  }
-
-  getBlockResultRpc(height: Number): AxiosPromise {
-    let url = 'http://' + this.chainURL + '/block_results?height=';
+  getBlockResult(height: Number): AxiosPromise {
+    let url = 'http://' + this.chainUri + '/block_results?height=';
     if (height > 0) {
       url = url + height;
     }
@@ -93,8 +66,8 @@ export class Connection {
       });
   }
 
-  getBlockRpc(height: Number): Promise<any> {
-    let url = 'http://' + this.chainURL + '/block?height=';
+  getBlock(height: Number): Promise<any> {
+    let url = 'http://' + this.chainUri + '/block?height=';
     if (height > 0) {
       url = url + height;
     }
@@ -115,27 +88,12 @@ export class Connection {
     })
   }
 
-  getNodeInfoRest(): Promise<any> {
-    let url = 'http://' + this.restURL + '/node_info';
-    return new Promise((resolve: Function, reject: Function) => {
-      axios
-        .get(url)
-        .then(response => {
-          resolve(response);
-        })
-        .catch(error => {
-          console.log("\n***\n***\nerror: " + error);
-          reject(error);
-        });
-    })
+  getLastBlock() {
+    return this.getBlock(-1);
   }
 
-  getLastBlockRpc() {
-    return this.getBlockRpc(-1);
-  }
-
-  getLastBlockHeightRpc(): AxiosPromise {
-    return this.getLastBlockRpc()
+  getLastBlockHeight(): AxiosPromise {
+    return this.getLastBlock()
       .then((block: any) => {
         return block.header.height;
       })
@@ -146,7 +104,7 @@ export class Connection {
   }
 
   subscribeToChain(callback: Function) {
-    var ws = new WebSocket('ws://' + this.chainURL + '/websocket');
+    var ws = new WebSocket('ws://' + this.chainUri + '/websocket');
     ws.onmessage = event => {
       callback(JSON.parse(event.data.result.block));
     };

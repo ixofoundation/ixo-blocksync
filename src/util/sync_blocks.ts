@@ -16,8 +16,8 @@ export class SyncBlocks {
   private eventHandler = new EventHandler();
   private statsHandler = new StatsSyncHandler();
 
-  startSync(chainURL: string, restURL: string) {
-    let conn = new Connection(chainURL, restURL);
+  startSync(chainUri: string) {
+    let conn = new Connection(chainUri);
     const self = this;
     var confirmationInterval = setInterval(function () {
       var isConnected = conn.isConnected();
@@ -35,7 +35,7 @@ export class SyncBlocks {
 
   performSyncing(conn: Connection) {
     this.chainHandler.getChainInfo().then((chain: IChain) => {
-      conn.getLastBlockRpc().then((block: any) => {
+      conn.getLastBlock().then((block: any) => {
         if (!chain) {
           this.initChainInfo(conn, false).then((chain: IChain) => {
             this.startQueue(conn, chain);
@@ -62,7 +62,7 @@ export class SyncBlocks {
 
   initChainInfo(connection: Connection, isUpdate: boolean): Promise<IChain> {
     return new Promise((resolve: Function, reject: Function) => {
-      connection.getLastBlockRpc()
+      connection.getLastBlock()
         .then((block: any) => {
           let chain: IChain = {chainId: block.header.chain_id, blockHeight: 0};
           if (isUpdate) {
