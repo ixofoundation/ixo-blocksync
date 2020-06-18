@@ -91,8 +91,11 @@ export class ProjectHandler {
       let rest = (process.env.BC_REST || 'localhost:1317');
       axios.get(rest + '/projectAccounts/' + projectDid)
         .then((response) => {
-          if (response.status == 200) resolve(response.data);
-          reject(response.statusText);
+          if (response.status == 200) {
+            resolve(response.data);
+          } else {
+            reject(response.statusText);
+          }
         })
         .catch((reason) => {
           reject(reason);
