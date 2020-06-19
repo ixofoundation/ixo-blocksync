@@ -6,8 +6,8 @@ services:
     environment:
       - PORT=8080
       - MONGODB_URI=mongodb://block-sync-db:27017/block-sync
-      - CHAIN_URI=blockchain:46657
-      - BC_REST=http://rest:1317
+      - CHAIN_URI=BLOCKCHAIN:46657  # Configure this
+      - BC_REST=http://REST:1317    # Configure this
       - NODEDID_LIST=
       - IGNORE_EVENTS=message,rewards,proposer_reward,commission,mint,transfer
       # - ONLY_EVENTS=
@@ -16,8 +16,6 @@ services:
       - "8080:8080"
     links:
       - block-sync-db
-      - blockchain
-      - rest
     logging:
       driver: "json-file"
       options:

@@ -2,7 +2,7 @@
 Syncs all the public info from the ixo blockchain to mongodb
 
 ## Run from Source
-Configure `.env-example` and then:
+Copy `.env-example` to `.env` and configure, and then:
 ```
 npm install
 npm start
