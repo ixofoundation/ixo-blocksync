@@ -119,11 +119,9 @@ class App {
     this.express.get('/api/sign_data/:msg', (req, res, next) => {
       authHandler.getSignData(req.params.msg)
         .then((response: any) => {
-          console.log("OK " + response)
           res.send(response);
         })
         .catch((error) => {
-          console.log("ERROR " + error)
           res.send(error);
         })
     });
