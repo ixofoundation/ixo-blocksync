@@ -12,8 +12,8 @@ export class AuthHandler {
             reject(response.statusText);
           }
         })
-        .catch((reason) => {
-          reject(reason);
+        .catch((error) => {
+          reject(error.response.data.error);
         });
     })
   }
