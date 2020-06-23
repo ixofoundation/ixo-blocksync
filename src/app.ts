@@ -8,6 +8,7 @@ import {DidHandler} from './handlers/did_handler';
 import {StatsHandler} from './handlers/stats_handler';
 import {EventHandler} from "./handlers/event_handler";
 import {Connection} from './util/connection';
+import {AuthHandler} from './handlers/auth_handler';
 
 
 class App {
@@ -18,7 +19,10 @@ class App {
   constructor() {
     this.express = express();
     this.middleware();
-    this.routes(new ProjectHandler(), new DidHandler(), new EventHandler(), new StatsHandler());
+    this.routes(
+      new AuthHandler(), new ProjectHandler(), new DidHandler(),
+      new EventHandler(), new StatsHandler()
+    );
   }
 
   // Configure Express middleware.
@@ -31,8 +35,9 @@ class App {
   }
 
   // Configure API endpoints.
-  private routes(projectHandler: ProjectHandler, didHandler: DidHandler,
-                 eventHandler: EventHandler, statsHandler: StatsHandler): void {
+  private routes(authHandler: AuthHandler, projectHandler: ProjectHandler,
+                 didHandler: DidHandler, eventHandler: EventHandler,
+                 statsHandler: StatsHandler): void {
     // GET REQUESTS
     this.express.get('/', (req, res) => {
       res.send('API is running');
@@ -109,6 +114,16 @@ class App {
       }).catch((err) => {
         next(err);
       });
+    });
+
+    this.express.get('/api/sign_data/:msg', (req, res, next) => {
+      authHandler.getSignData(req.params.msg)
+        .then((response: any) => {
+          res.send(response);
+        })
+        .catch((error) => {
+          res.send(error);
+        })
     });
 
     this.express.use(logger.after);

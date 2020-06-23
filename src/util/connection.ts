@@ -15,25 +15,23 @@ export class Connection {
   confirmConnection() {
     const self = this;
     this._confirmConnectionTimer = setInterval(function () {
-      self.getLastBlock().then((block: any) => {
-        self._isConnected = true;
-        clearTimeout(self._confirmConnectionTimer);
-        // console.log("block: " + JSON.stringify(block));
-      })
+      self.getLastBlock()
+        .then((block: any) => {
+          self._isConnected = true;
+          clearTimeout(self._confirmConnectionTimer);
+        })
         .catch((error: any) => {
           console.log("error: " + error);
         });
-
     }, 2000)
   }
 
   isConnected() {
-    // console.log("_isConnected: " + this._isConnected)
     return this._isConnected;
   }
 
   sendTransaction(txData: string) {
-    var url = 'http://' + this.chainUri + '/broadcast_tx_sync?tx=' + txData;
+    const url = 'http://' + this.chainUri + '/broadcast_tx_sync?tx=' + txData;
     return axios
       .get(url)
       .then(response => {
@@ -41,8 +39,6 @@ export class Connection {
           return response.data.result;
         } else {
           return response.data.error;
-
-          //throw new Error('Could not submit did ' + response.data.error);
         }
       })
       .catch(error => {
@@ -52,11 +48,10 @@ export class Connection {
   }
 
   getBlockResult(height: Number): AxiosPromise {
-    var url = 'http://' + this.chainUri + '/block_results?height=';
+    let url = 'http://' + this.chainUri + '/block_results?height=';
     if (height > 0) {
       url = url + height;
     }
-
     return axios
       .get(url)
       .then(response => {
@@ -72,11 +67,10 @@ export class Connection {
   }
 
   getBlock(height: Number): Promise<any> {
-    var url = 'http://' + this.chainUri + '/block?height=';
+    let url = 'http://' + this.chainUri + '/block?height=';
     if (height > 0) {
       url = url + height;
     }
-
     return new Promise((resolve: Function, reject: Function) => {
       axios
         .get(url)
@@ -99,14 +93,14 @@ export class Connection {
   }
 
   getLastBlockHeight(): AxiosPromise {
-    return this.getLastBlock().then((block: any) => {
-      return block.header.height;
-    })
+    return this.getLastBlock()
+      .then((block: any) => {
+        return block.header.height;
+      })
       .catch((error: any) => {
         console.log(error);
         return -1;
       });
-
   }
 
   subscribeToChain(callback: Function) {

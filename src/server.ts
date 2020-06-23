@@ -6,7 +6,7 @@ import {SyncBlocks} from './util/sync_blocks';
 
 // Set the port
 const port = (process.env.PORT || 8080);
-const chainURL = (process.env.CHAIN_URI || 'localhost:46657');
+const chainURL = (process.env.CHAIN_URI || 'localhost:26657');
 
 App.set('port', port);
 App.set('chainURL', chainURL);
