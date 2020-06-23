@@ -121,8 +121,8 @@ class App {
         .then((response: any) => {
           res.send(response);
         })
-        .catch((error) => {
-          res.send(error);
+        .catch((err) => {
+          next(err);
         })
     });
 
