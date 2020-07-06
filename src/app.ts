@@ -116,8 +116,8 @@ class App {
       });
     });
 
-    this.express.get('/api/sign_data/:msg', (req, res, next) => {
-      authHandler.getSignData(req.params.msg)
+    this.express.post('/api/sign_data', (req, res, next) => {
+      authHandler.getSignData(req.body.msg, req.body.pub_key)
         .then((response: any) => {
           res.send(response);
         })

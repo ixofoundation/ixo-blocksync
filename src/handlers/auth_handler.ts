@@ -1,10 +1,10 @@
 import axios from "axios";
 
 export class AuthHandler {
-  getSignData = (msgHex: string) => {
+  getSignData = (msgHex: string, pubKey: string) => {
     return new Promise((resolve: Function, reject: Function) => {
       let rest = (process.env.BC_REST || 'localhost:1317');
-      axios.get(rest + '/sign_data/' + msgHex)
+      axios.post(rest + '/sign_data', {msg: msgHex, pub_key: pubKey})
         .then((response) => {
           if (response.status == 200) {
             resolve(response.data);
