@@ -6,10 +6,12 @@ import {SyncBlocks} from './util/sync_blocks';
 
 // Set the port
 const port = (process.env.PORT || 8080);
-const chainURL = (process.env.CHAIN_URI || 'localhost:26657');
+const chainUri = (process.env.CHAIN_URI || 'http://localhost:26657');
+const bcRest = (process.env.BC_REST || 'http://localhost:1317');
 
 App.set('port', port);
-App.set('chainURL', chainURL);
+App.set('chainUri', chainUri);
+App.set('bcRest', bcRest);
 const server = http.createServer(App);
 export var io = require('socket.io')(server);
 
@@ -23,6 +25,4 @@ mongoDB.connectToDb();
 
 let syncBlocks = new SyncBlocks();
 
-syncBlocks.startSync(chainURL);
-
-
+syncBlocks.startSync(chainUri, bcRest);

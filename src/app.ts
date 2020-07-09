@@ -107,9 +107,12 @@ class App {
       });
     });
 
-    this.express.get('/api/blockchain/:tx', (req, res, next) => {
-      let blockChainConnection = new Connection(this.express.get('chainURL'));
-      blockChainConnection.sendTransaction(req.params.tx).then((result: any) => {
+    this.express.post('/api/blockchain/txs', (req, res, next) => {
+      const bcConn = new Connection(
+        this.express.get('chainUri'),
+        this.express.get('bcRest')
+      );
+      bcConn.sendTransaction(req.body).then((result: any) => {
         res.send(result);
       }).catch((err) => {
         next(err);

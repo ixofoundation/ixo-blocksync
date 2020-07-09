@@ -6,6 +6,7 @@ import {TransactionHandler} from '../sync_handlers/txn_handler';
 import {StatsSyncHandler} from '../sync_handlers/stats_sync_handler';
 import {IStats} from '../models/stats';
 import {EventHandler} from "../sync_handlers/event_handler";
+import {AuthHandler} from "../handlers/auth_handler";
 
 const CLI = require('clui'),
   Spinner = CLI.Spinner;
@@ -15,14 +16,14 @@ export class SyncBlocks {
   private txnHandler = new TransactionHandler();
   private eventHandler = new EventHandler();
   private statsHandler = new StatsSyncHandler();
+  private authHandler = new AuthHandler();
 
-  startSync(chainUri: string) {
-    let conn = new Connection(chainUri);
+  startSync(chainUri: string, bcRest: string) {
+    const conn = new Connection(chainUri, bcRest);
     const self = this;
-    var confirmationInterval = setInterval(function () {
-      var isConnected = conn.isConnected();
-      console.log("Blockchain CONNECTED: " + isConnected);
-      if (isConnected) {
+    const confirmationInterval = setInterval(function () {
+      console.log("Blockchain CONNECTED: " + conn.isConnected());
+      if (conn.isConnected()) {
         clearTimeout(confirmationInterval);
         self.performSyncing(conn);
       }
@@ -64,7 +65,7 @@ export class SyncBlocks {
     return new Promise((resolve: Function, reject: Function) => {
       connection.getLastBlock()
         .then((block: any) => {
-          let chain: IChain = {chainId: block.header.chain_id, blockHeight: 0};
+          const chain: IChain = {chainId: block.header.chain_id, blockHeight: 0};
           if (isUpdate) {
             resolve(this.chainHandler.update(chain));
           } else {
@@ -78,8 +79,8 @@ export class SyncBlocks {
   }
 
   startQueue(connection: Connection, chain: IChain) {
-    let blockQueue = new BlockQueue(connection, chain.blockHeight);
-    var sync = new Spinner('Syncing Blocks...  ', ['⣾', '⣽', '⣻', '⢿', '⡿', '⣟', '⣯', '⣷']);
+    const blockQueue = new BlockQueue(connection, chain.blockHeight);
+    const sync = new Spinner('Syncing Blocks...  ', ['⣾', '⣽', '⣻', '⢿', '⡿', '⣟', '⣯', '⣷']);
 
     blockQueue.onBlock((result: BlockResult, event: NewBlockEvent) => {
       this.chainHandler.setBlockHeight(result.getBlockHeight(), chain.chainId);
@@ -89,28 +90,34 @@ export class SyncBlocks {
       // Route transactions
       if (event.getTransactions() != null) {
         // console.log('Block Result  ' + JSON.stringify(event.getTransactions()));
-        for (var i: number = 0; i < event.getTransactions().length; i++) {
+        for (let i: number = 0; i < event.getTransactions().length; i++) {
           if (event.getTransactionCode(i) == undefined || 0) {
-            this.txnHandler.routeTransactions(event.block.getTransaction(i));
+            this.authHandler.decodeTx(event.block.getTransaction(i))
+              .then((response: any) => {
+                this.txnHandler.routeTransaction(response.result);
+              })
+              .catch((err) => {
+                throw(err);
+              })
           }
         }
       }
 
       // Route events from deliver_tx
       if (result.getBeginBlockEvents() != null) {
-        for (var i: number = 0; i < result.getTransactionCount(); i++) {
+        for (let i: number = 0; i < result.getTransactionCount(); i++) {
           for (var j: number = 0; j < result.getDeliverTxEvents(i).length; j++) {
             this.eventHandler.routeEvent(result.getDeliverTxEvent(i, j), height, 'deliver_tx', `${i},${j}`);
           }
         }
 
         // Route events from begin_block
-        for (var i: number = 0; i < result.getBeginBlockEvents().length; i++) {
+        for (let i: number = 0; i < result.getBeginBlockEvents().length; i++) {
           this.eventHandler.routeEvent(result.getBeginBlockEvent(i), height, 'begin_block', `${i}`);
         }
 
         // Route events from end_block
-        for (var i: number = 0; i < result.getEndBlockEvents().length; i++) {
+        for (let i: number = 0; i < result.getEndBlockEvents().length; i++) {
           this.eventHandler.routeEvent(result.getEndBlockEvent(i), height, 'end_block', `${i}`);
         }
       }
