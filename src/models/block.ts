@@ -127,23 +127,23 @@ export class BlockQueue {
 
   async start() {
     this.started = true;
-    var noBlocks = false;
+    let noBlocks = false;
     while (this.started) {
       if (noBlocks) {
         await this.sleep(500);
       }
-      await this.conn.getBlockResult(this.curBlock).then((blockResult) => {
-        if (blockResult) {
-          this.conn.getBlock(this.curBlock)
-            .then((block) => {
-              this.callback(new BlockResult(blockResult), new NewBlockEvent(block));
-            });
-
-          ++this.curBlock;
-        } else {
-          noBlocks = true;
-        }
-      });
+      await this.conn.getBlockResult(this.curBlock)
+        .then((blockResult) => {
+          if (blockResult) {
+            this.conn.getBlock(this.curBlock)
+              .then((block) => {
+                this.callback(new BlockResult(blockResult), new NewBlockEvent(block));
+              });
+            ++this.curBlock;
+          } else {
+            noBlocks = true;
+          }
+        });
     }
   }
 

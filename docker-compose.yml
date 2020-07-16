@@ -6,9 +6,8 @@ services:
     environment:
       - PORT=8080
       - MONGODB_URI=mongodb://block-sync-db:27017/block-sync
-      - CHAIN_URI=BLOCKCHAIN:46657  # Configure this
-      - BC_REST=http://REST:1317    # Configure this
-      - NODEDID_LIST=
+      - CHAIN_URI=http://BLOCKCHAIN:26657  # Configure this
+      - BC_REST=http://REST:1317           # Configure this
       - IGNORE_EVENTS=message,rewards,proposer_reward,commission,mint,transfer
       # - ONLY_EVENTS=
     restart: always
@@ -27,6 +26,3 @@ services:
     image: mongo
     ports:
       - "27017:27017"
-
-
-
