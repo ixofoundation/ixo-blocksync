@@ -1,6 +1,6 @@
 {
   "name": "ixo-block-sync",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Block synchronizer to mongoDB",
   "main": "index.js",
   "scripts": {
