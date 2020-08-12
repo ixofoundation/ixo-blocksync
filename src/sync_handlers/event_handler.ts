@@ -5,7 +5,7 @@ import {IGNORE_EVENTS, ONLY_EVENTS} from "../util/secrets";
 export class EventHandler {
   private eventSyncHandler = new EventSyncHandler();
 
-  routeEvent(event: any, blockHeight: number, eventSource: string, eventIndex: string) {
+  routeEvent(event: any, blockHeight: number, eventSource: string, eventIndex: [number, number]) {
 
     if ((ONLY_EVENTS && ONLY_EVENTS.indexOf(event.type) < 0)
       || (IGNORE_EVENTS && IGNORE_EVENTS.indexOf(event.type) >= 0)) {

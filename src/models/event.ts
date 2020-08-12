@@ -4,7 +4,7 @@ export interface IEvent {
   context: {
     blockHeight: number;
     eventSource: string;
-    eventIndex: string;
+    eventIndex: [number, number];
   }
 }
 

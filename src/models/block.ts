@@ -72,7 +72,8 @@ export class BlockResult {
   }
 
   getBlockHeight(): number {
-    return this.blockResult.height;
+    const height = this.blockResult.height
+    return typeof height == "string" ? parseInt(height) : height
   }
 
   getEndBlockEvents(): Array<any> {
