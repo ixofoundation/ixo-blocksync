@@ -18,7 +18,7 @@ export var EventSchema: Schema = new Schema({
     type: [KVPairSchema],
   },
   eventIndex: {
-    type: Number,
+    type: [Number, Number],
   },
   blockHeight: {
     type: Number,

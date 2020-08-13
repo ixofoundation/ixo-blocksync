@@ -107,18 +107,18 @@ export class SyncBlocks {
       if (result.getBeginBlockEvents() != null) {
         for (let i: number = 0; i < result.getTransactionCount(); i++) {
           for (var j: number = 0; j < result.getDeliverTxEvents(i).length; j++) {
-            this.eventHandler.routeEvent(result.getDeliverTxEvent(i, j), height, 'deliver_tx', `${i},${j}`);
+            this.eventHandler.routeEvent(result.getDeliverTxEvent(i, j), height, 'deliver_tx', [i, j]);
           }
         }
 
         // Route events from begin_block
         for (let i: number = 0; i < result.getBeginBlockEvents().length; i++) {
-          this.eventHandler.routeEvent(result.getBeginBlockEvent(i), height, 'begin_block', `${i}`);
+          this.eventHandler.routeEvent(result.getBeginBlockEvent(i), height, 'begin_block', [i, 0]);
         }
 
         // Route events from end_block
         for (let i: number = 0; i < result.getEndBlockEvents().length; i++) {
-          this.eventHandler.routeEvent(result.getEndBlockEvent(i), height, 'end_block', `${i}`);
+          this.eventHandler.routeEvent(result.getEndBlockEvent(i), height, 'end_block', [i, 0]);
         }
       }
     });
