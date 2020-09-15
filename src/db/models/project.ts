@@ -87,29 +87,6 @@ export var ProjectSchema: Schema = new Schema(
           role: String
         }
       ],
-      evaluatorPayPerClaim: String,
-      socialMedia: {
-        facebookLink: {
-          type: String,
-          required: false,
-          default: ''
-        },
-        instagramLink: {
-          type: String,
-          required: false,
-          default: ''
-        },
-        twitterLink: {
-          type: String,
-          required: false,
-          default: ''
-        },
-        webLink: {
-          type: String,
-          required: false,
-          default: ''
-        }
-      },
       ixo: {
         totalStaked: {
           type: Number,

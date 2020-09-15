@@ -32,13 +32,6 @@
           "serviceProvidersPending": 0,
           "investors": 6
         },
-        "evaluatorPayPerClaim": "15",
-        "socialMedia": {
-          "facebookLink": "https://www.facebook.com/ixofoundation/",
-          "instagramLink": "",
-          "twitterLink": "",
-          "webLink": "https://ixo.foundation"
-        },
         "ixo": {
           "totalStaked": 200,
           "totalUsed": 55
