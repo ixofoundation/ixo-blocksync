@@ -5,7 +5,7 @@ import {IGNORE_EVENTS, ONLY_EVENTS} from "../util/secrets";
 export class EventHandler {
   private eventSyncHandler = new EventSyncHandler();
 
-  routeEvent(event: any, blockHeight: number, eventSource: string, eventIndex: [number, number]) {
+  routeEvent(event: any, blockHeight: number, eventSource: string, eventIndex: [number, number], timestamp: Date) {
 
     if ((ONLY_EVENTS && ONLY_EVENTS.indexOf(event.type) < 0)
       || (IGNORE_EVENTS && IGNORE_EVENTS.indexOf(event.type) >= 0)) {
@@ -25,10 +25,11 @@ export class EventHandler {
       type: eventType,
       attributes: eventAttributes,
       context: {
-        blockHeight: blockHeight,
-        eventSource: eventSource,
-        eventIndex: eventIndex,
-      }
+        blockHeight,
+        eventSource,
+        eventIndex,
+        timestamp,
+      },
     };
     return this.eventSyncHandler.create(toCreate);
   }

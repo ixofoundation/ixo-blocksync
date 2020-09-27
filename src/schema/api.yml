@@ -119,17 +119,6 @@ definitions:
         type: number
       totalUsed:
         type: number
-  SocialMedia:
-    type: object
-    properties:
-      facebookLink:
-        type: string
-      instagramLink:
-        type: string
-      twitterLink:
-        type: string
-      webLink:
-        type: string
   Agents:
     type: object
     properties:

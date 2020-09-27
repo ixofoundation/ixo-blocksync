@@ -21,12 +21,10 @@ interface IData {
   requiredClaims: string,
   sdgs: string[];
   templates: ITemplates;
-  evaluatorPayPerClaim: string;
   claimStats: IClaimStats;
   claims: IClaim[];
   agentsStats: IAgentStats;
   agents: IAgent[];
-  socialMedia: ISocialMedia;
   ixo: IIxo;
   serviceEndpoint: string;
   imageLink: string;
@@ -37,13 +35,6 @@ interface IData {
 interface IIxo {
   totalStaked: number;
   totalUsed: number;
-}
-
-interface ISocialMedia {
-  facebookLink: string;
-  instagramLink: string;
-  twitterLink: string;
-  webLink: string;
 }
 
 interface IFounder {
