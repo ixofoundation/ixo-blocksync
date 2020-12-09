@@ -67,14 +67,14 @@ export class BondsHandler {
     }
   };
 
-  listBondByCreatorDid = (params: any) => {
-    if (params.creatorDid == undefined) {
+  listBondByCreatorDid = (creatorDid: string) => {
+    if (creatorDid == undefined) {
       return new Promise((resolve: Function, reject: Function) => {
         reject(new Error("'creatorDid' not specified in params"));
       });
     } else {
       return new Promise((resolve: Function, reject: Function) => {
-        BondDB.find({creatorDid: params.creatorDid}, (err, res) => {
+        BondDB.find({creatorDid}, (err, res) => {
           if (err) {
             reject(err);
           } else {

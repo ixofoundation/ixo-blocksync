@@ -85,14 +85,14 @@ export class ProjectHandler {
     }
   };
 
-  listProjectBySenderDid = (params: any) => {
-    if (params.senderDid == undefined) {
+  listProjectBySenderDid = (senderDid: any) => {
+    if (senderDid == undefined) {
       return new Promise((resolve: Function, reject: Function) => {
         reject(new Error("'senderDid' not specified in params"));
       });
     } else {
       return new Promise((resolve: Function, reject: Function) => {
-        ProjectDB.find({senderDid: params.senderDid}, (err, res) => {
+        ProjectDB.find({senderDid}, (err, res) => {
           if (err) {
             reject(err);
           } else {

@@ -68,6 +68,14 @@ class App {
       });
     });
 
+    this.express.get('/api/project/getByProjectSenderDid/:senderDid', (req, res, next) => {
+      projectHandler.listProjectBySenderDid(req.params.senderDid).then((bondsList: any) => {
+        res.send(bondsList);
+      }).catch((err) => {
+        next(err);
+      });
+    });
+
     this.express.get('/api/project/shields/status/:projectDid', (req, res, next) => {
       projectHandler.listProjectByProjectDid(req.params.projectDid).then((projectData: any) => {
         res.send({
