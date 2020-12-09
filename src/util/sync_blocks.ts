@@ -88,9 +88,8 @@ export class SyncBlocks {
       const timestamp = new Date(Date.parse(event.block.block.header.time))
       sync.message('Syncing block number ' + height);
 
-      // Route transactions
+      // Iterate over all transactions, if any, and route accordingly
       if (event.getTransactions() != null) {
-        // console.log('Block Result  ' + JSON.stringify(event.getTransactions()));
         for (let i: number = 0; i < event.getTransactions().length; i++) {
           if (event.getTransactionCode(i) == undefined || 0) {
             this.authHandler.decodeTx(event.block.getTransaction(i))
@@ -104,8 +103,9 @@ export class SyncBlocks {
         }
       }
 
-      // Route events from deliver_tx
+      // Route events, if any
       if (result.getBeginBlockEvents() != null) {
+        // Route events from deliver_tx
         for (let i: number = 0; i < result.getTransactionCount(); i++) {
           for (var j: number = 0; j < result.getDeliverTxEvents(i).length; j++) {
             this.eventHandler.routeEvent(result.getDeliverTxEvent(i, j), height, 'deliver_tx', [i, j], timestamp);
