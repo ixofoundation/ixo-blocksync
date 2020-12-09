@@ -4,7 +4,9 @@ Syncs all the public info from an ixo blockchain to an instance of MongoDB
 ## Run from Source
 **Requirements**: [MongoDB](https://docs.mongodb.com/manual/installation/)
 
-Copy `.env-example` to `.env` and configure, and then:
+Copy `.env-example` to `.env` and configure. If this step is skipped, ixo-blocksync will use `.env-example` as the configuration by default.
+
+Then:
 ```bash
 npm install
 npm run build
@@ -14,7 +16,9 @@ npm start
 ## Run using Docker (with Compose)
 **Requirements**: [Docker](https://docs.docker.com/engine/install/) and [Docker Compose](https://docs.docker.com/compose/install/)
 
-Configure environment in `docker-compose.yml`, especially `CHAIN_URI` and `BC_REST`, then:
+Configure environment in `docker-compose.yml`, especially `CHAIN_URI` and `BC_REST`.
+
+Then:
 ```bash
 mkdir ./data/       # may need to give write permission
 mkdir ./data/db/    # may need to give write permission
