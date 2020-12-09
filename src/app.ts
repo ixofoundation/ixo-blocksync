@@ -9,6 +9,7 @@ import {StatsHandler} from './handlers/stats_handler';
 import {EventHandler} from "./handlers/event_handler";
 import {Connection} from './util/connection';
 import {AuthHandler} from './handlers/auth_handler';
+import {BondsHandler} from "./handlers/bonds_handler";
 
 
 class App {
@@ -20,8 +21,8 @@ class App {
     this.express = express();
     this.middleware();
     this.routes(
-      new AuthHandler(), new ProjectHandler(), new DidHandler(),
-      new EventHandler(), new StatsHandler()
+      new AuthHandler(), new ProjectHandler(), new BondsHandler(),
+      new DidHandler(), new EventHandler(), new StatsHandler()
     );
   }
 
@@ -36,8 +37,8 @@ class App {
 
   // Configure API endpoints.
   private routes(authHandler: AuthHandler, projectHandler: ProjectHandler,
-                 didHandler: DidHandler, eventHandler: EventHandler,
-                 statsHandler: StatsHandler): void {
+                 bondsHandler: BondsHandler, didHandler: DidHandler,
+                 eventHandler: EventHandler, statsHandler: StatsHandler): void {
     // GET REQUESTS
     this.express.get('/', (req, res) => {
       res.send('API is running');
@@ -86,6 +87,46 @@ class App {
     this.express.get('/api/did/getByDid/:did', (req, res, next) => {
       didHandler.getDidDocByDid(req.params.did).then((didDoc: any) => {
         res.send(didDoc);
+      }).catch((err) => {
+        next(err);
+      });
+    });
+
+    this.express.get('/api/bonds/listBonds', (req, res, next) => {
+      bondsHandler.listAllBonds().then((bondsList: any) => {
+        res.send(bondsList);
+      }).catch((err) => {
+        next(err);
+      });
+    });
+
+    this.express.get('/api/bonds/listBondDids', (req, res, next) => {
+      bondsHandler.listAllBondDids().then((bondDidsList: any) => {
+        res.send(bondDidsList);
+      }).catch((err) => {
+        next(err);
+      });
+    });
+
+    this.express.get('/api/bonds/listBondTokens', (req, res, next) => {
+      bondsHandler.listAllBondTokens().then((bondTokensList: any) => {
+        res.send(bondTokensList);
+      }).catch((err) => {
+        next(err);
+      });
+    });
+
+    this.express.get('/api/bonds/getByBondDid/:bondDid', (req, res, next) => {
+      bondsHandler.listBondByBondDid(req.params.bondDid).then((bondData: any) => {
+        res.send(bondData);
+      }).catch((err) => {
+        next(err);
+      });
+    });
+
+    this.express.get('/api/bonds/getByBondCreatorDid/:creatorDid', (req, res, next) => {
+      bondsHandler.listBondByCreatorDid(req.params.creatorDid).then((bondsList: any) => {
+        res.send(bondsList);
       }).catch((err) => {
         next(err);
       });
