@@ -18,6 +18,23 @@ export class ProjectHandler {
     });
   };
 
+  listAllProjectsFiltered = (fields: string[]) => {
+    return new Promise((resolve: Function, reject: Function) => {
+      const filter = {}
+      for (const i in fields) {
+        filter[fields[i]] = true
+      }
+      return ProjectDB.find({}, filter, (err, res) => {
+        if (err) {
+          reject(err);
+        } else {
+          io.emit('list specified fields of all projects', res);
+          resolve(res);
+        }
+      });
+    });
+  };
+
   listProjects = (filter: any) => {
     return new Promise((resolve: Function, reject: Function) => {
       return ProjectDB.find(filter, (err, res) => {

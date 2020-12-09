@@ -52,6 +52,14 @@ class App {
       });
     });
 
+    this.express.get('/api/project/listProjectsFiltered', (req, res, next) => {
+      projectHandler.listAllProjectsFiltered(req.body).then((projectList: any) => {
+        res.send(projectList);
+      }).catch((err) => {
+        next(err);
+      });
+    });
+
     this.express.get('/api/project/getByProjectDid/:projectDid', (req, res, next) => {
       projectHandler.listProjectByProjectDid(req.params.projectDid).then((projectData: any) => {
         res.send(projectData);
@@ -100,17 +108,9 @@ class App {
       });
     });
 
-    this.express.get('/api/bonds/listBondDids', (req, res, next) => {
-      bondsHandler.listAllBondDids().then((bondDidsList: any) => {
-        res.send(bondDidsList);
-      }).catch((err) => {
-        next(err);
-      });
-    });
-
-    this.express.get('/api/bonds/listBondTokens', (req, res, next) => {
-      bondsHandler.listAllBondTokens().then((bondTokensList: any) => {
-        res.send(bondTokensList);
+    this.express.get('/api/bonds/listBondsFiltered', (req, res, next) => {
+      bondsHandler.listAllBondsFiltered(req.body).then((bondsList: any) => {
+        res.send(bondsList);
       }).catch((err) => {
         next(err);
       });

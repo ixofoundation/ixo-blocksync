@@ -1,6 +1,7 @@
 import {BondDB} from '../db/models/bonds';
 import {io} from '../server';
 
+
 declare var Promise: any;
 
 export class BondsHandler {
@@ -30,13 +31,17 @@ export class BondsHandler {
     });
   };
 
-  listAllBondTokens = () => {
+  listAllBondsFiltered = (fields: string[]) => {
     return new Promise((resolve: Function, reject: Function) => {
-      return BondDB.find({}, {token: true}, (err, res) => {
+      const filter = {}
+      for (const i in fields) {
+        filter[fields[i]] = true
+      }
+      return BondDB.find({}, filter, (err, res) => {
         if (err) {
           reject(err);
         } else {
-          io.emit('list all bond tokens', res);
+          io.emit('list specified fields of all bond', res);
           resolve(res);
         }
       });
