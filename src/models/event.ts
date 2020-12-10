@@ -5,6 +5,7 @@ export interface IEvent {
     blockHeight: number;
     eventSource: string;
     eventIndex: [number, number];
+    timestamp: Date;
   }
 }
 

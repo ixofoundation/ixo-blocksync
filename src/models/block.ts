@@ -77,31 +77,31 @@ export class BlockResult {
   }
 
   getEndBlockEvents(): Array<any> {
-    return this.blockResult.results.end_block.events || [];
+    return this.blockResult.end_block_events || [];
   }
 
   getEndBlockEvent(i): any {
-    return this.blockResult.results.end_block.events[i];
+    return this.blockResult.end_block_events[i];
   }
 
   getBeginBlockEvents(): Array<any> {
-    return this.blockResult.results.begin_block.events || [];
+    return this.blockResult.begin_block_events || [];
   }
 
   getBeginBlockEvent(i): any {
-    return this.blockResult.results.begin_block.events[i];
+    return this.blockResult.begin_block_events[i];
   }
 
   getTransactionCount(): any {
-    return this.blockResult.results.deliver_tx ? this.blockResult.results.deliver_tx.length : 0;
+    return this.blockResult.txs_results ? this.blockResult.txs_results.length : 0;
   }
 
   getDeliverTxEvents(tx: number): Array<any> {
-    return this.blockResult.results.deliver_tx[tx].events;
+    return this.blockResult.txs_results[tx].events;
   }
 
   getDeliverTxEvent(tx: number, i): any {
-    return this.blockResult.results.deliver_tx[tx].events[i];
+    return this.blockResult.txs_results[tx].events[i];
   }
 }
 

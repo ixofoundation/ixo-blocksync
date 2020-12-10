@@ -2,8 +2,9 @@ version: "2"
 services:
   block-sync:
     container_name: block-sync
-    image: trustlab/ixo-blocksync:latest
+    image: ixofoundation/ixo-blocksync:latest
     environment:
+      - NODE_ENV=production
       - PORT=8080
       - MONGODB_URI=mongodb://block-sync-db:27017/block-sync
       - CHAIN_URI=http://BLOCKCHAIN:26657  # Configure this
