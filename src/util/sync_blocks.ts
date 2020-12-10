@@ -91,7 +91,7 @@ export class SyncBlocks {
       // Iterate over all transactions, if any, and route accordingly
       if (event.getTransactions() != null) {
         for (let i: number = 0; i < event.getTransactions().length; i++) {
-          if (event.getTransactionCode(i) == undefined || 0) {
+          if (result.getTransactionCode(i) == undefined || result.getTransactionCode(i) == 0) {
             this.authHandler.decodeTx(event.block.getTransaction(i))
               .then((response: any) => {
                 this.txnHandler.routeTransaction(response.result);
