@@ -4,11 +4,14 @@ import {StatsSyncHandler} from './stats_sync_handler';
 import {IStats} from '../models/stats';
 import {ICredential, IDid} from '../models/did';
 import {DidSyncHandler} from './did_sync_handler';
+import {BondSyncHandler} from './bonds_sync_handler';
+import {IBond} from "../models/bonds";
 
 export class TransactionHandler {
   TXN_TYPE = Object.freeze({
     PROJECT: "project/CreateProject",
     DID: "did/AddDid",
+    BOND_CREATE: "bonds/MsgCreateBond",
     AGENT_CREATE: "project/CreateAgent",
     AGENT_UPDATE: "project/UpdateAgent",
     CAPTURE_CLAIM: "project/CreateClaim",
@@ -21,6 +24,7 @@ export class TransactionHandler {
   private projectSyncHandler = new ProjectSyncHandler();
   private statsSyncHandler = new StatsSyncHandler();
   private didSyncHandler = new DidSyncHandler();
+  private bondSyncHandler = new BondSyncHandler();
 
   convertHexToAscii(hex: string): string {
     let str = '';
@@ -76,6 +80,15 @@ export class TransactionHandler {
           publicKey: msgVal.pubKey
         };
         return this.didSyncHandler.create(didDoc);
+      case this.TXN_TYPE.BOND_CREATE:
+        let bondDoc: IBond = {
+          did: msgVal.bond_did,
+          token: msgVal.token,
+          name: msgVal.name,
+          description: msgVal.description,
+          creatorDid: msgVal.creator_did,
+        };
+        return this.bondSyncHandler.create(bondDoc);
       case this.TXN_TYPE.AGENT_CREATE:
         let agent: IAgent = {
           did: msgVal.data.did,
