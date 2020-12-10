@@ -1,28 +1,487 @@
 swagger: '2.0'
 info:
-  version: '0.1'
+  version: '0.2'
   title: 'IXO'
   description: ''
-# Added by API Auto Mocking Plugin
-host: virtserver.swaggerhub.com
-basePath: /phillipgibb/IXO/0.1
-
+host: block_sync_pandora.ixo.world
+basePath: /api
 schemes:
   - https
   - http
 paths:
-  '/listProjects':
+  '/':
+    get:
+      description: Ping
+      summary: ping
+      operationId: ping
+      tags: [ blocksync ]
+      responses:
+        200:
+          description: Api
+  '/project/listProjects':
     get:
       description: Returns a list of projects
       operationId: listProjects
-      tags:
-        [projects]
+      tags: [ projects ]
       responses:
         200:
           description: List of Projects
           schema:
             $ref: '#/definitions/Projects'
+  '/project/listProjectsFiltered':
+    get:
+      description: Returns specified fields for all projects
+      operationId: listProjectsFiltered
+      tags: [ projects ]
+      parameters:
+        - in: body
+          name: List of fields
+          schema:
+            type: array
+            items:
+              type: string
+              example:
+                - "projectDid"
+                - "senderDid"
+      responses:
+        200:
+          description: List of fields for all projects
+          schema:
+            $ref: '#/definitions/Projects'
+  '/project/getByProjectDid/{projectDid}':
+    get:
+      description: Returns a list of projects belonging to a project did
+      operationId: getByProjectDid
+      tags: [ projects ]
+      parameters:
+        - in: path
+          name: projectDid
+          type: string
+          required: true
+          description: Project did
+      responses:
+        200:
+          description: List of Projects
+          schema:
+            $ref: '#/definitions/Projects'
+  '/project/getByProjectSenderDid/{senderDid}':
+    get:
+      description: Returns a list of projects created by a sender DID
+      operationId: getByProjectSenderDid
+      tags: [ projects ]
+      parameters:
+        - in: path
+          name: senderDid
+          type: string
+          required: true
+          description: Sender DID
+      responses:
+        200:
+          description: List of Projects
+          schema:
+            $ref: '#/definitions/Projects'
+  '/project/getProjectAccounts/{projectDid}':
+    get:
+      description: Returns a list of accounts belonging to a project
+      operationId: getProjectAccounts
+      tags: [ projects ]
+      parameters:
+        - in: path
+          name: projectDid
+          type: string
+          required: true
+          description: Project did
+      responses:
+        200:
+          description: List of Accounts
+          schema:
+            $ref: '#/definitions/Accounts'
+  '/project/shields/status/{projectDid}':
+    get:
+      description: Get project status in shield format for a specific project
+      operationId: getStatusShield
+      tags: [ projects ]
+      parameters:
+        - in: path
+          name: projectDid
+          type: string
+          required: true
+          description: Project did
+      responses:
+        200:
+          description: Status in shield format
+          schema:
+            type: object
+            properties:
+              schemaVersion:
+                type: number
+                example: 1
+              label:
+                type: string
+                example: "status"
+              message:
+                type: string
+                example: "CREATED"
+              color:
+                type: string
+                example: "blue"
+              cacheSeconds:
+                type: number
+                example: 300
+  '/bonds/listBonds':
+    get:
+      description: Returns a list of bonds
+      operationId: listBonds
+      tags: [ bonds ]
+      responses:
+        200:
+          description: List of Bonds
+          schema:
+            $ref: '#/definitions/Bonds'
+  '/bonds/listBondsFiltered':
+    get:
+      description: Returns specified fields for all bonds
+      operationId: listBondsFiltered
+      tags: [ bonds ]
+      parameters:
+        - in: body
+          name: List of fields
+          schema:
+            type: array
+            items:
+              type: string
+              example:
+                - "did"
+                - "creatorDid"
+      responses:
+        200:
+          description: List of fields for all bonds
+          schema:
+            $ref: '#/definitions/Bonds'
+  '/bonds/getByBondDid/{bondDid}':
+    get:
+      description: Returns a list of bonds belonging to a bond DID
+      operationId: getByBondDid
+      tags: [ bonds ]
+      parameters:
+        - in: path
+          name: bondDid
+          type: string
+          required: true
+          description: Bond DID
+      responses:
+        200:
+          description: List of Bonds
+          schema:
+            $ref: '#/definitions/Bonds'
+  '/bonds/getByBondCreatorDid/{creatorDid}':
+    get:
+      description: Returns a list of bonds created by a creator DID
+      operationId: getByBondCreatorDid
+      tags: [ bonds ]
+      parameters:
+        - in: path
+          name: creatorDid
+          type: string
+          required: true
+          description: Creator DID
+      responses:
+        200:
+          description: List of Bonds
+          schema:
+            $ref: '#/definitions/Bonds'
+  '/did/getByDid/{did}':
+    get:
+      description: Returns the did document for a specific did
+      operationId: getDidDoc
+      tags: [ dids ]
+      parameters:
+        - in: path
+          name: did
+          type: string
+          required: true
+          description: did
+      responses:
+        200:
+          description: did document
+          schema:
+            $ref: '#/definitions/DidDoc'
+  '/event/getEventByType/{type}':
+    get:
+      description: Returns the list of events by event type
+      operationId: getEventByType
+      tags: [ events ]
+      parameters:
+        - in: path
+          name: type
+          type: string
+          required: true
+          description: event type
+      responses:
+        200:
+          description: list of events
+  '/stats/listStats':
+    get:
+      description: Returns the statistics for projects
+      operationId: getStats
+      tags: [ stats ]
+      responses:
+        200:
+          description: stats result
+          schema:
+            $ref: '#/definitions/Stats'
+  '/blockchain/txs':
+    post:
+      description: Forwards a transaction to the ixo-node for validation
+      operationId: sendTransaction
+      tags: [ transactions ]
+      consumes: [ application/json ]
+      produces: [ application/json ]
+      parameters:
+        - in: body
+          name: txBroadcast
+          description: >-
+            The tx must be a signed StdTx. The supported broadcast modes include
+            `"block"`(return after tx commit), `"sync"`(return afer CheckTx) and
+            `"async"`(return right away).
+          required: true
+          schema:
+            $ref: "#/definitions/TxBroadcastTx"
+      responses:
+        "200":
+          description: Tx broadcasting result
+          schema:
+            $ref: "#/definitions/TxBroadcastResult"
+        "500":
+          description: Internal Server Error
+  '/sign_data':
+    post:
+      description: Get signature bytes for a particular message
+      operationId: signatureData
+      tags: [ transactions ]
+      consumes: [ application/json ]
+      produces: [ application/json ]
+      parameters:
+        - in: body
+          name: Message and pubkey
+          required: true
+          schema:
+            $ref: "#/definitions/SignDataQuery"
+      responses:
+        "200":
+          description: Signature data result
+          schema:
+            $ref: "#/definitions/SignDataResult"
+        "500":
+          description: Internal Server Error
 definitions:
+  TxBroadcastTx:
+    type: object
+    properties:
+      tx:
+        type: object
+        properties:
+          msg:
+            type: array
+            items:
+              type: string
+          fee:
+            type: object
+            properties:
+              gas:
+                type: string
+              amount:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    denom:
+                      type: string
+                      example: stake
+                    amount:
+                      type: string
+                      example: "50"
+          memo:
+            type: string
+          signature:
+            type: object
+            properties:
+              signature:
+                type: string
+                example: >-
+                  MEUCIQD02fsDPra8MtbRsyB1w7bqTM55Wu138zQbFcWx4+CFyAIge5WNPfKIuvzBZ69MyqHsqD8S1IwiEp+iUb6VSdtlpgY=
+              pub_key:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    example: tendermint/PubKeySecp256k1
+                  value:
+                    type: string
+                    example: Avz04VhtKJh8ACCVzlI8aTosGy0ikFXKIVHQ3jKMrosH
+              account_number:
+                type: string
+                example: "0"
+              sequence:
+                type: string
+                example: "0"
+      mode:
+        type: string
+        example: block
+  TxBroadcastResult:
+    type: object
+    properties:
+      check_tx:
+        type: object
+        properties:
+          code:
+            type: integer
+          data:
+            type: string
+          gas_used:
+            type: integer
+          gas_wanted:
+            type: integer
+          info:
+            type: string
+          log:
+            type: string
+          tags:
+            type: array
+            items:
+              type: object
+              properties:
+                key:
+                  type: string
+                value:
+                  type: string
+        example:
+          code: 0
+          data: data
+          log: log
+          gas_used: 5000
+          gas_wanted: 10000
+          info: info
+          tags:
+            - ""
+            - ""
+      deliver_tx:
+        type: object
+        properties:
+          code:
+            type: integer
+          data:
+            type: string
+          gas_used:
+            type: integer
+          gas_wanted:
+            type: integer
+          info:
+            type: string
+          log:
+            type: string
+          tags:
+            type: array
+            items:
+              type: object
+              properties:
+                key:
+                  type: string
+                value:
+                  type: string
+        example:
+          code: 5
+          data: data
+          log: log
+          gas_used: 5000
+          gas_wanted: 10000
+          info: info
+          tags:
+            - ""
+            - ""
+      hash:
+        type: string
+        example: EE5F3404034C524501629B56E0DDC38FAD651F04
+      height:
+        type: integer
+  SignDataQuery:
+    type: object
+    properties:
+      msg:
+        type: string
+        example: "7B2274797065223A226469642F416464446964222C2276616C7565223A7B22646964223A226469643A69786F3A34584A4C426647745753474B537A344265527864756E222C227075624B6579223A2232764D4868737364687242435246697139766A37547847594479625734795964725968394A47353652614174227D7D"
+      pub_key:
+        type: string
+        example: "2vMHhssdhrBCRFiq9vj7TxGYDybW4yYdrYh9JG56RaAt"
+  SignDataResult:
+    type: object
+    properties:
+      sign_bytes:
+        type: string
+        example: '{"account_number":"0","chain_id":"pandora-1","fee":{"amount":[],"gas":"0"},"memo":"","msgs":[{"type":"did/AddDid","value":{"did":"did:ixo:4XJLBfGtWSGKSz4BeRxdun","pubKey":"2vMHhssdhrBCRFiq9vj7TxGYDybW4yYdrYh9JG56RaAt"}}],"sequence":"0"}'
+      fee:
+        type: object
+        properties:
+          amount:
+            type: array
+            items:
+              $ref: '#/definitions/Coins'
+          gas:
+            type: string
+            example: '200000'
+  Stats:
+    type: object
+    properties:
+      total:
+        type: number
+      totalSuccessful:
+        type: number
+      totalSubmitted:
+        type: number
+      totalPending:
+        type: number
+      totalRejected:
+        type: number
+      claimLocations:
+        type: array
+        items:
+          $ref: '#/definitions/Location'
+  DidDoc:
+    type: object
+    properties:
+      did:
+        type: string
+      publicKey:
+        type: string
+      credentials:
+        type: array
+        items:
+          $ref: '#/definitions/Credential'
+  Credential:
+    type: object
+    properties:
+      type:
+        type: array
+        items:
+          type: string
+      claim:
+        $ref: '#/definitions/CredentialClaim'
+      issuer:
+        type: string
+  CredentialClaim:
+    type: object
+    properties:
+      id:
+        type: string
+      KYCValidated:
+        type: boolean
+  Accounts:
+    type: object
+    properties:
+      accounts:
+        type: array
+        items:
+          $ref: '#/definitions/Account'
   Projects:
     type: object
     properties:
@@ -30,6 +489,21 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Project'
+  Account:
+    type: object
+    properties:
+      name:
+        type: string
+      accountNumber:
+        type: string
+      address:
+        type: string
+      coins:
+        $ref: '#/definitions/Coins'
+      pubKey:
+        type: string
+      sequence:
+        type: string
   Project:
     type: object
     properties:
@@ -45,7 +519,17 @@ definitions:
         type: string
       status:
         type: string
-
+  Coins:
+    type: array
+    items:
+      $ref: '#/definitions/Coin'
+  Coin:
+    type: object
+    properties:
+      denom:
+        type: string
+      amount:
+        type: number
   ProjectData:
     type: object
     properties:
@@ -64,6 +548,8 @@ definitions:
       createdOn:
         type: string
       createdBy:
+        type: string
+      bondId:
         type: string
       projectLocation:
         type: string
@@ -96,7 +582,6 @@ definitions:
         type: string
       founder:
         $ref: '#/definitions/Founder'
-
   Founder:
     type: object
     properties:
@@ -119,6 +604,17 @@ definitions:
         type: number
       totalUsed:
         type: number
+  SocialMedia:
+    type: object
+    properties:
+      facebookLink:
+        type: string
+      instagramLink:
+        type: string
+      twitterLink:
+        type: string
+      webLink:
+        type: string
   Agents:
     type: object
     properties:
@@ -134,7 +630,6 @@ definitions:
         type: number
       investorsPending:
         type: number
-
   ClaimTemplate:
     type: object
     properties:
@@ -142,7 +637,6 @@ definitions:
         type: string
       form:
         type: string
-
   ClaimStats:
     type: object
     properties:
@@ -152,7 +646,6 @@ definitions:
       currentRejected:
         type: number
         default: 0
-
   Claim:
     type: object
     properties:
@@ -175,3 +668,25 @@ definitions:
         type: number
       lat:
         type: number
+  Bonds:
+    type: array
+    items:
+      $ref: '#/definitions/Bond'
+  Bond:
+    type: object
+    properties:
+      did:
+        type: string
+        example: "did:ixo:U7GK8p8rVhJMKhBVRCJJ8c"
+      token:
+        type: string
+        example: abc
+      name:
+        type: string
+        example: Some bond
+      description:
+        type: string
+        example: Description about bond.
+      creatorDid:
+        type: string
+        example: "did:ixo:4XJLBfGtWSGKSz4BeRxdun"
