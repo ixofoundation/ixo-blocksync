@@ -2,7 +2,7 @@
 Syncs all the public info from an ixo blockchain to an instance of MongoDB.
 
 ## API Documentation
-Refer to [src/schema/api.yml](src/schema/api.yml)
+Refer to [src/schema/api.yml](src/schema/api.yml) or visit [the online version](https://app.swaggerhub.com/apis/ig-shaun/ixo/0.2).
 
 ## Notes about Events
 - **Warning**: Setting blocksync to accept all events leads to a lot of events
