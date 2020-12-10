@@ -37,20 +37,34 @@ paths:
         - in: body
           name: List of fields
           schema:
-            type: array
-            items:
-              type: string
-              example:
-                - "projectDid"
-                - "senderDid"
+            type: string
+            example:
+              - "projectDid"
+              - "senderDid"
       responses:
         200:
           description: List of fields for all projects
           schema:
             $ref: '#/definitions/Projects'
+  '/project/getByEntityType/{entityType}':
+    get:
+      description: Returns a list of projects of the specified entity type
+      operationId: getByEntityType
+      tags: [ projects ]
+      parameters:
+        - in: path
+          name: entityType
+          type: string
+          required: true
+          description: Entity Type
+      responses:
+        200:
+          description: List of Projects
+          schema:
+            $ref: '#/definitions/Projects'
   '/project/getByProjectDid/{projectDid}':
     get:
-      description: Returns a list of projects belonging to a project did
+      description: Returns a project having the specified DID
       operationId: getByProjectDid
       tags: [ projects ]
       parameters:
@@ -58,12 +72,12 @@ paths:
           name: projectDid
           type: string
           required: true
-          description: Project did
+          description: Project DID
       responses:
         200:
-          description: List of Projects
+          description: Project having the specified DID
           schema:
-            $ref: '#/definitions/Projects'
+            $ref: '#/definitions/Project'
   '/project/getByProjectSenderDid/{senderDid}':
     get:
       description: Returns a list of projects created by a sender DID
@@ -90,7 +104,7 @@ paths:
           name: projectDid
           type: string
           required: true
-          description: Project did
+          description: Project DID
       responses:
         200:
           description: List of Accounts
@@ -106,7 +120,7 @@ paths:
           name: projectDid
           type: string
           required: true
-          description: Project did
+          description: Project DID
       responses:
         200:
           description: Status in shield format
@@ -147,12 +161,10 @@ paths:
         - in: body
           name: List of fields
           schema:
-            type: array
-            items:
-              type: string
-              example:
-                - "did"
-                - "creatorDid"
+            type: string
+            example:
+              - "did"
+              - "creatorDid"
       responses:
         200:
           description: List of fields for all bonds
@@ -192,7 +204,7 @@ paths:
             $ref: '#/definitions/Bonds'
   '/did/getByDid/{did}':
     get:
-      description: Returns the did document for a specific did
+      description: Returns the DID document for a specific DID
       operationId: getDidDoc
       tags: [ dids ]
       parameters:
@@ -200,10 +212,10 @@ paths:
           name: did
           type: string
           required: true
-          description: did
+          description: DID
       responses:
         200:
-          description: did document
+          description: DID document
           schema:
             $ref: '#/definitions/DidDoc'
   '/event/getEventByType/{type}':

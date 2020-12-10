@@ -60,6 +60,14 @@ class App {
       });
     });
 
+    this.express.get('/api/project/getByEntityType/:entityType', (req, res, next) => {
+      projectHandler.listProjectByEntityType(req.params.entityType).then((projectData: any) => {
+        res.send(projectData);
+      }).catch((err) => {
+        next(err);
+      });
+    });
+
     this.express.get('/api/project/getByProjectDid/:projectDid', (req, res, next) => {
       projectHandler.listProjectByProjectDid(req.params.projectDid).then((projectData: any) => {
         res.send(projectData);
@@ -69,8 +77,8 @@ class App {
     });
 
     this.express.get('/api/project/getByProjectSenderDid/:senderDid', (req, res, next) => {
-      projectHandler.listProjectBySenderDid(req.params.senderDid).then((bondsList: any) => {
-        res.send(bondsList);
+      projectHandler.listProjectBySenderDid(req.params.senderDid).then((projectList: any) => {
+        res.send(projectList);
       }).catch((err) => {
         next(err);
       });

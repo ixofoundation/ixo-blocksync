@@ -85,6 +85,25 @@ export class ProjectHandler {
     }
   };
 
+  listProjectByEntityType = (entityType: string) => {
+    if (entityType == undefined) {
+      return new Promise((resolve: Function, reject: Function) => {
+        reject(new Error("'entityType' not specified in params"));
+      });
+    } else {
+      return new Promise((resolve: Function, reject: Function) => {
+        return ProjectDB.find({"data.@type": entityType}, (err, res) => {
+          if (err) {
+            reject(err);
+          } else {
+            io.emit('list project by entity type', res);
+            resolve(res);
+          }
+        });
+      });
+    }
+  };
+
   listProjectBySenderDid = (senderDid: any) => {
     if (senderDid == undefined) {
       return new Promise((resolve: Function, reject: Function) => {
