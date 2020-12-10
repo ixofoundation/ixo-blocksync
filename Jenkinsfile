@@ -15,7 +15,7 @@ node {
     }
 
     stage('Build image') {
-        app = docker.build("ixofoundation/ixo-block-sync:" + branch)
+        app = docker.build("ixofoundation/ixo-blocksync:" + branch)
     }
 
     stage('Test image') {

@@ -1,7 +1,7 @@
 {
-  "name": "ixo-block-sync",
-  "version": "1.1.3",
-  "description": "Block synchronizer to mongoDB",
+  "name": "ixo-blocksync",
+  "version": "1.1.4",
+  "description": "Syncs all the public info from an ixo blockchain to an instance of MongoDB ",
   "main": "index.js",
   "scripts": {
     "start": "tsc && node build/dist/server.js",
@@ -9,7 +9,7 @@
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repository": "https://github.com/ixofoundation/ixo-block-sync",
+  "repository": "https://github.com/ixofoundation/ixo-blocksync",
   "keywords": [
     "blockchain"
   ],
