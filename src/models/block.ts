@@ -28,7 +28,7 @@ export class Block {
   }
 
   getTransaction(txnNumber: number): string {
-    return (this.block.data.txs[txnNumber]);
+    return this.block.data.txs[txnNumber];
   }
 }
 
@@ -56,11 +56,7 @@ export class NewBlockEvent {
   }
 
   getTransaction(txnNumber: number): string {
-    return (this.getBlock().getTransactions()[txnNumber]);
-  }
-
-  getTransactionCode(txnNumber: number): string {
-    return (this.getBlock().getTransactions()[txnNumber].code);
+    return this.getBlock().getTransactions()[txnNumber];
   }
 }
 
@@ -94,6 +90,10 @@ export class BlockResult {
 
   getTransactionCount(): any {
     return this.blockResult.txs_results ? this.blockResult.txs_results.length : 0;
+  }
+
+  getTransactionCode(txnNumber: number): any {
+    return this.blockResult.txs_results[txnNumber].code;
   }
 
   getDeliverTxEvents(tx: number): Array<any> {
