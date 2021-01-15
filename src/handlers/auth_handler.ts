@@ -13,6 +13,7 @@ export class AuthHandler {
           }
         })
         .catch((error) => {
+          console.log(error.response.data.error)
           reject(error.response.data.error);
         });
     })
@@ -30,6 +31,7 @@ export class AuthHandler {
           }
         })
         .catch((error) => {
+          console.log(error.response.data.error)
           reject(error.response.data.error);
         });
     })
