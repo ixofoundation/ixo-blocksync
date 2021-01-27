@@ -103,24 +103,23 @@ export class SyncBlocks {
         }
       }
 
-      // Route events, if any
-      if (result.getBeginBlockEvents() != null) {
-        // Route events from deliver_tx
+      // Route events from deliver_tx, if any
+      if (result.getDeliverTxEventsForAllTxs() != null) {
         for (let i: number = 0; i < result.getTransactionCount(); i++) {
           for (var j: number = 0; j < result.getDeliverTxEvents(i).length; j++) {
             this.eventHandler.routeEvent(result.getDeliverTxEvent(i, j), height, 'deliver_tx', [i, j], timestamp);
           }
         }
+      }
 
-        // Route events from begin_block
-        for (let i: number = 0; i < result.getBeginBlockEvents().length; i++) {
-          this.eventHandler.routeEvent(result.getBeginBlockEvent(i), height, 'begin_block', [i, 0], timestamp);
-        }
+      // Route events from begin_block, if any
+      for (let i: number = 0; i < result.getBeginBlockEvents().length; i++) {
+        this.eventHandler.routeEvent(result.getBeginBlockEvent(i), height, 'begin_block', [i, 0], timestamp);
+      }
 
-        // Route events from end_block
-        for (let i: number = 0; i < result.getEndBlockEvents().length; i++) {
-          this.eventHandler.routeEvent(result.getEndBlockEvent(i), height, 'end_block', [i, 0], timestamp);
-        }
+      // Route events from end_block, if any
+      for (let i: number = 0; i < result.getEndBlockEvents().length; i++) {
+        this.eventHandler.routeEvent(result.getEndBlockEvent(i), height, 'end_block', [i, 0], timestamp);
       }
     });
     sync.start();

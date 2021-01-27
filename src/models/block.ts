@@ -96,8 +96,12 @@ export class BlockResult {
     return this.blockResult.txs_results[txnNumber].code;
   }
 
+  getDeliverTxEventsForAllTxs(): Array<any> {
+    return this.blockResult.txs_results || [];
+  }
+
   getDeliverTxEvents(tx: number): Array<any> {
-    return this.blockResult.txs_results[tx].events;
+    return this.blockResult.txs_results[tx].events || [];
   }
 
   getDeliverTxEvent(tx: number, i): any {
