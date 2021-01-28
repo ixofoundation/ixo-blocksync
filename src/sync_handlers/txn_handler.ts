@@ -105,6 +105,7 @@ export class TransactionHandler {
       case this.TXN_TYPE.CAPTURE_CLAIM:
         let claim: IClaim = {
           claimId: msgVal.data.claimID,
+          claimTemplateId: msgVal.data.claimTemplateID,
           date: new Date(),
           location: {
             long: '33.9249° S',

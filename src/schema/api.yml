@@ -667,6 +667,8 @@ definitions:
         $ref: '#/definitions/Location'
       claimId:
         type: string
+      claimTemplateId:
+        type: string
       status:
         type: string
       saDid:
