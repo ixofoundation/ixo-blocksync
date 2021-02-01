@@ -36,6 +36,7 @@ export var ProjectSchema: Schema = new Schema(
             lat: String
           },
           claimId: String,
+          claimTemplateId: String,
           status: String,
           saDid: String,
           eaDid: String

@@ -55,6 +55,7 @@ export interface IClaim {
   date: Date;
   location: ILocation;
   claimId: string;
+  claimTemplateId: string;
   status: string;
   saDid: string;
   eaDid?: string;
