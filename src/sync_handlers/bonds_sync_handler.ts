@@ -39,7 +39,7 @@ export class BondSyncHandler {
       // Get latest price and only append new price if previous price not the same
       this.getLastPrice(bondInfo.did)
         .then((lastPriceResult: any) => {
-          lastPriceResult = lastPriceResult.toJSON()
+          lastPriceResult = lastPriceResult ? lastPriceResult.toJSON() : {}
           if (!lastPriceResult.lastPrice || lastPriceResult.lastPrice.price != priceEntry.price) {
             BondDB.updateOne(
               {did: bondInfo.did},

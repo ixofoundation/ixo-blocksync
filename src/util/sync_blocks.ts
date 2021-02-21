@@ -65,7 +65,7 @@ export class SyncBlocks {
     return new Promise((resolve: Function, reject: Function) => {
       connection.getLastBlock()
         .then((block: any) => {
-          const chain: IChain = {chainId: block.header.chain_id, blockHeight: 0};
+          const chain: IChain = {chainId: block.header.chain_id, blockHeight: 1};
           if (isUpdate) {
             resolve(this.chainHandler.update(chain));
           } else {
