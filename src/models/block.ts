@@ -1,4 +1,5 @@
 import {Connection} from "../util/connection";
+import {NewBondsInfo} from "./bonds";
 
 export class Block {
   block: any;
@@ -113,7 +114,8 @@ export class BlockQueue {
 
   conn: Connection;
   curBlock: number;
-  callback: Function;
+  onBlockCallback: Function;
+  onBondsInfoCallback: Function;
   started: boolean;
 
   constructor(conn: Connection, startBlock: number) {
@@ -123,7 +125,11 @@ export class BlockQueue {
   }
 
   onBlock(callback: Function) {
-    this.callback = callback;
+    this.onBlockCallback = callback;
+  }
+
+  onBondsInfo(callback: Function) {
+    this.onBondsInfoCallback = callback;
   }
 
   async sleep(ms: number = 0) {
@@ -137,12 +143,28 @@ export class BlockQueue {
       if (noBlocks) {
         await this.sleep(500);
       }
-      await this.conn.getBlockResult(this.curBlock)
+
+      const curBlock = this.curBlock; // save just in case this.curBlock edited
+
+      // Get block result and block, and then bonds info
+      await this.conn.getBlockResult(curBlock)
         .then((blockResult) => {
           if (blockResult) {
-            this.conn.getBlock(this.curBlock)
+            this.conn.getBlock(curBlock)
               .then((block) => {
-                this.callback(new BlockResult(blockResult), new NewBlockEvent(block));
+                // Process new block result and new block
+                const latestBlockEvent = new NewBlockEvent(block);
+                this.onBlockCallback(new BlockResult(blockResult), latestBlockEvent);
+
+                // Get bonds info for curBlock and process it
+                this.conn.getBondsInfo(curBlock)
+                  .then((bondsInfo: any) => {
+                    if (bondsInfo.result) {
+                      const blockHeight = bondsInfo.height;
+                      const blockTimestamp = new Date(Date.parse(latestBlockEvent.block.block.header.time))
+                      this.onBondsInfoCallback(new NewBondsInfo(bondsInfo.result, blockHeight, blockTimestamp))
+                    }
+                  })
               });
             ++this.curBlock;
           } else {

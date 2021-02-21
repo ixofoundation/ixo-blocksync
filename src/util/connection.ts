@@ -3,13 +3,15 @@ import axios, {AxiosPromise} from 'axios';
 export class Connection {
   chainUri: string;
   bcRest: string;
+  bondsInfoExtractPeriod: number | undefined;
   _isConnected: boolean;
   _confirmConnectionTimer: NodeJS.Timer;
 
-  constructor(chainUri: string, bcRest: string) {
+  constructor(chainUri: string, bcRest: string, bondsInfoExtractPeriod: number | undefined) {
     this._isConnected = false;
     this.chainUri = chainUri;
     this.bcRest = bcRest;
+    this.bondsInfoExtractPeriod = bondsInfoExtractPeriod;
     this.confirmConnection();
   }
 
@@ -92,6 +94,29 @@ export class Connection {
           reject(error);
         });
     })
+  }
+
+  getBondsInfo(height: number): AxiosPromise {
+    if (!this.bondsInfoExtractPeriod || height % this.bondsInfoExtractPeriod != 0) {
+      return new Promise((resolve: Function) => {
+        resolve('')
+      })
+    }
+
+    let url = this.bcRest + '/bonds_detailed/' + height;
+    return axios
+      .get(url)
+      .then(response => {
+        if (response.data) {
+          return response.data;
+        } else {
+          return {}
+        }
+      })
+      .catch(err => {
+        console.log("\n***\n***\nerror: " + err);
+        return '';
+      });
   }
 
   getLastBlock() {
