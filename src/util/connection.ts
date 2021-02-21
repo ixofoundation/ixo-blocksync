@@ -103,7 +103,7 @@ export class Connection {
       })
     }
 
-    let url = this.bcRest + '/bonds_detailed/' + height;
+    let url = this.bcRest + '/bonds_detailed?height=' + height;
     return axios
       .get(url)
       .then(response => {
