@@ -186,6 +186,35 @@ paths:
           description: List of Bonds
           schema:
             $ref: '#/definitions/Bonds'
+  '/bonds/getPriceHistoryByBondDid/{bondDid}':
+    get:
+      description: Returns the price history for the specified bond
+      operationId: getPriceHistoryByBondDid
+      tags: [ bonds ]
+      parameters:
+        - in: path
+          name: bondDid
+          type: string
+          required: true
+          description: Bond DID
+        - in: body
+          name: timeRestrictions
+          required: false
+          description: Time restrictions for price history, in milliseconds
+          schema:
+            type: object
+            properties:
+              fromTime:
+                type: string
+                example: 1613938630619
+              toTime:
+                type: string
+                example: 1613938630619
+      responses:
+        200:
+          description: List of Bonds
+          schema:
+            $ref: '#/definitions/BondPriceHistory'
   '/bonds/getByBondCreatorDid/{creatorDid}':
     get:
       description: Returns a list of bonds created by a creator DID
@@ -704,3 +733,17 @@ definitions:
       creatorDid:
         type: string
         example: "did:ixo:4XJLBfGtWSGKSz4BeRxdun"
+  BondPriceHistory:
+    type: object
+    properties:
+      priceHistory:
+        type: array
+        items:
+          type: object
+          properties:
+            price:
+              type: string
+              example: "100.5"
+            time:
+              type: string
+              example: "2021-02-21T19:58:09.021Z"
