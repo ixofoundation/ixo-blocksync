@@ -87,6 +87,7 @@ export class TransactionHandler {
           name: msgVal.name,
           description: msgVal.description,
           creatorDid: msgVal.creator_did,
+          priceHistory: [],
         };
         return this.bondSyncHandler.create(bondDoc);
       case this.TXN_TYPE.AGENT_CREATE:

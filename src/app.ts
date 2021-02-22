@@ -140,6 +140,14 @@ class App {
       });
     });
 
+    this.express.get('/api/bonds/getPriceHistoryByBondDid/:bondDid', (req, res, next) => {
+      bondsHandler.listBondPriceHistoryByBondDid(req.params.bondDid, req.body).then((bondData: any) => {
+        res.send(bondData);
+      }).catch((err) => {
+        next(err);
+      });
+    });
+
     this.express.get('/api/bonds/getByBondCreatorDid/:creatorDid', (req, res, next) => {
       bondsHandler.listBondByCreatorDid(req.params.creatorDid).then((bondsList: any) => {
         res.send(bondsList);
@@ -167,7 +175,8 @@ class App {
     this.express.post('/api/blockchain/txs', (req, res, next) => {
       const bcConn = new Connection(
         this.express.get('chainUri'),
-        this.express.get('bcRest')
+        this.express.get('bcRest'),
+        this.express.get('bondsInfoExtractPeriod'),
       );
       bcConn.sendTransaction(req.body).then((result: any) => {
         res.send(result);

@@ -3,13 +3,15 @@ import axios, {AxiosPromise} from 'axios';
 export class Connection {
   chainUri: string;
   bcRest: string;
+  bondsInfoExtractPeriod: number | undefined;
   _isConnected: boolean;
   _confirmConnectionTimer: NodeJS.Timer;
 
-  constructor(chainUri: string, bcRest: string) {
+  constructor(chainUri: string, bcRest: string, bondsInfoExtractPeriod: number | undefined) {
     this._isConnected = false;
     this.chainUri = chainUri;
     this.bcRest = bcRest;
+    this.bondsInfoExtractPeriod = bondsInfoExtractPeriod;
     this.confirmConnection();
   }
 
@@ -54,11 +56,8 @@ export class Connection {
       });
   }
 
-  getBlockResult(height: Number): AxiosPromise {
-    let url = this.chainUri + '/block_results?height=';
-    if (height > 0) {
-      url += height;
-    }
+  getBlockResult(height: Number | String): AxiosPromise {
+    const url = this.chainUri + '/block_results?height=' + height;
     return axios
       .get(url)
       .then(response => {
@@ -73,11 +72,8 @@ export class Connection {
       });
   }
 
-  getBlock(height: Number): Promise<any> {
-    let url = this.chainUri + '/block?height=';
-    if (height > 0) {
-      url += height;
-    }
+  getBlock(height: Number | String): Promise<any> {
+    const url = this.chainUri + '/block?height=' + height;
     return new Promise((resolve: Function, reject: Function) => {
       axios.get(url)
         .then(response => {
@@ -94,8 +90,31 @@ export class Connection {
     })
   }
 
+  getBondsInfo(height: number): AxiosPromise {
+    if (!this.bondsInfoExtractPeriod || height % this.bondsInfoExtractPeriod != 0) {
+      return new Promise((resolve: Function) => {
+        resolve('')
+      })
+    }
+
+    const url = this.bcRest + '/bonds_detailed?height=' + height;
+    return axios
+      .get(url)
+      .then(response => {
+        if (response.data) {
+          return response.data;
+        } else {
+          return {}
+        }
+      })
+      .catch(err => {
+        console.log("\n***\n***\nerror: " + err);
+        return '';
+      });
+  }
+
   getLastBlock() {
-    return this.getBlock(-1);
+    return this.getBlock("");
   }
 
   testRpcConnection() {

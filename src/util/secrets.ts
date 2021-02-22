@@ -21,6 +21,12 @@ export const ONLY_EVENTS = onlyEvents ? onlyEvents.split(',') : undefined; // de
 logger.info('Ignoring events: ' + IGNORE_EVENTS);
 logger.info('Only events: ' + ONLY_EVENTS);
 
+const bondsInfoExtractPeriodBlocks = process.env.BONDS_INFO_EXTRACT_PERIOD_BLOCKS;
+export const BONDS_INFO_EXTRACT_PERIOD_BLOCKS = bondsInfoExtractPeriodBlocks ?
+  parseInt(bondsInfoExtractPeriodBlocks) : undefined; // default: undefined => no bonds info extracted
+
+logger.info('Bonds info extract period blocks: ' + BONDS_INFO_EXTRACT_PERIOD_BLOCKS)
+
 if (!MONGODB_URI) {
   logger.error('No mongo connection string. Set MONGODB_URI environment variable.');
   process.exit(1);

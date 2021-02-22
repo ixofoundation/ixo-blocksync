@@ -7,9 +7,8 @@ import {StatsSyncHandler} from '../sync_handlers/stats_sync_handler';
 import {IStats} from '../models/stats';
 import {EventHandler} from "../sync_handlers/event_handler";
 import {AuthHandler} from "../handlers/auth_handler";
-
-const CLI = require('clui'),
-  Spinner = CLI.Spinner;
+import {NewBondsInfo} from "../models/bonds";
+import {BondHandler} from "../sync_handlers/bonds_handler";
 
 export class SyncBlocks {
   private chainHandler = new ChainHandler();
@@ -17,9 +16,10 @@ export class SyncBlocks {
   private eventHandler = new EventHandler();
   private statsHandler = new StatsSyncHandler();
   private authHandler = new AuthHandler();
+  private bondHandler = new BondHandler();
 
-  startSync(chainUri: string, bcRest: string) {
-    const conn = new Connection(chainUri, bcRest);
+  startSync(chainUri: string, bcRest: string, bondsInfoExtractPeriod: number | undefined) {
+    const conn = new Connection(chainUri, bcRest, bondsInfoExtractPeriod);
     const self = this;
     const confirmationInterval = setInterval(function () {
       console.log("Blockchain CONNECTED: " + conn.isConnected());
@@ -65,7 +65,7 @@ export class SyncBlocks {
     return new Promise((resolve: Function, reject: Function) => {
       connection.getLastBlock()
         .then((block: any) => {
-          const chain: IChain = {chainId: block.header.chain_id, blockHeight: 0};
+          const chain: IChain = {chainId: block.header.chain_id, blockHeight: 1};
           if (isUpdate) {
             resolve(this.chainHandler.update(chain));
           } else {
@@ -80,13 +80,12 @@ export class SyncBlocks {
 
   startQueue(connection: Connection, chain: IChain) {
     const blockQueue = new BlockQueue(connection, chain.blockHeight);
-    const sync = new Spinner('Syncing Blocks...  ', ['⣾', '⣽', '⣻', '⢿', '⡿', '⣟', '⣯', '⣷']);
 
     blockQueue.onBlock((result: BlockResult, event: NewBlockEvent) => {
       this.chainHandler.setBlockHeight(result.getBlockHeight(), chain.chainId);
       const height = result.getBlockHeight();
       const timestamp = new Date(Date.parse(event.block.block.header.time))
-      sync.message('Syncing block number ' + height);
+      console.log('Syncing block number ' + height);
 
       // Iterate over all transactions, if any, and route accordingly
       if (event.getTransactions() != null) {
@@ -122,7 +121,15 @@ export class SyncBlocks {
         this.eventHandler.routeEvent(result.getEndBlockEvent(i), height, 'end_block', [i, 0], timestamp);
       }
     });
-    sync.start();
+
+    blockQueue.onBondsInfo((bondsInfo: NewBondsInfo) => {
+      const height = bondsInfo.blockHeight;
+      if (height > 0) {
+        console.log('Syncing bonds info at block number ' + height);
+        this.bondHandler.routeNewBondsInfo(bondsInfo);
+      }
+    });
+
     blockQueue.start();
   }
 }
