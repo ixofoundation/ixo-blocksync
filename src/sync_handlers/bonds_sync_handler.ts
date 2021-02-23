@@ -18,7 +18,7 @@ export class BondSyncHandler {
 
   getLastPrice = (bondDid: string) => {
     return new Promise((resolve: Function, reject: Function) => {
-      return BondDB.findOne({did: bondDid}, {lastPrice: {$last: "$priceHistory"}}, (err, res) => {
+      return BondDB.findOne({did: bondDid}, {lastPrice: {$arrayElemAt: ["$priceHistory", -1]}}, (err, res) => {
         if (err) {
           reject(err);
         } else {
