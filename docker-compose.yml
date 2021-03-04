@@ -26,6 +26,7 @@ services:
   block-sync-db:
     container_name: block-sync-db
     image: mongo
+    restart: always
     ports:
       - "27017:27017"
     volumes:
