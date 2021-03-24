@@ -4,9 +4,10 @@ FROM node:12
 RUN mkdir /usr/src/app
 WORKDIR /usr/src/app
 
-# Install app dependencies
+# Install app dependencies and build
 COPY package*.json ./
 RUN npm install
+RUN npm run build
 
 # Copy rest of files
 COPY . .

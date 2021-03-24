@@ -1,11 +1,11 @@
 {
   "name": "ixo-blocksync",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "description": "Syncs all the public info from an ixo blockchain to an instance of MongoDB ",
   "main": "index.js",
   "scripts": {
-    "start": "tsc && node build/dist/server.js",
-    "dropdb": "tsc && node build/dist/dropdb.js",
+    "start": "node build/dist/server.js",
+    "dropdb": "node build/dist/dropdb.js",
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
