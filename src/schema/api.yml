@@ -261,6 +261,8 @@ paths:
       responses:
         200:
           description: list of events
+          schema:
+            $ref: '#/definitions/Event'
   '/stats/listStats':
     get:
       description: Returns the statistics for projects
@@ -473,23 +475,38 @@ definitions:
   Stats:
     type: object
     properties:
-      total:
-        type: number
-      totalSuccessful:
-        type: number
-      totalSubmitted:
-        type: number
-      totalPending:
-        type: number
-      totalRejected:
-        type: number
-      claimLocations:
-        type: array
-        items:
-          $ref: '#/definitions/Location'
+      claims:
+        type: object
+        properties:
+          total:
+            type: number
+          totalSuccessful:
+            type: number
+          totalSubmitted:
+            type: number
+          totalPending:
+            type: number
+          totalRejected:
+            type: number
+          claimLocations:
+            type: array
+            items:
+              $ref: '#/definitions/Location'
+          totalSericeProviders:
+            type: number
+          totalProjects:
+            type: number
+          totalEvaluationAgents:
+            type: number
+          _id:
+            type: string
+          __v:
+            type: number
   DidDoc:
     type: object
     properties:
+      _id:
+        type: string
       did:
         type: string
       publicKey:
@@ -498,6 +515,8 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Credential'
+      __v:
+        type: number
   Credential:
     type: object
     properties:
@@ -505,6 +524,8 @@ definitions:
         type: array
         items:
           type: string
+      _id:
+        type: string
       claim:
         $ref: '#/definitions/CredentialClaim'
       issuer:
@@ -718,6 +739,8 @@ definitions:
   Bond:
     type: object
     properties:
+      _id:
+        type: string
       did:
         type: string
         example: "did:ixo:U7GK8p8rVhJMKhBVRCJJ8c"
@@ -736,6 +759,8 @@ definitions:
   BondPriceHistory:
     type: object
     properties:
+      _id:
+        type: string
       priceHistory:
         type: array
         items:
@@ -747,3 +772,38 @@ definitions:
             time:
               type: string
               example: "2021-02-21T19:58:09.021Z"
+  Event:
+    type: object
+    properties:
+      eventIndex:
+        type: array
+        items:
+          type: number
+      _id:
+        type: string
+      type:
+        type: string
+      attributes:
+        type: array
+        items:
+          type: object
+          properties:
+            _id:
+              type: string
+            key:
+              type: string
+            value:
+              type: string
+      context:
+        type: object
+        properties:
+          blockHeight:
+            type: number
+          eventSource:
+            type: string
+          eventIndex:
+            type: array
+            items:
+              type: number
+      __v:
+        type: number
