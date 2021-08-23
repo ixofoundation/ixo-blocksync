@@ -596,8 +596,6 @@ definitions:
   ProjectData:
     type: object
     additionalProperties: true
-    title:
-      The data relating to the specific project
     description:
       Structure of response depends on the specific project.
   ClaimTemplate:
