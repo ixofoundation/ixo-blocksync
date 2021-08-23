@@ -540,47 +540,48 @@ definitions:
   Accounts:
     type: object
     properties:
-      accounts:
+      map:
         type: array
         items:
           $ref: '#/definitions/Account'
   Projects:
-    type: object
-    properties:
-      projects:
-        type: array
-        items:
-          $ref: '#/definitions/Project'
+    type: array
+    items:
+        $ref: '#/definitions/Project'
   Account:
     type: object
     properties:
-      name:
+      InitiatingNodePayFees:
         type: string
-      accountNumber:
+      IxoFees:
         type: string
-      address:
+      IxoPayFees:
         type: string
-      coins:
-        $ref: '#/definitions/Coins'
-      pubKey:
-        type: string
-      sequence:
-        type: string
+    additionalProperties:
+      type: string
+    maxProperties:
+      4
+    description:
+      The additional property is the did being queried
   Project:
     type: object
     properties:
       data:
         $ref: '#/definitions/ProjectData'
+      _id:
+        type: string
+      txHash:
+        type: string
+      senderDid:
+        type: string
       projectDid:
         type: string
       pubKey:
         type: string
-      senderDid:
-        type: string
-      txHash:
-        type: string
       status:
         type: string
+      __v:
+        type: number
   Coins:
     type: array
     items:
@@ -591,59 +592,16 @@ definitions:
       denom:
         type: string
       amount:
-        type: number
+        type: string
   ProjectData:
     type: object
     properties:
-      title:
+      value:
         type: string
-      ownerName:
-        type: string
-      ownerEmail:
-        type: string
-      shortDescription:
-        type: string
-      longDescription:
-        type: string
-      impactAction:
-        type: string
-      createdOn:
-        type: string
-      createdBy:
-        type: string
-      bondId:
-        type: string
-      projectLocation:
-        type: string
-      requiredClaims:
-        type: number
-      sdgs:
-        type: array
-        items:
-          type: number
-      claimStats:
-        $ref: '#/definitions/ClaimStats'
-      claims:
-        type: array
-        items:
-          $ref: '#/definitions/Claim'
-      templates:
-        type: object
-        properties:
-          claim:
-            $ref: '#/definitions/ClaimTemplate'
-      agents:
-        $ref: '#/definitions/Agents'
-      socialMedia:
-        $ref: '#/definitions/SocialMedia'
-      ixo:
-        $ref: '#/definitions/Ixo'
-      serviceEndpoint:
-        type: string
-      imageLink:
-        type: string
-      founder:
-        $ref: '#/definitions/Founder'
+    title:
+      The data relating to the specific project
+    description:
+      Structure of response depends on the specific project.
   Founder:
     type: object
     properties:
