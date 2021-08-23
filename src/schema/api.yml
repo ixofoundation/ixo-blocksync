@@ -595,9 +595,7 @@ definitions:
         type: string
   ProjectData:
     type: object
-    properties:
-      value:
-        type: string
+    additionalProperties: true
     title:
       The data relating to the specific project
     description:
