@@ -598,30 +598,6 @@ definitions:
     additionalProperties: true
     description:
       Structure of response depends on the specific project.
-  ClaimTemplate:
-    type: object
-    properties:
-      schema:
-        type: string
-      form:
-        type: string
-  Claim:
-    type: object
-    properties:
-      date:
-        type: string
-      location:
-        $ref: '#/definitions/Location'
-      claimId:
-        type: string
-      claimTemplateId:
-        type: string
-      status:
-        type: string
-      saDid:
-        type: string
-      eaDid:
-        type: string
   Location:
     type: object
     properties:
