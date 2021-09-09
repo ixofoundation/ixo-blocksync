@@ -212,7 +212,7 @@ paths:
                 example: 1613938630619
       responses:
         200:
-          description: List of Bonds
+          description: Bond's price history
           schema:
             $ref: '#/definitions/BondPriceHistory'
   '/bonds/getByBondCreatorDid/{creatorDid}':
