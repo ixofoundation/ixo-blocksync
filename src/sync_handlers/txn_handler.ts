@@ -17,6 +17,7 @@ export class TransactionHandler {
     CAPTURE_CLAIM: "project/CreateClaim",
     CLAIM_UPDATE: "project/CreateEvaluation",
     PROJECT_STATUS_UPDATE: "project/UpdateProjectStatus",
+    PROJECT_DOC_UPDATE: "project/UpdateProjectDoc",
     ADD_CREDENTIAL: "did/AddCredential"
   });
   AGENT_TYPE = Object.freeze({SERVICE: 'SA', EVALUATOR: 'EA', INVESTOR: 'IA'});
@@ -129,6 +130,8 @@ export class TransactionHandler {
         return this.didSyncHandler.addCredential(msgVal.credential.claim.id, credential);
       case this.TXN_TYPE.PROJECT_STATUS_UPDATE:
         return this.projectSyncHandler.updateProjectStatus(msgVal.data.status, msgVal.projectDid);
+      case this.TXN_TYPE.PROJECT_DOC_UPDATE:
+        return this.projectSyncHandler.updateProjectDoc(msgVal.data, msgVal.projectDid);
     }
   }
 
