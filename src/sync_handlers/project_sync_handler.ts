@@ -218,4 +218,44 @@ export class ProjectSyncHandler {
       );
     });
   };
+
+  updateProjectDoc = (doc: any, projectDid: string) => {
+    return new Promise((resolve: Function, reject: Function) => {
+      return ProjectDB.findOne({projectDid: projectDid})
+          .then((prevProject) => {
+            if (prevProject) {
+              // Order of fields matters:
+              // - fields before `doc` will be overwritten by their values in `doc` (if they are specified in `doc`)
+              // - fields after `doc` will take on their previous values (from `prevProject`), whether they were specified in `doc` or not
+              const newData = {
+                createdOn: prevProject.data.createdOn,
+                createdBy: prevProject.data.createdBy,
+                nodeDid: prevProject.data.nodeDid,
+                ...doc,
+                claimStats: prevProject.data.claimStats,
+                agentStats: prevProject.data.agentStats,
+                ixo: prevProject.data.ixo,
+                agents: prevProject.data.agents,
+              }
+
+              ProjectDB.updateOne(
+                  {projectDid: projectDid},
+                  {$set: {'data': newData}},
+                  (err, res) => {
+                    if (err) {
+                      reject(err);
+                    } else {
+                      io.emit('project doc updated', {projectDid: projectDid});
+                      resolve(res);
+                    }
+                  }
+              )
+            }
+          })
+          .catch((err) => {
+            io.emit('error while updating project doc: project not found', {err})
+            reject(err);
+          });
+    });
+  };
 }
