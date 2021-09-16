@@ -492,7 +492,7 @@ definitions:
             type: array
             items:
               $ref: '#/definitions/Location'
-          totalSericeProviders:
+          totalServiceProviders:
             type: number
           totalProjects:
             type: number
