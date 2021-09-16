@@ -172,7 +172,7 @@ paths:
             $ref: '#/definitions/Bonds'
   '/bonds/getByBondDid/{bondDid}':
     get:
-      description: Returns a list of bonds belonging to a bond DID
+      description: Returns a bond belonging to a bond DID
       operationId: getByBondDid
       tags: [ bonds ]
       parameters:
@@ -183,9 +183,9 @@ paths:
           description: Bond DID
       responses:
         200:
-          description: List of Bonds
+          description: Bond
           schema:
-            $ref: '#/definitions/Bonds'
+            $ref: '#/definitions/Bond'
   '/bonds/getPriceHistoryByBondDid/{bondDid}':
     get:
       description: Returns the price history for the specified bond
