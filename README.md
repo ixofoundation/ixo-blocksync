@@ -12,12 +12,20 @@ Refer to [src/schema/api.yml](src/schema/api.yml) or visit [the online version](
 ## Run
 
 ### From Source
-**Requirements**: [MongoDB](https://docs.mongodb.com/manual/installation/)
+**Requirements**: 
+
+- [MongoDB](https://docs.mongodb.com/manual/installation/)
+- 200GB of Hard Drive Space
+ 
 
 Copy `.env-example` to `.env` and configure. If this step is skipped, ixo-blocksync will use `.env-example` as the configuration by default.
 
 Then:
 ```bash
+
+git clone https://github.com/ixofoundation/ixo-blocksync.git # For the latest stable build
+cd ixo-blocksync/
+npm install
 npm install
 npm run build
 npm start
