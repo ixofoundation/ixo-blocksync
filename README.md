@@ -26,7 +26,6 @@ Then:
 git clone https://github.com/ixofoundation/ixo-blocksync.git # For the latest stable build
 cd ixo-blocksync/
 npm install
-npm install
 npm run build
 npm start
 ```
