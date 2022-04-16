@@ -10,6 +10,13 @@ echo "* IXO BLOCKSYNC                   *"
 echo "***********************************"
 echo ""
 echo "Build ixo blocksync"
+
+rm -r ./data/
+mkdir ./data/     
+mkdir ./data/db/    
+npm install      
+npm run build       
+
 docker build -t ixofoundation/ixo-blocksync .
 
 docker-compose up --no-start

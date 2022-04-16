@@ -1,4 +1,5 @@
 import {BondDB} from '../db/models/bonds';
+import { Transaction } from '../db/models/transactions';
 import {io} from '../server';
 
 
@@ -130,4 +131,28 @@ export class BondsHandler {
       });
     }
   };
+
+  gettransactionhistorybond = (bondDid: string) => {
+    return new Promise((resolve: Function, reject: Function) => {
+      return Transaction.find({bond_did: bondDid}, (err, res) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(res);
+        }
+      });
+    });
+  }
+  gettransactionhistorybondbuyer = (buyerDid: string) => {
+    return new Promise((resolve: Function, reject: Function) => {
+      return Transaction.find({buyer_did: buyerDid}, (err, res) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(res);
+        }
+      });
+    });
+  }
+
 }

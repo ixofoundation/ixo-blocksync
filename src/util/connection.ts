@@ -121,6 +121,9 @@ export class Connection {
     return new Promise((resolve: Function, reject: Function) => {
       axios.get(this.chainUri + '/health')
         .then(response => {
+          console.log(response);
+          console.log(this.bcRest + '/health');
+
           if (response.data.result) {
             resolve()
           } else {
@@ -134,6 +137,9 @@ export class Connection {
     return new Promise((resolve: Function, reject: Function) => {
       axios.get(this.bcRest + '/node_info')
         .then(response => {
+          console.log(response);
+          console.log(this.bcRest + '/node_info');
+          
           if (response.data.node_info) {
             resolve()
           } else {

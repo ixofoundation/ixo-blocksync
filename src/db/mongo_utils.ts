@@ -46,14 +46,14 @@ export default class MongoUtils {
     if (error.syscall !== 'listen') {
       throw error;
     }
-    let bind = (typeof this.port === 'string') ? 'Pipe ' + this.port : 'Port ' + this.port;
+    // let bind = (typeof this.port === 'string') ? 'Pipe ' + this.port : 'Port ' + this.port;
     switch (error.code) {
       case 'EACCES':
-        console.log(`${bind} requires elevated privileges`);
+        // console.log(`${bind} requires elevated privileges`);
         process.exit(1);
         break;
       case 'EADDRINUSE':
-        console.log(`${bind} is already in use`);
+        // console.log(`${bind} is already in use`);
         process.exit(1);
         break;
       default:
@@ -63,8 +63,8 @@ export default class MongoUtils {
 
   onListening(): void {
     let addr = this.server.address();
-    let bind = (typeof addr === 'string') ? `pipe ${addr}` : `port ${addr.port}`;
-    console.log(`Listening on ${bind}`);
+    // let bind = (typeof addr === 'string') ? `pipe ${addr}` : `port ${addr.port}`;
+    // console.log(`Listening on ${bind}`);
   }
 
   normalizePort(val: number | string): number | string | boolean {

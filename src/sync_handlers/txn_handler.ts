@@ -2,6 +2,9 @@ import {ProjectSyncHandler} from './project_sync_handler';
 import {IAgent, IClaim, IProject} from '../models/project';
 import {StatsSyncHandler} from './stats_sync_handler';
 import {IStats} from '../models/stats';
+import {ITransactionEvent} from '../models/order';
+import {IWithdrawReserveEvent} from '../models/withdraw_reserve';
+import {IWithdrawShareEvent} from '../models/withdraw_share';
 import {ICredential, IDid} from '../models/did';
 import {DidSyncHandler} from './did_sync_handler';
 import {BondSyncHandler} from './bonds_sync_handler';
@@ -12,6 +15,10 @@ export class TransactionHandler {
     PROJECT: "project/CreateProject",
     DID: "did/AddDid",
     BOND_CREATE: "bonds/MsgCreateBond",
+    TRANSACTION_FULFILL:"bonds/order_fulfill",
+    BOND_WITHDRAWEL:"bonds/withdraw_share",
+    BOND_WITHDRAWEL_RESERVE:"bonds/withdraw_reserve",
+    BOND_PRICE_CHANGE:"bonds/price_change",
     AGENT_CREATE: "project/CreateAgent",
     AGENT_UPDATE: "project/UpdateAgent",
     CAPTURE_CLAIM: "project/CreateClaim",
@@ -28,6 +35,9 @@ export class TransactionHandler {
   private bondSyncHandler = new BondSyncHandler();
 
   convertHexToAscii(hex: string): string {
+
+    console.log(hex);
+    
     let str = '';
     let i = 0;
     let l = hex.length;
@@ -59,14 +69,18 @@ export class TransactionHandler {
 
   routeTransaction(txData: any) {
 
+    console.log(txData);
+    
     if (typeof txData == 'string') {
       // If the tx is a string then assume it is in hex format
       txData = JSON.parse(this.convertHexToAscii(txData))
     }
 
-    // console.log('routeTransaction::: Found ' + JSON.stringify(txData));
+    console.log('routeTransaction::: Found ' + JSON.stringify(txData));
 
     const msgVal = txData.msg[0].value;
+    console.log(msgVal);
+    
     switch (txData.msg[0].type) {
       case this.TXN_TYPE.PROJECT:
         let projectDoc: IProject = msgVal;
@@ -80,7 +94,33 @@ export class TransactionHandler {
           did: msgVal.did,
           publicKey: msgVal.pubKey
         };
-        return this.didSyncHandler.create(didDoc);
+        return this.didSyncHandler.create(didDoc); 
+      case this.TXN_TYPE.TRANSACTION_FULFILL:
+        console.log(msgVal);
+
+        let orderDoc: ITransactionEvent = {
+          buyer_did: msgVal.buyer_did,
+          amount: msgVal.amount,
+          max_prices: msgVal.max_prices,
+          bond_did:msgVal.bond_did,
+        };
+        return this.bondSyncHandler.createorder(orderDoc); 
+
+      case this.TXN_TYPE.BOND_WITHDRAWEL:
+        console.log(msgVal);
+
+        let bondwithdrawDoc: IWithdrawShareEvent = {
+    
+        };
+        return this.bondSyncHandler.createbondsharewithdrawel(bondwithdrawDoc); 
+      case this.TXN_TYPE.BOND_WITHDRAWEL_RESERVE:
+        console.log(msgVal);
+
+        let bondwithdrawreserveDoc: IWithdrawReserveEvent = {
+    
+        };
+        return this.bondSyncHandler.createbondreservewithdrawel(bondwithdrawreserveDoc); 
+         
       case this.TXN_TYPE.BOND_CREATE:
         let bondDoc: IBond = {
           did: msgVal.bond_did,
