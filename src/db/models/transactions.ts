@@ -16,4 +16,9 @@ const TransactionSchema: Schema = new Schema({
     bond_did: { type: String, required: true }
 });
 
+TransactionSchema.pre('save', function (this: ITransactionEvent, next: any) {
+    next();
+    return this;
+  });
+
 export const Transaction: Model<ITransactionEvent> = model('Transaction', TransactionSchema);

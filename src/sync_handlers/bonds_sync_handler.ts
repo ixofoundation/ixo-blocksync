@@ -27,6 +27,7 @@ export class BondSyncHandler {
       return Transaction.create(orderdoc, (err, res) => {
         if (err) {
           reject(err);
+          console.log(err);
         } else {
           io.emit('order created', orderdoc);
           resolve(res);
@@ -39,6 +40,7 @@ export class BondSyncHandler {
       return WithdrawShare.create(bondsharewithdrawel, (err, res) => {
         if (err) {
           reject(err);
+          console.log(err);
         } else {
           io.emit('bond share withdrawel created', bondsharewithdrawel);
           resolve(res);
@@ -51,6 +53,7 @@ export class BondSyncHandler {
       return WithdrawReserve.create(bondreservewithdrawel, (err, res) => {
         if (err) {
           reject(err);
+          console.log(err);
         } else {
           io.emit('bond reserve withdrawel created', bondreservewithdrawel);
           resolve(res);

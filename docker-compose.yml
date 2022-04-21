@@ -4,14 +4,7 @@ services:
     container_name: block-sync
     image: ixofoundation/ixo-blocksync:latest
     environment:
-      - NODE_ENV=production
-      - PORT=8080
-      - MONGODB_URI=mongodb://block-sync-db:27017/block-sync
-      - CHAIN_URI=http://45.ixo.earth/rpc  # Configure this
-      - BC_REST=http://45.ixo.earth      # Configure this
-      - IGNORE_EVENTS=message,rewards,proposer_reward,commission,mint,transfer
-      # - ONLY_EVENTS=
-      - BONDS_INFO_EXTRACT_PERIOD_BLOCKS=1
+    env_file: .env
     restart: always
     ports:
       - "80:8080"

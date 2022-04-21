@@ -15,9 +15,9 @@ export class TransactionHandler {
     PROJECT: "project/CreateProject",
     DID: "did/AddDid",
     BOND_CREATE: "bonds/MsgCreateBond",
-    TRANSACTION_FULFILL:"bonds/order_fulfill",
-    BOND_WITHDRAWEL:"bonds/withdraw_share",
-    BOND_WITHDRAWEL_RESERVE:"bonds/withdraw_reserve",
+    BOND_TRANSACTION_FULFILL:"bonds/MsgBuy",
+    BOND_WITHDRAWEL:"bonds/MsgWithdrawShare",
+    BOND_WITHDRAWEL_RESERVE:"bonds/MsgWithdrawReserve",
     BOND_PRICE_CHANGE:"bonds/price_change",
     AGENT_CREATE: "project/CreateAgent",
     AGENT_UPDATE: "project/UpdateAgent",
@@ -79,6 +79,7 @@ export class TransactionHandler {
     console.log('routeTransaction::: Found ' + JSON.stringify(txData));
 
     const msgVal = txData.msg[0].value;
+    const msgComplete = txData.msg[0];
     console.log(msgVal);
     
     switch (txData.msg[0].type) {
@@ -95,14 +96,14 @@ export class TransactionHandler {
           publicKey: msgVal.pubKey
         };
         return this.didSyncHandler.create(didDoc); 
-      case this.TXN_TYPE.TRANSACTION_FULFILL:
+      case this.TXN_TYPE.BOND_TRANSACTION_FULFILL:
         console.log(msgVal);
 
         let orderDoc: ITransactionEvent = {
-          buyer_did: msgVal.buyer_did,
-          amount: msgVal.amount,
-          max_prices: msgVal.max_prices,
-          bond_did:msgVal.bond_did,
+          buyer_did: JSON.stringify(msgVal.buyer_did),
+          amount: JSON.stringify(msgVal.amount),
+          max_prices: JSON.stringify(msgVal.max_prices),
+          bond_did:JSON.stringify(msgVal.bond_did),
         };
         return this.bondSyncHandler.createorder(orderDoc); 
 
@@ -110,16 +111,24 @@ export class TransactionHandler {
         console.log(msgVal);
 
         let bondwithdrawDoc: IWithdrawShareEvent = {
-    
+          raw_value:JSON.stringify(msgComplete) ,
+          amount:JSON.stringify(msgVal.amount) ,
+          fee: JSON.stringify(txData.fee),
+          withdrawer_did:JSON.stringify(msgVal.withdrawer_did) ,
+          bond_did: JSON.stringify(msgVal.bond_did),
         };
         return this.bondSyncHandler.createbondsharewithdrawel(bondwithdrawDoc); 
       case this.TXN_TYPE.BOND_WITHDRAWEL_RESERVE:
         console.log(msgVal);
 
         let bondwithdrawreserveDoc: IWithdrawReserveEvent = {
-    
+          raw_value:JSON.stringify(msgComplete) ,
+          amount:JSON.stringify(msgVal.amount) ,
+          fee: JSON.stringify(txData.fee),
+          withdrawer_did:JSON.stringify(msgVal.withdrawer_did) ,
+          bond_did: JSON.stringify(msgVal.bond_did),
         };
-        return this.bondSyncHandler.createbondreservewithdrawel(bondwithdrawreserveDoc); 
+       return this.bondSyncHandler.createbondreservewithdrawel(bondwithdrawreserveDoc); 
          
       case this.TXN_TYPE.BOND_CREATE:
         let bondDoc: IBond = {
