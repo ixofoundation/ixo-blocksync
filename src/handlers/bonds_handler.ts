@@ -1,4 +1,7 @@
 import {BondDB} from '../db/models/bonds';
+import { Transaction } from '../db/models/transactions';
+import { WithdrawShare } from '../db/models/sharewithdrawels';
+import { WithdrawReserve } from '../db/models/reservewithdrawels';
 import {io} from '../server';
 
 
@@ -130,4 +133,72 @@ export class BondsHandler {
       });
     }
   };
+
+  gettransactionhistorybond = (bondDid: string) => {
+    return new Promise((resolve: Function, reject: Function) => {
+      return Transaction.find({bond_did: bondDid}, (err, res) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(res);
+        }
+      });
+    });
+  }
+  gettransactionhistorybondbuyer = (buyerDid: string) => {
+    return new Promise((resolve: Function, reject: Function) => {
+      return Transaction.find({buyer_did: buyerDid}, (err, res) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(res);
+        }
+      });
+    });
+  }
+  getwithdrawhistoryfrombondreservebybonddid = (bondDid: string) => {
+    return new Promise((resolve: Function, reject: Function) => {
+      return WithdrawShare.find({bond_did: bondDid}, (err, res) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(res);
+        }
+      });
+    });
+  }
+  getwithdrawhistoryfrombondsharebybonddid = (withdrawer_did: string) => {
+    return new Promise((resolve: Function, reject: Function) => {
+      return WithdrawShare.find({withdrawer_did: withdrawer_did}, (err, res) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(res);
+        }
+      });
+    });
+  }
+  getwithdrawhistoryfrombondreservebywithdrawerdid = (bondDid: string) => {
+    return new Promise((resolve: Function, reject: Function) => {
+      return WithdrawReserve.find({bond_did: bondDid}, (err, res) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(res);
+        }
+      });
+    });
+  }
+  getwithdrawhistoryfrombondsharebybuyerdid = (withdrawer_did: string) => {
+    return new Promise((resolve: Function, reject: Function) => {
+      return WithdrawReserve.find({withdrawer_did: withdrawer_did}, (err, res) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(res);
+        }
+      });
+    });
+  }
+
 }

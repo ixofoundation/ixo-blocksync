@@ -10,7 +10,7 @@ import {EventHandler} from "./handlers/event_handler";
 import {Connection} from './util/connection';
 import {AuthHandler} from './handlers/auth_handler';
 import {BondsHandler} from "./handlers/bonds_handler";
-
+// import { create } from 'apisauce'
 
 class App {
   // ref to Express instance
@@ -43,6 +43,78 @@ class App {
     this.express.get('/', (req, res) => {
       res.send('API is running');
     });
+
+ 
+
+  
+    //getBondWithdrawals
+    this.express.get('/api/bond/get/transactions/:bonddid', (req, res, next) => {
+
+      bondsHandler.gettransactionhistorybond(req.params.bonddid).then((transactiondata: any) => {
+        res.send(transactiondata);
+      }).catch((err) => {
+        next(err);
+      });
+    });
+
+    this.express.get('/api/bond/get/transactions/:entityType', (req, res, next) => {
+
+      bondsHandler.gettransactionhistorybondbuyer(req.params.userdid).then((transactiondata: any) => {
+        res.send(transactiondata);
+      }).catch((err) => {
+        next(err);
+      });
+    });
+
+   
+    //get withdraw History
+    this.express.get('/api/bond/get/withdraw/reserve/bybonddid/:bonddid', (req, res, next) => {
+
+      bondsHandler.getwithdrawhistoryfrombondreservebybonddid(req.params.bonddid).then((transactiondata: any) => {
+        res.send(transactiondata);
+      }).catch((err) => {
+        next(err);
+      });
+    });
+    this.express.get('/api/bond/get/withdraw/reserve/bywithdrawdid/:withdrawerdid', (req, res, next) => {
+
+      bondsHandler.getwithdrawhistoryfrombondreservebywithdrawerdid(req.params.withdrawerdid).then((transactiondata: any) => {
+        res.send(transactiondata);
+      }).catch((err) => {
+        next(err);
+      });
+    });
+
+    this.express.get('/api/bond/get/withdraw/share/bybondid/:bonddid', (req, res, next) => {
+
+      bondsHandler.getwithdrawhistoryfrombondsharebybonddid(req.params.bonddid).then((transactiondata: any) => {
+        res.send(transactiondata);
+      }).catch((err) => {
+        next(err);
+      });
+    });
+    this.express.get('/api/bond/get/withdraw/share/bywithdrawdid/:withdrawerdid', (req, res, next) => {
+
+      bondsHandler.getwithdrawhistoryfrombondreservebywithdrawerdid(req.params.withdrawerdid).then((transactiondata: any) => {
+        res.send(transactiondata);
+      }).catch((err) => {
+        next(err);
+      });
+    });
+
+    // this.express.get('/api/bond/getpriceforbuyestimate/:entityType', (req, res, next) => {
+
+    //   const api = create({baseURL: 'https://testnet.ixo.world/rest',})
+
+    //   api
+    //     .get('/repos/skellock/apisauce/commits')
+    //     .then((response: any) => response.data[0].commit.message)
+    //     .then(console.log)
+
+    // });
+
+
+    //End new apis
 
     this.express.get('/api/project/listProjects', (req, res, next) => {
       projectHandler.listAllProjects().then((projectList: any) => {

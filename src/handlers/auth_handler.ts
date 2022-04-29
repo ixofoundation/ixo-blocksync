@@ -27,6 +27,8 @@ export class AuthHandler {
           if (response.status == 200) {
             resolve(response.data);
           } else {
+            console.log("itsa me mario");
+            
             reject(response.statusText);
           }
         })
