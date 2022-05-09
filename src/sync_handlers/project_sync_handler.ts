@@ -1,6 +1,6 @@
-import {ProjectDB} from '../db/models/project';
-import {IAgent, IClaim, IProject} from '../models/project';
-import {io} from '../server';
+import { ProjectDB } from '../db/models/project';
+import { IAgent, IClaim, IProject } from '../models/project';
+import { io } from '../server';
 
 declare var Promise: any;
 
@@ -19,11 +19,11 @@ export class ProjectSyncHandler {
 
   addAgent = (projectDid: string, agent: IAgent) => {
     return new Promise((resolve: Function, reject: Function) => {
-      return ProjectDB.findOneAndUpdate({projectDid: projectDid}, {$push: {'data.agents': agent}}, (err, res) => {
+      return ProjectDB.findOneAndUpdate({ projectDid: projectDid }, { $push: { 'data.agents': agent } }, (err, res) => {
         if (err) {
           reject(err);
         } else {
-          io.emit('agent added', {projectDid: projectDid, agent: agent});
+          io.emit('agent added', { projectDid: projectDid, agent: agent });
           resolve(res);
         }
       });
@@ -33,8 +33,8 @@ export class ProjectSyncHandler {
   updateAgentStatus = (agentDid: string, status: string, projectDid: string, role: string) => {
     return new Promise((resolve: Function, reject: Function) => {
       return ProjectDB.findOneAndUpdate(
-        {projectDid: projectDid, 'data.agents.did': agentDid},
-        {$set: {'data.agents.$.status': status}},
+        { projectDid: projectDid, 'data.agents.did': agentDid },
+        { $set: { 'data.agents.$.status': status } },
         (err, res) => {
           if (err) {
             reject(err);
@@ -48,7 +48,7 @@ export class ProjectSyncHandler {
             } else {
               this.updateAgentStats(role, status, projectDid);
             }
-            io.emit('agent updated', {agentDid: agentDid, status: status});
+            io.emit('agent updated', { agentDid: agentDid, status: status });
             resolve(res);
           }
         }
@@ -60,8 +60,8 @@ export class ProjectSyncHandler {
     return new Promise((resolve: Function, reject: Function) => {
       return ProjectDB.aggregate(
         [
-          {$match: {projectDid: projectDid}},
-          {$unwind: '$data.agents'},
+          { $match: { projectDid: projectDid } },
+          { $unwind: '$data.agents' },
           {
             $group: {
               _id: 0,
@@ -69,7 +69,7 @@ export class ProjectSyncHandler {
                 $sum: {
                   $cond: [
                     {
-                      $and: [{$eq: ['$data.agents.role', role]}, {$eq: ['$data.agents.status', status]}]
+                      $and: [{ $eq: ['$data.agents.role', role] }, { $eq: ['$data.agents.status', status] }]
                     },
                     1,
                     0
@@ -83,7 +83,11 @@ export class ProjectSyncHandler {
           if (err) {
             reject(err);
           } else {
-            resolve(res[0].count);
+            try {
+              resolve(res[0].count);
+            } catch (error) {
+              resolve(error);
+            }
           }
         }
       );
@@ -94,25 +98,25 @@ export class ProjectSyncHandler {
     this.getAgentCount(status, projectDid, role).then((count: number) => {
       let statsProp;
       if (status === '0' && role === 'SA') {
-        statsProp = {'data.agentStats.serviceProvidersPending': count};
+        statsProp = { 'data.agentStats.serviceProvidersPending': count };
       } else if (status === '1' && role === 'SA') {
-        statsProp = {'data.agentStats.serviceProviders': count};
+        statsProp = { 'data.agentStats.serviceProviders': count };
       } else if (status === '0' && role === 'EA') {
-        statsProp = {'data.agentStats.evaluatorsPending': count};
+        statsProp = { 'data.agentStats.evaluatorsPending': count };
       } else if (status === '1' && role === 'EA') {
-        statsProp = {'data.agentStats.evaluators': count};
+        statsProp = { 'data.agentStats.evaluators': count };
       } else if (status === '0' && role === 'IA') {
-        statsProp = {'data.agentStats.investorsPending': count};
+        statsProp = { 'data.agentStats.investorsPending': count };
       } else if (status === '1' && role === 'IA') {
-        statsProp = {'data.agentStats.investors': count};
+        statsProp = { 'data.agentStats.investors': count };
       }
 
       return new Promise((resolve: Function, reject: Function) => {
-        return ProjectDB.findOneAndUpdate({projectDid: projectDid}, statsProp, (err, res) => {
+        return ProjectDB.findOneAndUpdate({ projectDid: projectDid }, statsProp, (err, res) => {
           if (err) {
             reject(err);
           } else {
-            io.emit('agent stats updated', {projectDid: projectDid, updatedStats: statsProp});
+            io.emit('agent stats updated', { projectDid: projectDid, updatedStats: statsProp });
             resolve(res);
           }
         });
@@ -122,12 +126,12 @@ export class ProjectSyncHandler {
 
   addClaim = (projectDid: string, claim: IClaim) => {
     return new Promise((resolve: Function, reject: Function) => {
-      return ProjectDB.findOneAndUpdate({projectDid: projectDid}, {$push: {'data.claims': claim}}, (err, res) => {
+      return ProjectDB.findOneAndUpdate({ projectDid: projectDid }, { $push: { 'data.claims': claim } }, (err, res) => {
         if (err) {
           reject(err);
         } else {
           this.updateClaimStats(claim.status, projectDid);
-          io.emit('claim added', {projectDid: projectDid, claim: claim});
+          io.emit('claim added', { projectDid: projectDid, claim: claim });
           resolve(res);
         }
       });
@@ -137,14 +141,14 @@ export class ProjectSyncHandler {
   updateClaimStatus = (status: string, projectDid: string, claimId: string, agentDid: string) => {
     return new Promise((resolve: Function, reject: Function) => {
       return ProjectDB.findOneAndUpdate(
-        {projectDid: projectDid, 'data.claims.claimId': claimId},
-        {$set: {'data.claims.$.status': status, 'data.claims.$.eaDid': agentDid}},
+        { projectDid: projectDid, 'data.claims.claimId': claimId },
+        { $set: { 'data.claims.$.status': status, 'data.claims.$.eaDid': agentDid } },
         (err, res) => {
           if (err) {
             reject(err);
           } else {
             this.updateClaimStats(status, projectDid);
-            io.emit('claim updated', {projectDid: projectDid, status: status});
+            io.emit('claim updated', { projectDid: projectDid, status: status });
             resolve(res);
           }
         }
@@ -156,17 +160,17 @@ export class ProjectSyncHandler {
     this.getClaimCount(status, projectDid).then((count: number) => {
       let statsProp;
       if (status === '1') {
-        statsProp = {'data.claimStats.currentSuccessful': count};
+        statsProp = { 'data.claimStats.currentSuccessful': count };
       } else if (status === '2') {
-        statsProp = {'data.claimStats.currentRejected': count};
+        statsProp = { 'data.claimStats.currentRejected': count };
       }
 
       return new Promise((resolve: Function, reject: Function) => {
-        return ProjectDB.findOneAndUpdate({projectDid: projectDid}, statsProp, (err, res) => {
+        return ProjectDB.findOneAndUpdate({ projectDid: projectDid }, statsProp, (err, res) => {
           if (err) {
             reject(err);
           } else {
-            io.emit('claim stats updated', {projectDid: projectDid, updatedStats: statsProp});
+            io.emit('claim stats updated', { projectDid: projectDid, updatedStats: statsProp });
             resolve(res);
           }
         });
@@ -178,14 +182,14 @@ export class ProjectSyncHandler {
     return new Promise((resolve: Function, reject: Function) => {
       return ProjectDB.aggregate(
         [
-          {$match: {projectDid: projectDid}},
-          {$unwind: '$data.claims'},
+          { $match: { projectDid: projectDid } },
+          { $unwind: '$data.claims' },
           {
             $group: {
               _id: 0,
               count: {
                 $sum: {
-                  $cond: [{$eq: ['$data.claims.status', status]}, 1, 0]
+                  $cond: [{ $eq: ['$data.claims.status', status] }, 1, 0]
                 }
               }
             }
@@ -195,7 +199,11 @@ export class ProjectSyncHandler {
           if (err) {
             reject(err);
           } else {
-            resolve(res[0].count);
+            try {
+              resolve(res[0].count);
+            } catch (error) {
+              resolve(error);
+            }
           }
         }
       );
@@ -205,13 +213,13 @@ export class ProjectSyncHandler {
   updateProjectStatus = (status: string, projectDid: string) => {
     return new Promise((resolve: Function, reject: Function) => {
       return ProjectDB.findOneAndUpdate(
-        {projectDid: projectDid},
-        {$set: {'status': status}},
+        { projectDid: projectDid },
+        { $set: { 'status': status } },
         (err, res) => {
           if (err) {
             reject(err);
           } else {
-            io.emit('project status updated', {projectDid: projectDid, status: status});
+            io.emit('project status updated', { projectDid: projectDid, status: status });
             resolve(res);
           }
         }
@@ -221,41 +229,41 @@ export class ProjectSyncHandler {
 
   updateProjectDoc = (doc: any, projectDid: string) => {
     return new Promise((resolve: Function, reject: Function) => {
-      return ProjectDB.findOne({projectDid: projectDid})
-          .then((prevProject) => {
-            if (prevProject) {
-              // Order of fields matters:
-              // - fields before `doc` will be overwritten by their values in `doc` (if they are specified in `doc`)
-              // - fields after `doc` will take on their previous values (from `prevProject`), whether they were specified in `doc` or not
-              const newData = {
-                createdOn: prevProject.data.createdOn,
-                createdBy: prevProject.data.createdBy,
-                nodeDid: prevProject.data.nodeDid,
-                ...doc,
-                claimStats: prevProject.data.claimStats,
-                agentStats: prevProject.data.agentStats,
-                ixo: prevProject.data.ixo,
-                agents: prevProject.data.agents,
-              }
-
-              ProjectDB.updateOne(
-                  {projectDid: projectDid},
-                  {$set: {'data': newData}},
-                  (err, res) => {
-                    if (err) {
-                      reject(err);
-                    } else {
-                      io.emit('project doc updated', {projectDid: projectDid});
-                      resolve(res);
-                    }
-                  }
-              )
+      return ProjectDB.findOne({ projectDid: projectDid })
+        .then((prevProject) => {
+          if (prevProject) {
+            // Order of fields matters:
+            // - fields before `doc` will be overwritten by their values in `doc` (if they are specified in `doc`)
+            // - fields after `doc` will take on their previous values (from `prevProject`), whether they were specified in `doc` or not
+            const newData = {
+              createdOn: prevProject.data.createdOn,
+              createdBy: prevProject.data.createdBy,
+              nodeDid: prevProject.data.nodeDid,
+              ...doc,
+              claimStats: prevProject.data.claimStats,
+              agentStats: prevProject.data.agentStats,
+              ixo: prevProject.data.ixo,
+              agents: prevProject.data.agents,
             }
-          })
-          .catch((err) => {
-            io.emit('error while updating project doc: project not found', {err})
-            reject(err);
-          });
+
+            ProjectDB.updateOne(
+              { projectDid: projectDid },
+              { $set: { 'data': newData } },
+              (err, res) => {
+                if (err) {
+                  reject(err);
+                } else {
+                  io.emit('project doc updated', { projectDid: projectDid });
+                  resolve(res);
+                }
+              }
+            )
+          }
+        })
+        .catch((err) => {
+          io.emit('error while updating project doc: project not found', { err })
+          reject(err);
+        });
     });
   };
 }
