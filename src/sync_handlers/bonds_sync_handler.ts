@@ -3,9 +3,11 @@ import {BondDB} from '../db/models/bonds';
 import {Transaction} from '../db/models/transactions';
 import {WithdrawReserve} from '../db/models/reservewithdrawels';
 import {WithdrawShare} from '../db/models/sharewithdrawels';
+import {Alphachange} from '../db/models/alpha';
 import {ITransactionEvent} from '../models/order';
 import {IWithdrawReserveEvent} from '../models/withdraw_reserve';
 import {IWithdrawShareEvent} from '../models/withdraw_share';
+import {IAlphachangeEvent} from '../models/alphachange';
 import {io} from '../server';
 
 export class BondSyncHandler {
@@ -35,6 +37,22 @@ export class BondSyncHandler {
       });
     });
   };
+  //Alpha bond changes
+  createalphachangeevent = (alphachange: IAlphachangeEvent) => {
+    return new Promise((resolve: Function, reject: Function) => {
+      return Alphachange.create(alphachange, (err, res) => {
+        if (err) {
+          reject(err);
+          console.log(err);
+        } else {
+          io.emit('alpha share event created', alphachange);
+          resolve(res);
+        }
+      });
+    });
+  };
+  
+  
   createbondsharewithdrawel = (bondsharewithdrawel: IWithdrawShareEvent) => {
     return new Promise((resolve: Function, reject: Function) => {
       return WithdrawShare.create(bondsharewithdrawel, (err, res) => {

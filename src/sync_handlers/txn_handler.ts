@@ -1,3 +1,4 @@
+import { Alphachange } from './../db/models/alpha';
 import {ProjectSyncHandler} from './project_sync_handler';
 import {IAgent, IClaim, IProject} from '../models/project';
 import {StatsSyncHandler} from './stats_sync_handler';
@@ -5,6 +6,7 @@ import {IStats} from '../models/stats';
 import {ITransactionEvent} from '../models/order';
 import {IWithdrawReserveEvent} from '../models/withdraw_reserve';
 import {IWithdrawShareEvent} from '../models/withdraw_share';
+import {IAlphachangeEvent} from '../models/alphachange';
 import {ICredential, IDid} from '../models/did';
 import {DidSyncHandler} from './did_sync_handler';
 import {BondSyncHandler} from './bonds_sync_handler';
@@ -17,6 +19,8 @@ export class TransactionHandler {
     BOND_CREATE: "bonds/MsgCreateBond",
     BOND_TRANSACTION_FULFILL:"bonds/MsgBuy",
     BOND_WITHDRAWEL:"bonds/MsgWithdrawShare",
+    BOND_ALPHA_CHANGE:"bonds/set_next_alpha",
+    BOND_ALPHA_CHANGE_EDIT_SUCCESS:"bonds/edit_alpha_success",
     BOND_WITHDRAWEL_RESERVE:"bonds/MsgWithdrawReserve",
     BOND_PRICE_CHANGE:"bonds/price_change",
     AGENT_CREATE: "project/CreateAgent",
@@ -107,6 +111,24 @@ export class TransactionHandler {
         };
         return this.bondSyncHandler.createorder(orderDoc); 
 
+      case this.TXN_TYPE.BOND_ALPHA_CHANGE:
+        console.log(msgVal);
+
+        let alphachangeDoc: IAlphachangeEvent = {
+          raw_value:JSON.stringify(msgComplete) ,
+          bond_did: JSON.stringify(msgVal.bond_did),
+        };
+        return this.bondSyncHandler.createalphachangeevent(alphachangeDoc);       
+        
+      case this.TXN_TYPE.BOND_ALPHA_CHANGE_EDIT_SUCCESS:
+        console.log(msgVal);
+
+        let alphaeditchangeDoc: IAlphachangeEvent = {
+          raw_value:JSON.stringify(msgComplete) ,
+          bond_did: JSON.stringify(msgVal.bond_did),
+        };
+        return this.bondSyncHandler.createalphachangeevent(alphaeditchangeDoc); 
+      
       case this.TXN_TYPE.BOND_WITHDRAWEL:
         console.log(msgVal);
 
