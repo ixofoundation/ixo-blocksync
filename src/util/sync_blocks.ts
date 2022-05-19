@@ -93,7 +93,7 @@ export class SyncBlocks {
           if (result.getTransactionCode(i) == undefined || result.getTransactionCode(i) == 0) {
             this.authHandler.decodeTx(event.block.getTransaction(i))
               .then((response: any) => {
-                this.txnHandler.routeTransaction(response.result);
+                this.txnHandler.routeTransaction(response.result,String(height),String(timestamp));
               })
               .catch((err) => {
                 throw(err);

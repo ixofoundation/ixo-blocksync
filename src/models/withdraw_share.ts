@@ -4,6 +4,8 @@ export interface IWithdrawShareEvent {
     fee: string;
     withdrawer_did: string;
     bond_did: string;
+    height: string;
+    timestamp:string;
   }
   
 

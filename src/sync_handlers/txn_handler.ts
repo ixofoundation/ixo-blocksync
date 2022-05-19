@@ -19,8 +19,8 @@ export class TransactionHandler {
     BOND_CREATE: "bonds/MsgCreateBond",
     BOND_TRANSACTION_FULFILL:"bonds/MsgBuy",
     BOND_WITHDRAWEL:"bonds/MsgWithdrawShare",
-    BOND_ALPHA_CHANGE:"bonds/set_next_alpha",
-    BOND_ALPHA_CHANGE_EDIT_SUCCESS:"bonds/edit_alpha_success",
+    BOND_ALPHA_CHANGE:"bonds/MsgSetNextAlpha",
+    BOND_ALPHA_CHANGE_EDIT_SUCCESS:"bonds/EditAlphaSuccess",
     BOND_WITHDRAWEL_RESERVE:"bonds/MsgWithdrawReserve",
     BOND_PRICE_CHANGE:"bonds/price_change",
     AGENT_CREATE: "project/CreateAgent",
@@ -71,7 +71,7 @@ export class TransactionHandler {
     return nodeDidIncluded;
   };
 
-  routeTransaction(txData: any) {
+  routeTransaction(txData: any,height:string,timestamp:string) {
 
     console.log(txData);
     
@@ -84,6 +84,8 @@ export class TransactionHandler {
 
     const msgVal = txData.msg[0].value;
     const msgComplete = txData.msg[0];
+    const msgCompleteTransaction = txData;
+
     console.log(msgVal);
     
     switch (txData.msg[0].type) {
@@ -113,44 +115,56 @@ export class TransactionHandler {
 
       case this.TXN_TYPE.BOND_ALPHA_CHANGE:
         console.log(msgVal);
-
+        console.log("Setting Alpha event");
+        
         let alphachangeDoc: IAlphachangeEvent = {
           raw_value:JSON.stringify(msgComplete) ,
-          bond_did: JSON.stringify(msgVal.bond_did),
+          bond_did: msgVal.bond_did,
+          height: height,
+          timestamp: timestamp,
         };
         return this.bondSyncHandler.createalphachangeevent(alphachangeDoc);       
         
       case this.TXN_TYPE.BOND_ALPHA_CHANGE_EDIT_SUCCESS:
         console.log(msgVal);
+        console.log(msgCompleteTransaction);
+        console.log("Setting Alpha event");
 
         let alphaeditchangeDoc: IAlphachangeEvent = {
           raw_value:JSON.stringify(msgComplete) ,
-          bond_did: JSON.stringify(msgVal.bond_did),
+          bond_did: msgVal.bond_did,
+          height: height,
+          timestamp: timestamp,
         };
         return this.bondSyncHandler.createalphachangeevent(alphaeditchangeDoc); 
       
       case this.TXN_TYPE.BOND_WITHDRAWEL:
-        console.log(msgVal);
-
-        let bondwithdrawDoc: IWithdrawShareEvent = {
-          raw_value:JSON.stringify(msgComplete) ,
-          amount:JSON.stringify(msgVal.amount) ,
-          fee: JSON.stringify(txData.fee),
-          withdrawer_did:JSON.stringify(msgVal.withdrawer_did) ,
-          bond_did: JSON.stringify(msgVal.bond_did),
-        };
-        return this.bondSyncHandler.createbondsharewithdrawel(bondwithdrawDoc); 
+        console.log(msgCompleteTransaction.msg[0].value);
+        console.log("Bond share withdraw event");
+        // let bondwithdrawDoc: IWithdrawShareEvent = {
+        //   raw_value:JSON.stringify(msgComplete) ,
+        //   amount:JSON.stringify(msgVal.amount) ,
+        //   fee: JSON.stringify(txData.fee),
+        //   withdrawer_did:JSON.stringify(msgVal.withdrawer_did) ,
+        //   bond_did: JSON.stringify(msgVal.bond_did),
+        // height: height,
+        //  timestamp: timestamp,
+        // };
+        // return this.bondSyncHandler.createbondsharewithdrawel(bondwithdrawDoc); 
       case this.TXN_TYPE.BOND_WITHDRAWEL_RESERVE:
-        console.log(msgVal);
+        console.log(msgCompleteTransaction);
+        console.log("Bond reserve withdraw event");
 
-        let bondwithdrawreserveDoc: IWithdrawReserveEvent = {
-          raw_value:JSON.stringify(msgComplete) ,
-          amount:JSON.stringify(msgVal.amount) ,
-          fee: JSON.stringify(txData.fee),
-          withdrawer_did:JSON.stringify(msgVal.withdrawer_did) ,
-          bond_did: JSON.stringify(msgVal.bond_did),
-        };
-       return this.bondSyncHandler.createbondreservewithdrawel(bondwithdrawreserveDoc); 
+      //   let bondwithdrawreserveDoc: IWithdrawReserveEvent = {
+      //     raw_value:JSON.stringify(msgCompleteTransaction) ,
+      //     amount:JSON.stringify(msgVal.amount) ,
+      //     fee: JSON.stringify(txData.fee),
+      //     withdrawer_did:JSON.stringify(msgVal.recipient_did) ,
+      //     height: height,
+       //  timestamp: timestamp,
+      //     bond_did: JSON.stringify(msgVal.bond_did),
+      //   };
+      //  return this.bondSyncHandler.createbondreservewithdrawel(bondwithdrawreserveDoc); 
          
       case this.TXN_TYPE.BOND_CREATE:
         let bondDoc: IBond = {

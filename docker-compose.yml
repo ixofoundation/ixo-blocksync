@@ -3,7 +3,6 @@ services:
   block-sync:
     container_name: block-sync
     image: ixofoundation/ixo-blocksync:latest
-    environment:
     env_file: .env
     restart: always
     ports:
