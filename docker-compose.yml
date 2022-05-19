@@ -16,11 +16,11 @@ services:
         max-size: "1m"
         max-file: "1"
 
-  block-sync-db:
-    container_name: block-sync-db
-    image: mongo
-    restart: always
-    ports:
+    block-sync-db:
+      container_name: block-sync-db
+      image: mongo
+      restart: always
+      ports:
         - "27017:27017"
-    volumes:
+      volumes:
         - ./data/db:/data/db
