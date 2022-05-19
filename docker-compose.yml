@@ -3,7 +3,6 @@ services:
   block-sync:
     container_name: block-sync
     image: ixofoundation/ixo-blocksync:latest
-    environment:
     env_file: .env
     restart: always
     ports:
@@ -16,11 +15,11 @@ services:
         max-size: "1m"
         max-file: "1"
 
-    block-sync-db:
-      container_name: block-sync-db
-      image: mongo
-      restart: always
-      ports:
-        - "27017:27017"
-      volumes:
-        - ./data/db:/data/db
+  block-sync-db:
+    container_name: block-sync-db
+    image: mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./data/db:/data/db
