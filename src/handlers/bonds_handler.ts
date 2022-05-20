@@ -3,6 +3,7 @@ import {BondDB} from '../db/models/bonds';
 import { Transaction } from '../db/models/transactions';
 import { WithdrawShare } from '../db/models/sharewithdrawels';
 import { WithdrawReserve } from '../db/models/reservewithdrawels';
+import { Outcomepayment } from '../db/models/outcomepayment';
 
 import {io} from '../server';
 
@@ -139,6 +140,18 @@ export class BondsHandler {
   getalphahistorybydid = (bondDid: string) => {
     return new Promise((resolve: Function, reject: Function) => {
       return Alphachange.find({bond_did: bondDid}, (err, res) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(res);
+        }
+      });
+    });
+  }  
+
+    getoutcomehistorybydid = (bondDid: string) => {
+    return new Promise((resolve: Function, reject: Function) => {
+      return Outcomepayment.find({bond_did: bondDid}, (err, res) => {
         if (err) {
           reject(err);
         } else {

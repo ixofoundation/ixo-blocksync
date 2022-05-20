@@ -1,3 +1,5 @@
+import { Outcomepayment } from './../db/models/outcomepayment';
+
 import {IBond, NewBondInfo, PriceEntry} from '../models/bonds';
 import {BondDB} from '../db/models/bonds';
 import {Transaction} from '../db/models/transactions';
@@ -8,6 +10,8 @@ import {ITransactionEvent} from '../models/order';
 import {IWithdrawReserveEvent} from '../models/withdraw_reserve';
 import {IWithdrawShareEvent} from '../models/withdraw_share';
 import {IAlphachangeEvent} from '../models/alphachange';
+import {IOutcomepaymentEvent} from '../models/outcomepayment';
+
 import {io} from '../server';
 
 export class BondSyncHandler {
@@ -74,6 +78,19 @@ export class BondSyncHandler {
           console.log(err);
         } else {
           io.emit('bond reserve withdrawel created', bondreservewithdrawel);
+          resolve(res);
+        }
+      });
+    });
+  };
+  createoutcomepayment = (outcomepayment:IOutcomepaymentEvent ) => {
+    return new Promise((resolve: Function, reject: Function) => {
+      return Outcomepayment.create(outcomepayment, (err, res) => {
+        if (err) {
+          reject(err);
+          console.log(err);
+        } else {
+          io.emit('outcome payment created', outcomepayment);
           resolve(res);
         }
       });

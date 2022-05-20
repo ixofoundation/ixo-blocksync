@@ -1,4 +1,6 @@
-import { Alphachange } from './../db/models/alpha';
+import { BlockResult } from './../models/block';
+
+
 import {ProjectSyncHandler} from './project_sync_handler';
 import {IAgent, IClaim, IProject} from '../models/project';
 import {StatsSyncHandler} from './stats_sync_handler';
@@ -7,6 +9,7 @@ import {ITransactionEvent} from '../models/order';
 import {IWithdrawReserveEvent} from '../models/withdraw_reserve';
 import {IWithdrawShareEvent} from '../models/withdraw_share';
 import {IAlphachangeEvent} from '../models/alphachange';
+import {IOutcomepaymentEvent} from '../models/outcomepayment';
 import {ICredential, IDid} from '../models/did';
 import {DidSyncHandler} from './did_sync_handler';
 import {BondSyncHandler} from './bonds_sync_handler';
@@ -18,6 +21,7 @@ export class TransactionHandler {
     DID: "did/AddDid",
     BOND_CREATE: "bonds/MsgCreateBond",
     BOND_TRANSACTION_FULFILL:"bonds/MsgBuy",
+    BOND_TRANSACTION_OUTCOMEPAYMENT:"bonds/MsgMakeOutcomePayment",
     BOND_WITHDRAWEL:"bonds/MsgWithdrawShare",
     BOND_ALPHA_CHANGE:"bonds/MsgSetNextAlpha",
     BOND_ALPHA_CHANGE_EDIT_SUCCESS:"bonds/EditAlphaSuccess",
@@ -71,9 +75,12 @@ export class TransactionHandler {
     return nodeDidIncluded;
   };
 
-  routeTransaction(txData: any,height:string,timestamp:string) {
+  routeTransaction(txData: any,height:string,timestamp:string,rawblock:any) {
 
+    // console.log(rawblock);
+    console.log(rawblock.blockResult.txs_results[0]);
     console.log(txData);
+    const txdataraw = txData;
     
     if (typeof txData == 'string') {
       // If the tx is a string then assume it is in hex format
@@ -87,6 +94,7 @@ export class TransactionHandler {
     const msgCompleteTransaction = txData;
 
     console.log(msgVal);
+    console.log(msgCompleteTransaction);
     
     switch (txData.msg[0].type) {
       case this.TXN_TYPE.PROJECT:
@@ -141,30 +149,47 @@ export class TransactionHandler {
       case this.TXN_TYPE.BOND_WITHDRAWEL:
         console.log(msgCompleteTransaction.msg[0].value);
         console.log("Bond share withdraw event");
-        // let bondwithdrawDoc: IWithdrawShareEvent = {
-        //   raw_value:JSON.stringify(msgComplete) ,
-        //   amount:JSON.stringify(msgVal.amount) ,
-        //   fee: JSON.stringify(txData.fee),
-        //   withdrawer_did:JSON.stringify(msgVal.withdrawer_did) ,
-        //   bond_did: JSON.stringify(msgVal.bond_did),
-        // height: height,
-        //  timestamp: timestamp,
-        // };
-        // return this.bondSyncHandler.createbondsharewithdrawel(bondwithdrawDoc); 
+        let bondwithdrawDoc: IWithdrawShareEvent = {
+          raw_value:JSON.stringify(msgComplete) ,
+          // amount:JSON.stringify(msgVal.amount) ,
+          // fee: JSON.stringify(txData.fee),
+          transaction:JSON.stringify(rawblock.blockResult.txs_results[0]),
+          recipient_did:msgVal.recipient_did,
+          bond_did: msgVal.bond_did,
+          height: height,
+          timestamp: timestamp,
+        };
+        return this.bondSyncHandler.createbondsharewithdrawel(bondwithdrawDoc); 
       case this.TXN_TYPE.BOND_WITHDRAWEL_RESERVE:
         console.log(msgCompleteTransaction);
         console.log("Bond reserve withdraw event");
 
-      //   let bondwithdrawreserveDoc: IWithdrawReserveEvent = {
-      //     raw_value:JSON.stringify(msgCompleteTransaction) ,
-      //     amount:JSON.stringify(msgVal.amount) ,
-      //     fee: JSON.stringify(txData.fee),
-      //     withdrawer_did:JSON.stringify(msgVal.recipient_did) ,
-      //     height: height,
-       //  timestamp: timestamp,
-      //     bond_did: JSON.stringify(msgVal.bond_did),
-      //   };
-      //  return this.bondSyncHandler.createbondreservewithdrawel(bondwithdrawreserveDoc); 
+        let bondwithdrawreserveDoc: IWithdrawReserveEvent = {
+          raw_value:JSON.stringify(msgCompleteTransaction) ,
+          amount:msgVal.amount ,
+          fee: txData.fee,
+          withdrawer_did:msgVal.recipient_did ,
+          height: height,
+        timestamp: timestamp,
+          bond_did: msgVal.bond_did,
+        };
+       return this.bondSyncHandler.createbondreservewithdrawel(bondwithdrawreserveDoc);
+
+       //Outcome payments
+      case this.TXN_TYPE.BOND_TRANSACTION_OUTCOMEPAYMENT:
+        console.log(msgCompleteTransaction);
+        console.log("Bond outcome payments event");
+
+        let outcomepaymentDoc: IOutcomepaymentEvent = {
+          raw_value:JSON.stringify(msgCompleteTransaction) ,
+          amount:JSON.stringify(msgVal.amount) ,
+      
+          sender_did:JSON.stringify(msgVal.sender_did) ,
+          height: height,
+        timestamp: timestamp,
+          bond_did: JSON.stringify(msgVal.bond_did),
+        };
+       return this.bondSyncHandler.createoutcomepayment(outcomepaymentDoc); 
          
       case this.TXN_TYPE.BOND_CREATE:
         let bondDoc: IBond = {

@@ -46,9 +46,20 @@ class App {
 
  
 
-    //get alpha updates
 
-     //getBondWithdrawals
+
+     //getoutcomepayments
+     this.express.get('/api/bond/get/outcomepayments/:bonddid', (req, res, next) => {
+
+      bondsHandler.getoutcomehistorybydid(req.params.bonddid).then((transactiondata: any) => {
+        res.send(transactiondata);
+      }).catch((err) => {
+        next(err);
+      });
+    });
+
+
+         //get alpha updates
      this.express.get('/api/bond/get/alphas/:bonddid', (req, res, next) => {
 
       bondsHandler.getalphahistorybydid(req.params.bonddid).then((transactiondata: any) => {

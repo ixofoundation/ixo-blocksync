@@ -84,6 +84,7 @@ export class SyncBlocks {
     blockQueue.onBlock((result: BlockResult, event: NewBlockEvent) => {
       this.chainHandler.setBlockHeight(result.getBlockHeight(), chain.chainId);
       const height = result.getBlockHeight();
+      const rawblock = result;
       const timestamp = new Date(Date.parse(event.block.block.header.time))
       // console.log('Syncing block number ' + height);
 
@@ -93,7 +94,7 @@ export class SyncBlocks {
           if (result.getTransactionCode(i) == undefined || result.getTransactionCode(i) == 0) {
             this.authHandler.decodeTx(event.block.getTransaction(i))
               .then((response: any) => {
-                this.txnHandler.routeTransaction(response.result,String(height),String(timestamp));
+                this.txnHandler.routeTransaction(response.result,String(height),String(timestamp),rawblock);
               })
               .catch((err) => {
                 throw(err);
