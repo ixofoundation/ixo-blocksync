@@ -165,13 +165,14 @@ export class TransactionHandler {
         console.log("Bond reserve withdraw event");
 
         let bondwithdrawreserveDoc: IWithdrawReserveEvent = {
-          raw_value:JSON.stringify(msgCompleteTransaction) ,
-          amount:msgVal.amount ,
-          fee: txData.fee,
-          withdrawer_did:msgVal.recipient_did ,
-          height: height,
-        timestamp: timestamp,
+          raw_value:JSON.stringify(msgComplete) ,
+          // amount:JSON.stringify(msgVal.amount) ,
+          // fee: JSON.stringify(txData.fee),
+          transaction:JSON.stringify(rawblock.blockResult.txs_results[0]),
+          recipient_did:msgVal.recipient_did,
           bond_did: msgVal.bond_did,
+          height: height,
+          timestamp: timestamp,
         };
        return this.bondSyncHandler.createbondreservewithdrawel(bondwithdrawreserveDoc);
 
