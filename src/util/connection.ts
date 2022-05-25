@@ -84,6 +84,7 @@ export class Connection {
           }
         })
         .catch(error => {
+          console.log("\n***\n***\nerror: Failed to get Block");
           console.log("\n***\n***\nerror: " + error);
           reject(error);
         });
@@ -109,6 +110,7 @@ export class Connection {
       })
       .catch(err => {
         console.log("\n***\n***\nerror: " + err);
+        console.log("\n***\n***\nerror: Failed to get BondInfo");
         return '';
       });
   }

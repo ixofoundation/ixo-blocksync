@@ -50,7 +50,7 @@ export class SyncBlocks {
         }
       })
         .catch((error: any) => {
-          console.log("\n!!!!\nerror: " + error);
+          console.log("\n!!!!\n  Syncing error: " + error);
         });
 
     });
