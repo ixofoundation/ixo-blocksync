@@ -16,6 +16,8 @@
   "author": "Nicolaas Vercuiel",
   "license": "MIT",
   "dependencies": {
+    "@sentry/node": "^6.19.7",
+    "@sentry/tracing": "^6.19.7",
     "apisauce": "^2.1.5",
     "axios": "^0.21.2",
     "body-parser": "^1.19.0",

@@ -3,6 +3,8 @@ import * as cors from 'cors';
 import * as bodyParser from 'body-parser';
 import * as logger from './util/logger';
 import * as compression from 'compression';
+import * as Sentry from "@sentry/node";
+import * as Tracing from "@sentry/tracing";
 import {ProjectHandler} from './handlers/project_handler';
 import {DidHandler} from './handlers/did_handler';
 import {StatsHandler} from './handlers/stats_handler';
@@ -33,6 +35,13 @@ class App {
     this.express.use(bodyParser.json());
     this.express.use(logger.before);
     this.express.use(compression());
+    Sentry.init({
+      dsn: process.env.SENTRYDSN, 
+      // Set tracesSampleRate to 1.0 to capture 100%
+      // of transactions for performance monitoring.
+      // We recommend adjusting this value in production
+      tracesSampleRate: 1.0,
+    });
   }
 
   // Configure API endpoints.
