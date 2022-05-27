@@ -21,6 +21,13 @@ class App {
   // Run configuration methods on the Express instance.
   constructor() {
     this.express = express();
+    Sentry.init({
+      dsn: process.env.SENTRYDSN, 
+      // Set tracesSampleRate to 1.0 to capture 100%
+      // of transactions for performance monitoring.
+      // We recommend adjusting this value in production
+      tracesSampleRate: 1.0,
+    });
     this.middleware();
     this.routes(
       new AuthHandler(), new ProjectHandler(), new BondsHandler(),
@@ -35,15 +42,18 @@ class App {
     this.express.use(bodyParser.json());
     this.express.use(logger.before);
     this.express.use(compression());
-    Sentry.init({
-      dsn: process.env.SENTRYDSN, 
-      // Set tracesSampleRate to 1.0 to capture 100%
-      // of transactions for performance monitoring.
-      // We recommend adjusting this value in production
-      tracesSampleRate: 1.0,
-    });
+    this.express.use(Sentry.Handlers.requestHandler() as express.RequestHandler);
+    this.express.use(Sentry.Handlers.errorHandler({
+      shouldHandleError(error) {
+        // Capture all 404 and 500 errors
+        if (error) {
+          return true;
+        }
+        return false;
+      },
+    }) as express.ErrorRequestHandler);
   }
-
+  
   // Configure API endpoints.
   private routes(authHandler: AuthHandler, projectHandler: ProjectHandler,
                  bondsHandler: BondsHandler, didHandler: DidHandler,

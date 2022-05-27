@@ -7,7 +7,8 @@
     "start": "tsc && node build/dist/server.js",
     "dropdb": "tsc && node build/dist/dropdb.js",
     "build": "tsc",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "devClear": "bash ./bin/start_clear.sh"
   },
   "repository": "https://github.com/ixofoundation/ixo-blocksync",
   "keywords": [
@@ -20,6 +21,7 @@
     "@sentry/tracing": "^6.19.7",
     "apisauce": "^2.1.5",
     "axios": "^0.21.2",
+    "axios-retry": "^3.2.5",
     "body-parser": "^1.19.0",
     "clui": "^0.3.6",
     "compression": "^1.7.4",

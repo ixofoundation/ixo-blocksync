@@ -1,7 +1,9 @@
 import {ProjectDB} from '../db/models/project';
 import axios from 'axios';
 import {io} from '../server';
+import axiosRetry from 'axios-retry';
 
+axiosRetry(axios, { retries: 3 });
 declare var Promise: any;
 
 export class ProjectHandler {

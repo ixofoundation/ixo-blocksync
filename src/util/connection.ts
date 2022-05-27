@@ -1,4 +1,7 @@
 import axios, {AxiosPromise} from 'axios';
+import axiosRetry from 'axios-retry';
+
+axiosRetry(axios, { retries: 3 });
 
 export class Connection {
   chainUri: string;
