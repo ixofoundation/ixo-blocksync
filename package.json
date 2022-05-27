@@ -1,6 +1,6 @@
 {
   "name": "ixo-blocksync",
-  "version": "1.1.7",
+  "version": "1.2.5",
   "description": "Syncs all the public info from an ixo blockchain to an instance of MongoDB ",
   "main": "index.js",
   "scripts": {
@@ -14,7 +14,7 @@
   "keywords": [
     "blockchain"
   ],
-  "author": "Nicolaas Vercuiel",
+  "author": "Nicolaas Vercuiel, Casey Pazera, Andrew Margetts",
   "license": "MIT",
   "dependencies": {
     "@sentry/node": "^6.19.7",
