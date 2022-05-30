@@ -78,7 +78,7 @@ export class TransactionHandler {
   routeTransaction(txData: any,height:string,timestamp:string,rawblock:any) {
 
     // console.log(rawblock);
-    console.log(rawblock.blockResult.txs_results[0]);
+    // console.log(rawblock.blockResult.txs_results[0]);
     console.log(txData);
     const txdataraw = txData;
     
