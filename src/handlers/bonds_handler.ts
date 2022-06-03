@@ -205,9 +205,21 @@ export class BondsHandler {
       });
     });
   }
-  getwithdrawhistoryfrombondreservebywithdrawerdid = (bondDid: string) => {
+  getwithdrawhistoryfrombondreservebyrecipientdid = (recipientdid: string) => {
     return new Promise((resolve: Function, reject: Function) => {
-      return WithdrawReserve.find({bond_did: bondDid}, (err, res) => {
+      return WithdrawReserve.find({recipient_did: recipientdid}, (err, res) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(res);
+        }
+      });
+    });
+  }  
+  
+  getwithdrawhistoryfrombondsharebyrecipientdid = (recipientdid: string) => {
+    return new Promise((resolve: Function, reject: Function) => {
+      return WithdrawShare.find({recipient_did: recipientdid}, (err, res) => {
         if (err) {
           reject(err);
         } else {
@@ -216,6 +228,8 @@ export class BondsHandler {
       });
     });
   }
+
+  
   getwithdrawhistoryfrombondsharebybuyerdid = (withdrawer_did: string) => {
     return new Promise((resolve: Function, reject: Function) => {
       return WithdrawReserve.find({withdrawer_did: withdrawer_did}, (err, res) => {

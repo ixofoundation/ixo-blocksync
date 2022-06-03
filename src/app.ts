@@ -118,9 +118,11 @@ class App {
         next(err);
       });
     });
-    this.express.get('/api/bond/get/withdraw/reserve/bywithdrawdid/:withdrawerdid', (req, res, next) => {
 
-      bondsHandler.getwithdrawhistoryfrombondreservebywithdrawerdid(req.params.withdrawerdid).then((transactiondata: any) => {
+     //update this
+    this.express.get('/api/bond/get/withdraw/reserve/byrecipientdid/:recipientdid', (req, res, next) => {
+
+      bondsHandler.getwithdrawhistoryfrombondreservebyrecipientdid(req.params.recipientdid).then((transactiondata: any) => {
         res.send(transactiondata);
       }).catch((err) => {
         next(err);
@@ -135,9 +137,11 @@ class App {
         next(err);
       });
     });
-    this.express.get('/api/bond/get/withdraw/share/bywithdrawdid/:withdrawerdid', (req, res, next) => {
 
-      bondsHandler.getwithdrawhistoryfrombondreservebywithdrawerdid(req.params.withdrawerdid).then((transactiondata: any) => {
+    //update this
+    this.express.get('/api/bond/get/withdraw/share/byrecipientdid/:recipientdid', (req, res, next) => {
+
+      bondsHandler.getwithdrawhistoryfrombondsharebyrecipientdid(req.params.recipientdid).then((transactiondata: any) => {
         res.send(transactiondata);
       }).catch((err) => {
         next(err);
