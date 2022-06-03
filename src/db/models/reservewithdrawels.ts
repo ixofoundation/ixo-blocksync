@@ -6,7 +6,7 @@ interface IWithdrawReserveEvent extends Document {
     // amount: string;
     // fee: string;
     transaction: string;
-    recipient_did: string;
+    withdrawer_did: string;
     bond_did: string;
     height: string;
     timestamp:string;
@@ -18,7 +18,7 @@ const WithdrawReserveSchema: Schema = new Schema({
     // amount: { type: String, required: true },
     // fee: { type: String, required: false },
     transaction: { type: String, required: true },
-    recipient_did: { type: String, required: true },
+    withdrawer_did: { type: String, required: true },
     bond_did: { type: String, required: true },
     height: { type: String, required: true },
     timestamp: { type: String, required: true },
@@ -28,4 +28,4 @@ WithdrawReserveSchema.pre('save', function (this: IWithdrawReserveEvent, next: a
     return this;
   });
 
-export const WithdrawReserve: Model<IWithdrawReserveEvent> = model('WithdrawReserveSchema', WithdrawReserveSchema);
+export const WithdrawReserve: Model<IWithdrawReserveEvent> = model('WithdrawReserve', WithdrawReserveSchema);

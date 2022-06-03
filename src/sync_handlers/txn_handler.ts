@@ -169,7 +169,7 @@ export class TransactionHandler {
           // amount:JSON.stringify(msgVal.amount) ,
           // fee: JSON.stringify(txData.fee),
           transaction:JSON.stringify(rawblock.blockResult.txs_results[0]),
-          recipient_did:msgVal.recipient_did,
+          withdrawer_did:msgVal.withdrawer_did,
           bond_did: msgVal.bond_did,
           height: height,
           timestamp: timestamp,
