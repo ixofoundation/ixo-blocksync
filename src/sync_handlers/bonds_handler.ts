@@ -14,9 +14,9 @@ export class BondHandler {
         this.bondSyncHandler.addBondInfo(bondInfo)
       }   
       
-      if (bondInfo.hasMultiplePrices()) {
-        this.bondSyncHandler.addBondInfoInitialPrice(bondInfo)
-      }
+      // if (bondInfo.hasMultiplePrices()) {
+      //   this.bondSyncHandler.addBondInfoInitialPrice(bondInfo)
+      // }
     }
   }
   

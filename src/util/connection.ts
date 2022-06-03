@@ -113,7 +113,8 @@ export class Connection {
       })
       .catch(err => {
         console.log("\n***\n***\nerror: " + err);
-        console.log("\n***\n***\nerror: Failed to get BondInfo");
+
+        console.log(`\n***\n***\nerror: Failed to get BondInfo @ ${height}`);
         return '';
       });
   }
