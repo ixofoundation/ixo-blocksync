@@ -12,7 +12,11 @@ export class BondHandler {
       // Only add bond info if bond has one price
       if (!bondInfo.hasMultiplePrices()) {
         this.bondSyncHandler.addBondInfo(bondInfo)
-      }
+      }   
+      
+      // if (bondInfo.hasMultiplePrices()) {
+      //   this.bondSyncHandler.addBondInfoInitialPrice(bondInfo)
+      // }
     }
   }
   

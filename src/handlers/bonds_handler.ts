@@ -185,7 +185,7 @@ export class BondsHandler {
   }
   getwithdrawhistoryfrombondreservebybonddid = (bondDid: string) => {
     return new Promise((resolve: Function, reject: Function) => {
-      return WithdrawShare.find({bond_did: bondDid}, (err, res) => {
+      return WithdrawReserve.find({bond_did: bondDid}, (err, res) => {
         if (err) {
           reject(err);
         } else {

@@ -86,7 +86,7 @@ export class SyncBlocks {
       const height = result.getBlockHeight();
       const rawblock = result;
       const timestamp = new Date(Date.parse(event.block.block.header.time))
-      // console.log('Syncing block number ' + height);
+      console.log('Syncing block number ' + height);
 
       // Iterate over all transactions, if any, and route accordingly
       if (event.getTransactions() != null) {

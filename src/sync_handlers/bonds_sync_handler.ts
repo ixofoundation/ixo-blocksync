@@ -140,5 +140,30 @@ export class BondSyncHandler {
           }
         })
     });
+  }  
+  
+  addBondInfoInitialPrice = (bondInfo: NewBondInfo) => {
+    // Construct a new price entry from the bond info
+    let priceEntry: PriceEntry = {
+      price: 0.000000000000000000,
+      time: bondInfo.blockTimestamp
+    }
+
+
+
+    return new Promise((resolve: Function, reject: Function) => {
+      // Get latest price and only append new price if previous price not the same
+  BondDB.updateOne(
+              {did: bondInfo.did},
+              {$push: {priceHistory: priceEntry}},
+              (err, res) => {
+                if (err) {
+                  reject(err);
+                } else {
+                  io.emit('bond info updated', bondInfo.did);
+                  resolve(res);
+                }
+              });
+    });
   }
 }
