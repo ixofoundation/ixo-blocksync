@@ -194,9 +194,9 @@ export class BondsHandler {
       });
     });
   }
-  getwithdrawhistoryfrombondsharebybonddid = (withdrawer_did: string) => {
+  getwithdrawhistoryfrombondsharebybonddid = (bond_did: string) => {
     return new Promise((resolve: Function, reject: Function) => {
-      return WithdrawShare.find({withdrawer_did: withdrawer_did}, (err, res) => {
+      return WithdrawShare.find({bond_did: bond_did}, (err, res) => {
         if (err) {
           reject(err);
         } else {
