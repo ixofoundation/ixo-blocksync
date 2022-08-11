@@ -1,4 +1,4 @@
-import { chainId, prisma } from "../prisma_client";
+import { prisma } from "../prisma_client";
 import { IChain } from "../interface_models/Chain";
 
 export const createChain = async (chainDoc: IChain) => {

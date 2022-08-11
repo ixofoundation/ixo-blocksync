@@ -1,3 +1,4 @@
+require('dotenv').config();
 require("log-timestamp");
 import * as http from "http";
 import App from "./app";
