@@ -1,7 +1,7 @@
 export interface IDid {
     did: string;
     publicKey: string;
-    Credential: ICredential[];
+    Credential?: ICredential[];
 };
 
 export interface ICredential {

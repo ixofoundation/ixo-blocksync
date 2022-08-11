@@ -9,6 +9,7 @@ export interface NewProject {
 
 interface NewData {
     title: string;
+    type?: string;
     projectDid: string;
     ownerName: string;
     ownerEmail: string;
@@ -94,7 +95,7 @@ export interface NewAgent {
 export interface IProject {
     projectDid: string;
     title: string;
-    type: string;
+    type?: string;
     ownerName: string;
     ownerEmail: string;
     shortDescription: string;
@@ -148,5 +149,85 @@ export interface IClaim {
     claimTemplateId: string;
     status: string;
     saId: string;
-    eaId: string;
+    eaId?: string;
+};
+
+export const convertAgentDoc = (projectDid: string, newAgent: NewAgent) => {
+    let agentDoc: IAgent = {
+        agentDid: newAgent.did,
+        projectDid: projectDid,
+        status: newAgent.status,
+        kyc: newAgent.kyc,
+        role: newAgent.role,
+    };
+    return agentDoc;
+};
+
+export const convertClaimDoc = (projectDid: string, newClaim: NewClaim) => {
+    let claimDoc: IClaim = {
+        claimId: newClaim.claimId,
+        projectDid: projectDid,
+        date: newClaim.date,
+        location: [newClaim.location.long, newClaim.location.lat],
+        claimTemplateId: newClaim.claimTemplateId,
+        status: newClaim.status,
+        saId: newClaim.saDid,
+        eaId: newClaim.eaDid,
+    };
+    return claimDoc;
+};
+
+export const convertProjectDoc = (newProject: NewProject) => {
+    let projectDoc: IProject = {
+        projectDid: newProject.projectDid,
+        title: newProject.data.title,
+        type: newProject.data.type,
+        ownerName: newProject.data.ownerName,
+        ownerEmail: newProject.data.ownerEmail,
+        shortDescription: newProject.data.shortDescription,
+        longDescription: newProject.data.longDescription,
+        impactAction: newProject.data.impactAction,
+        createdOn: newProject.data.createdOn,
+        createdBy: newProject.data.createdBy,
+        projectLocation: newProject.data.projectLocation,
+        requiredClaims: newProject.data.requiredClaims,
+        sdgs: newProject.data.sdgs,
+        templateSchema: newProject.data.templates.claim.schema,
+        templateForm: newProject.data.templates.claim.form,
+        successfulClaims: newProject.data.claimStats.currentSuccessful,
+        rejectedClaims: newProject.data.claimStats.currentRejected,
+        evaluators: newProject.data.agentsStats.evaluators,
+        evaluatorsPending: newProject.data.agentsStats.evaluatorsPending,
+        serviceProviders: newProject.data.agentsStats.serviceProviders,
+        serviceProvidersPending: newProject.data.agentsStats.serviceProvidersPending,
+        investors: newProject.data.agentsStats.investors,
+        investorsPending: newProject.data.agentsStats.investorsPending,
+        ixoStaked: newProject.data.ixo.totalStaked,
+        ixoUsed: newProject.data.ixo.totalUsed,
+        serviceEndpoint: newProject.data.serviceEndpoint,
+        imageLink: newProject.data.imageLink,
+        founderName: newProject.data.founder.name,
+        founderEmail: newProject.data.founder.email,
+        founderCountry: newProject.data.founder.countryOfOrigin,
+        founderDescription: newProject.data.founder.shortDescription,
+        founderWebsite: newProject.data.founder.websiteURL,
+        founderLogo: newProject.data.founder.logoLink,
+        nodeDid: newProject.data.nodeDid,
+        pubKey: newProject.pubKey,
+        senderDid: newProject.senderDid,
+        txHash: newProject.txHash,
+        status: newProject.status,
+    };
+
+    let agentDocs: IAgent[] = [];
+    newProject.data.agents.forEach(agent => {
+        agentDocs.push(convertAgentDoc(projectDoc.projectDid, agent));
+    });
+
+    let claimDocs: IClaim[] = [];
+    newProject.data.claims.forEach(claim => {
+        claimDocs.push(convertClaimDoc(projectDoc.projectDid, claim));
+    });
+
+    return { projectDoc, agentDocs, claimDocs };
 };

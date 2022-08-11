@@ -126,6 +126,7 @@ CREATE TABLE "Stat" (
     "totalServiceProviders" INTEGER NOT NULL,
     "totalProjects" INTEGER NOT NULL,
     "totalEvaluationAgents" INTEGER NOT NULL,
+    "totalInvestors" INTEGER NOT NULL,
     "totalClaims" INTEGER NOT NULL,
     "successfulClaims" INTEGER NOT NULL,
     "submittedClaims" INTEGER NOT NULL,
@@ -140,7 +141,7 @@ CREATE TABLE "Stat" (
 CREATE TABLE "Project" (
     "projectDid" TEXT NOT NULL,
     "title" TEXT NOT NULL,
-    "type" TEXT NOT NULL,
+    "type" TEXT,
     "ownerName" TEXT NOT NULL,
     "ownerEmail" TEXT NOT NULL,
     "shortDescription" TEXT NOT NULL,

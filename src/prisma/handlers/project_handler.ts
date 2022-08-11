@@ -5,8 +5,12 @@ import { IAgent, IClaim, IProject } from "../interface_models/Project";
 
 axiosRetry(axios, { retries: 3 });
 
-export const createProject = async (projectDoc: IProject) => {
-    return prisma.project.create({ data: projectDoc });
+export const createProject = async (projectDoc: IProject, agentDocs: IAgent[], claimDocs: IClaim[]) => {
+    let result: any;
+    result = await prisma.project.create({ data: projectDoc });
+    result += await prisma.agent.createMany({ data: agentDocs });
+    result += await prisma.claim.createMany({ data: claimDocs });
+    return result;
 };
 
 export const addAgent = async (agentDoc: IAgent) => {

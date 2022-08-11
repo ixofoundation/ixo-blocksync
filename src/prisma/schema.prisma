@@ -124,6 +124,7 @@ model Stat {
   totalServiceProviders Int
   totalProjects         Int
   totalEvaluationAgents Int
+  totalInvestors        Int
   totalClaims           Int
   successfulClaims      Int
   submittedClaims       Int
@@ -135,7 +136,7 @@ model Stat {
 model Project {
   projectDid              String   @id
   title                   String
-  type                    String
+  type                    String?
   ownerName               String
   ownerEmail              String
   shortDescription        String

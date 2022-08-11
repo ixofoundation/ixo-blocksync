@@ -6,8 +6,11 @@ import { IShareWithdrawal } from "../interface_models/ShareWithdrawal";
 import { IReserveWithdrawal } from "../interface_models/ReserveWithdrawal";
 import { IOutcomePayment } from "../interface_models/OutcomePayment";
 
-export const createBondPrice = async (bondDoc: IBond) => {
-    return prisma.bond.create({ data: bondDoc });
+export const createBondPrice = async (bondDoc: IBond, priceDocs?: IPriceEntry[]) => {
+    let result: any;
+    result = await prisma.bond.create({ data: bondDoc });
+    if (priceDocs) { result += await prisma.priceEntry.createMany({ data: priceDocs }) };
+    return result;
 };
 
 export const createTransaction = async (transactionDoc: ITransaction) => {

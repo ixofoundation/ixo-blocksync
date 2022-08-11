@@ -6,7 +6,6 @@ export interface IBond {
     name: string;
     description: string;
     creatorDid: string;
-    PriceEntry: IPriceEntry[];
 };
 
 export interface IPriceEntry {
@@ -63,7 +62,3 @@ export class NewBondsInfo {
         );
     };
 };
-
-export const createIBond = (newBondInfo: NewBondInfo) => {
-    newBondInfo.did
-}
