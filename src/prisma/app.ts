@@ -44,13 +44,13 @@ class App {
 
     private routes(): void {
         this.express.get("/", async (req, res) => {
-            await res.send("API is Running");
+            await res.json("API is Running");
         });
 
         this.express.get("/api/bond/get/outcomepayments/:bonddid", async (req, res, next) => {
             try {
                 const outcomePayments = await BondHandler.getOutcomeHistoryByDid(req.params.bonddid);
-                res.send(outcomePayments);
+                res.json(outcomePayments);
             } catch (error) {
                 next(error)
             }
@@ -59,7 +59,7 @@ class App {
         this.express.get("/api/bond/get/alphas/:bonddid", async (req, res, next) => {
             try {
                 const alphaHistory = await BondHandler.getAlphaHistoryByDid(req.params.bonddid);
-                res.send(alphaHistory);
+                res.json(alphaHistory);
             } catch (error) {
                 next(error)
             }
@@ -68,7 +68,7 @@ class App {
         this.express.get("/api/bond/get/transactions/:bonddid", async (req, res, next) => {
             try {
                 const transactions = await BondHandler.getTransactionHistoryBond(req.params.bonddid);
-                res.send(transactions);
+                res.json(transactions);
             } catch (error) {
                 next(error)
             }
@@ -77,7 +77,7 @@ class App {
         this.express.get("/api/bond/get/transactions/:entityType", async (req, res, next) => {
             try {
                 const transactions = await BondHandler.getTransactionHistoryBondBuyer(req.params.entityType);
-                res.send(transactions);
+                res.json(transactions);
             } catch (error) {
                 next(error)
             }
@@ -86,7 +86,7 @@ class App {
         this.express.get("/api/bond/get/withdraw/reserve/bybonddid/:bonddid", async (req, res, next) => {
             try {
                 const reserveWithdrawals = await BondHandler.getWithdrawHistoryFromBondReserveByBondDid(req.params.bonddid);
-                res.send(reserveWithdrawals);
+                res.json(reserveWithdrawals);
             } catch (error) {
                 next(error)
             }
@@ -95,7 +95,7 @@ class App {
         this.express.get("/api/bond/get/withdraw/reserve/byrecipientdid/:recipientdid", async (req, res, next) => {
             try {
                 const reserveWithdrawals = await BondHandler.getWithdrawHistoryFromBondReserveByWithdrawerId(req.params.recipientdid);
-                res.send(reserveWithdrawals);
+                res.json(reserveWithdrawals);
             } catch (error) {
                 next(error)
             }
@@ -104,7 +104,7 @@ class App {
         this.express.get("/api/bond/get/withdraw/share/bybondid/:bonddid", async (req, res, next) => {
             try {
                 const shareWithdrawals = await BondHandler.getWithdrawHistoryFromBondShareByBondDid(req.params.bonddid);
-                res.send(shareWithdrawals);
+                res.json(shareWithdrawals);
             } catch (error) {
                 next(error)
             }
@@ -121,7 +121,7 @@ class App {
         this.express.get("/api/project/listProjects", async (req, res, next) => {
             try {
                 const projects = await ProjectHandler.listAllProjects();
-                res.send(projects);
+                res.json(projects);
             } catch (error) {
                 next(error)
             }
@@ -130,7 +130,7 @@ class App {
         this.express.get("/api/project/listProjectsFiltered", async (req, res, next) => {
             try {
                 const projects = await ProjectHandler.listAllProjectsFiltered(req.body);
-                res.send(projects);
+                res.json(projects);
             } catch (error) {
                 next(error)
             }
@@ -139,7 +139,7 @@ class App {
         this.express.get("/api/project/getByEntityType/:entityType", async (req, res, next) => {
             try {
                 const projects = await ProjectHandler.listProjectByEntityType(req.params.entityType);
-                res.send(projects);
+                res.json(projects);
             } catch (error) {
                 next(error)
             }
@@ -148,7 +148,7 @@ class App {
         this.express.get("/api/project/getByProjectDid/:projectDid", async (req, res, next) => {
             try {
                 const project = await ProjectHandler.listProjectByProjectDid(req.params.projectDid);
-                res.send(project);
+                res.json(project);
             } catch (error) {
                 next(error)
             }
@@ -157,7 +157,7 @@ class App {
         this.express.get("/api/project/getByProjectSenderDid/:senderDid", async (req, res, next) => {
             try {
                 const project = await ProjectHandler.listProjectBySenderDid(req.params.senderDid);
-                res.send(project);
+                res.json(project);
             } catch (error) {
                 next(error)
             }
@@ -166,7 +166,7 @@ class App {
         this.express.get("/api/project/shields/status/:projectDid", async (req, res, next) => {
             try {
                 const project = await ProjectHandler.listProjectByProjectDid(req.params.projectDid);
-                res.send({
+                res.json({
                     "schemaVersion": 1,
                     "label": "status",
                     "message": project?.status ? project?.status : "null",
@@ -181,7 +181,7 @@ class App {
         this.express.get("/api/project/getProjectAccounts/:projectDid", async (req, res, next) => {
             try {
                 const projectAccounts = await ProjectHandler.getProjectAccountsFromChain(req.params.projectDid);
-                res.send(projectAccounts);
+                res.json(projectAccounts);
             } catch (error) {
                 next(error)
             }
@@ -190,7 +190,7 @@ class App {
         this.express.get("/api/did/getByDid/:did", async (req, res, next) => {
             try {
                 const did = await DidHandler.getDidByDid(req.params.did);
-                res.send(did);
+                res.json(did);
             } catch (error) {
                 next(error)
             }
@@ -199,7 +199,7 @@ class App {
         this.express.get("/api/bonds/listBonds", async (req, res, next) => {
             try {
                 const bonds = await BondHandler.listAllBonds();
-                res.send(bonds);
+                res.json(bonds);
             } catch (error) {
                 next(error)
             }
@@ -208,7 +208,7 @@ class App {
         this.express.get("/api/bonds/listBondsFiltered", async (req, res, next) => {
             try {
                 const bonds = await BondHandler.listAllBondsFiltered(req.body);
-                res.send(bonds);
+                res.json(bonds);
             } catch (error) {
                 next(error)
             }
@@ -217,7 +217,7 @@ class App {
         this.express.get("/api/bonds/getByBondDid/:bondDid", async (req, res, next) => {
             try {
                 const bond = await BondHandler.listBondByBondDid(req.params.bondDid);
-                res.send(bond);
+                res.json(bond);
             } catch (error) {
                 next(error)
             }
@@ -226,7 +226,7 @@ class App {
         this.express.get("/api/bonds/getPriceHistoryByBondDid/:bondDid", async (req, res, next) => {
             try {
                 const priceHistory = await BondHandler.listBondPriceHistoryByBondDid(req.params.bondDid, req.body);
-                res.send(priceHistory);
+                res.json(priceHistory);
             } catch (error) {
                 next(error)
             }
@@ -235,7 +235,7 @@ class App {
         this.express.get("/api/bonds/getByBondCreatorDid/:creatorDid", async (req, res, next) => {
             try {
                 const bonds = await BondHandler.listBondByCreatorDid(req.params.creatorDid);
-                res.send(bonds);
+                res.json(bonds);
             } catch (error) {
                 next(error)
             }
@@ -244,7 +244,7 @@ class App {
         this.express.get("/api/event/getEventByType/:type", async (req, res, next) => {
             try {
                 const events = await EventHandler.getEventsByType(req.params.type);
-                res.send(events);
+                res.json(events);
             } catch (error) {
                 next(error)
             }
@@ -253,7 +253,7 @@ class App {
         this.express.get("/api/stats/listStats", async (req, res, next) => {
             try {
                 const stats = await StatHandler.getStats();
-                res.send(stats[0]);
+                res.json(stats[0]);
             } catch (error) {
                 next(error)
             }
@@ -267,7 +267,7 @@ class App {
                     this.express.get("bondsInfoExtractPeriod"),
                 );
                 const result = bcConn.sendTransaction(req.body)
-                res.send(result)
+                res.json(result)
             } catch (error) {
                 next(error)
             }
@@ -276,7 +276,7 @@ class App {
         this.express.post("/api/sign_data", async (req, res, next) => {
             try {
                 const response = await AuthHandler.getSignData(req.body.msg, req.body.pub_key);
-                res.send(response);
+                res.json(response);
             } catch (error) {
                 next(error)
             }
