@@ -2,9 +2,9 @@
   "compilerOptions": {
     "outDir": "build/dist",
     "module": "commonjs",
-    "target": "es5",
+    "target": "ES2021",
     "lib": [
-      "es6",
+      "ES2021",
       "dom",
       "esnext.asynciterable"
     ],
