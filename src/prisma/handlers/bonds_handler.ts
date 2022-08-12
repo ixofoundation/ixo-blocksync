@@ -1,5 +1,5 @@
 import { prisma } from "../prisma_client";
-import { IBond, IPriceEntry } from "../interface_models/Bond";
+import { IBond, IPriceEntry, NewPriceEntry } from "../interface_models/Bond";
 import { ITransaction } from "../interface_models/Transaction";
 import { IAlphaChange } from "../interface_models/AlphaChange";
 import { IShareWithdrawal } from "../interface_models/ShareWithdrawal";
@@ -33,11 +33,26 @@ export const createOutcomePayment = async (outcomePaymentDoc: IOutcomePayment) =
     return prisma.outcomePayment.create({ data: outcomePaymentDoc });
 };
 
-export const addPriceEntry = async (priceEntryDoc: IPriceEntry) => {
+export const addPriceEntry = async (newPriceEntryDoc: NewPriceEntry) => {
     let result: any;
-    let lastPrice = await getLastPrice(priceEntryDoc.bondDid);
-    if (!lastPrice.price || lastPrice.price != priceEntryDoc.price) {
-        result = await prisma.priceEntry.create({ data: priceEntryDoc })
+    let priceEntryDoc: IPriceEntry;
+    let lastPrice = await getLastPrice(newPriceEntryDoc.bondDid);
+    if ("denom" in newPriceEntryDoc.price[0]) {
+        priceEntryDoc = {
+            bondDid: newPriceEntryDoc.bondDid,
+            time: newPriceEntryDoc.time,
+            denom: newPriceEntryDoc.price[0]["denom"],
+            price: newPriceEntryDoc.price[0]["amount"],
+        };
+    } else {
+        priceEntryDoc = {
+            bondDid: newPriceEntryDoc.bondDid,
+            time: newPriceEntryDoc.time,
+            price: newPriceEntryDoc.price[0]["amount"],
+        };
+    }
+    if (!lastPrice?.price || lastPrice?.price != newPriceEntryDoc.price[0]["amount"]) {
+        result = await prisma.priceEntry.create({ data: priceEntryDoc });
     }
     return result;
 };
@@ -107,6 +122,7 @@ export const listBondPriceHistoryByBondDid = async (bondDid: string, reqBody: an
         },
         select: {
             time: true,
+            denom: true,
             price: true,
         },
     });

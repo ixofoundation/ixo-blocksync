@@ -11,7 +11,14 @@ export interface IBond {
 export interface IPriceEntry {
     bondDid: string;
     time: Date;
+    denom?: string;
     price: Decimal;
+};
+
+export interface NewPriceEntry {
+    bondDid: string;
+    time: Date;
+    price: any[];
 };
 
 export class NewBondInfo {

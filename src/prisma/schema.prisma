@@ -46,6 +46,7 @@ model PriceEntry {
   bond    Bond     @relation(fields: [bondDid], references: [bondDid])
   bondDid String
   time    DateTime
+  denom   String?
   price   Decimal
 }
 

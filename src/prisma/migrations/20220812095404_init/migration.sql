@@ -33,6 +33,7 @@ CREATE TABLE "PriceEntry" (
     "id" TEXT NOT NULL,
     "bondDid" TEXT NOT NULL,
     "time" TIMESTAMP(3) NOT NULL,
+    "denom" TEXT,
     "price" DECIMAL(65,30) NOT NULL,
 
     CONSTRAINT "PriceEntry_pkey" PRIMARY KEY ("id")
