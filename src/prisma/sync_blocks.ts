@@ -36,7 +36,7 @@ export class SyncBlocks {
             blockHeight: chainResult?.blockHeight,
         };
         conn.getLastBlock().then((block: any) => {
-            if (!chain.chainId || !chain.blockHeight) {
+            if (!chainResult) {
                 this.initChainInfo(conn, false).then((chain: IChain) => {
                     this.startQueue(conn, chain);
                 });

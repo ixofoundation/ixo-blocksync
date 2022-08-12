@@ -37,6 +37,7 @@ export const addPriceEntry = async (newPriceEntryDoc: NewPriceEntry) => {
     let result: any;
     let priceEntryDoc: IPriceEntry;
     let lastPrice = await getLastPrice(newPriceEntryDoc.bondDid);
+    if (!lastPrice) { return; }
     if ("denom" in newPriceEntryDoc.price[0]) {
         priceEntryDoc = {
             bondDid: newPriceEntryDoc.bondDid,
