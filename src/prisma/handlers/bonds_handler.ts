@@ -76,7 +76,7 @@ export const getLastPrice = async (bondDid: string) => {
             price: true,
         }
     });
-    const lastPriceEntry = prices[-1];
+    const lastPriceEntry = prices[prices.length - 1];
     const convertedLastPriceEntry: NumberPriceEntry = {
         time: lastPriceEntry.time,
         price: Number(lastPriceEntry.price),
