@@ -224,7 +224,7 @@ export class TransactionHandler {
                     description: msgVal.description,
                     creatorDid: msgVal.creator_did,
                 };
-                return BondHandler.createBondPrice(bondDoc);
+                return BondHandler.createBond(bondDoc);
             case this.TXN_TYPE.AGENT_CREATE:
                 let agentDoc: IAgent = {
                     agentDid: msgVal.data.did,
