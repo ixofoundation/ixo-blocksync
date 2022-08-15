@@ -19,7 +19,7 @@ model DID {
 }
 
 model Credential {
-  id       String  @id @default(uuid())
+  id       Int     @id @default(autoincrement())
   DID      DID     @relation(fields: [did], references: [did])
   did      String
   claimId  String
@@ -42,7 +42,7 @@ model Bond {
 }
 
 model PriceEntry {
-  id      String   @id @default(uuid())
+  id      Int      @id @default(autoincrement())
   bond    Bond     @relation(fields: [bondDid], references: [bondDid])
   bondDid String
   time    DateTime
@@ -51,7 +51,7 @@ model PriceEntry {
 }
 
 model AlphaChange {
-  id        String @id @default(uuid())
+  id        Int    @id @default(autoincrement())
   bond      Bond   @relation(fields: [bondDid], references: [bondDid])
   bondDid   String
   rawValue  String
@@ -60,7 +60,7 @@ model AlphaChange {
 }
 
 model OutcomePayment {
-  id        String @id @default(uuid())
+  id        Int    @id @default(autoincrement())
   bond      Bond   @relation(fields: [bondDid], references: [bondDid])
   bondDid   String
   rawValue  String
@@ -71,7 +71,7 @@ model OutcomePayment {
 }
 
 model ReserveWithdrawal {
-  id            String @id @default(uuid())
+  id            Int    @id @default(autoincrement())
   bond          Bond   @relation(fields: [bondDid], references: [bondDid])
   bondDid       String
   rawValue      String
@@ -82,7 +82,7 @@ model ReserveWithdrawal {
 }
 
 model ShareWithdrawal {
-  id           String @id @default(uuid())
+  id           Int    @id @default(autoincrement())
   bond         Bond   @relation(fields: [bondDid], references: [bondDid])
   bondDid      String
   rawValue     String
@@ -93,7 +93,7 @@ model ShareWithdrawal {
 }
 
 model Transaction {
-  id        String @id @default(uuid())
+  id        Int    @id @default(autoincrement())
   bond      Bond   @relation(fields: [bondDid], references: [bondDid])
   bondDid   String
   buyerDid  String
@@ -109,7 +109,7 @@ model Chain {
 }
 
 model Event {
-  id          String   @id @default(uuid())
+  id          Int      @id @default(autoincrement())
   type        String
   attributes  Json[]
   blockHeight Int
@@ -121,7 +121,7 @@ model Event {
 }
 
 model Stat {
-  id                    String   @id @default(uuid())
+  id                    Int      @id @default(autoincrement())
   totalServiceProviders Int
   totalProjects         Int
   totalEvaluationAgents Int

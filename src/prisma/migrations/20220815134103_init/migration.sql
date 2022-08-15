@@ -8,7 +8,7 @@ CREATE TABLE "DID" (
 
 -- CreateTable
 CREATE TABLE "Credential" (
-    "id" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
     "did" TEXT NOT NULL,
     "claimId" TEXT NOT NULL,
     "claimKyc" BOOLEAN NOT NULL,
@@ -30,7 +30,7 @@ CREATE TABLE "Bond" (
 
 -- CreateTable
 CREATE TABLE "PriceEntry" (
-    "id" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
     "bondDid" TEXT NOT NULL,
     "time" TIMESTAMP(3) NOT NULL,
     "denom" TEXT,
@@ -41,7 +41,7 @@ CREATE TABLE "PriceEntry" (
 
 -- CreateTable
 CREATE TABLE "AlphaChange" (
-    "id" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
     "bondDid" TEXT NOT NULL,
     "rawValue" TEXT NOT NULL,
     "height" TEXT NOT NULL,
@@ -52,7 +52,7 @@ CREATE TABLE "AlphaChange" (
 
 -- CreateTable
 CREATE TABLE "OutcomePayment" (
-    "id" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
     "bondDid" TEXT NOT NULL,
     "rawValue" TEXT NOT NULL,
     "senderDid" TEXT NOT NULL,
@@ -65,7 +65,7 @@ CREATE TABLE "OutcomePayment" (
 
 -- CreateTable
 CREATE TABLE "ReserveWithdrawal" (
-    "id" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
     "bondDid" TEXT NOT NULL,
     "rawValue" TEXT NOT NULL,
     "transaction" TEXT NOT NULL,
@@ -78,7 +78,7 @@ CREATE TABLE "ReserveWithdrawal" (
 
 -- CreateTable
 CREATE TABLE "ShareWithdrawal" (
-    "id" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
     "bondDid" TEXT NOT NULL,
     "rawValue" TEXT NOT NULL,
     "transaction" TEXT NOT NULL,
@@ -91,7 +91,7 @@ CREATE TABLE "ShareWithdrawal" (
 
 -- CreateTable
 CREATE TABLE "Transaction" (
-    "id" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
     "bondDid" TEXT NOT NULL,
     "buyerDid" TEXT NOT NULL,
     "amount" TEXT NOT NULL,
@@ -110,7 +110,7 @@ CREATE TABLE "Chain" (
 
 -- CreateTable
 CREATE TABLE "Event" (
-    "id" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
     "type" TEXT NOT NULL,
     "attributes" JSONB[],
     "blockHeight" INTEGER NOT NULL,
@@ -123,7 +123,7 @@ CREATE TABLE "Event" (
 
 -- CreateTable
 CREATE TABLE "Stat" (
-    "id" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
     "totalServiceProviders" INTEGER NOT NULL,
     "totalProjects" INTEGER NOT NULL,
     "totalEvaluationAgents" INTEGER NOT NULL,

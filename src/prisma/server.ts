@@ -7,7 +7,7 @@ import { prisma } from "./prisma_client";
 import { createStats } from "./handlers/stats_handler";
 import ServerUtils from "./server_utils";
 
-let statId: string;
+let statId: number;
 const seedStats = async () => {
     const existingStats = await prisma.stat.findFirst({});
     if (existingStats) {
