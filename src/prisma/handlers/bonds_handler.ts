@@ -106,7 +106,7 @@ export const listBondByBondDid = async (bondDid: string) => {
 
 export const listBondPriceHistoryByBondDid = async (bondDid: string, reqBody: any) => {
     let fromTime = 0;
-    let toTime = 8640000000000000;
+    let toTime = (new Date()).getTime();
     if (reqBody.hasOwnProperty("fromTime")) {
         fromTime = parseInt(reqBody.fromTime);
     };
