@@ -1,5 +1,3 @@
-import { Decimal } from "@prisma/client/runtime";
-
 export interface IBond {
     bondDid: string;
     token: string;
@@ -12,24 +10,24 @@ export interface IPriceEntry {
     bondDid: string;
     time: Date;
     denom?: string;
-    price: Decimal;
+    price: number;
 };
 
-export interface NewPriceEntry {
-    bondDid: string;
+export interface NumberPriceEntry {
     time: Date;
-    price: any[];
-};
+    denom?: string;
+    price: number;
+}
 
 export class NewBondInfo {
     did: string;
     spotPrice: any;
     supply: any;
     reserve: any;
-    blockHeight: bigint;
+    blockHeight: number;
     blockTimestamp: Date;
 
-    constructor(did: string, spotPrice: any, supply: any, reserve: any, blockHeight: bigint, blockTimestamp: Date) {
+    constructor(did: string, spotPrice: any, supply: any, reserve: any, blockHeight: number, blockTimestamp: Date) {
         this.did = did;
         this.spotPrice = spotPrice;
         this.supply = supply;
@@ -45,10 +43,10 @@ export class NewBondInfo {
 
 export class NewBondsInfo {
     bondsInfo: any[];
-    blockHeight: bigint;
+    blockHeight: number;
     blockTimestamp: Date;
 
-    constructor(bondsInfo: any[], blockHeight: bigint, blockTimestamp: Date) {
+    constructor(bondsInfo: any[], blockHeight: number, blockTimestamp: Date) {
         this.bondsInfo = bondsInfo;
         this.blockHeight = blockHeight;
         this.blockTimestamp = blockTimestamp;

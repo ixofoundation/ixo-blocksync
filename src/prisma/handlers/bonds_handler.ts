@@ -1,5 +1,5 @@
 import { prisma } from "../prisma_client";
-import { IBond, IPriceEntry, NewPriceEntry } from "../interface_models/Bond";
+import { IBond, IPriceEntry, NewBondInfo, NumberPriceEntry } from "../interface_models/Bond";
 import { ITransaction } from "../interface_models/Transaction";
 import { IAlphaChange } from "../interface_models/AlphaChange";
 import { IShareWithdrawal } from "../interface_models/ShareWithdrawal";
@@ -30,29 +30,42 @@ export const createOutcomePayment = async (outcomePaymentDoc: IOutcomePayment) =
     return prisma.outcomePayment.create({ data: outcomePaymentDoc });
 };
 
-export const addPriceEntry = async (newPriceEntryDoc: NewPriceEntry) => {
+export const addPriceEntry = async (bondInfo: NewBondInfo) => {
     let result: any;
     let priceEntryDoc: IPriceEntry;
-    let lastPrice = await getLastPrice(newPriceEntryDoc.bondDid);
+    let lastPrice = await getLastPrice(bondInfo.did);
     if (!lastPrice) { return; }
-    if ("denom" in newPriceEntryDoc.price[0]) {
+    if ("denom" in bondInfo.spotPrice[0]) {
         priceEntryDoc = {
-            bondDid: newPriceEntryDoc.bondDid,
-            time: newPriceEntryDoc.time,
-            denom: newPriceEntryDoc.price[0]["denom"],
-            price: newPriceEntryDoc.price[0]["amount"],
+            bondDid: bondInfo.did,
+            time: bondInfo.blockTimestamp,
+            denom: bondInfo.spotPrice[0].denom,
+            price: bondInfo.spotPrice[0].amount,
         };
     } else {
         priceEntryDoc = {
-            bondDid: newPriceEntryDoc.bondDid,
-            time: newPriceEntryDoc.time,
-            price: newPriceEntryDoc.price[0]["amount"],
+            bondDid: bondInfo.did,
+            time: bondInfo.blockTimestamp,
+            price: bondInfo.spotPrice[0].amount,
         };
     }
-    if (!lastPrice?.price || lastPrice?.price != newPriceEntryDoc.price[0]["amount"]) {
+    if (!lastPrice?.price || lastPrice?.price != priceEntryDoc.price) {
         result = await prisma.priceEntry.create({ data: priceEntryDoc });
     }
     return result;
+};
+
+export const addInitialPriceEntry = async (bondInfo: NewBondInfo) => {
+    let lastPrice = await getLastPrice(bondInfo.did);
+    if (!lastPrice) { return; }
+    let priceEntryDoc: IPriceEntry = {
+        bondDid: bondInfo.did,
+        time: bondInfo.blockTimestamp,
+        price: 0.000000000000000000,
+    };
+    return prisma.priceEntry.create({
+        data: priceEntryDoc,
+    });
 };
 
 export const getLastPrice = async (bondDid: string) => {
@@ -63,19 +76,16 @@ export const getLastPrice = async (bondDid: string) => {
             price: true,
         }
     });
-    return prices[-1];
+    const lastPriceEntry = prices[-1];
+    const convertedLastPriceEntry: NumberPriceEntry = {
+        time: lastPriceEntry.time,
+        price: Number(lastPriceEntry.price),
+    };
+    return convertedLastPriceEntry;
 };
 
 export const listAllBonds = async () => {
-    return prisma.bond.findMany({
-        select: {
-            bondDid: true,
-            token: true,
-            name: true,
-            description: true,
-            creatorDid: true,
-        },
-    });
+    return prisma.bond.findMany();
 };
 
 export const listAllBondsFiltered = async (fields: string[]) => {
@@ -91,13 +101,6 @@ export const listAllBondsFiltered = async (fields: string[]) => {
 export const listBondByBondDid = async (bondDid: string) => {
     return prisma.bond.findFirst({
         where: { bondDid: bondDid },
-        select: {
-            bondDid: true,
-            token: true,
-            name: true,
-            description: true,
-            creatorDid: true,
-        },
     });
 };
 
@@ -129,13 +132,6 @@ export const listBondPriceHistoryByBondDid = async (bondDid: string, reqBody: an
 export const listBondByCreatorDid = async (creatorDid: string) => {
     return prisma.bond.findMany({
         where: { creatorDid: creatorDid },
-        select: {
-            bondDid: true,
-            token: true,
-            name: true,
-            description: true,
-            creatorDid: true,
-        },
     });
 };
 
