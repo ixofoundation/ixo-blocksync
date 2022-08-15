@@ -103,7 +103,7 @@ model Transaction {
 
 model Chain {
   chainId     String @id
-  blockHeight BigInt
+  blockHeight Int
 
   @@index([chainId])
 }
@@ -112,9 +112,9 @@ model Event {
   id          String   @id @default(uuid())
   type        String
   attributes  Json[]
-  blockHeight BigInt
+  blockHeight Int
   eventSource String
-  eventIndex  BigInt[]
+  eventIndex  Int[]
   timestamp   DateTime
 
   @@index([type])

@@ -43,8 +43,8 @@ class App {
     };
 
     private routes(): void {
-        this.express.get("/", async (req, res) => {
-            await res.json("API is Running");
+        this.express.get("/", (req, res) => {
+            res.send("API is Running");
         });
 
         this.express.get("/api/bond/get/outcomepayments/:bonddid", async (req, res, next) => {

@@ -52,16 +52,13 @@ export class SyncBlocks {
                 console.log("\n!!!!\n  Syncing error: " + error);
             });
         const stats = StatHandler.getStats()[0];
-        if (!stats) {
-            StatHandler.createStats();
-        };
     };
 
     initChainInfo(connection: Connection, isUpdate: boolean): Promise<IChain> {
         return new Promise((resolve: Function, reject: Function) => {
             connection.getLastBlock()
                 .then((block: any) => {
-                    const chain: IChain = { chainId: block.header.chain_id, blockHeight: 1n };
+                    const chain: IChain = { chainId: block.header.chain_id, blockHeight: 1 };
                     if (isUpdate) {
                         resolve(ChainHandler.updateChain(chain));
                     } else {
@@ -80,7 +77,7 @@ export class SyncBlocks {
         blockQueue.onBlock((result: BlockResult, event: NewBlockEvent) => {
             let chainDoc: IChain = {
                 chainId: chain.chainId,
-                blockHeight: BigInt(result.getBlockHeight()),
+                blockHeight: result.getBlockHeight(),
             }
             ChainHandler.updateChain(chainDoc);
             const height = result.getBlockHeight();
@@ -107,19 +104,19 @@ export class SyncBlocks {
             if (result.getDeliverTxEventsForAllTxs() != null) {
                 for (let i: number = 0; i < result.getTransactionCount(); i++) {
                     for (var j: number = 0; j < result.getDeliverTxEvents(i).length; j++) {
-                        EventSyncHandler.routeEvent(result.getDeliverTxEvent(i, j), BigInt(height), 'deliver_tx', [BigInt(i), BigInt(j)], timestamp);
+                        EventSyncHandler.routeEvent(result.getDeliverTxEvent(i, j), height, 'deliver_tx', [i, j], timestamp);
                     }
                 }
             }
 
             // Route events from begin_block, if any
             for (let i: number = 0; i < result.getBeginBlockEvents().length; i++) {
-                EventSyncHandler.routeEvent(result.getBeginBlockEvent(i), BigInt(height), 'begin_block', [BigInt(i), BigInt(0)], timestamp);
+                EventSyncHandler.routeEvent(result.getBeginBlockEvent(i), height, 'begin_block', [i, 0], timestamp);
             }
 
             // Route events from end_block, if any
             for (let i: number = 0; i < result.getEndBlockEvents().length; i++) {
-                EventSyncHandler.routeEvent(result.getEndBlockEvent(i), BigInt(height), 'end_block', [BigInt(i), BigInt(0)], timestamp);
+                EventSyncHandler.routeEvent(result.getEndBlockEvent(i), height, 'end_block', [i, 0], timestamp);
             }
         });
 

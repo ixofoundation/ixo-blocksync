@@ -3,8 +3,8 @@ import { Prisma } from "@prisma/client";
 export interface IEvent {
     type: string;
     attributes: Prisma.JsonArray;
-    blockHeight: bigint;
+    blockHeight: number;
     eventSource: string;
-    eventIndex: [bigint, bigint];
+    eventIndex: [number, number];
     timestamp: Date;
 };

@@ -3,7 +3,7 @@ import { IEvent } from "../interface_models/Event";
 import { IGNORE_EVENTS, ONLY_EVENTS } from "../../util/secrets";
 import * as EventHandler from "../handlers/event_handler";
 
-export const routeEvent = async (event: any, blockHeight: bigint, eventSource: string, eventIndex: [bigint, bigint], timestamp: Date) => {
+export const routeEvent = async (event: any, blockHeight: number, eventSource: string, eventIndex: [number, number], timestamp: Date) => {
     if ((ONLY_EVENTS && ONLY_EVENTS.indexOf(event.type) < 0)
         || (IGNORE_EVENTS && IGNORE_EVENTS.indexOf(event.type) >= 0)) {
         return;

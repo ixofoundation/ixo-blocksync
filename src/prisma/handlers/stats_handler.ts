@@ -1,4 +1,5 @@
-import { prisma, statId } from "../prisma_client";
+import { prisma } from "../prisma_client";
+import { statId } from "../server";
 import { IStat } from "../interface_models/Stat";
 
 export const createStats = async () => {

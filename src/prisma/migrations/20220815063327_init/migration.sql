@@ -103,7 +103,7 @@ CREATE TABLE "Transaction" (
 -- CreateTable
 CREATE TABLE "Chain" (
     "chainId" TEXT NOT NULL,
-    "blockHeight" BIGINT NOT NULL,
+    "blockHeight" INTEGER NOT NULL,
 
     CONSTRAINT "Chain_pkey" PRIMARY KEY ("chainId")
 );
@@ -113,9 +113,9 @@ CREATE TABLE "Event" (
     "id" TEXT NOT NULL,
     "type" TEXT NOT NULL,
     "attributes" JSONB[],
-    "blockHeight" BIGINT NOT NULL,
+    "blockHeight" INTEGER NOT NULL,
     "eventSource" TEXT NOT NULL,
-    "eventIndex" BIGINT[],
+    "eventIndex" INTEGER[],
     "timestamp" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Event_pkey" PRIMARY KEY ("id")
