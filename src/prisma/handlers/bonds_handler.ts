@@ -1,10 +1,11 @@
 import { prisma } from "../prisma_client";
-import { IBond, IPriceEntry, NewBondInfo, NumberPriceEntry } from "../interface_models/Bond";
+import { IBond, IPriceEntry, NewBondInfo } from "../interface_models/Bond";
 import { ITransaction } from "../interface_models/Transaction";
 import { IAlphaChange } from "../interface_models/AlphaChange";
 import { IShareWithdrawal } from "../interface_models/ShareWithdrawal";
 import { IReserveWithdrawal } from "../interface_models/ReserveWithdrawal";
 import { IOutcomePayment } from "../interface_models/OutcomePayment";
+import { Prisma } from "@prisma/client";
 
 export const createBond = async (bondDoc: IBond) => {
     return prisma.bond.create({ data: bondDoc });
@@ -34,7 +35,7 @@ export const addPriceEntry = async (bondInfo: NewBondInfo) => {
     let result: any;
     let priceEntryDoc: IPriceEntry;
     let lastPrice = await getLastPrice(bondInfo.did);
-    if (!lastPrice) { return; }
+    if (!lastPrice) { return; };
     if ("denom" in bondInfo.spotPrice[0]) {
         priceEntryDoc = {
             bondDid: bondInfo.did,
@@ -49,7 +50,7 @@ export const addPriceEntry = async (bondInfo: NewBondInfo) => {
             price: bondInfo.spotPrice[0].amount,
         };
     }
-    if (!lastPrice?.price || lastPrice?.price != priceEntryDoc.price) {
+    if (!lastPrice?.price || lastPrice?.price != new Prisma.Decimal(priceEntryDoc.price)) {
         result = await prisma.priceEntry.create({ data: priceEntryDoc });
     }
     return result;
@@ -57,7 +58,7 @@ export const addPriceEntry = async (bondInfo: NewBondInfo) => {
 
 export const addInitialPriceEntry = async (bondInfo: NewBondInfo) => {
     let lastPrice = await getLastPrice(bondInfo.did);
-    if (!lastPrice) { return; }
+    if (!lastPrice) { return; };
     let priceEntryDoc: IPriceEntry = {
         bondDid: bondInfo.did,
         time: bondInfo.blockTimestamp,
@@ -76,12 +77,9 @@ export const getLastPrice = async (bondDid: string) => {
             price: true,
         }
     });
+    if (!prices) { return; };
     const lastPriceEntry = prices[prices.length - 1];
-    const convertedLastPriceEntry: NumberPriceEntry = {
-        time: lastPriceEntry.time,
-        price: Number(lastPriceEntry.price),
-    };
-    return convertedLastPriceEntry;
+    return lastPriceEntry;
 };
 
 export const listAllBonds = async () => {

@@ -13,12 +13,6 @@ export interface IPriceEntry {
     price: number;
 };
 
-export interface NumberPriceEntry {
-    time: Date;
-    denom?: string;
-    price: number;
-}
-
 export class NewBondInfo {
     did: string;
     spotPrice: any;

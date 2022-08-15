@@ -6,8 +6,10 @@ export const routeNewBondsInfo = async (bondsInfo: NewBondsInfo) => {
         const bondInfo = bondsInfo.getBondInfo(i);
         if (!bondInfo.hasMultiplePrices()) {
             await BondHandler.addPriceEntry(bondInfo);
-        } else {
-            await BondHandler.addInitialPriceEntry(bondInfo);
-        }
-    }
+        };
+
+        // if (bondInfo.hasMultiplePrices()) {
+        //     await BondHandler.addInitialPriceEntry(bondInfo);
+        // };
+    };
 };
