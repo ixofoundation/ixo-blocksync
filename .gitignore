@@ -66,10 +66,3 @@ typings/
 .next
 
 scratch.json
-
-# External Mongo data
-data/
-
-src/prisma/test.ts
-
-bck/
