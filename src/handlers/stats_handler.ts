@@ -1,15 +1,43 @@
-import {StatsDB} from "../db/models/stats";
+import { prisma } from "../prisma/prisma_client";
+import { io, statId } from "../server";
+import { IStat } from "../prisma/interface_models/Stat";
 
-export class StatsHandler {
-  getStatsInfo = () => {
-    return new Promise((resolve: Function, reject: Function) => {
-      return StatsDB.find({}, (err, res) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(res[0]);
-        }
-      });
+export const createStats = async () => {
+    let emptyStats: IStat = {
+        totalServiceProviders: 0,
+        totalProjects: 0,
+        totalEvaluationAgents: 0,
+        totalInvestors: 0,
+        totalClaims: 0,
+        successfulClaims: 0,
+        submittedClaims: 0,
+        pendingClaims: 0,
+        rejectedClaims: 0,
+        claimLocations: [""],
+    };
+    return prisma.stat.create({ data: emptyStats });
+};
+
+export const updateStats = async (statDoc: IStat) => {
+    try {
+        const res = await prisma.stat.update({
+            where: {
+                id: statId,
+            },
+            data: statDoc,
+        });
+        io.emit("Stats Updated", statDoc);
+        return res;
+    } catch (error) {
+        console.log(error);
+        return;
+    };
+};
+
+export const getStats = async () => {
+    return prisma.stat.findMany({
+        where: {
+            id: statId,
+        },
     });
-  }
-}
+};

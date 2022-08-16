@@ -7,9 +7,8 @@
     "start": "tsc && node build/dist/server.js",
     "dropdb": "tsc && node build/dist/dropdb.js",
     "build": "tsc",
-    "test": "echo \"Error: no test specified\" && exit 1",
     "devClear": "bash ./bin/start_clear.sh",
-    "pgdev": "npx ts-node src/prisma/server.ts"
+    "pgdev": "npx ts-node src/server.ts"
   },
   "repository": "https://github.com/ixofoundation/ixo-blocksync",
   "keywords": [

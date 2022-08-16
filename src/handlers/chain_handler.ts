@@ -1,5 +1,5 @@
-import { prisma } from "../prisma_client";
-import { IChain } from "../interface_models/Chain";
+import { prisma } from "../prisma/prisma_client";
+import { IChain } from "../prisma/interface_models/Chain";
 
 export const createChain = async (chainDoc: IChain) => {
     const existingChain = await prisma.chain.findFirst({

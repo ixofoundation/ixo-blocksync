@@ -1,15 +1,19 @@
-import {EventDB} from '../db/models/event';
+import { prisma } from "../prisma/prisma_client";
+import { io } from "../server";
+import { IEvent } from "../prisma/interface_models/Event";
 
-export class EventHandler {
-  getEventsByType = (type: string) => {
-    return new Promise((resolve: Function, reject: Function) => {
-      return EventDB.find({type: type}, (err, res) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(res);
-        }
-      });
+export const createEvent = async (eventDoc: IEvent) => {
+    try {
+        const res = await prisma.event.create({ data: eventDoc });
+        io.emit("Event Created", res);
+    } catch (error) {
+        console.log(error);
+        return;
+    };
+};
+
+export const getEventsByType = async (type: string) => {
+    return prisma.event.findMany({
+        where: { type: type },
     });
-  };
-}
+};

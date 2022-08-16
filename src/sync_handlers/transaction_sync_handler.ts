@@ -2,15 +2,15 @@ import * as ProjectHandler from "../handlers/project_handler";
 import * as StatHandler from "../handlers/stats_handler";
 import * as DidHandler from "../handlers/did_handler";
 import * as BondHandler from "../handlers/bonds_handler";
-import { convertProjectDoc, IAgent, IClaim, NewProject } from "../interface_models/Project";
-import { IStat } from "../interface_models/Stat";
-import { ICredential, IDid } from "../interface_models/DID";
-import { ITransaction } from "../interface_models/Transaction";
-import { IAlphaChange } from "../interface_models/AlphaChange";
-import { IShareWithdrawal } from "../interface_models/ShareWithdrawal";
-import { IReserveWithdrawal } from "../interface_models/ReserveWithdrawal";
-import { IOutcomePayment } from "../interface_models/OutcomePayment";
-import { IBond } from "../interface_models/Bond";
+import { convertProjectDoc, IAgent, IClaim, NewProject } from "../prisma/interface_models/Project";
+import { IStat } from "../prisma/interface_models/Stat";
+import { ICredential, IDid } from "../prisma/interface_models/DID";
+import { ITransaction } from "../prisma/interface_models/Transaction";
+import { IAlphaChange } from "../prisma/interface_models/AlphaChange";
+import { IShareWithdrawal } from "../prisma/interface_models/ShareWithdrawal";
+import { IReserveWithdrawal } from "../prisma/interface_models/ReserveWithdrawal";
+import { IOutcomePayment } from "../prisma/interface_models/OutcomePayment";
+import { IBond } from "../prisma/interface_models/Bond";
 
 export class TransactionHandler {
     TXN_TYPE = Object.freeze({
