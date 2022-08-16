@@ -16,7 +16,7 @@ const seedStats = async () => {
         const newStats = await createStats();
         statId = newStats?.id;
     }
-}
+};
 seedStats();
 export { statId };
 

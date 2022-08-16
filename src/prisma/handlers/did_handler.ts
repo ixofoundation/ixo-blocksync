@@ -1,15 +1,31 @@
 import { prisma } from "../prisma_client";
+import { io } from "../server";
 import { ICredential, IDid } from "../interface_models/DID";
 
 export const createDid = async (didDoc: IDid, credentialDocs?: ICredential[]) => {
-    let result: any;
-    result = prisma.dID.create({ data: didDoc });
-    if (credentialDocs) { result += prisma.credential.createMany({ data: credentialDocs }) };
-    return result;
+    try {
+        let res: any;
+        res = await prisma.dID.create({ data: didDoc });
+        if (credentialDocs) {
+            res += await prisma.credential.createMany({ data: credentialDocs });
+        };
+        io.emit("DID Created", res);
+        return res;
+    } catch (error) {
+        console.log(error);
+        return;
+    };
 };
 
 export const addCredential = async (credentialDoc: ICredential) => {
-    return prisma.credential.create({ data: credentialDoc });
+    try {
+        const res = await prisma.credential.create({ data: credentialDoc });
+        io.emit("Credential Added", res);
+        return res;
+    } catch (error) {
+        console.log(error);
+        return;
+    };
 };
 
 export const getDidByDid = async (did: string) => {

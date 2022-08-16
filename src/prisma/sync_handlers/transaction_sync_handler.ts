@@ -2,7 +2,6 @@ import * as ProjectHandler from "../handlers/project_handler";
 import * as StatHandler from "../handlers/stats_handler";
 import * as DidHandler from "../handlers/did_handler";
 import * as BondHandler from "../handlers/bonds_handler";
-import * as BondSyncHandler from "../sync_handlers/bonds_sync_handler";
 import { convertProjectDoc, IAgent, IClaim, NewProject } from "../interface_models/Project";
 import { IStat } from "../interface_models/Stat";
 import { ICredential, IDid } from "../interface_models/DID";

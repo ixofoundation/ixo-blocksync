@@ -1,105 +1,176 @@
 import { prisma } from "../prisma_client";
+import { Prisma } from "@prisma/client";
+import { io } from "../server";
 import { IBond, IPriceEntry, NewBondInfo } from "../interface_models/Bond";
 import { ITransaction } from "../interface_models/Transaction";
 import { IAlphaChange } from "../interface_models/AlphaChange";
 import { IShareWithdrawal } from "../interface_models/ShareWithdrawal";
 import { IReserveWithdrawal } from "../interface_models/ReserveWithdrawal";
 import { IOutcomePayment } from "../interface_models/OutcomePayment";
-import { Prisma } from "@prisma/client";
 
 export const createBond = async (bondDoc: IBond) => {
-    return prisma.bond.create({ data: bondDoc });
+    try {
+        const res = await prisma.bond.create({ data: bondDoc });
+        io.emit("Bond Created", res);
+        return res;
+    } catch (error) {
+        console.log(error);
+        return;
+    };
 };
 
 export const createTransaction = async (transactionDoc: ITransaction) => {
-    return prisma.transaction.create({ data: transactionDoc });
+    try {
+        const res = await prisma.transaction.create({ data: transactionDoc });
+        io.emit("Transaction Created", res);
+        return res;
+    } catch (error) {
+        console.log(error);
+        return;
+    };
 };
 
 export const createAlphaChange = async (alphaChangeDoc: IAlphaChange) => {
-    return prisma.alphaChange.create({ data: alphaChangeDoc });
+    try {
+        const res = await prisma.alphaChange.create({ data: alphaChangeDoc });
+        io.emit("Alpha Change Created", res);
+        return res;
+    } catch (error) {
+        console.log(error);
+        return;
+    };
 };
 
 export const createShareWithdrawal = async (shareWithdrawalDoc: IShareWithdrawal) => {
-    return prisma.shareWithdrawal.create({ data: shareWithdrawalDoc });
+    try {
+        const res = await prisma.shareWithdrawal.create({ data: shareWithdrawalDoc });
+        io.emit("Share Withdrawal Created", res);
+        return res;
+    } catch (error) {
+        console.log(error);
+        return;
+    };
 };
 
 export const createReserveWithdrawal = async (reserveWithdrawalDoc: IReserveWithdrawal) => {
-    return prisma.reserveWithdrawal.create({ data: reserveWithdrawalDoc });
+    try {
+        const res = await prisma.reserveWithdrawal.create({ data: reserveWithdrawalDoc });
+        io.emit("Reserve Withdrawal Created", res);
+        return res;
+    } catch (error) {
+        console.log(error);
+        return;
+    };
 };
 
 export const createOutcomePayment = async (outcomePaymentDoc: IOutcomePayment) => {
-    return prisma.outcomePayment.create({ data: outcomePaymentDoc });
-};
-
-export const addPriceEntry = async (bondInfo: NewBondInfo) => {
-    let result: any;
-    let priceEntryDoc: IPriceEntry;
-    let lastPrice = await getLastPrice(bondInfo.did);
-    if (!lastPrice) { return; };
-    if ("denom" in bondInfo.spotPrice[0]) {
-        priceEntryDoc = {
-            bondDid: bondInfo.did,
-            time: bondInfo.blockTimestamp,
-            denom: bondInfo.spotPrice[0].denom,
-            price: bondInfo.spotPrice[0].amount,
-        };
-    } else {
-        priceEntryDoc = {
-            bondDid: bondInfo.did,
-            time: bondInfo.blockTimestamp,
-            price: bondInfo.spotPrice[0].amount,
-        };
-    }
-    if (!lastPrice?.price || lastPrice?.price != new Prisma.Decimal(priceEntryDoc.price)) {
-        result = await prisma.priceEntry.create({ data: priceEntryDoc });
-    }
-    return result;
-};
-
-export const addInitialPriceEntry = async (bondInfo: NewBondInfo) => {
-    let lastPrice = await getLastPrice(bondInfo.did);
-    if (!lastPrice) { return; };
-    let priceEntryDoc: IPriceEntry = {
-        bondDid: bondInfo.did,
-        time: bondInfo.blockTimestamp,
-        price: 0.000000000000000000,
+    try {
+        const res = await prisma.outcomePayment.create({ data: outcomePaymentDoc });
+        io.emit("Outcome Payment Created", res);
+        return res;
+    } catch (error) {
+        console.log(error);
+        return;
     };
-    return prisma.priceEntry.create({
-        data: priceEntryDoc,
-    });
 };
 
 export const getLastPrice = async (bondDid: string) => {
-    const prices = await prisma.priceEntry.findMany({
-        where: { bondDid: bondDid },
-        select: {
-            time: true,
-            price: true,
+    try {
+        const prices = await prisma.priceEntry.findMany({
+            where: { bondDid: bondDid },
+            select: {
+                time: true,
+                price: true,
+            },
+        });
+        if (!prices) {
+            return;
+        };
+        const lastPriceEntry = prices[prices.length - 1];
+        return lastPriceEntry;
+    } catch (error) {
+        console.log(error);
+        return;
+    };
+};
+
+export const addPriceEntry = async (bondInfo: NewBondInfo) => {
+    try {
+        let result: any;
+        let lastPrice: any;
+        let priceEntryDoc: IPriceEntry;
+        lastPrice = await getLastPrice(bondInfo.did);
+        if (!lastPrice) {
+            //lastPrice = {};
+            return;
+        };
+        if ("denom" in bondInfo.spotPrice[0]) {
+            priceEntryDoc = {
+                bondDid: bondInfo.did,
+                time: bondInfo.blockTimestamp,
+                denom: bondInfo.spotPrice[0].denom,
+                price: bondInfo.spotPrice[0].amount,
+            };
+        } else {
+            priceEntryDoc = {
+                bondDid: bondInfo.did,
+                time: bondInfo.blockTimestamp,
+                price: bondInfo.spotPrice[0].amount,
+            };
+        };
+        if (!lastPrice?.price || lastPrice?.price != new Prisma.Decimal(priceEntryDoc.price)) {
+            result = await prisma.priceEntry.create({ data: priceEntryDoc });
+            io.emit("Price Entry Added", bondInfo.did);
         }
-    });
-    if (!prices) { return; };
-    const lastPriceEntry = prices[prices.length - 1];
-    return lastPriceEntry;
+        return result;
+    } catch (error) {
+        console.log(error);
+        return;
+    };
+};
+
+export const addInitialPriceEntry = async (bondInfo: NewBondInfo) => {
+    try {
+        const priceEntryDoc: IPriceEntry = {
+            bondDid: bondInfo.did,
+            time: bondInfo.blockTimestamp,
+            price: 0.000000000000000000,
+        };
+        const res = await prisma.priceEntry.create({
+            data: priceEntryDoc,
+        });
+        io.emit("Initial Price Entry Added", bondInfo.did);
+        return res;
+    } catch (error) {
+        console.log(error);
+        return;
+    };
 };
 
 export const listAllBonds = async () => {
-    return prisma.bond.findMany();
+    const res = await prisma.bond.findMany();
+    io.emit("List all Bonds", res);
+    return res;
 };
 
 export const listAllBondsFiltered = async (fields: string[]) => {
     let filter = {};
-    for (const i in fields) {
+    for (let i in fields) {
         filter[fields[i]] = true;
     };
-    return prisma.bond.findMany({
+    const res = await prisma.bond.findMany({
         select: filter,
     });
+    io.emit("List Specified Fields of all Bonds", res);
+    return res;
 };
 
 export const listBondByBondDid = async (bondDid: string) => {
-    return prisma.bond.findFirst({
+    const res = await prisma.bond.findFirst({
         where: { bondDid: bondDid },
     });
+    io.emit("List Bond by DID", res);
+    return res;
 };
 
 export const listBondPriceHistoryByBondDid = async (bondDid: string, reqBody: any) => {
@@ -111,7 +182,7 @@ export const listBondPriceHistoryByBondDid = async (bondDid: string, reqBody: an
     if (reqBody.hasOwnProperty("toTime")) {
         toTime = parseInt(reqBody.toTime);
     };
-    return prisma.priceEntry.findMany({
+    const res = await prisma.priceEntry.findMany({
         where: {
             bondDid: bondDid,
             time: {
@@ -120,25 +191,16 @@ export const listBondPriceHistoryByBondDid = async (bondDid: string, reqBody: an
             },
         },
         select: {
-            time: true,
-            denom: true,
             price: true,
         },
     });
+    io.emit("List Bond Price History by DID", res);
+    return res;
 };
 
 export const listBondByCreatorDid = async (creatorDid: string) => {
     return prisma.bond.findMany({
         where: { creatorDid: creatorDid },
-    });
-};
-
-//All functions from here on not implemented in api
-export const listAllBondsDids = async () => {
-    return prisma.bond.findMany({
-        select: {
-            bondDid: true,
-        },
     });
 };
 

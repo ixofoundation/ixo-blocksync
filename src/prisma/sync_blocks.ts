@@ -4,7 +4,6 @@ import * as ChainHandler from "./handlers/chain_handler";
 import { IChain } from "./interface_models/Chain";
 import { TransactionHandler } from "./sync_handlers/transaction_sync_handler";
 import * as StatHandler from "./handlers/stats_handler";
-import { IStat } from "./interface_models/Stat";
 import * as EventSyncHandler from "./sync_handlers/event_sync_handler";
 import * as AuthHandler from "./handlers/auth_handler";
 import { NewBondsInfo } from "./interface_models/Bond";
@@ -51,7 +50,6 @@ export class SyncBlocks {
             .catch((error: any) => {
                 console.log("\n!!!!\n  Syncing error: " + error);
             });
-        const stats = StatHandler.getStats()[0];
     };
 
     initChainInfo(connection: Connection, isUpdate: boolean): Promise<IChain> {

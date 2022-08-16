@@ -1,5 +1,5 @@
 import { prisma } from "../prisma_client";
-import { statId } from "../server";
+import { io, statId } from "../server";
 import { IStat } from "../interface_models/Stat";
 
 export const createStats = async () => {
@@ -16,15 +16,22 @@ export const createStats = async () => {
         claimLocations: [""],
     };
     return prisma.stat.create({ data: emptyStats });
-}
+};
 
 export const updateStats = async (statDoc: IStat) => {
-    return prisma.stat.update({
-        where: {
-            id: statId,
-        },
-        data: statDoc,
-    });
+    try {
+        const res = await prisma.stat.update({
+            where: {
+                id: statId,
+            },
+            data: statDoc,
+        });
+        io.emit("Stats Updated", statDoc);
+        return res;
+    } catch (error) {
+        console.log(error);
+        return;
+    };
 };
 
 export const getStats = async () => {

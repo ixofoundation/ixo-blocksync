@@ -6,19 +6,31 @@ export const createChain = async (chainDoc: IChain) => {
         where: { chainId: chainDoc.chainId },
     });
     if (existingChain) {
-        return existingChain
+        return existingChain;
     } else {
         return prisma.chain.create({ data: chainDoc });
-    }
+    };
 };
 
 export const updateChain = async (chainDoc: IChain) => {
-    return prisma.chain.update({
-        where: { chainId: chainDoc.chainId },
-        data: { blockHeight: chainDoc.blockHeight },
-    });
+    try {
+        const res = await prisma.chain.update({
+            where: { chainId: chainDoc.chainId },
+            data: { blockHeight: chainDoc.blockHeight },
+        });
+        return res;
+    } catch (error) {
+        console.log(error);
+        return;
+    };
 };
 
 export const getChain = async () => {
-    return prisma.chain.findMany();
+    try {
+        const res = await prisma.chain.findMany();
+        return res;
+    } catch (error) {
+        console.log(error);
+        return;
+    };
 };
