@@ -13,7 +13,7 @@ import * as BondHandler from "./handlers/bonds_handler";
 import { Connection } from "./util/connection";
 
 class App {
-    public express: express.Application;
+    public express: any;
 
     constructor() {
         this.express = express();
