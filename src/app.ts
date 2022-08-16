@@ -12,6 +12,8 @@ import * as AuthHandler from "./handlers/auth_handler";
 import * as BondHandler from "./handlers/bonds_handler";
 import { Connection } from "./util/connection";
 
+const { postgraphile } = require("postgraphile");
+
 class App {
     public express: any;
 
@@ -40,6 +42,17 @@ class App {
                 return false;
             },
         }) as express.ErrorRequestHandler);
+        this.express.use(
+            postgraphile(
+                process.env.DATABASE_URL,
+                "public",
+                {
+                    watchPg: true,
+                    graphiql: true,
+                    enhanceGraphiql: true,
+                },
+            )
+        );
     };
 
     private routes(): void {

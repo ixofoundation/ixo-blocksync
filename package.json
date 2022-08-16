@@ -37,6 +37,7 @@
     "jayson": "^2.1.2",
     "log-timestamp": "^0.3.0",
     "mongoose": "^5.13.14",
+    "postgraphile": "^4.12.11",
     "socket.io": "^2.5.0",
     "subscriptions-transport-ws": "^0.9.19",
     "ts-node": "^6.2.0",
