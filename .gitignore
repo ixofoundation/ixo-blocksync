@@ -66,3 +66,5 @@ typings/
 .next
 
 scratch.json
+
+/data

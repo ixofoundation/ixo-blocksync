@@ -1,3 +1,4 @@
+require('dotenv').config();
 import { NewBondsInfo } from "../prisma/interface_models/Bond";
 import * as BondHandler from "../handlers/bonds_handler";
 import { Queue, Worker } from "bullmq";
@@ -7,7 +8,7 @@ const connection = {
     port: Number(process.env.REDIS_PORT)
 };
 
-const queue = new Queue("PriceEntries", { connection: { connection } });
+const queue = new Queue("PriceEntries", { connection });
 
 const worker = new Worker("PriceEntries", async (job) => {
     for (let i: number = 0; i < job.data.bondsInfo.length; i++) {
@@ -20,7 +21,7 @@ const worker = new Worker("PriceEntries", async (job) => {
         // };
     };
 },
-    { connection: { connection } }
+    { connection }
 );
 
 export const routeNewBondsInfo = async (bondsInfo: NewBondsInfo) => {

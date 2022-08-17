@@ -1,3 +1,4 @@
+require('dotenv').config();
 import { Prisma } from "@prisma/client";
 import { IEvent } from "../prisma/interface_models/Event";
 import { IGNORE_EVENTS, ONLY_EVENTS } from "../util/secrets";
@@ -9,12 +10,12 @@ const connection = {
     port: Number(process.env.REDIS_PORT)
 };
 
-const queue = new Queue("Events", { connection: { connection } });
+const queue = new Queue("Events", { connection });
 
 const worker = new Worker("Events", async (job) => {
     return EventHandler.createEvent(job.data);
 },
-    { connection: { connection } }
+    { connection }
 );
 
 export const routeEvent = async (event: any, blockHeight: number, eventSource: string, eventIndex: [number, number], timestamp: Date) => {
