@@ -1,4 +1,4 @@
-version: "2"
+version: "3.6"
 services:
   block-sync:
     container_name: block-sync
@@ -6,7 +6,7 @@ services:
     env_file: .env
     restart: always
     ports:
-      - "80:8080"
+      - "8080:8080"
     links:
       - block-sync-db
     logging:
@@ -14,11 +14,26 @@ services:
       options:
         max-size: "1m"
         max-file: "1"
+    depends_on:
+      - block-sync-qdb
+      - block-sync-db
+
+  block-sync-rest:
+    image: postgrest/postgrest
+    ports:
+      - 3000:3000
+    environment:
+      PGRST_DB_URI: postgres://app_user:password@db:5432/app_db
+      PGRST_DB_SCHEMAS: public
+      PGRST_DB_ANON_ROLE: app_user #In production this role should not be the same as the one used for the connection
+      PGRST_OPENAPI_SERVER_PROXY_URI: http://0.0.0.0:3000
+    depends_on:
+      - blocksync-db
+      
   block-sync-qdb:
     container_name: block-sync-qdb
     image: redis:7.0
     restart: always
-    
 
   block-sync-db:
     container_name: block-sync-db
