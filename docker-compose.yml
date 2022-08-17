@@ -6,7 +6,7 @@ services:
     env_file: .env
     restart: always
     ports:
-      - "8080:8080"
+      - 8080:8080
     links:
       - block-sync-db
     logging:
@@ -18,8 +18,9 @@ services:
       - block-sync-qdb
       - block-sync-db
 
-  block-sync-rest:
-    image: postgrest/postgrest
+  block-sync-grest:
+    image: postgrest/postgrest:9.0.1
+    container_name: block-sync-grest
     ports:
       - 3000:3000
     environment:
@@ -37,9 +38,9 @@ services:
 
   block-sync-db:
     container_name: block-sync-db
-    image: mongo
+    image: postgres:12.12
     restart: always
     ports:
-      - "27017:27017"
+      - 5432:5432
     volumes:
       - ./data/db:/data/db
