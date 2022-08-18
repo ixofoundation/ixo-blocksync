@@ -14,20 +14,20 @@ import * as stats from "./json_exports/stats.json";
 
 const resetAll = async () => {
     await prisma.agent.deleteMany();
+    await prisma.claim.deleteMany();
+    await prisma.project.deleteMany();
+    await prisma.priceEntry.deleteMany();
     await prisma.alphaChange.deleteMany();
+    await prisma.transaction.deleteMany();
+    await prisma.shareWithdrawal.deleteMany();
+    await prisma.reserveWithdrawal.deleteMany();
+    await prisma.outcomePayment.deleteMany();
     await prisma.bond.deleteMany();
     await prisma.chain.deleteMany();
-    await prisma.claim.deleteMany();
     await prisma.credential.deleteMany();
     await prisma.dID.deleteMany();
     await prisma.event.deleteMany();
-    await prisma.outcomePayment.deleteMany();
-    await prisma.priceEntry.deleteMany();
-    await prisma.project.deleteMany();
-    await prisma.reserveWithdrawal.deleteMany();
-    await prisma.shareWithdrawal.deleteMany();
     await prisma.stat.deleteMany();
-    await prisma.transaction.deleteMany();
 };
 // resetAll();
 
@@ -60,72 +60,107 @@ const seedBonds = async () => {
 
 const seedAlphaChanges = async () => {
     alphachanges.forEach(async alphachange => {
-        await prisma.alphaChange.create({
-            data: {
+        const bondExists = await prisma.bond.findFirst({
+            where: {
                 bondDid: alphachange.bond_did,
-                rawValue: alphachange.raw_value,
-                height: alphachange.height,
-                timestamp: alphachange.timestamp,
             },
         });
+        if (bondExists) {
+            await prisma.alphaChange.create({
+                data: {
+                    bondDid: alphachange.bond_did,
+                    rawValue: alphachange.raw_value,
+                    height: alphachange.height,
+                    timestamp: alphachange.timestamp,
+                },
+            });
+        };
     });
 };
 
 const seedTransactions = async () => {
     transactions.forEach(async transaction => {
-        await prisma.transaction.create({
-            data: {
+        const bondExists = await prisma.bond.findFirst({
+            where: {
                 bondDid: transaction.bond_did,
-                buyerDid: transaction.buyer_did,
-                amount: transaction.amount,
-                maxPrices: transaction.max_prices,
             },
         });
+        if (bondExists) {
+            await prisma.transaction.create({
+                data: {
+                    bondDid: transaction.bond_did,
+                    buyerDid: transaction.buyer_did,
+                    amount: transaction.amount,
+                    maxPrices: transaction.max_prices,
+                },
+            });
+        };
     });
 };
 
 const seedShareWithdrawals = async () => {
     sharewithdrawals.forEach(async sharewithdrawal => {
-        await prisma.shareWithdrawal.create({
-            data: {
+        const bondExists = await prisma.bond.findFirst({
+            where: {
                 bondDid: sharewithdrawal.bond_did,
-                rawValue: sharewithdrawal.raw_value,
-                transaction: sharewithdrawal.transaction,
-                recipientDid: sharewithdrawal.recipient_did,
-                height: sharewithdrawal.height,
-                timestamp: sharewithdrawal.timestamp,
             },
         });
+        if (bondExists) {
+            await prisma.shareWithdrawal.create({
+                data: {
+                    bondDid: sharewithdrawal.bond_did,
+                    rawValue: sharewithdrawal.raw_value,
+                    transaction: sharewithdrawal.transaction,
+                    recipientDid: sharewithdrawal.recipient_did,
+                    height: sharewithdrawal.height,
+                    timestamp: sharewithdrawal.timestamp,
+                },
+            });
+        };
     });
 };
 
 const seedReserveWithdrawals = async () => {
     reservewithdrawals.forEach(async reservewithdrawal => {
-        await prisma.reserveWithdrawal.create({
-            data: {
+        const bondExists = await prisma.bond.findFirst({
+            where: {
                 bondDid: reservewithdrawal.bond_did,
-                rawValue: reservewithdrawal.raw_value,
-                transaction: reservewithdrawal.transaction,
-                withdrawerDid: reservewithdrawal.withdrawer_did,
-                height: reservewithdrawal.height,
-                timestamp: reservewithdrawal.timestamp,
             },
-        });
+        })
+        if (bondExists) {
+            await prisma.reserveWithdrawal.create({
+                data: {
+                    bondDid: reservewithdrawal.bond_did,
+                    rawValue: reservewithdrawal.raw_value,
+                    transaction: reservewithdrawal.transaction,
+                    withdrawerDid: reservewithdrawal.withdrawer_did,
+                    height: reservewithdrawal.height,
+                    timestamp: reservewithdrawal.timestamp,
+                },
+            });
+        };
     });
 };
 
 const seedOutcomePayments = async () => {
     outcomepayments.forEach(async outcomepayment => {
-        await prisma.outcomePayment.create({
-            data: {
+        const bondExists = await prisma.bond.findFirst({
+            where: {
                 bondDid: outcomepayment.bond_did,
-                rawValue: outcomepayment.raw_value,
-                senderDid: outcomepayment.sender_did,
-                amount: outcomepayment.amount,
-                height: outcomepayment.height,
-                timestamp: outcomepayment.timestamp,
             },
         });
+        if (bondExists) {
+            await prisma.outcomePayment.create({
+                data: {
+                    bondDid: outcomepayment.bond_did,
+                    rawValue: outcomepayment.raw_value,
+                    senderDid: outcomepayment.sender_did,
+                    amount: outcomepayment.amount,
+                    height: outcomepayment.height,
+                    timestamp: outcomepayment.timestamp,
+                },
+            });
+        };
     });
 };
 
@@ -207,16 +242,16 @@ const seedStats = async () => {
 };
 
 const seedAll = async () => {
-    // await seedBonds();
-    // await seedAlphaChanges();
-    // await seedTransactions();
-    // await seedShareWithdrawals();
-    // await seedReserveWithdrawals();
-    // await seedOutcomePayments();
-    // await seedChains();
-    // await seedDIDs();
-    // await seedStats();
-    //await seedProjects();
+    await seedBonds();
+    await seedAlphaChanges();
+    await seedTransactions();
+    await seedShareWithdrawals();
+    await seedReserveWithdrawals();
+    await seedOutcomePayments();
+    await seedChains();
+    await seedDIDs();
+    await seedStats();
+    // await seedProjects();
     // await seedEvents();
 };
-seedAll();
+// seedAll();
