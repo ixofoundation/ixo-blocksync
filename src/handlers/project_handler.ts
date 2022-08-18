@@ -8,12 +8,12 @@ axiosRetry(axios, { retries: 3 });
 
 export const createProject = async (projectDoc: IProject, agentDocs: IAgent[], claimDocs: IClaim[]) => {
     try {
-        let result: any;
-        result = await prisma.project.create({ data: projectDoc });
-        result += await prisma.agent.createMany({ data: agentDocs });
-        result += await prisma.claim.createMany({ data: claimDocs });
-        io.emit("Project Created", result);
-        return result;
+        let res: any;
+        res = await prisma.project.create({ data: projectDoc });
+        if (agentDocs !== []) { res += await prisma.agent.createMany({ data: agentDocs }) };
+        if (claimDocs !== []) { res += await prisma.claim.createMany({ data: claimDocs }) };
+        io.emit("Project Created", res);
+        return res;
     } catch (error) {
         console.log(error);
         return;
@@ -170,9 +170,19 @@ export const updateProjectStatus = async (projectDid: string, status: string) =>
 
 export const updateProject = async (projectDid: string, projectDoc: any) => {
     try {
+        if (projectDoc["data"]["claims"]) { delete projectDoc["data"]["claims"] };
+        if (projectDoc["data"]["agents"]) { delete projectDoc["data"]["agents"] };
+        if (projectDoc["data"]["ixo"]) { delete projectDoc["data"]["ixo"] };
+        if (projectDoc["data"]["createdOn"]) { delete projectDoc["data"]["createdOn"] };
+        if (projectDoc["data"]["createdBy"]) { delete projectDoc["data"]["createdBy"] };
+        if (projectDoc["data"]["nodeDid"]) { delete projectDoc["data"]["nodeDid"] };
+        if (projectDoc["data"]["agentStats"]) { delete projectDoc["data"]["agentStats"] };
+        if (projectDoc["data"]["claimStats"]) { delete projectDoc["data"]["claimStats"] };
         const res = await prisma.project.update({
             where: { projectDid: projectDid },
-            data: projectDoc,
+            data: {
+                data: projectDoc,
+            },
         });
         io.emit("Project Updated", { projectDid: projectDid });
         return res;
@@ -210,7 +220,7 @@ export const listProjectByProjectDid = async (projectDid: string) => {
 
 export const listProjectByEntityType = async (entityType: string) => {
     const res = await prisma.project.findMany({
-        where: { type: entityType },
+        where: { entityType: entityType },
     });
     io.emit("List Project by Entity Type", res);
     return res;

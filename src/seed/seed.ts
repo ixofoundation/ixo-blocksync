@@ -8,9 +8,11 @@ import * as sharewithdrawals from "./json_exports/withdrawshares.json";
 import * as outcomepayments from "./json_exports/paymentoutcomes.json";
 import * as chains from "./json_exports/chains.json";
 import * as dids from "./json_exports/dids.json";
-// import * as events from "./json_exports/events.json";
+import * as events from "./json_exports/events.json";
 import * as projects from "./json_exports/projects.json";
 import * as stats from "./json_exports/stats.json";
+import { convertProject } from "../prisma/interface_models/Project";
+import * as ProjectHandler from "../handlers/project_handler";
 
 const resetAll = async () => {
     await prisma.agent.deleteMany();
@@ -202,23 +204,31 @@ const seedDIDs = async () => {
     });
 };
 
-// const seedEvents = async () => {
-//     for (const event in events) {
-//         if (Object.prototype.hasOwnProperty.call(events, event)) {
-//             const element = events[event];
-//             console.log(element);
-//         };
-//         break;
-//     };
-// };
+const seedEvents = async () => {
+    for (const event in events) {
+        if (Object.prototype.hasOwnProperty.call(events, event)) {
+            const element = events[event];
+            await prisma.event.create({
+                data: {
+                    type: element["type"],
+                    attributes: element["attributes"],
+                    blockHeight: element["context"]["blockHeight"],
+                    eventSource: element["context"]["eventSource"],
+                    eventIndex: element["context"]["eventIndex"],
+                    timestamp: element["context"]["timestamp"],
+                },
+            });
+        };
+    };
+};
 
 const seedProjects = async () => {
     for (const project in projects) {
         if (Object.prototype.hasOwnProperty.call(projects, project)) {
             const element = projects[project];
-            console.log(element);
+            const { projectDoc, agentDocs, claimDocs } = convertProject(element);
+            await ProjectHandler.createProject(projectDoc, agentDocs, claimDocs);
         };
-        break;
     };
 };
 
@@ -251,7 +261,7 @@ const seedAll = async () => {
     await seedChains();
     await seedDIDs();
     await seedStats();
-    // await seedProjects();
-    // await seedEvents();
+    await seedProjects();
+    await seedEvents();
 };
 // seedAll();

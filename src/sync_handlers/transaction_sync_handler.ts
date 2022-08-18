@@ -2,7 +2,7 @@ import * as ProjectHandler from "../handlers/project_handler";
 import * as StatHandler from "../handlers/stats_handler";
 import * as DidHandler from "../handlers/did_handler";
 import * as BondHandler from "../handlers/bonds_handler";
-import { convertProjectDoc, IAgent, IClaim, NewProject } from "../prisma/interface_models/Project";
+import { convertProject, IAgent, IClaim } from "../prisma/interface_models/Project";
 import { IStat } from "../prisma/interface_models/Stat";
 import { ICredential, IDid } from "../prisma/interface_models/DID";
 import { ITransaction } from "../prisma/interface_models/Transaction";
@@ -136,10 +136,10 @@ export class TransactionHandler {
 
         switch (txData.msg[0].type) {
             case this.TXN_TYPE.PROJECT:
-                let projectDoc: NewProject = msgVal;
+                let projectDoc: any = msgVal;
                 if (this.checkNodeDid(projectDoc.data.nodeDid)) {
                     this.updateGlobalStats(this.TXN_TYPE.PROJECT, "", "", projectDoc.data.requiredClaims);
-                    let docs = convertProjectDoc(projectDoc);
+                    let docs = convertProject(projectDoc);
                     return ProjectHandler.createProject(docs.projectDoc, docs.agentDocs, docs.claimDocs);
                 };
                 break;
@@ -242,7 +242,6 @@ export class TransactionHandler {
                 let claimDoc: IClaim = {
                     claimId: msgVal.data.claimID,
                     projectDid: msgVal.projectDid,
-                    claimTemplateId: msgVal.data.claimTemplateID,
                     date: new Date(),
                     location: ["33.9249° S", "18.4241° E"],
                     saId: msgVal.senderDid,
@@ -264,7 +263,7 @@ export class TransactionHandler {
             case this.TXN_TYPE.PROJECT_STATUS_UPDATE:
                 return ProjectHandler.updateProjectStatus(msgVal.projectDid, msgVal.data.status);
             case this.TXN_TYPE.PROJECT_DOC_UPDATE:
-                return ProjectHandler.updateProject(msgVal.projectDid, convertProjectDoc(msgVal.data).projectDoc);
+                return ProjectHandler.updateProject(msgVal.projectDid, msgVal.data);
         };
     };
 };

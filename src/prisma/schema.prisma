@@ -136,20 +136,17 @@ model Stat {
 
 model Project {
   projectDid              String   @id
-  title                   String
-  type                    String?
-  ownerName               String
-  ownerEmail              String
-  shortDescription        String
-  longDescription         String
-  impactAction            String
+  data                    Json?
+  txHash                  String
+  senderDid               String
+  pubKey                  String
+  status                  String?
+  entityType              String?
+  ixoStaked               Decimal
+  ixoUsed                 Decimal
   createdOn               DateTime
   createdBy               String
-  projectLocation         String
-  requiredClaims          String
-  sdgs                    String[]
-  templateSchema          String
-  templateForm            String
+  nodeDid                 String
   successfulClaims        Int
   rejectedClaims          Int
   evaluators              Int
@@ -158,21 +155,6 @@ model Project {
   serviceProvidersPending Int
   investors               Int
   investorsPending        Int
-  ixoStaked               Decimal
-  ixoUsed                 Decimal
-  serviceEndpoint         String
-  imageLink               String
-  founderName             String
-  founderEmail            String
-  founderCountry          String
-  founderDescription      String
-  founderWebsite          String
-  founderLogo             String
-  nodeDid                 String
-  pubKey                  String
-  senderDid               String
-  txHash                  String
-  status                  String
   Agent                   Agent[]
   Claim                   Claim[]
 
@@ -189,13 +171,12 @@ model Agent {
 }
 
 model Claim {
-  claimId         String   @id
-  project         Project  @relation(fields: [projectDid], references: [projectDid])
-  projectDid      String
-  date            DateTime
-  location        String[]
-  claimTemplateId String
-  status          String
-  saId            String
-  eaId            String?
+  claimId    String   @id
+  project    Project  @relation(fields: [projectDid], references: [projectDid])
+  projectDid String
+  date       DateTime
+  location   String[]
+  status     String
+  saId       String
+  eaId       String?
 }
