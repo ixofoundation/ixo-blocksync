@@ -10,7 +10,6 @@ Refer to [src/schema/api.yml](src/schema/api.yml) or visit [the online version](
 - To ignore all events, one can set `ONLY_EVENTS` to some random string
 
 ## Run
----
 ### From Source
 Requirements
 - [PostgreSQL](https://www.postgresql.org/download/)
