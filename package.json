@@ -5,10 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "tsc && node build/dist/server.js",
-    "dropdb": "tsc && node build/dist/dropdb.js",
     "build": "tsc",
-    "devClear": "bash ./bin/start_clear.sh",
-    "pgdev": "npx ts-node src/server.ts"
+    "dev": "npx ts-node src/server.ts"
   },
   "repository": "https://github.com/ixofoundation/ixo-blocksync",
   "keywords": [

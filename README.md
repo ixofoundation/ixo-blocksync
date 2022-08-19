@@ -10,36 +10,64 @@ Refer to [src/schema/api.yml](src/schema/api.yml) or visit [the online version](
 - To ignore all events, one can set `ONLY_EVENTS` to some random string
 
 ## Run
-
+---
 ### From Source
-**Requirements**: 
+Requirements
+- [PostgreSQL](https://www.postgresql.org/download/)
+- [Redis](https://redis.io/download/)
 
-- [MongoDB](https://docs.mongodb.com/manual/installation/)
-- 200GB of Hard Drive Space
- 
-
-Copy `.env-example` to `.env` and configure. If this step is skipped, ixo-blocksync will use `.env-example` as the configuration by default.
-
-Then:
 ```bash
-
-git clone https://github.com/ixofoundation/ixo-blocksync.git # For the latest stable build
+git clone https://github.com/ixofoundation/ixo-blocksync.git
 cd ixo-blocksync/
+```
+
+Copy `.env.example` to `.env` and configure. If this step is skipped, ixo-blocksync will use `.env.example` as the configuration by default.
+
+- Create a database called Blocksync
+
+```bash
 npm install
+npx prisma migrate reset
+npx prisma generate
 npm run build
 npm start
 ```
-
+---
 ### Using Docker (with Compose)
-**Requirements**: [Docker](https://docs.docker.com/engine/install/) and [Docker Compose](https://docs.docker.com/compose/install/)
+Requirements
+- [Docker](https://docs.docker.com/engine/install/)
+- [Docker Compose](https://docs.docker.com/compose/install/)
 
-Configure environment in `docker-compose.yml`, especially `CHAIN_URI` and `BC_REST`.
-
-Then:
 ```bash
-mkdir ./data/       # may need to give write permission
-mkdir ./data/db/    # may need to give write permission
-npm install         # npm version used: 6.14.5; this creates node_modules/ folder
-npm run build       # npm version used: 6.14.5; this creates build/ folder
-bash bin/start.sh   # may need to superuser privileges
+git clone https://github.com/ixofoundation/ixo-blocksync.git
+cd ixo-blocksync/
+```
+
+Copy `.env.example` to `.env` and configure. If this step is skipped, ixo-blocksync will use `.env.example` as the configuration by default.
+
+```bash
+docker build .
+docker compose up
+```
+---
+### Seeding the Database with Previous MongoDB Data
+- Export all collections as JSON from the block-sync MongoDB database
+- Place the resulting JSON files within the `src/seed/json_exports` directory
+- Configure `DATABASE_URL` in `.env` with the correct username, password and host
+
+Local PostgreSQL
+- Create a database called Blocksync
+
+```bash
+npx prisma migrate reset
+npx prisma generate
+npx ts-node src/seed/seed.ts
+```
+
+Docker PostgreSQL
+```bash
+docker build .
+docker compose up block-sync-db
+npx prisma generate
+npx ts-node src/seed/seed.ts
 ```
