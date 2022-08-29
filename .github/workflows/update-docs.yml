@@ -22,11 +22,21 @@ jobs:
           node-version: 16.x
           cache: yarn
 
-      - name: install deps
+      - name: install typedoc
         run: yarn add typedoc
+      
+      - name: install deps
+        run: yarn install
 
+      - name: prism migrate reset  
+        run: npx prisma migrate reset
+        
+      - name: prism generate  
+        run: npx prisma generate
+      
       - name: generate docs
         run: npx typedoc src/app.ts
+        
       
       #   run: echo ${GITHUB_REF##*/}
 
