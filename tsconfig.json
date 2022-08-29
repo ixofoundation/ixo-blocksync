@@ -2,9 +2,9 @@
   "compilerOptions": {
     "outDir": "build/dist",
     "module": "commonjs",
-    "target": "es5",
+    "target": "ES2020",
     "lib": [
-      "es6",
+      "ES2020",
       "dom",
       "esnext.asynciterable"
     ],
@@ -20,7 +20,8 @@
     "strictNullChecks": true,
     "suppressImplicitAnyIndexErrors": true,
     "noUnusedLocals": false,
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "resolveJsonModule": true,
   },
   "exclude": [
     "node_modules",

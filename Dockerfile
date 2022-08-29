@@ -1,4 +1,4 @@
-FROM node:12
+FROM node:16.14.2
 
 # Create app directory
 RUN mkdir /usr/src/app
@@ -10,6 +10,9 @@ RUN npm install
 
 # Copy rest of files
 COPY . .
+
+# Generate Prisma client
+RUN npx prisma generate
 
 EXPOSE 8080
 

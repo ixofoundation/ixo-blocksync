@@ -1,44 +1,20 @@
 import axios from "axios";
-import axiosRetry from 'axios-retry';
+import axiosRetry from "axios-retry";
 
 axiosRetry(axios, { retries: 3 });
 
-export class AuthHandler {
-  getSignData = (msgHex: string, pubKey: string) => {
-    return new Promise((resolve: Function, reject: Function) => {
-      const rest = (process.env.BC_REST || 'http://localhost:1317');
-      axios.post(rest + '/txs/sign_data', {msg: msgHex, pub_key: pubKey})
-        .then((response) => {
-          if (response.status == 200) {
-            resolve(response.data);
-          } else {
-            reject(response.statusText);
-          }
-        })
-        .catch((error) => {
-          console.log(error.response.data.error)
-          reject(error.response.data.error);
-        });
-    })
-  }
+export const getSignData = async (msgHex: string, pubKey: string) => {
+    const rest = (process.env.BC_REST || 'http://localhost:1317');
+    return axios.post(rest + '/txs/sign_data', { msg: msgHex, pub_key: pubKey });
+};
 
-  decodeTx = (txData: string) => {
-    return new Promise((resolve: Function, reject: Function) => {
-      let rest = (process.env.BC_REST || 'localhost:1317');
-      axios.post(rest + '/txs/decode', {tx: txData})
-        .then((response) => {
-          if (response.status == 200) {
-            resolve(response.data);
-          } else {
-            console.log("itsa me mario");
-            
-            reject(response.statusText);
-          }
-        })
-        .catch((error) => {
-          console.log(error.response.data.error)
-          reject(error.response.data.error);
-        });
-    })
-  }
-}
+export const decodeTx = async (txData: string) => {
+    const rest = (process.env.BC_REST || 'localhost:1317');
+    const response = await axios.post(rest + '/txs/decode', { tx: txData });
+    if (response.status == 200) {
+        return response;
+    } else {
+        console.log(response.statusText);
+        return;
+    };
+};
