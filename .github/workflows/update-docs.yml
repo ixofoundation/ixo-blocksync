@@ -1,6 +1,6 @@
 name: update docs
 on: 
-  push: 
+  # push: 
     # branches: [dev]
   workflow_dispatch: 
 permissions:
