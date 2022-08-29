@@ -22,8 +22,11 @@ jobs:
           node-version: 16.x
           cache: yarn
 
-      - name: cleer seed
+      - name: clear seed
         run: rm -rf src/seed/
+        
+      - name: clear old docs
+        run: rm -rf docs/
 
       - name: install typedoc
         run: yarn add typedoc
