@@ -4,7 +4,7 @@ on:
     branches: [dev]
   workflow_dispatch: 
 permissions:
-  contents: write
+  contents: write 
 
 jobs:
   ixo-blocksync-docs:
@@ -29,7 +29,7 @@ jobs:
         run: yarn add typedoc
       
       - name: generate docs
-        run: npx typedoc src/server.ts
+        run: npx typedoc src/* src/*/*
         
       #   run: echo ${GITHUB_REF##*/}
 
