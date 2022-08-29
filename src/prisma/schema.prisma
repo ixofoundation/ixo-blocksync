@@ -1,0 +1,182 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model DID {
+  did        String       @id
+  publicKey  String
+  Credential Credential[]
+
+  @@index([did])
+}
+
+model Credential {
+  id       Int     @id @default(autoincrement())
+  DID      DID     @relation(fields: [did], references: [did])
+  did      String
+  claimId  String
+  claimKyc Boolean
+  issuer   String
+}
+
+model Bond {
+  bondDid           String              @id
+  token             String
+  name              String
+  description       String
+  creatorDid        String
+  PriceEntry        PriceEntry[]
+  AlphaChange       AlphaChange[]
+  Transaction       Transaction[]
+  ShareWithdrawal   ShareWithdrawal[]
+  ReserveWithdrawal ReserveWithdrawal[]
+  OutcomePayment    OutcomePayment[]
+}
+
+model PriceEntry {
+  id      Int      @id @default(autoincrement())
+  bond    Bond     @relation(fields: [bondDid], references: [bondDid])
+  bondDid String
+  time    DateTime
+  denom   String?
+  price   Decimal
+}
+
+model AlphaChange {
+  id        Int    @id @default(autoincrement())
+  bond      Bond   @relation(fields: [bondDid], references: [bondDid])
+  bondDid   String
+  rawValue  String
+  height    String
+  timestamp String
+}
+
+model OutcomePayment {
+  id        Int    @id @default(autoincrement())
+  bond      Bond   @relation(fields: [bondDid], references: [bondDid])
+  bondDid   String
+  rawValue  String
+  senderDid String
+  amount    String
+  height    String
+  timestamp String
+}
+
+model ReserveWithdrawal {
+  id            Int    @id @default(autoincrement())
+  bond          Bond   @relation(fields: [bondDid], references: [bondDid])
+  bondDid       String
+  rawValue      String
+  transaction   String
+  withdrawerDid String
+  height        String
+  timestamp     String
+}
+
+model ShareWithdrawal {
+  id           Int    @id @default(autoincrement())
+  bond         Bond   @relation(fields: [bondDid], references: [bondDid])
+  bondDid      String
+  rawValue     String
+  transaction  String
+  recipientDid String
+  height       String
+  timestamp    String
+}
+
+model Transaction {
+  id        Int    @id @default(autoincrement())
+  bond      Bond   @relation(fields: [bondDid], references: [bondDid])
+  bondDid   String
+  buyerDid  String
+  amount    String
+  maxPrices String
+}
+
+model Chain {
+  chainId     String @id
+  blockHeight Int
+
+  @@index([chainId])
+}
+
+model Event {
+  id          Int      @id @default(autoincrement())
+  type        String
+  attributes  Json[]
+  blockHeight Int
+  eventSource String
+  eventIndex  Int[]
+  timestamp   DateTime
+
+  @@index([type])
+}
+
+model Stat {
+  id                    Int      @id @default(autoincrement())
+  totalServiceProviders Int
+  totalProjects         Int
+  totalEvaluationAgents Int
+  totalInvestors        Int
+  totalClaims           Int
+  successfulClaims      Int
+  submittedClaims       Int
+  pendingClaims         Int
+  rejectedClaims        Int
+  claimLocations        String[]
+}
+
+model Project {
+  projectDid              String   @id
+  data                    Json?
+  txHash                  String
+  senderDid               String
+  pubKey                  String
+  status                  String?
+  entityType              String?
+  ixoStaked               Decimal
+  ixoUsed                 Decimal
+  createdOn               DateTime
+  createdBy               String
+  nodeDid                 String
+  successfulClaims        Int
+  rejectedClaims          Int
+  evaluators              Int
+  evaluatorsPending       Int
+  serviceProviders        Int
+  serviceProvidersPending Int
+  investors               Int
+  investorsPending        Int
+  Agent                   Agent[]
+  Claim                   Claim[]
+
+  @@index([projectDid])
+}
+
+model Agent {
+  agentDid   String   @id
+  project    Project  @relation(fields: [projectDid], references: [projectDid])
+  projectDid String
+  status     String
+  kyc        Boolean?
+  role       String
+}
+
+model Claim {
+  claimId    String   @id
+  project    Project  @relation(fields: [projectDid], references: [projectDid])
+  projectDid String
+  date       DateTime
+  location   String[]
+  status     String
+  saId       String
+  eaId       String?
+}

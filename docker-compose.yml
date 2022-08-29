@@ -1,12 +1,12 @@
-version: "2"
+version: "3.6"
 services:
   block-sync:
     container_name: block-sync
-    image: ixofoundation/ixo-blocksync:latest
+    image: northroomza/ixo-blocksync:latest
     env_file: .env
     restart: always
     ports:
-      - "80:8080"
+      - 8080:8080
     links:
       - block-sync-db
     logging:
@@ -14,12 +14,37 @@ services:
       options:
         max-size: "1m"
         max-file: "1"
+    depends_on:
+      - block-sync-qdb
+      - block-sync-db
+
+  block-sync-grest:
+    image: postgrest/postgrest:latest
+    container_name: block-sync-grest
+    ports:
+      - 3000:3000
+    environment:
+      PGRST_DB_URI: postgresql://postgres:postgrespw@block-sync-db:5432/Blocksync
+      PGRST_DB_SCHEMAS: public
+      PGRST_DB_ANON_ROLE: app_user #In production this role should not be the same as the one used for the connection
+      PGRST_OPENAPI_SERVER_PROXY_URI: http://0.0.0.0:3000
+    depends_on:
+      - block-sync-db
+      
+  block-sync-qdb:
+    container_name: block-sync-qdb
+    image: redis:7.0
+    restart: always
 
   block-sync-db:
     container_name: block-sync-db
-    image: mongo
+    image: postgres:12.12
     restart: always
+    environment: 
+      - POSTGRES_DB=Blocksync
+      - POSTGRES_PASSWORD=postgrespw
     ports:
-      - "27017:27017"
+      - 5432:5432
     volumes:
       - ./data/db:/data/db
+      - ./src/prisma/migrations/20220818133728_init/:/docker-entrypoint-initdb.d/
