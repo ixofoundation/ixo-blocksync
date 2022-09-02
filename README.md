@@ -1,5 +1,5 @@
 # ixo-blocksync
-Syncs all the public info from an ixo blockchain to an instance of MongoDB.
+Syncs all the public info from an ixo blockchain to an instance of PostgreSQL.
 
 ## API Documentation
 Refer to [src/schema/api.yml](src/schema/api.yml) or visit [the online version](https://app.swaggerhub.com/apis-docs/drshaun/ixo/0.2.3).
