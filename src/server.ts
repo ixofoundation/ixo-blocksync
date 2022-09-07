@@ -6,6 +6,7 @@ import { SyncBlocks } from "./util/sync_blocks";
 import { prisma } from "./prisma/prisma_client";
 import { createStats } from "./handlers/stats_handler";
 import ServerUtils from "./util/server_utils";
+import { spawn, Worker } from "threads";
 
 let statId: number;
 const seedStats = async () => {
@@ -42,3 +43,9 @@ serverUtils.connect();
 
 let syncBlocks = new SyncBlocks();
 syncBlocks.startSync(chainUri, bcRest, bondsInfoExtractPeriod);
+
+const startThread = async () => {
+    const syncBlockTransactions = await spawn(new Worker("./sync_block_transactions"));
+    await syncBlockTransactions();
+};
+startThread().catch(console.error);
