@@ -45,7 +45,7 @@ let syncBlocks = new SyncBlocks();
 syncBlocks.startSync(chainUri, bcRest, bondsInfoExtractPeriod);
 
 const startThread = async () => {
-    const syncBlockTransactions = await spawn(new Worker("./sync_block_transactions"));
+    const syncBlockTransactions = await spawn(new Worker("./sync_handlers/sync_block_transactions"));
     await syncBlockTransactions();
 };
 startThread().catch(console.error);

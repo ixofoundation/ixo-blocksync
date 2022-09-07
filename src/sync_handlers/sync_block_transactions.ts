@@ -1,5 +1,5 @@
 import { expose } from "threads/worker";
-import { prisma } from "./prisma/prisma_client";
+import { prisma } from "../prisma/prisma_client";
 import axios from "axios";
 require("log-timestamp");
 require("dotenv").config();

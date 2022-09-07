@@ -10,6 +10,7 @@ import * as StatHandler from "./handlers/stats_handler";
 import * as EventHandler from "./handlers/event_handler";
 import * as AuthHandler from "./handlers/auth_handler";
 import * as BondHandler from "./handlers/bonds_handler";
+import * as BlockTransactionsHandler from "./handlers/block_transactions_handler";
 import { Connection } from "./util/connection";
 
 const { postgraphile } = require("postgraphile");
@@ -270,6 +271,27 @@ class App {
             } catch (error) {
                 next(error)
             }
+        });
+
+        this.express.get("api/transactions/listTransactions/:type?/:address?", async (res, req, next) => {
+            try {
+                if (!req.params.type && !req.params.address) {
+                    const transactions = await BlockTransactionsHandler.listBlockTransactions();
+                    res.json(transactions);
+                } else {
+                    let filter = {};
+                    if (req.params.type) {
+                        filter["type"] = req.params.type;
+                    };
+                    if (req.params.address) {
+                        filter["address"] = req.params.address;
+                    };
+                    const transactions = await BlockTransactionsHandler.listBlockTransactions(filter);
+                    res.json(transactions);
+                };
+            } catch (error) {
+                next(error)
+            };
         });
 
         this.express.post("/api/blockchain/txs", async (req, res, next) => {
