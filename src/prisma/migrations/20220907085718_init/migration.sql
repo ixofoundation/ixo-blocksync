@@ -201,6 +201,14 @@ CREATE TABLE "BlockTransaction" (
     CONSTRAINT "BlockTransaction_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "BlockTransactionHeight" (
+    "id" SERIAL NOT NULL,
+    "blockHeight" INTEGER NOT NULL,
+
+    CONSTRAINT "BlockTransactionHeight_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE INDEX "DID_did_idx" ON "DID"("did");
 

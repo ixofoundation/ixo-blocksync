@@ -1,6 +1,7 @@
 import { expose } from "threads/worker";
 import { prisma } from "./prisma/prisma_client";
 import axios from "axios";
+require("log-timestamp");
 require("dotenv").config();
 
 const RPC = process.env.CHAIN_URI;
@@ -32,24 +33,25 @@ expose(async function SyncBlockTransactions() {
             } else {
                 currentBlock++;
             };
+            await prisma.blockTransactionHeight.update({
+                where: { id: 1 },
+                data: { blockHeight: currentBlock },
+            });
         } catch (error) {
             console.log("Error Syncing Transactions for Block " + currentBlock);
         };
     };
 });
 
-
 const getLastBlockHeight = async () => {
-    const res = await prisma.blockTransaction.findMany({
-        select: {
-            blockHeight: true,
-        },
-        orderBy: {
-            blockHeight: "desc",
-        },
-        take: 1,
-    });
-    const lastBlockHeight = res ? res[0].blockHeight : 0;
+    const res = await prisma.blockTransactionHeight.findFirst();
+    let lastBlockHeight: number;
+    if (res) {
+        lastBlockHeight = res.blockHeight;
+    } else {
+        lastBlockHeight = 1;
+        await prisma.blockTransactionHeight.create({ data: { blockHeight: lastBlockHeight } });
+    };
     return lastBlockHeight;
 };
 

@@ -190,3 +190,8 @@ model BlockTransaction {
   memo          String
   timeoutHeight String
 }
+
+model BlockTransactionHeight {
+  id          Int @id @default(autoincrement())
+  blockHeight Int
+}
