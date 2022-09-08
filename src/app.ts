@@ -273,22 +273,38 @@ class App {
             }
         });
 
-        this.express.get("api/transactions/listTransactions/:type?/:address?", async (res, req, next) => {
+        this.express.get("api/transactions/listTransactionsByType/:type", async (res, req, next) => {
             try {
-                if (!req.params.type && !req.params.address) {
-                    const transactions = await BlockTransactionsHandler.listBlockTransactions();
-                    res.json(transactions);
-                } else {
-                    let filter = {};
-                    if (req.params.type) {
-                        filter["type"] = req.params.type;
-                    };
-                    if (req.params.address) {
-                        filter["address"] = req.params.address;
-                    };
-                    const transactions = await BlockTransactionsHandler.listBlockTransactions(filter);
-                    res.json(transactions);
+                const filter = {
+                    type: req.params.type
                 };
+                const transactions = await BlockTransactionsHandler.listBlockTransactions(filter);
+                res.json(transactions);
+            } catch (error) {
+                next(error)
+            };
+        });
+
+        this.express.get("api/transactions/listTransactionsByAddress/:address", async (res, req, next) => {
+            try {
+                const filter = {
+                    address: req.params.address
+                };
+                const transactions = await BlockTransactionsHandler.listBlockTransactions(filter);
+                res.json(transactions);
+            } catch (error) {
+                next(error)
+            };
+        });
+
+        this.express.get("api/transactions/listTransactionsByTypeAndAddress/:type/:address", async (res, req, next) => {
+            try {
+                const filter = {
+                    type: req.params.type,
+                    address: req.params.address,
+                };
+                const transactions = await BlockTransactionsHandler.listBlockTransactions(filter);
+                res.json(transactions);
             } catch (error) {
                 next(error)
             };
