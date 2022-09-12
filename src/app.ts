@@ -10,6 +10,7 @@ import * as StatHandler from "./handlers/stats_handler";
 import * as EventHandler from "./handlers/event_handler";
 import * as AuthHandler from "./handlers/auth_handler";
 import * as BondHandler from "./handlers/bonds_handler";
+import * as BlockTransactionsHandler from "./handlers/block_transactions_handler";
 import { Connection } from "./util/connection";
 
 const { postgraphile } = require("postgraphile");
@@ -270,6 +271,43 @@ class App {
             } catch (error) {
                 next(error)
             }
+        });
+
+        this.express.get("api/transactions/listTransactionsByType/:type", async (res, req, next) => {
+            try {
+                const filter = {
+                    type: req.params.type
+                };
+                const transactions = await BlockTransactionsHandler.listBlockTransactions(filter);
+                res.json(transactions);
+            } catch (error) {
+                next(error)
+            };
+        });
+
+        this.express.get("api/transactions/listTransactionsByAddress/:address", async (res, req, next) => {
+            try {
+                const filter = {
+                    address: req.params.address
+                };
+                const transactions = await BlockTransactionsHandler.listBlockTransactions(filter);
+                res.json(transactions);
+            } catch (error) {
+                next(error)
+            };
+        });
+
+        this.express.get("api/transactions/listTransactionsByTypeAndAddress/:type/:address", async (res, req, next) => {
+            try {
+                const filter = {
+                    type: req.params.type,
+                    address: req.params.address,
+                };
+                const transactions = await BlockTransactionsHandler.listBlockTransactions(filter);
+                res.json(transactions);
+            } catch (error) {
+                next(error)
+            };
         });
 
         this.express.post("/api/blockchain/txs", async (req, res, next) => {

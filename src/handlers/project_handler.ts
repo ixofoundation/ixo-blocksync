@@ -10,8 +10,8 @@ export const createProject = async (projectDoc: IProject, agentDocs: IAgent[], c
     try {
         let res: any;
         res = await prisma.project.create({ data: projectDoc });
-        if (agentDocs !== []) { res += await prisma.agent.createMany({ data: agentDocs }) };
-        if (claimDocs !== []) { res += await prisma.claim.createMany({ data: claimDocs }) };
+        if (agentDocs.length > 0) { res += await prisma.agent.createMany({ data: agentDocs }) };
+        if (claimDocs.length > 0) { res += await prisma.claim.createMany({ data: claimDocs }) };
         io.emit("Project Created", res);
         return res;
     } catch (error) {

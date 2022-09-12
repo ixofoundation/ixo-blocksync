@@ -45,7 +45,7 @@ export const convertProject = (project: any) => {
     let claimDocs: IClaim[] = [];
     let agentDocs: IAgent[] = [];
 
-    if (project["data"]["claims"] !== []) {
+    if (["data"]["claims"] in project["data"]) {
         project["data"]["claims"].forEach(claim => {
             const claimDoc: IClaim = {
                 claimId: claim["claimId"],
@@ -58,10 +58,10 @@ export const convertProject = (project: any) => {
             };
             claimDocs.push(claimDoc);
         });
+        delete project["data"]["claims"];
     };
-    delete project["data"]["claims"];
 
-    if (project["data"]["agents"] !== []) {
+    if (["data"]["agents"] in project["data"]) {
         project["data"]["agents"].forEach(agent => {
             const agentDoc: IAgent = {
                 agentDid: agent["did"],
@@ -72,12 +72,22 @@ export const convertProject = (project: any) => {
             };
             agentDocs.push(agentDoc);
         });
+        delete project["data"]["agents"];
     };
-    delete project["data"]["agents"];
 
-    let ixoStaked = new Prisma.Decimal(project["data"]["ixo"]["totalStaked"]);
-    let ixoUsed = new Prisma.Decimal(project["data"]["ixo"]["totalUsed"]);
-    let createdOn = new Date(parseInt(project["data"]["createdOn"]["$date"]["$numberLong"]));
+    let ixoStaked: Prisma.Decimal;
+    if (["ixo"]["totalStaked"] in project["data"]) {
+        ixoStaked = new Prisma.Decimal(project["data"]["ixo"]["totalStaked"]);
+    } else {
+        ixoStaked = new Prisma.Decimal(0);
+    };
+    let ixoUsed: Prisma.Decimal;
+    if (["ixo"]["totalUsed"] in project["data"]) {
+        ixoUsed = new Prisma.Decimal(project["data"]["ixo"]["totalUsed"]);
+    } else {
+        ixoUsed = new Prisma.Decimal(0);
+    };
+    let createdOn = new Date(parseInt(project["data"]["createdOn"]));
     let createdBy = project["data"]["createdBy"];
     let nodeDid = project["data"]["nodeDid"];
     delete project["data"]["ixo"];
@@ -85,14 +95,54 @@ export const convertProject = (project: any) => {
     delete project["data"]["createdBy"];
     delete project["data"]["nodeDid"];
 
-    let successfulClaims = project["data"]["claimStats"]["currentSuccessful"];
-    let rejectedClaims = project["data"]["claimStats"]["currentRejected"];
-    let evaluators = project["data"]["agentStats"]["evaluators"];
-    let evaluatorsPending = project["data"]["agentStats"]["evaluatorsPending"];
-    let serviceProviders = project["data"]["agentStats"]["serviceProviders"];
-    let serviceProvidersPending = project["data"]["agentStats"]["serviceProvidersPending"];
-    let investors = project["data"]["agentStats"]["investors"];
-    let investorsPending = project["data"]["agentStats"]["investorsPending"];
+    let successfulClaims: number;
+    if (["claimStats"]["currentSuccessful"] in project["data"]) {
+        successfulClaims = project["data"]["claimStats"]["currentSuccessful"];
+    } else {
+        successfulClaims = 0;
+    }
+    let rejectedClaims: number;
+    if (["claimStats"]["currentRejected"] in project["data"]) {
+        rejectedClaims = project["data"]["claimStats"]["currentRejected"];
+    } else {
+        rejectedClaims = 0;
+    };
+    let evaluators: number;
+    if (["agentStats"]["evaluators"] in project["data"]) {
+        evaluators = project["data"]["agentStats"]["evaluators"];
+    } else {
+        evaluators = 0;
+    };
+    let evaluatorsPending: number;
+    if (["agentStats"]["evaluatorsPending"] in project["data"]) {
+        evaluatorsPending = project["data"]["agentStats"]["evaluatorsPending"];
+    } else {
+        evaluatorsPending = 0;
+    }
+    let serviceProviders: number;
+    if (["agentStats"]["serviceProviders"] in project["data"]) {
+        serviceProviders = project["data"]["agentStats"]["serviceProviders"];
+    } else {
+        serviceProviders = 0;
+    }
+    let serviceProvidersPending: number;
+    if (["agentStats"]["serviceProvidersPending"] in project["data"]) {
+        serviceProvidersPending = project["data"]["agentStats"]["serviceProvidersPending"];
+    } else {
+        serviceProvidersPending = 0;
+    };
+    let investors: number;
+    if (["agentStats"]["investors"] in project["data"]) {
+        investors = project["data"]["agentStats"]["investors"];
+    } else {
+        investors = 0;
+    };
+    let investorsPending: number;
+    if (["agentStats"]["investorsPending"] in project["data"]) {
+        investorsPending = project["data"]["agentStats"]["investorsPending"];
+    } else {
+        investorsPending = 0;
+    };
     delete project["data"]["agentStats"];
     delete project["data"]["claimStats"];
 
