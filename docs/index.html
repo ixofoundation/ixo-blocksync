@@ -62,8 +62,9 @@
 </ul>
 <pre><code class="language-bash"><span class="hl-0">git clone https://github.com/ixofoundation/ixo-blocksync.git</span><br/><span class="hl-1">cd</span><span class="hl-0"> ixo-blocksync/</span>
 </code></pre>
-<p>Copy <code>.env.example</code> to <code>.env</code> and configure. If this step is skipped, ixo-blocksync will use <code>.env.example</code> as the configuration by default.</p>
-<pre><code class="language-bash"><span class="hl-0">docker build </span><span class="hl-1">.</span><br/><span class="hl-0">docker compose up</span>
+<p>Copy <code>.env.example</code> to <code>.env</code> and configure. If this step is skipped, ixo-blocksync will use <code>.env.example</code> as the configuration by default.
+Don&#39;t use quotations when asign env vars for docker<br>Delete the seed folder in src/seed/* if you do not plan to import data from json<br>Create a role(e.g. app_user) in the DB for postgress to work</p>
+<pre><code class="language-bash"><span class="hl-0">docker build -t ixofoundation/ixo-blocksync:latest </span><span class="hl-1">.</span><br/><span class="hl-0">docker compose up -d</span>
 </code></pre>
 <hr>
 
