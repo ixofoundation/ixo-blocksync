@@ -614,6 +614,11 @@
     "function-bind" "^1.1.1"
     "get-intrinsic" "^1.0.2"
 
+"callsites@^3.1.0":
+  "integrity" "sha512-P8BjAsXvZS+VIDUI11hHCQEv74YT67YUi5JJFNWIqL235sBmjX4+qx9Muvls5ivyNENctx46xQLQ3aTuE7ssaQ=="
+  "resolved" "https://registry.npmjs.org/callsites/-/callsites-3.1.0.tgz"
+  "version" "3.1.0"
+
 "camelcase@^2.0.1":
   "integrity" "sha512-DLIsRzJVBQu72meAKPkWQOLcujdXT32hwdfnkI1frSiSRMK1MofjKHf+MEx0SB6fjEFXL8fBDv1dKymBlOp4Qw=="
   "resolved" "https://registry.npmjs.org/camelcase/-/camelcase-2.1.1.tgz"
@@ -973,6 +978,13 @@
   dependencies:
     "ms" "2.1.2"
 
+"debug@^4.2.0":
+  "integrity" "sha512-PRWFHuSU3eDtQJPvnNY7Jcket1j0t5OuOsFzPPzsekD52Zl8qUfFIPEiswXqIvHWGVHOgX+7G/vCNNhehwxfkQ=="
+  "resolved" "https://registry.npmjs.org/debug/-/debug-4.3.4.tgz"
+  "version" "4.3.4"
+  dependencies:
+    "ms" "2.1.2"
+
 "debug@^4.3.1":
   "integrity" "sha512-PRWFHuSU3eDtQJPvnNY7Jcket1j0t5OuOsFzPPzsekD52Zl8qUfFIPEiswXqIvHWGVHOgX+7G/vCNNhehwxfkQ=="
   "resolved" "https://registry.npmjs.org/debug/-/debug-4.3.4.tgz"
@@ -1305,6 +1317,11 @@
   "integrity" "sha512-TtpcNJ3XAzx3Gq8sWRzJaVajRs0uVxA2YAkdb1jm2YkPz4G6egUFAyA3n5vtEIZefPk5Wa4UXbKuS5fKkJWdgA=="
   "resolved" "https://registry.npmjs.org/escape-string-regexp/-/escape-string-regexp-4.0.0.tgz"
   "version" "4.0.0"
+
+"esm@^3.2.25":
+  "integrity" "sha512-U1suiZ2oDVWv4zPO56S0NcR5QriEahGtdN2OR6FiOG4WJvcjBVFB0qI4+eKoWFH483PKGuLuu6V8Z4T5g63UVA=="
+  "resolved" "https://registry.npmjs.org/esm/-/esm-3.2.25.tgz"
+  "version" "3.2.25"
 
 "etag@~1.8.1":
   "integrity" "sha512-aIL5Fx7mawVa300al2BnEE4iNvo1qETxLrPI/o05L7z6go7fCw1J6EQmbK4FmJ2AS7kgVF/KEZWufBfdClMcPg=="
@@ -1904,6 +1921,11 @@
   "integrity" "sha512-41Cifkg6e8TylSpdtTpeLVMqvSBEVzTttHvERD741+pnZ8ANv0004MRL43QKPDlK9cGvNp6NZWZUBlbGXYxxng=="
   "resolved" "https://registry.npmjs.org/is-number/-/is-number-7.0.0.tgz"
   "version" "7.0.0"
+
+"is-observable@^2.1.0":
+  "integrity" "sha512-DailKdLb0WU+xX8K5w7VsJhapwHLZ9jjmazqCJq4X12CTgqq73TKnbRcnSLuXYPOoLQgV5IrD7ePiX/h1vnkBw=="
+  "resolved" "https://registry.npmjs.org/is-observable/-/is-observable-2.1.0.tgz"
+  "version" "2.1.0"
 
 "is-plain-obj@^2.1.0":
   "integrity" "sha512-YWnfyRwxL/+SsrWYfOpUtz5b3YD+nyfkHvjbcanzk8zgyO4ASD67uVMRt8k5bM4lLMDnXfriRhOpemw+NfT1eA=="
@@ -2545,6 +2567,11 @@
   "integrity" "sha512-z+cPxW0QGUp0mcqcsgQyLVRDoXFQbXOwBaqyF7VIgI4TWNQsDHrBpUQslRmIfAoYWdYzs6UlKJtB2XJpTaNSpQ=="
   "resolved" "https://registry.npmjs.org/object-inspect/-/object-inspect-1.12.2.tgz"
   "version" "1.12.2"
+
+"observable-fns@^0.6.1":
+  "integrity" "sha512-9gRK4+sRWzeN6AOewNBTLXir7Zl/i3GB6Yl26gK4flxz8BXVpD3kt8amREmWNb0mxYOGDotvE5a4N+PtGGKdkg=="
+  "resolved" "https://registry.npmjs.org/observable-fns/-/observable-fns-0.6.1.tgz"
+  "version" "0.6.1"
 
 "on-finished@2.4.1":
   "integrity" "sha512-oVlzkg3ENAhCk2zdv7IJwd/QUD4z2RxRwpkcGY8psCVcCYZNq4wYnVWALHM+brtuJjePWiYF/ClmuDr8Ch5+kg=="
@@ -3428,6 +3455,18 @@
   "resolved" "https://registry.npmjs.org/text-hex/-/text-hex-1.0.0.tgz"
   "version" "1.0.0"
 
+"threads@^1.7.0":
+  "integrity" "sha512-Mx5NBSHX3sQYR6iI9VYbgHKBLisyB+xROCBGjjWm1O9wb9vfLxdaGtmT/KCjUqMsSNW6nERzCW3T6H43LqjDZQ=="
+  "resolved" "https://registry.npmjs.org/threads/-/threads-1.7.0.tgz"
+  "version" "1.7.0"
+  dependencies:
+    "callsites" "^3.1.0"
+    "debug" "^4.2.0"
+    "is-observable" "^2.1.0"
+    "observable-fns" "^0.6.1"
+  optionalDependencies:
+    "tiny-worker" ">= 2"
+
 "through@^2.3.8", "through@>=2.2.7 <3":
   "integrity" "sha512-w89qg7PI8wAdvX60bMDP+bFoD5Dvhm9oLheFp5O4a2QF0cSBGsBX4qZmadPMvVqlLJBBci+WqGGOAPvcDeNSVg=="
   "resolved" "https://registry.npmjs.org/through/-/through-2.3.8.tgz"
@@ -3440,6 +3479,13 @@
   dependencies:
     "es5-ext" "~0.10.46"
     "next-tick" "1"
+
+"tiny-worker@>= 2":
+  "integrity" "sha512-pJ70wq5EAqTAEl9IkGzA+fN0836rycEuz2Cn6yeZ6FRzlVS5IDOkFHpIoEsksPRQV34GDqXm65+OlnZqUSyK2g=="
+  "resolved" "https://registry.npmjs.org/tiny-worker/-/tiny-worker-2.3.0.tgz"
+  "version" "2.3.0"
+  dependencies:
+    "esm" "^3.2.25"
 
 "to-array@0.1.4":
   "integrity" "sha512-LhVdShQD/4Mk4zXNroIQZJC+Ap3zgLcDuwEdcmLv9CCO73NWockQDwyUnW/m8VX/EElfL6FcYx7EeutN4HJA6A=="

@@ -180,3 +180,18 @@ model Claim {
   saId       String
   eaId       String?
 }
+
+model BlockTransaction {
+  id            Int    @id @default(autoincrement())
+  blockHeight   Int
+  msg           Json?
+  fee           Json?
+  signatures    Json?
+  memo          String
+  timeoutHeight String
+}
+
+model BlockTransactionHeight {
+  id          Int @id @default(autoincrement())
+  blockHeight Int
+}

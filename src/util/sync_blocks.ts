@@ -89,7 +89,7 @@ export class SyncBlocks {
                     if (result.getTransactionCode(i) == undefined || result.getTransactionCode(i) == 0) {
                         AuthHandler.decodeTx(event.block.getTransaction(i))
                             .then((response: any) => {
-                                this.TransactionHandler.routeTransaction(response.result, String(height), String(timestamp), rawblock);
+                                this.TransactionHandler.routeTransaction(response.data.result, String(height), String(timestamp), rawblock);
                             })
                             .catch((err) => {
                                 throw (err);
