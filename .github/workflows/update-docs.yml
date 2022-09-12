@@ -1,7 +1,7 @@
 name: update docs
 on: 
   push: 
-    branches: [dev]
+    branches: [master]
   workflow_dispatch: 
 permissions:
   contents: write 
@@ -22,8 +22,11 @@ jobs:
           node-version: 16.x
           cache: yarn
 
-      - name: cleer seed
+      - name: clear seed
         run: rm -rf src/seed/
+        
+      - name: clear old docs
+        run: rm -rf docs/
 
       - name: install typedoc
         run: yarn add typedoc
@@ -37,5 +40,5 @@ jobs:
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: docs
-          branch: dev
+          branch: master
           target-folder: docs
