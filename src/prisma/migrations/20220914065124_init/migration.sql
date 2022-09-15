@@ -209,6 +209,53 @@ CREATE TABLE "BlockTransactionHeight" (
     CONSTRAINT "BlockTransactionHeight_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "CosmosBlock" (
+    "height" INTEGER NOT NULL,
+    "hash" TEXT NOT NULL,
+    "num_txs" INTEGER NOT NULL DEFAULT 0,
+    "total_gas" INTEGER NOT NULL DEFAULT 0,
+    "proposer_address" TEXT,
+    "timestamp" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "CosmosBlock_pkey" PRIMARY KEY ("height")
+);
+
+-- CreateTable
+CREATE TABLE "WasmCode" (
+    "code_id" INTEGER NOT NULL,
+    "creator" TEXT NOT NULL DEFAULT '',
+    "creation_time" TEXT NOT NULL DEFAULT '',
+    "height" INTEGER NOT NULL,
+
+    CONSTRAINT "WasmCode_pkey" PRIMARY KEY ("code_id")
+);
+
+-- CreateTable
+CREATE TABLE "WasmContract" (
+    "address" TEXT NOT NULL,
+    "code_id" INTEGER NOT NULL,
+    "creator" TEXT NOT NULL DEFAULT '',
+    "admin" TEXT NOT NULL DEFAULT '',
+    "label" TEXT NOT NULL DEFAULT '',
+    "creation_time" TEXT NOT NULL DEFAULT '',
+    "height" INTEGER NOT NULL,
+    "json" JSONB DEFAULT '{}',
+
+    CONSTRAINT "WasmContract_pkey" PRIMARY KEY ("address")
+);
+
+-- CreateTable
+CREATE TABLE "ExecMsg" (
+    "id" SERIAL NOT NULL,
+    "sender" TEXT NOT NULL,
+    "address" TEXT NOT NULL,
+    "funds" JSONB,
+    "json" JSONB,
+
+    CONSTRAINT "ExecMsg_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE INDEX "DID_did_idx" ON "DID"("did");
 
@@ -220,6 +267,24 @@ CREATE INDEX "Event_type_idx" ON "Event"("type");
 
 -- CreateIndex
 CREATE INDEX "Project_projectDid_idx" ON "Project"("projectDid");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "CosmosBlock_hash_key" ON "CosmosBlock"("hash");
+
+-- CreateIndex
+CREATE INDEX "CosmosBlock_hash_idx" ON "CosmosBlock"("hash");
+
+-- CreateIndex
+CREATE INDEX "CosmosBlock_proposer_address_idx" ON "CosmosBlock"("proposer_address");
+
+-- CreateIndex
+CREATE INDEX "WasmCode_creator_idx" ON "WasmCode"("creator");
+
+-- CreateIndex
+CREATE INDEX "WasmContract_code_id_idx" ON "WasmContract"("code_id");
+
+-- CreateIndex
+CREATE INDEX "WasmContract_creator_idx" ON "WasmContract"("creator");
 
 -- AddForeignKey
 ALTER TABLE "Credential" ADD CONSTRAINT "Credential_did_fkey" FOREIGN KEY ("did") REFERENCES "DID"("did") ON DELETE RESTRICT ON UPDATE CASCADE;

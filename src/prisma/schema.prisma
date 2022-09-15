@@ -195,3 +195,46 @@ model BlockTransactionHeight {
   id          Int @id @default(autoincrement())
   blockHeight Int
 }
+
+model CosmosBlock {
+  height           Int      @id
+  hash             String   @unique
+  num_txs          Int      @default(0)
+  total_gas        Int      @default(0)
+  proposer_address String?
+  timestamp        DateTime
+
+  @@index([hash])
+  @@index([proposer_address])
+}
+
+model WasmCode {
+  code_id       Int    @id
+  creator       String @default("")
+  creation_time String @default("")
+  height        Int
+
+  @@index([creator])
+}
+
+model WasmContract {
+  address       String @id
+  code_id       Int
+  creator       String @default("")
+  admin         String @default("")
+  label         String @default("")
+  creation_time String @default("")
+  height        Int
+  json          Json?  @default("{}")
+
+  @@index([code_id])
+  @@index([creator])
+}
+
+model ExecMsg {
+  id      Int    @id @default(autoincrement())
+  sender  String
+  address String
+  funds   Json?
+  json    Json?
+}
