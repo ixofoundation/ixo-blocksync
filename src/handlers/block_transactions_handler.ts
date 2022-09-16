@@ -6,43 +6,25 @@ export const listBlockTransactions = async (filter?: any) => {
         if (filter.type && filter.address) {
             res = await prisma.blockTransaction.findMany({
                 where: {
-                    AND: [
-                        {
-                            msg: {
-                                path: ["type"],
-                                equals: filter.type,
-                            }
-                        },
-                        {
-                            msg: {
-                                path: ["value"]["from_address"],
-                                equals: filter.address,
-                            },
-                        },
-                    ],
+                    type: filter.type,
+                    from: filter.address,
                 },
             });
         } else if (filter.type) {
             res = await prisma.blockTransaction.findMany({
                 where: {
-                    msg: {
-                        path: ["type"],
-                        equals: filter.type
-                    }
+                    type: filter.type,
                 },
             });
         } else if (filter.address) {
             res = await prisma.blockTransaction.findMany({
                 where: {
-                    msg: {
-                        path: ["type"],
-                        equals: filter.type
-                    }
+                    from: filter.address,
                 },
             });
-        };
+        }
     } else {
         res = await prisma.blockTransaction.findMany();
-    };
+    }
     return res;
 };

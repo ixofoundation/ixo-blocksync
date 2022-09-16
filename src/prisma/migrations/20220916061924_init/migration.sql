@@ -192,7 +192,9 @@ CREATE TABLE "Claim" (
 CREATE TABLE "BlockTransaction" (
     "id" SERIAL NOT NULL,
     "blockHeight" INTEGER NOT NULL,
-    "msg" JSONB,
+    "type" TEXT NOT NULL,
+    "from" TEXT,
+    "value" JSONB,
     "fee" JSONB,
     "signatures" JSONB,
     "memo" TEXT NOT NULL,

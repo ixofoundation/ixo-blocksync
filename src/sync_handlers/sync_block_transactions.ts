@@ -31,11 +31,13 @@ expose(async function SyncBlockTransactions() {
                     await prisma.blockTransaction.create({
                         data: {
                             blockHeight: currentBlock,
-                            msg: transaction.msg[0],
+                            type: transaction.msg[0]["type"],
+                            from: transaction.msg[0]["value"]["from_address"]
+                                ? transaction.msg[0]["value"]["from_address"]
+                                : null,
+                            value: transaction.msg[0]["value"],
                             fee: transaction.fee,
-                            signatures: transaction.signatures
-                                ? transaction.signatures
-                                : {},
+                            signatures: transaction.signatures,
                             memo: transaction.memo,
                             timeoutHeight: transaction.timeout_height,
                         },

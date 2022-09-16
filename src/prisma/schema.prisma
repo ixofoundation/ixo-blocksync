@@ -182,9 +182,11 @@ model Claim {
 }
 
 model BlockTransaction {
-  id            Int    @id @default(autoincrement())
+  id            Int     @id @default(autoincrement())
   blockHeight   Int
-  msg           Json?
+  type          String
+  from          String?
+  value         Json?
   fee           Json?
   signatures    Json?
   memo          String
