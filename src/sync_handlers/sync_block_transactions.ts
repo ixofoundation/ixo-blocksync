@@ -30,7 +30,7 @@ expose(async function SyncBlockTransactions() {
                     const transaction = await decodeTx(tx);
                     await prisma.blockTransaction.create({
                         data: {
-                            blockHeight: currentBlock,
+                            blockHeight: currentBlock - 1,
                             type: transaction.msg[0]["type"],
                             from: transaction.msg[0]["value"]["from_address"]
                                 ? transaction.msg[0]["value"]["from_address"]
@@ -56,7 +56,7 @@ expose(async function SyncBlockTransactions() {
             }
             await prisma.blockTransactionHeight.update({
                 where: { id: 1 },
-                data: { blockHeight: currentBlock },
+                data: { blockHeight: currentBlock - 1 },
             });
         } catch (error) {
             console.log("Error Syncing Transactions for Block " + currentBlock);
