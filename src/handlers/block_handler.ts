@@ -1,6 +1,6 @@
 import { prisma } from "../prisma/prisma_client";
 
-export const createCosmosBlock = async (
+export const createBlock = async (
     blockHash: string,
     block: any,
     blockResult: any,
@@ -20,7 +20,7 @@ export const createCosmosBlock = async (
             proposer_address: block.header.proposer_address,
             timestamp: new Date(Date.parse(block.header.time)),
         };
-        const res = await prisma.cosmosBlock.create({ data: blockDoc });
+        const res = await prisma.block.create({ data: blockDoc });
         return res;
     } catch (error) {
         console.log(error);

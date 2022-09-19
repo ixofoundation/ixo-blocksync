@@ -33,10 +33,21 @@ CREATE TABLE "PriceEntry" (
     "id" SERIAL NOT NULL,
     "bondDid" TEXT NOT NULL,
     "time" TIMESTAMP(3) NOT NULL,
-    "denom" TEXT,
+    "denom" TEXT NOT NULL,
     "price" DECIMAL(65,30) NOT NULL,
 
     CONSTRAINT "PriceEntry_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "BondBuy" (
+    "id" SERIAL NOT NULL,
+    "bondDid" TEXT NOT NULL,
+    "buyerDid" TEXT NOT NULL,
+    "amount" TEXT NOT NULL,
+    "maxPrices" TEXT NOT NULL,
+
+    CONSTRAINT "BondBuy_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -90,17 +101,6 @@ CREATE TABLE "ShareWithdrawal" (
 );
 
 -- CreateTable
-CREATE TABLE "Transaction" (
-    "id" SERIAL NOT NULL,
-    "bondDid" TEXT NOT NULL,
-    "buyerDid" TEXT NOT NULL,
-    "amount" TEXT NOT NULL,
-    "maxPrices" TEXT NOT NULL,
-
-    CONSTRAINT "Transaction_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "Chain" (
     "chainId" TEXT NOT NULL,
     "blockHeight" INTEGER NOT NULL,
@@ -122,7 +122,7 @@ CREATE TABLE "Event" (
 );
 
 -- CreateTable
-CREATE TABLE "Stat" (
+CREATE TABLE "Stats" (
     "id" SERIAL NOT NULL,
     "totalServiceProviders" INTEGER NOT NULL,
     "totalProjects" INTEGER NOT NULL,
@@ -135,7 +135,7 @@ CREATE TABLE "Stat" (
     "rejectedClaims" INTEGER NOT NULL,
     "claimLocations" TEXT[],
 
-    CONSTRAINT "Stat_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Stats_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -189,7 +189,7 @@ CREATE TABLE "Claim" (
 );
 
 -- CreateTable
-CREATE TABLE "BlockTransaction" (
+CREATE TABLE "Transaction" (
     "id" SERIAL NOT NULL,
     "blockHeight" INTEGER NOT NULL,
     "type" TEXT NOT NULL,
@@ -200,19 +200,11 @@ CREATE TABLE "BlockTransaction" (
     "memo" TEXT NOT NULL,
     "timeoutHeight" TEXT NOT NULL,
 
-    CONSTRAINT "BlockTransaction_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Transaction_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "BlockTransactionHeight" (
-    "id" SERIAL NOT NULL,
-    "blockHeight" INTEGER NOT NULL,
-
-    CONSTRAINT "BlockTransactionHeight_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "CosmosBlock" (
+CREATE TABLE "Block" (
     "height" INTEGER NOT NULL,
     "hash" TEXT NOT NULL,
     "num_txs" INTEGER NOT NULL DEFAULT 0,
@@ -220,7 +212,7 @@ CREATE TABLE "CosmosBlock" (
     "proposer_address" TEXT,
     "timestamp" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "CosmosBlock_pkey" PRIMARY KEY ("height")
+    CONSTRAINT "Block_pkey" PRIMARY KEY ("height")
 );
 
 -- CreateTable
@@ -271,13 +263,13 @@ CREATE INDEX "Event_type_idx" ON "Event"("type");
 CREATE INDEX "Project_projectDid_idx" ON "Project"("projectDid");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "CosmosBlock_hash_key" ON "CosmosBlock"("hash");
+CREATE UNIQUE INDEX "Block_hash_key" ON "Block"("hash");
 
 -- CreateIndex
-CREATE INDEX "CosmosBlock_hash_idx" ON "CosmosBlock"("hash");
+CREATE INDEX "Block_hash_idx" ON "Block"("hash");
 
 -- CreateIndex
-CREATE INDEX "CosmosBlock_proposer_address_idx" ON "CosmosBlock"("proposer_address");
+CREATE INDEX "Block_proposer_address_idx" ON "Block"("proposer_address");
 
 -- CreateIndex
 CREATE INDEX "WasmCode_creator_idx" ON "WasmCode"("creator");
@@ -295,6 +287,9 @@ ALTER TABLE "Credential" ADD CONSTRAINT "Credential_did_fkey" FOREIGN KEY ("did"
 ALTER TABLE "PriceEntry" ADD CONSTRAINT "PriceEntry_bondDid_fkey" FOREIGN KEY ("bondDid") REFERENCES "Bond"("bondDid") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "BondBuy" ADD CONSTRAINT "BondBuy_bondDid_fkey" FOREIGN KEY ("bondDid") REFERENCES "Bond"("bondDid") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "AlphaChange" ADD CONSTRAINT "AlphaChange_bondDid_fkey" FOREIGN KEY ("bondDid") REFERENCES "Bond"("bondDid") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -305,9 +300,6 @@ ALTER TABLE "ReserveWithdrawal" ADD CONSTRAINT "ReserveWithdrawal_bondDid_fkey" 
 
 -- AddForeignKey
 ALTER TABLE "ShareWithdrawal" ADD CONSTRAINT "ShareWithdrawal_bondDid_fkey" FOREIGN KEY ("bondDid") REFERENCES "Bond"("bondDid") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Transaction" ADD CONSTRAINT "Transaction_bondDid_fkey" FOREIGN KEY ("bondDid") REFERENCES "Bond"("bondDid") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Agent" ADD CONSTRAINT "Agent_projectDid_fkey" FOREIGN KEY ("projectDid") REFERENCES "Project"("projectDid") ON DELETE RESTRICT ON UPDATE CASCADE;

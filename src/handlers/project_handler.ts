@@ -2,22 +2,31 @@ import { prisma } from "../prisma/prisma_client";
 import { io } from "../server";
 import axios from "axios";
 import axiosRetry from "axios-retry";
-import { IAgent, IClaim, IProject } from "../prisma/interface_models/Project";
+import { IAgent, IClaim, IProject } from "../types/Project";
+import { REST } from "../util/secrets";
 
 axiosRetry(axios, { retries: 3 });
 
-export const createProject = async (projectDoc: IProject, agentDocs: IAgent[], claimDocs: IClaim[]) => {
+export const createProject = async (
+    projectDoc: IProject,
+    agentDocs: IAgent[],
+    claimDocs: IClaim[],
+) => {
     try {
         let res: any;
         res = await prisma.project.create({ data: projectDoc });
-        if (agentDocs.length > 0) { res += await prisma.agent.createMany({ data: agentDocs }) };
-        if (claimDocs.length > 0) { res += await prisma.claim.createMany({ data: claimDocs }) };
+        if (agentDocs.length > 0) {
+            res += await prisma.agent.createMany({ data: agentDocs });
+        }
+        if (claimDocs.length > 0) {
+            res += await prisma.claim.createMany({ data: claimDocs });
+        }
         io.emit("Project Created", res);
         return res;
     } catch (error) {
         console.log(error);
         return;
-    };
+    }
 };
 
 export const addAgent = async (agentDoc: IAgent) => {
@@ -28,10 +37,14 @@ export const addAgent = async (agentDoc: IAgent) => {
     } catch (error) {
         console.log(error);
         return resizeBy;
-    };
+    }
 };
 
-export const getAgentCount = async (projectDid: string, status: string, role: string) => {
+export const getAgentCount = async (
+    projectDid: string,
+    status: string,
+    role: string,
+) => {
     try {
         const res = await prisma.agent.count({
             where: {
@@ -44,7 +57,7 @@ export const getAgentCount = async (projectDid: string, status: string, role: st
     } catch (error) {
         console.log(error);
         return;
-    };
+    }
 };
 
 export const updateAgentStatus = async (agentDid: string, status: string) => {
@@ -58,10 +71,14 @@ export const updateAgentStatus = async (agentDid: string, status: string) => {
     } catch (error) {
         console.log(error);
         return;
-    };
+    }
 };
 
-export const updateAgentStats = async (projectDid: string, status: string, role: string) => {
+export const updateAgentStats = async (
+    projectDid: string,
+    status: string,
+    role: string,
+) => {
     try {
         let stats;
         let count = await getAgentCount(projectDid, status, role);
@@ -87,7 +104,7 @@ export const updateAgentStats = async (projectDid: string, status: string, role:
     } catch (error) {
         console.log(error);
         return;
-    };
+    }
 };
 
 export const addClaim = async (claimDoc: IClaim) => {
@@ -98,7 +115,7 @@ export const addClaim = async (claimDoc: IClaim) => {
     } catch (error) {
         console.log(error);
         return;
-    };
+    }
 };
 
 export const getClaimCount = async (projectDid: string, status: string) => {
@@ -113,10 +130,14 @@ export const getClaimCount = async (projectDid: string, status: string) => {
     } catch (error) {
         console.log(error);
         return;
-    };
+    }
 };
 
-export const updateClaimStatus = async (claimId: string, status: string, agentDid: string) => {
+export const updateClaimStatus = async (
+    claimId: string,
+    status: string,
+    agentDid: string,
+) => {
     try {
         const res = await prisma.claim.update({
             where: { claimId: claimId },
@@ -130,7 +151,7 @@ export const updateClaimStatus = async (claimId: string, status: string, agentDi
     } catch (error) {
         console.log(error);
         return;
-    };
+    }
 };
 
 export const updateClaimStats = async (projectDid: string, status: string) => {
@@ -146,38 +167,63 @@ export const updateClaimStats = async (projectDid: string, status: string) => {
             where: { projectDid: projectDid },
             data: stats,
         });
-        io.emit("Claim Stats Updated", { projectDid: projectDid, updatedStats: status });
+        io.emit("Claim Stats Updated", {
+            projectDid: projectDid,
+            updatedStats: status,
+        });
         return res;
     } catch (error) {
         console.log(error);
         return;
-    };
+    }
 };
 
-export const updateProjectStatus = async (projectDid: string, status: string) => {
+export const updateProjectStatus = async (
+    projectDid: string,
+    status: string,
+) => {
     try {
         const res = await prisma.project.update({
             where: { projectDid: projectDid },
             data: { status: status },
         });
-        io.emit("Project Status Updated", { projectDid: projectDid, status: status });
+        io.emit("Project Status Updated", {
+            projectDid: projectDid,
+            status: status,
+        });
         return res;
     } catch (error) {
         console.log(error);
         return;
-    };
+    }
 };
 
 export const updateProject = async (projectDid: string, projectDoc: any) => {
     try {
-        if (projectDoc["data"]["claims"]) { delete projectDoc["data"]["claims"] };
-        if (projectDoc["data"]["agents"]) { delete projectDoc["data"]["agents"] };
-        if (projectDoc["data"]["ixo"]) { delete projectDoc["data"]["ixo"] };
-        if (projectDoc["data"]["createdOn"]) { delete projectDoc["data"]["createdOn"] };
-        if (projectDoc["data"]["createdBy"]) { delete projectDoc["data"]["createdBy"] };
-        if (projectDoc["data"]["nodeDid"]) { delete projectDoc["data"]["nodeDid"] };
-        if (projectDoc["data"]["agentStats"]) { delete projectDoc["data"]["agentStats"] };
-        if (projectDoc["data"]["claimStats"]) { delete projectDoc["data"]["claimStats"] };
+        if (projectDoc["data"]["claims"]) {
+            delete projectDoc["data"]["claims"];
+        }
+        if (projectDoc["data"]["agents"]) {
+            delete projectDoc["data"]["agents"];
+        }
+        if (projectDoc["data"]["ixo"]) {
+            delete projectDoc["data"]["ixo"];
+        }
+        if (projectDoc["data"]["createdOn"]) {
+            delete projectDoc["data"]["createdOn"];
+        }
+        if (projectDoc["data"]["createdBy"]) {
+            delete projectDoc["data"]["createdBy"];
+        }
+        if (projectDoc["data"]["nodeDid"]) {
+            delete projectDoc["data"]["nodeDid"];
+        }
+        if (projectDoc["data"]["agentStats"]) {
+            delete projectDoc["data"]["agentStats"];
+        }
+        if (projectDoc["data"]["claimStats"]) {
+            delete projectDoc["data"]["claimStats"];
+        }
         const res = await prisma.project.update({
             where: { projectDid: projectDid },
             data: {
@@ -189,7 +235,7 @@ export const updateProject = async (projectDid: string, projectDoc: any) => {
     } catch (error) {
         console.log(error);
         return;
-    };
+    }
 };
 
 export const listAllProjects = async () => {
@@ -202,7 +248,7 @@ export const listAllProjectsFiltered = async (fields: string[]) => {
     let filter = {};
     for (const i in fields) {
         filter[fields[i]] = true;
-    };
+    }
     const res = await prisma.project.findMany({
         select: filter,
     });
@@ -235,12 +281,11 @@ export const listProjectBySenderDid = async (senderDid: any) => {
 };
 
 export const getProjectAccountsFromChain = async (projectDid: string) => {
-    const rest = (process.env.BC_REST || "http://localhost:1317");
-    const response = await axios.get(rest + "/projectAccounts/" + projectDid);
-    if (response.status == 200) {
-        return response;
+    const res = await axios.get(REST + "/projectAccounts/" + projectDid);
+    if (res.status == 200) {
+        return res;
     } else {
-        console.log(response.statusText);
+        console.log(res.statusText);
         return;
     }
 };

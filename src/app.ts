@@ -9,9 +9,10 @@ import * as DidHandler from "./handlers/did_handler";
 import * as StatHandler from "./handlers/stats_handler";
 import * as EventHandler from "./handlers/event_handler";
 import * as AuthHandler from "./handlers/auth_handler";
-import * as BondHandler from "./handlers/bonds_handler";
-import * as BlockTransactionsHandler from "./handlers/block_transactions_handler";
-import { Connection } from "./util/connection";
+import * as BondHandler from "./handlers/bond_handler";
+import * as TransactionHandler from "./handlers/transaction_handler";
+import { sendTransaction } from "./util/connection";
+import { SENTRYDSN, DATABASE_URL } from "./util/secrets";
 
 const { postgraphile } = require("postgraphile");
 
@@ -21,7 +22,7 @@ class App {
     constructor() {
         this.express = express();
         Sentry.init({
-            dsn: process.env.SENTRYDSN,
+            dsn: SENTRYDSN,
             tracesSampleRate: 1.0,
         });
         this.middleware();
@@ -48,7 +49,7 @@ class App {
             }) as express.ErrorRequestHandler,
         );
         this.express.use(
-            postgraphile(process.env.DATABASE_URL, "public", {
+            postgraphile(DATABASE_URL, "public", {
                 watchPg: true,
                 graphiql: true,
                 enhanceGraphiql: true,
@@ -173,6 +174,7 @@ class App {
                         await BondHandler.getWithdrawHistoryFromBondShareByRecipientDid(
                             req.params.recipientdid,
                         );
+                    res.json(shareWithdrawals);
                 } catch (error) {
                     next(error);
                 }
@@ -377,7 +379,7 @@ class App {
         this.express.get("/api/stats/listStats", async (req, res, next) => {
             try {
                 const stats = await StatHandler.getStats();
-                res.json(stats[0]);
+                res.json(stats);
             } catch (error) {
                 next(error);
             }
@@ -391,9 +393,7 @@ class App {
                         type: req.params.type,
                     };
                     const transactions =
-                        await BlockTransactionsHandler.listBlockTransactions(
-                            filter,
-                        );
+                        await TransactionHandler.listBlockTransactions(filter);
                     res.json(transactions);
                 } catch (error) {
                     next(error);
@@ -409,9 +409,7 @@ class App {
                         address: req.params.address,
                     };
                     const transactions =
-                        await BlockTransactionsHandler.listBlockTransactions(
-                            filter,
-                        );
+                        await TransactionHandler.listBlockTransactions(filter);
                     res.json(transactions);
                 } catch (error) {
                     next(error);
@@ -428,9 +426,7 @@ class App {
                         address: req.params.address,
                     };
                     const transactions =
-                        await BlockTransactionsHandler.listBlockTransactions(
-                            filter,
-                        );
+                        await TransactionHandler.listBlockTransactions(filter);
                     res.json(transactions);
                 } catch (error) {
                     next(error);
@@ -440,13 +436,8 @@ class App {
 
         this.express.post("/api/blockchain/txs", async (req, res, next) => {
             try {
-                const bcConn = new Connection(
-                    this.express.get("chainUri"),
-                    this.express.get("bcRest"),
-                    this.express.get("bondsInfoExtractPeriod"),
-                );
-                const result = bcConn.sendTransaction(req.body);
-                res.json(result);
+                const res = await sendTransaction(req.body);
+                res.json(res);
             } catch (error) {
                 next(error);
             }

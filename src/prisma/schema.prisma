@@ -35,7 +35,7 @@ model Bond {
   creatorDid        String
   PriceEntry        PriceEntry[]
   AlphaChange       AlphaChange[]
-  Transaction       Transaction[]
+  BondBuy           BondBuy[]
   ShareWithdrawal   ShareWithdrawal[]
   ReserveWithdrawal ReserveWithdrawal[]
   OutcomePayment    OutcomePayment[]
@@ -46,8 +46,17 @@ model PriceEntry {
   bond    Bond     @relation(fields: [bondDid], references: [bondDid])
   bondDid String
   time    DateTime
-  denom   String?
+  denom   String
   price   Decimal
+}
+
+model BondBuy {
+  id        Int    @id @default(autoincrement())
+  bond      Bond   @relation(fields: [bondDid], references: [bondDid])
+  bondDid   String
+  buyerDid  String
+  amount    String
+  maxPrices String
 }
 
 model AlphaChange {
@@ -92,15 +101,6 @@ model ShareWithdrawal {
   timestamp    String
 }
 
-model Transaction {
-  id        Int    @id @default(autoincrement())
-  bond      Bond   @relation(fields: [bondDid], references: [bondDid])
-  bondDid   String
-  buyerDid  String
-  amount    String
-  maxPrices String
-}
-
 model Chain {
   chainId     String @id
   blockHeight Int
@@ -120,7 +120,7 @@ model Event {
   @@index([type])
 }
 
-model Stat {
+model Stats {
   id                    Int      @id @default(autoincrement())
   totalServiceProviders Int
   totalProjects         Int
@@ -181,7 +181,7 @@ model Claim {
   eaId       String?
 }
 
-model BlockTransaction {
+model Transaction {
   id            Int     @id @default(autoincrement())
   blockHeight   Int
   type          String
@@ -193,12 +193,7 @@ model BlockTransaction {
   timeoutHeight String
 }
 
-model BlockTransactionHeight {
-  id          Int @id @default(autoincrement())
-  blockHeight Int
-}
-
-model CosmosBlock {
+model Block {
   height           Int      @id
   hash             String   @unique
   num_txs          Int      @default(0)

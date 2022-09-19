@@ -1,31 +1,51 @@
-require('dotenv').config();
 require("log-timestamp");
 import * as http from "http";
 import App from "./app";
-import { SyncBlocks } from "./util/sync_blocks";
-import { prisma } from "./prisma/prisma_client";
-import { createStats } from "./handlers/stats_handler";
 import ServerUtils from "./util/server_utils";
-import { spawn, Worker } from "threads";
+import { Chain } from "@prisma/client";
+import * as Connection from "./util/connection";
+import * as StatsHandler from "./handlers/stats_handler";
+import * as ChainHandler from "./handlers/chain_handler";
+import * as SyncBlocks from "./sync/sync_blocks";
+import {
+    PORT,
+    RPC,
+    REST,
+    BONDS_INFO_EXTRACT_PERIOD_BLOCKS,
+} from "./util/secrets";
 
-let statId: number;
+export let statId: number;
 const seedStats = async () => {
-    const existingStats = await prisma.stat.findFirst({});
+    const existingStats = await StatsHandler.getStats();
     if (existingStats) {
         statId = existingStats?.id;
     } else {
-        const newStats = await createStats();
+        const newStats = await StatsHandler.createStats();
         statId = newStats?.id;
     }
 };
 seedStats();
-export { statId };
 
-const port = (process.env.PORT || 8080);
-const chainUri = (process.env.CHAIN_URI || "http://localhost:26657");
-const bcRest = (process.env.BC_REST || "http://localhost:1317");
-const bondsInfoExtractPeriod = process.env.BONDS_INFO_EXTRACT_PERIOD_BLOCKS ?
-    parseInt(process.env.BONDS_INFO_EXTRACT_PERIOD_BLOCKS) : undefined
+export let currentChain: Chain;
+const seedChain = async () => {
+    const existingChain = await ChainHandler.getChain();
+    if (existingChain) {
+        currentChain = existingChain;
+    } else {
+        const res = await Connection.getLastBlock();
+        const newChain = await ChainHandler.createChain({
+            chainId: res.header.chain_id,
+            blockHeight: 1,
+        });
+        currentChain = newChain;
+    }
+};
+seedChain();
+
+const port = PORT;
+const chainUri = RPC;
+const bcRest = REST;
+const bondsInfoExtractPeriod = BONDS_INFO_EXTRACT_PERIOD_BLOCKS;
 
 App.set("port", port);
 App.set("chainUri", chainUri);
@@ -41,11 +61,5 @@ io.on("connection", function (socket) {
 let serverUtils = new ServerUtils(server, Number(port));
 serverUtils.connect();
 
-let syncBlocks = new SyncBlocks();
-syncBlocks.startSync(chainUri, bcRest, bondsInfoExtractPeriod);
-
-const startThread = async () => {
-    const syncBlockTransactions = await spawn(new Worker("./sync_handlers/sync_block_transactions"));
-    await syncBlockTransactions();
-};
-startThread().catch(console.error);
+Connection.testConnection();
+SyncBlocks.startSync();
