@@ -27,3 +27,11 @@ export const createBlock = async (
         return;
     }
 };
+
+export const getLastSyncedBlock = async () => {
+    return prisma.block.findFirst({
+        orderBy: {
+            height: "desc",
+        },
+    });
+};

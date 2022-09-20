@@ -3,7 +3,8 @@ import * as ProjectHandler from "../handlers/project_handler";
 import * as StatHandler from "../handlers/stats_handler";
 import * as DidHandler from "../handlers/did_handler";
 import * as BondHandler from "../handlers/bond_handler";
-import { MsgTypes } from "../types/Msg";
+import * as WasmHandler from "../handlers/wasm_handler";
+import { MsgTypes, WasmMsgTypes } from "../types/Msg";
 import * as ProjectTypes from "../types/Project";
 
 export const syncBlock = async (
@@ -44,14 +45,14 @@ export const syncBlock = async (
                 await BondHandler.createTransaction({
                     bondDid: value.bond_did,
                     buyerDid: value.buyer_did,
-                    amount: value.amount,
-                    maxPrices: value.maxPrices,
+                    amount: value.amount.amount,
+                    maxPrices: value.max_prices[0].amount,
                 });
                 break;
             case MsgTypes.setNextAlpha:
                 await BondHandler.createAlphaChange({
                     bondDid: value.bond_did,
-                    rawValue: msg,
+                    rawValue: JSON.stringify(msg),
                     height: blockHeight,
                     timestamp: timestamp,
                 });
@@ -59,15 +60,15 @@ export const syncBlock = async (
             case MsgTypes.editAlphaSuccess:
                 await BondHandler.createAlphaChange({
                     bondDid: value.bond_did,
-                    rawValue: msg,
+                    rawValue: JSON.stringify(msg),
                     height: blockHeight,
                     timestamp: timestamp,
                 });
                 break;
             case MsgTypes.withdrawShare:
                 await BondHandler.createShareWithdrawal({
-                    rawValue: msg,
-                    transaction: blockResult.txs_results[0],
+                    rawValue: JSON.stringify(msg),
+                    transaction: JSON.stringify(blockResult.txs_results[0]),
                     recipientDid: value.recipient_did,
                     bondDid: value.bond_did,
                     height: blockHeight,
@@ -76,8 +77,8 @@ export const syncBlock = async (
                 break;
             case MsgTypes.withdrawReserve:
                 await BondHandler.createReserveWithdrawal({
-                    rawValue: msg,
-                    transaction: blockResult.txs_results[0],
+                    rawValue: JSON.stringify(msg),
+                    transaction: JSON.stringify(blockResult.txs_results[0]),
                     withdrawerDid: value.withdrawer_did,
                     bondDid: value.bond_did,
                     height: blockHeight,
@@ -86,7 +87,7 @@ export const syncBlock = async (
                 break;
             case MsgTypes.makeOutcomePayment:
                 await BondHandler.createOutcomePayment({
-                    rawValue: msg,
+                    rawValue: JSON.stringify(msg),
                     amount: value.amount,
                     senderDid: value.sender_did,
                     height: blockHeight,
@@ -160,7 +161,7 @@ export const syncBlock = async (
             case MsgTypes.updateProjectStatus:
                 await ProjectHandler.updateProjectStatus(
                     value.projectDid,
-                    value.data,
+                    value.data.status,
                 );
                 break;
             case MsgTypes.updateProjectDoc:
@@ -169,7 +170,43 @@ export const syncBlock = async (
                     value.data,
                 );
                 break;
-            // case MsgTypes.WasmMsgTypes.storeCode
+            case WasmMsgTypes.storeCode:
+                await WasmHandler.createWasmCode({
+                    code_id: 1,
+                    creator: "",
+                    creation_time: "",
+                    height: 1,
+                });
+                break;
+            case WasmMsgTypes.instantiateContract:
+                // await WasmHandler.createWasmContract({
+                //     address: "",
+                //     code_id: 1,
+                //     creator: "",
+                //     admin: "",
+                //     label: "",
+                //     creation_time: "",
+                //     height: 1,
+                //     json: {},
+                // });
+                break;
+            case WasmMsgTypes.migrateContract:
+                // await WasmHandler.updateWasmContractCodeId("addr", 1);
+                break;
+            case WasmMsgTypes.clearAdmin:
+                // await WasmHandler.updateWasmContractAdmin("addr", "");
+                break;
+            case WasmMsgTypes.updateAdmin:
+                // await WasmHandler.updateWasmContractAdmin("addr", "admin");
+                break;
+            case WasmMsgTypes.executeContract:
+                // await WasmHandler.createExecMsg({
+                //     sender: "",
+                //     address: "",
+                //     funds: {},
+                //     json: {},
+                // });
+                break;
         }
     });
 };

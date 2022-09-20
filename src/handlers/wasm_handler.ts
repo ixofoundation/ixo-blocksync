@@ -23,7 +23,7 @@ export const createWasmContract = async (contractDoc: WasmContract) => {
                 creation_time: contractDoc.creation_time,
                 height: contractDoc.height,
                 json: contractDoc.json ? contractDoc.json : {},
-            }
+            },
         });
         return res;
     } catch (error) {
@@ -32,11 +32,14 @@ export const createWasmContract = async (contractDoc: WasmContract) => {
     }
 };
 
-export const updateWasmContractCodeId = async (address: string, code_id: number) => {
+export const updateWasmContractCodeId = async (
+    address: string,
+    code_id: number,
+) => {
     try {
         const res = await prisma.wasmContract.update({
             where: { address: address },
-            data: { code_id: code_id }
+            data: { code_id: code_id },
         });
         return res;
     } catch (error) {
@@ -45,11 +48,31 @@ export const updateWasmContractCodeId = async (address: string, code_id: number)
     }
 };
 
-export const updateWasmContractAdmin = async (address: string, admin: string) => {
+export const updateWasmContractAdmin = async (
+    address: string,
+    admin: string,
+) => {
     try {
         const res = await prisma.wasmContract.update({
             where: { address: address },
-            data: { admin: admin }
+            data: { admin: admin },
+        });
+        return res;
+    } catch (error) {
+        console.log(error);
+        return;
+    }
+};
+
+export const createExecMsg = async (execDoc: any) => {
+    try {
+        const res = await prisma.execMsg.create({
+            data: {
+                sender: execDoc.sender,
+                address: execDoc.address,
+                funds: execDoc.funds ? execDoc.funds : {},
+                json: execDoc.json ? execDoc.json : {},
+            },
         });
         return res;
     } catch (error) {

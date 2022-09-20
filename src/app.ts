@@ -11,6 +11,7 @@ import * as EventHandler from "./handlers/event_handler";
 import * as AuthHandler from "./handlers/auth_handler";
 import * as BondHandler from "./handlers/bond_handler";
 import * as TransactionHandler from "./handlers/transaction_handler";
+import * as BlockHandler from "./handlers/block_handler";
 import { sendTransaction } from "./util/connection";
 import { SENTRYDSN, DATABASE_URL } from "./util/secrets";
 
@@ -434,10 +435,22 @@ class App {
             },
         );
 
+        this.express.get(
+            "/api/block/getLastSyncedBlock",
+            async (req, res, next) => {
+                try {
+                    const block = await BlockHandler.getLastSyncedBlock();
+                    res.json(block);
+                } catch (error) {
+                    next(error);
+                }
+            },
+        );
+
         this.express.post("/api/blockchain/txs", async (req, res, next) => {
             try {
-                const res = await sendTransaction(req.body);
-                res.json(res);
+                const response = await sendTransaction(req.body);
+                res.json(response);
             } catch (error) {
                 next(error);
             }
