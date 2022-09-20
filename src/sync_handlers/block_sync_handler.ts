@@ -43,15 +43,15 @@ export const syncBlock = async (
                 break;
             case MsgTypes.buy:
                 await BondHandler.createTransaction({
-                    bondDid: value.bond_did,
-                    buyerDid: value.buyer_did,
-                    amount: value.amount.amount,
-                    maxPrices: value.max_prices[0].amount,
+                    bondDid: JSON.stringify(value.bond_did),
+                    buyerDid: JSON.stringify(value.buyer_did),
+                    amount: JSON.stringify(value.amount.amount),
+                    maxPrices: JSON.stringify(value.max_prices),
                 });
                 break;
             case MsgTypes.setNextAlpha:
                 await BondHandler.createAlphaChange({
-                    bondDid: value.bond_did,
+                    bondDid: JSON.stringify(value.bond_did),
                     rawValue: JSON.stringify(msg),
                     height: blockHeight,
                     timestamp: timestamp,
@@ -59,7 +59,7 @@ export const syncBlock = async (
                 break;
             case MsgTypes.editAlphaSuccess:
                 await BondHandler.createAlphaChange({
-                    bondDid: value.bond_did,
+                    bondDid: JSON.stringify(value.bond_did),
                     rawValue: JSON.stringify(msg),
                     height: blockHeight,
                     timestamp: timestamp,
@@ -69,8 +69,8 @@ export const syncBlock = async (
                 await BondHandler.createShareWithdrawal({
                     rawValue: JSON.stringify(msg),
                     transaction: JSON.stringify(blockResult.txs_results[0]),
-                    recipientDid: value.recipient_did,
-                    bondDid: value.bond_did,
+                    recipientDid: JSON.stringify(value.recipient_did),
+                    bondDid: JSON.stringify(value.bond_did),
                     height: blockHeight,
                     timestamp: timestamp,
                 });
@@ -79,8 +79,8 @@ export const syncBlock = async (
                 await BondHandler.createReserveWithdrawal({
                     rawValue: JSON.stringify(msg),
                     transaction: JSON.stringify(blockResult.txs_results[0]),
-                    withdrawerDid: value.withdrawer_did,
-                    bondDid: value.bond_did,
+                    withdrawerDid: JSON.stringify(value.withdrawer_did),
+                    bondDid: JSON.stringify(value.bond_did),
                     height: blockHeight,
                     timestamp: timestamp,
                 });
@@ -88,11 +88,11 @@ export const syncBlock = async (
             case MsgTypes.makeOutcomePayment:
                 await BondHandler.createOutcomePayment({
                     rawValue: JSON.stringify(msg),
-                    amount: value.amount,
-                    senderDid: value.sender_did,
+                    amount: JSON.stringify(value.amount),
+                    senderDid: JSON.stringify(value.sender_did),
                     height: blockHeight,
                     timestamp: timestamp,
-                    bondDid: value.bond_did,
+                    bondDid: JSON.stringify(value.bond_did),
                 });
                 break;
             case MsgTypes.createBond:
