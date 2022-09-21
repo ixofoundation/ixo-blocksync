@@ -63,7 +63,7 @@ model AlphaChange {
   id        Int    @id @default(autoincrement())
   bond      Bond   @relation(fields: [bondDid], references: [bondDid])
   bondDid   String
-  rawValue  String
+  rawValue  Json?
   height    String
   timestamp String
 }
@@ -72,7 +72,7 @@ model OutcomePayment {
   id        Int    @id @default(autoincrement())
   bond      Bond   @relation(fields: [bondDid], references: [bondDid])
   bondDid   String
-  rawValue  String
+  rawValue  Json?
   senderDid String
   amount    String
   height    String
@@ -83,8 +83,8 @@ model ReserveWithdrawal {
   id            Int    @id @default(autoincrement())
   bond          Bond   @relation(fields: [bondDid], references: [bondDid])
   bondDid       String
-  rawValue      String
-  transaction   String
+  rawValue      Json?
+  transaction   Json?
   withdrawerDid String
   height        String
   timestamp     String
@@ -94,8 +94,8 @@ model ShareWithdrawal {
   id           Int    @id @default(autoincrement())
   bond         Bond   @relation(fields: [bondDid], references: [bondDid])
   bondDid      String
-  rawValue     String
-  transaction  String
+  rawValue     Json?
+  transaction  Json?
   recipientDid String
   height       String
   timestamp    String

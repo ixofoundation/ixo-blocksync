@@ -54,7 +54,7 @@ CREATE TABLE "BondBuy" (
 CREATE TABLE "AlphaChange" (
     "id" SERIAL NOT NULL,
     "bondDid" TEXT NOT NULL,
-    "rawValue" TEXT NOT NULL,
+    "rawValue" JSONB,
     "height" TEXT NOT NULL,
     "timestamp" TEXT NOT NULL,
 
@@ -65,7 +65,7 @@ CREATE TABLE "AlphaChange" (
 CREATE TABLE "OutcomePayment" (
     "id" SERIAL NOT NULL,
     "bondDid" TEXT NOT NULL,
-    "rawValue" TEXT NOT NULL,
+    "rawValue" JSONB,
     "senderDid" TEXT NOT NULL,
     "amount" TEXT NOT NULL,
     "height" TEXT NOT NULL,
@@ -78,8 +78,8 @@ CREATE TABLE "OutcomePayment" (
 CREATE TABLE "ReserveWithdrawal" (
     "id" SERIAL NOT NULL,
     "bondDid" TEXT NOT NULL,
-    "rawValue" TEXT NOT NULL,
-    "transaction" TEXT NOT NULL,
+    "rawValue" JSONB,
+    "transaction" JSONB,
     "withdrawerDid" TEXT NOT NULL,
     "height" TEXT NOT NULL,
     "timestamp" TEXT NOT NULL,
@@ -91,8 +91,8 @@ CREATE TABLE "ReserveWithdrawal" (
 CREATE TABLE "ShareWithdrawal" (
     "id" SERIAL NOT NULL,
     "bondDid" TEXT NOT NULL,
-    "rawValue" TEXT NOT NULL,
-    "transaction" TEXT NOT NULL,
+    "rawValue" JSONB,
+    "transaction" JSONB,
     "recipientDid" TEXT NOT NULL,
     "height" TEXT NOT NULL,
     "timestamp" TEXT NOT NULL,
