@@ -169,7 +169,6 @@ CREATE TABLE "Agent" (
     "agentDid" TEXT NOT NULL,
     "projectDid" TEXT NOT NULL,
     "status" TEXT NOT NULL,
-    "kyc" BOOLEAN,
     "role" TEXT NOT NULL,
 
     CONSTRAINT "Agent_pkey" PRIMARY KEY ("agentDid")
@@ -178,12 +177,9 @@ CREATE TABLE "Agent" (
 -- CreateTable
 CREATE TABLE "Claim" (
     "claimId" TEXT NOT NULL,
+    "claimTemplateId" TEXT NOT NULL,
     "projectDid" TEXT NOT NULL,
-    "date" TIMESTAMP(3) NOT NULL,
-    "location" TEXT[],
     "status" TEXT NOT NULL,
-    "saId" TEXT NOT NULL,
-    "eaId" TEXT,
 
     CONSTRAINT "Claim_pkey" PRIMARY KEY ("claimId")
 );

@@ -108,12 +108,12 @@ class App {
         );
 
         this.express.get(
-            "/api/bond/get/transactions/:entityType",
+            "/api/bond/get/transactions/bybuyerdid/:buyerdid",
             async (req, res, next) => {
                 try {
                     const transactions =
                         await BondHandler.getTransactionHistoryBondBuyer(
-                            req.params.entityType,
+                            req.params.buyerdid,
                         );
                     res.json(transactions);
                 } catch (error) {

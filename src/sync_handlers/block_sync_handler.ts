@@ -4,7 +4,7 @@ import * as StatHandler from "../handlers/stats_handler";
 import * as DidHandler from "../handlers/did_handler";
 import * as BondHandler from "../handlers/bond_handler";
 import * as WasmHandler from "../handlers/wasm_handler";
-import { MsgTypes, WasmMsgTypes } from "../types/Msg";
+import { MsgTypes } from "../types/Msg";
 import * as ProjectTypes from "../types/Project";
 
 export const syncBlock = async (
@@ -131,10 +131,8 @@ export const syncBlock = async (
                 await StatHandler.updateAllStats(MsgTypes.createClaim, "", "0");
                 await ProjectHandler.addClaim({
                     claimId: value.data.claimID,
+                    claimTemplateId: value.data.claimTemplateID,
                     projectDid: value.projectDid,
-                    date: new Date(),
-                    location: ["33.9249° S", "18.4241° E"],
-                    saId: value.senderDid,
                     status: "0",
                 });
                 break;
@@ -145,9 +143,8 @@ export const syncBlock = async (
                     value.data.status,
                 );
                 await ProjectHandler.updateClaimStatus(
-                    value.data.claimId,
+                    value.data.claimID,
                     value.data.status,
-                    value.senderDid,
                 );
                 break;
             case MsgTypes.addCredential:
@@ -170,15 +167,15 @@ export const syncBlock = async (
                     value.data,
                 );
                 break;
-            case WasmMsgTypes.storeCode:
-                await WasmHandler.createWasmCode({
-                    code_id: 1,
-                    creator: "",
-                    creation_time: "",
-                    height: 1,
-                });
+            case MsgTypes.storeCode:
+                // await WasmHandler.createWasmCode({
+                //     index: 1,
+                //     creator: value.sender,
+                //     creation_time: timestamp,
+                //     height: Number(blockHeight),
+                // });
                 break;
-            case WasmMsgTypes.instantiateContract:
+            case MsgTypes.instantiateContract:
                 // await WasmHandler.createWasmContract({
                 //     address: "",
                 //     code_id: 1,
@@ -190,16 +187,16 @@ export const syncBlock = async (
                 //     json: {},
                 // });
                 break;
-            case WasmMsgTypes.migrateContract:
+            case MsgTypes.migrateContract:
                 // await WasmHandler.updateWasmContractCodeId("addr", 1);
                 break;
-            case WasmMsgTypes.clearAdmin:
+            case MsgTypes.clearAdmin:
                 // await WasmHandler.updateWasmContractAdmin("addr", "");
                 break;
-            case WasmMsgTypes.updateAdmin:
+            case MsgTypes.updateAdmin:
                 // await WasmHandler.updateWasmContractAdmin("addr", "admin");
                 break;
-            case WasmMsgTypes.executeContract:
+            case MsgTypes.executeContract:
                 // await WasmHandler.createExecMsg({
                 //     sender: "",
                 //     address: "",

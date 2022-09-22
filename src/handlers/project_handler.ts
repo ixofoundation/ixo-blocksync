@@ -2,15 +2,14 @@ import { prisma } from "../prisma/prisma_client";
 import { io } from "../server";
 import axios from "axios";
 import axiosRetry from "axios-retry";
-import { IAgent, IClaim, IProject } from "../types/Project";
 import { REST } from "../util/secrets";
 
 axiosRetry(axios, { retries: 3 });
 
 export const createProject = async (
-    projectDoc: IProject,
-    agentDocs: IAgent[],
-    claimDocs: IClaim[],
+    projectDoc: any,
+    agentDocs: any[],
+    claimDocs: any[],
 ) => {
     try {
         let res: any;
@@ -29,7 +28,7 @@ export const createProject = async (
     }
 };
 
-export const addAgent = async (agentDoc: IAgent) => {
+export const addAgent = async (agentDoc: any) => {
     try {
         const res = await prisma.agent.create({ data: agentDoc });
         io.emit("Agent Added", { agent: agentDoc });
@@ -107,7 +106,7 @@ export const updateAgentStats = async (
     }
 };
 
-export const addClaim = async (claimDoc: IClaim) => {
+export const addClaim = async (claimDoc: any) => {
     try {
         const res = await prisma.claim.create({ data: claimDoc });
         io.emit("Claim Added", { claim: claimDoc });
@@ -133,18 +132,11 @@ export const getClaimCount = async (projectDid: string, status: string) => {
     }
 };
 
-export const updateClaimStatus = async (
-    claimId: string,
-    status: string,
-    agentDid: string,
-) => {
+export const updateClaimStatus = async (claimId: string, status: string) => {
     try {
         const res = await prisma.claim.update({
             where: { claimId: claimId },
-            data: {
-                status: status,
-                eaId: agentDid,
-            },
+            data: { status: status },
         });
         io.emit("Claim Status Updated", { claimId: claimId, status: status });
         return res;

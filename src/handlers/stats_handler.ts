@@ -1,7 +1,6 @@
 import { prisma } from "../prisma/prisma_client";
 import { io, statId } from "../server";
-import { AgentTypes } from "../types/Agent";
-import { ClaimStatusTypes } from "../types/Claim";
+import { AgentTypes, ClaimStatusTypes } from "../types/Project";
 import { MsgTypes } from "../types/Msg";
 
 export const createStats = async () => {

@@ -1,7 +1,7 @@
-import { WasmCode, WasmContract } from "@prisma/client";
+import { WasmContract } from "@prisma/client";
 import { prisma } from "../prisma/prisma_client";
 
-export const createWasmCode = async (codeDoc: WasmCode) => {
+export const createWasmCode = async (codeDoc: any) => {
     try {
         const res = await prisma.wasmCode.create({ data: codeDoc });
         return res;
@@ -70,8 +70,8 @@ export const createExecMsg = async (execDoc: any) => {
             data: {
                 sender: execDoc.sender,
                 address: execDoc.address,
-                funds: execDoc.funds ? execDoc.funds : {},
-                json: execDoc.json ? execDoc.json : {},
+                funds: execDoc.funds,
+                json: execDoc.json,
             },
         });
         return res;

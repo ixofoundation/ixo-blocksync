@@ -1,12 +1,3 @@
-export enum WasmMsgTypes {
-    storeCode = "wasm/MsgStoreCode",
-    instantiateContract = "wasm/MsgInstantiateContract",
-    migrateContract = "wasm/MsgMigrateContract",
-    clearAdmin = "wasm/MsgClearAdmin",
-    updateAdmin = "wasm/MsgUpdateAdmin",
-    executeContract = "wasm/MsgExecuteContract",
-}
-
 export enum MsgTypes {
     addDid = "did/AddDid",
     addCredential = "did/AddCredential",
@@ -25,4 +16,10 @@ export enum MsgTypes {
     evaluateClaim = "project/CreateEvaluation",
     updateProjectStatus = "project/UpdateProjectStatus",
     updateProjectDoc = "project/UpdateProjectDoc",
+    storeCode = "wasm/MsgStoreCode",
+    instantiateContract = "wasm/MsgInstantiateContract",
+    migrateContract = "wasm/MsgMigrateContract",
+    clearAdmin = "wasm/MsgClearAdmin",
+    updateAdmin = "wasm/MsgUpdateAdmin",
+    executeContract = "wasm/MsgExecuteContract",
 }

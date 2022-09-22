@@ -162,23 +162,19 @@ model Project {
 }
 
 model Agent {
-  agentDid   String   @id
-  project    Project  @relation(fields: [projectDid], references: [projectDid])
+  agentDid   String  @id
+  project    Project @relation(fields: [projectDid], references: [projectDid])
   projectDid String
   status     String
-  kyc        Boolean?
   role       String
 }
 
 model Claim {
-  claimId    String   @id
-  project    Project  @relation(fields: [projectDid], references: [projectDid])
-  projectDid String
-  date       DateTime
-  location   String[]
-  status     String
-  saId       String
-  eaId       String?
+  claimId         String  @id
+  claimTemplateId String
+  project         Project @relation(fields: [projectDid], references: [projectDid])
+  projectDid      String
+  status          String
 }
 
 model Transaction {
