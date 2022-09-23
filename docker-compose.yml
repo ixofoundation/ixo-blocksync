@@ -47,4 +47,4 @@ services:
             - 5432:5432
         volumes:
             - ./data/db:/data/db
-            - ./src/prisma/migrations/20220922095113_init/:/docker-entrypoint-initdb.d/
+            - ./src/prisma/migrations/20220923104056_init/:/docker-entrypoint-initdb.d/

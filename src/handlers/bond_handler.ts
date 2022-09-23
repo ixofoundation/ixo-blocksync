@@ -1,6 +1,7 @@
 import { prisma } from "../prisma/prisma_client";
 import { Bond } from "@prisma/client";
 import { io } from "../server";
+import { createError } from "../util/error";
 
 export const createBond = async (bondDoc: Bond) => {
     try {
@@ -42,6 +43,7 @@ export const createTransaction = async (bondBuyDoc: any) => {
         io.emit("Transaction Created", res);
         return res;
     } catch (error) {
+        await createError({ type: "bonds/MsgBuy", error: String(error) });
         console.log(error);
         return;
     }
@@ -53,6 +55,10 @@ export const createAlphaChange = async (alphaChangeDoc: any) => {
         io.emit("Alpha Change Created", res);
         return res;
     } catch (error) {
+        await createError({
+            type: "bonds/MsgSetNextAlpha",
+            error: String(error),
+        });
         console.log(error);
         return;
     }
@@ -66,6 +72,10 @@ export const createShareWithdrawal = async (shareWithdrawalDoc: any) => {
         io.emit("Share Withdrawal Created", res);
         return res;
     } catch (error) {
+        await createError({
+            type: "bonds/MsgWithdrawShare",
+            error: String(error),
+        });
         console.log(error);
         return;
     }
@@ -79,6 +89,10 @@ export const createReserveWithdrawal = async (reserveWithdrawalDoc: any) => {
         io.emit("Reserve Withdrawal Created", res);
         return res;
     } catch (error) {
+        await createError({
+            type: "bonds/MsgWithdrawReserve",
+            error: String(error),
+        });
         console.log(error);
         return;
     }
@@ -92,6 +106,10 @@ export const createOutcomePayment = async (outcomePaymentDoc: any) => {
         io.emit("Outcome Payment Created", res);
         return res;
     } catch (error) {
+        await createError({
+            type: "bonds/MsgMakeOutcomePayment",
+            error: String(error),
+        });
         console.log(error);
         return;
     }

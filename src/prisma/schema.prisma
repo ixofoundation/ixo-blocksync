@@ -231,3 +231,9 @@ model ExecMsg {
   funds   Json?
   json    Json?
 }
+
+model Error {
+  id    Int    @id @default(autoincrement())
+  type  String
+  error String
+}

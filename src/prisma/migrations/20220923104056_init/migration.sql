@@ -246,6 +246,15 @@ CREATE TABLE "ExecMsg" (
     CONSTRAINT "ExecMsg_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "Error" (
+    "id" SERIAL NOT NULL,
+    "type" TEXT NOT NULL,
+    "error" TEXT NOT NULL,
+
+    CONSTRAINT "Error_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE INDEX "DID_did_idx" ON "DID"("did");
 
