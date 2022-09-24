@@ -390,11 +390,10 @@ class App {
             "api/transactions/listTransactionsByType/:type(*)",
             async (res, req, next) => {
                 try {
-                    const filter = {
-                        type: req.params.type,
-                    };
                     const transactions =
-                        await TransactionHandler.listBlockTransactions(filter);
+                        await TransactionHandler.listBlockTransactions({
+                            type: req.params.type,
+                        });
                     res.json(transactions);
                 } catch (error) {
                     next(error);
@@ -406,11 +405,10 @@ class App {
             "api/transactions/listTransactionsByAddress/:address",
             async (res, req, next) => {
                 try {
-                    const filter = {
-                        address: req.params.address,
-                    };
                     const transactions =
-                        await TransactionHandler.listBlockTransactions(filter);
+                        await TransactionHandler.listBlockTransactions({
+                            address: req.params.address,
+                        });
                     res.json(transactions);
                 } catch (error) {
                     next(error);
@@ -422,12 +420,11 @@ class App {
             "api/transactions/listTransactionsByAddressAndType/:address/:type(*)",
             async (res, req, next) => {
                 try {
-                    const filter = {
-                        type: req.params.type,
-                        address: req.params.address,
-                    };
                     const transactions =
-                        await TransactionHandler.listBlockTransactions(filter);
+                        await TransactionHandler.listBlockTransactions({
+                            type: req.params.type,
+                            address: req.params.address,
+                        });
                     res.json(transactions);
                 } catch (error) {
                     next(error);

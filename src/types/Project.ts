@@ -54,7 +54,7 @@ export const convertProject = (project: any) => {
     } else {
         ixoUsed = new Prisma.Decimal(0);
     }
-    let createdOn = new Date(parseInt(project["data"]["createdOn"]));
+    let createdOn = new Date(project["data"]["createdOn"]);
     let createdBy = project["data"]["createdBy"];
     let nodeDid = project["data"]["nodeDid"];
     let status = project["data"]["status"] ? project["data"]["status"] : null;
