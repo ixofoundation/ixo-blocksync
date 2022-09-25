@@ -1,7 +1,10 @@
 import { prisma } from "../prisma/prisma_client";
+import { Prisma } from "@prisma/client";
 import { io } from "../server";
 
-export const createEvent = async (eventDoc: any) => {
+export const createEvent = async (
+    eventDoc: Prisma.EventUncheckedCreateInput,
+) => {
     try {
         const res = await prisma.event.create({ data: eventDoc });
         io.emit("Event Created", res);

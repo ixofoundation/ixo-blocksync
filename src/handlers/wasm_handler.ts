@@ -1,7 +1,7 @@
-import { WasmContract } from "@prisma/client";
 import { prisma } from "../prisma/prisma_client";
+import { Prisma } from "@prisma/client";
 
-export const createWasmCode = async (codeDoc: any) => {
+export const createWasmCode = async (codeDoc: Prisma.WasmCodeCreateInput) => {
     try {
         const res = await prisma.wasmCode.create({ data: codeDoc });
         return res;
@@ -11,20 +11,11 @@ export const createWasmCode = async (codeDoc: any) => {
     }
 };
 
-export const createWasmContract = async (contractDoc: WasmContract) => {
+export const createWasmContract = async (
+    contractDoc: Prisma.WasmContractCreateInput,
+) => {
     try {
-        const res = await prisma.wasmContract.create({
-            data: {
-                address: contractDoc.address,
-                code_id: contractDoc.code_id,
-                creator: contractDoc.creator,
-                admin: contractDoc.admin,
-                label: contractDoc.label,
-                creation_time: contractDoc.creation_time,
-                height: contractDoc.height,
-                json: contractDoc.json ? contractDoc.json : {},
-            },
-        });
+        const res = await prisma.wasmContract.create({ data: contractDoc });
         return res;
     } catch (error) {
         console.log(error);
@@ -64,16 +55,11 @@ export const updateWasmContractAdmin = async (
     }
 };
 
-export const createExecMsg = async (execDoc: any) => {
+export const createExecMsg = async (
+    execDoc: Prisma.ExecMsgUncheckedCreateInput,
+) => {
     try {
-        const res = await prisma.execMsg.create({
-            data: {
-                sender: execDoc.sender,
-                address: execDoc.address,
-                funds: execDoc.funds,
-                json: execDoc.json,
-            },
-        });
+        const res = await prisma.execMsg.create({ data: execDoc });
         return res;
     } catch (error) {
         console.log(error);

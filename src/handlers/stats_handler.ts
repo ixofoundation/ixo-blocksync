@@ -1,4 +1,5 @@
 import { prisma } from "../prisma/prisma_client";
+import { Prisma } from "@prisma/client";
 import { io, statId } from "../server";
 import { AgentTypes, ClaimStatusTypes } from "../types/Project";
 import { MsgTypes } from "../types/Msg";
@@ -20,7 +21,7 @@ export const createStats = async () => {
     });
 };
 
-export const updateStats = async (statDoc: any) => {
+export const updateStats = async (statDoc: Prisma.StatsUpdateInput) => {
     try {
         const res = await prisma.stats.update({
             where: {
@@ -57,7 +58,7 @@ export const updateAllStats = async (
         submittedClaims: statDoc?.submittedClaims || 0,
         pendingClaims: statDoc?.pendingClaims || 0,
         rejectedClaims: statDoc?.rejectedClaims || 0,
-        claimLocations: statDoc?.claimLocations || 0,
+        claimLocations: statDoc?.claimLocations || [""],
     };
 
     if (claimsRequired) {

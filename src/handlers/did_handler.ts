@@ -1,14 +1,11 @@
 import { prisma } from "../prisma/prisma_client";
+import { Prisma } from "@prisma/client";
 import { io } from "../server";
-import { DID } from "@prisma/client";
 
-export const createDid = async (didDoc: DID, credentialDocs?: any[]) => {
+export const createDid = async (didDoc: Prisma.DIDCreateInput) => {
     try {
         let res: any;
         res = await prisma.dID.create({ data: didDoc });
-        if (credentialDocs) {
-            res += await prisma.credential.createMany({ data: credentialDocs });
-        }
         io.emit("DID Created", res);
         return res;
     } catch (error) {
@@ -17,7 +14,9 @@ export const createDid = async (didDoc: DID, credentialDocs?: any[]) => {
     }
 };
 
-export const addCredential = async (credentialDoc: any) => {
+export const addCredential = async (
+    credentialDoc: Prisma.CredentialUncheckedCreateInput,
+) => {
     try {
         const res = await prisma.credential.create({ data: credentialDoc });
         io.emit("Credential Added", res);

@@ -1,4 +1,5 @@
 import { prisma } from "../prisma/prisma_client";
+import { Prisma } from "@prisma/client";
 import { io } from "../server";
 import axios from "axios";
 import axiosRetry from "axios-retry";
@@ -7,9 +8,9 @@ import { REST } from "../util/secrets";
 axiosRetry(axios, { retries: 3 });
 
 export const createProject = async (
-    projectDoc: any,
-    agentDocs: any[],
-    claimDocs: any[],
+    projectDoc: Prisma.ProjectCreateInput,
+    agentDocs: Prisma.AgentUncheckedCreateInput[],
+    claimDocs: Prisma.ClaimUncheckedCreateInput[],
 ) => {
     try {
         let res: any;
@@ -28,7 +29,7 @@ export const createProject = async (
     }
 };
 
-export const addAgent = async (agentDoc: any) => {
+export const addAgent = async (agentDoc: Prisma.AgentUncheckedCreateInput) => {
     try {
         const res = await prisma.agent.create({ data: agentDoc });
         io.emit("Agent Added", { agent: agentDoc });
@@ -106,7 +107,7 @@ export const updateAgentStats = async (
     }
 };
 
-export const addClaim = async (claimDoc: any) => {
+export const addClaim = async (claimDoc: Prisma.ClaimUncheckedCreateInput) => {
     try {
         const res = await prisma.claim.create({ data: claimDoc });
         io.emit("Claim Added", { claim: claimDoc });

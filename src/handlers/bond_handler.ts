@@ -1,8 +1,8 @@
 import { prisma } from "../prisma/prisma_client";
-import { Bond } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { io } from "../server";
 
-export const createBond = async (bondDoc: Bond) => {
+export const createBond = async (bondDoc: Prisma.BondCreateInput) => {
     try {
         const res = await prisma.bond.create({ data: bondDoc });
         io.emit("Bond Created", res);
@@ -26,7 +26,9 @@ export const getLastPrice = async (bondDid: string) => {
     }
 };
 
-export const createPriceEntry = async (priceEntryDoc: any) => {
+export const createPriceEntry = async (
+    priceEntryDoc: Prisma.PriceEntryUncheckedCreateInput,
+) => {
     try {
         const res = await prisma.priceEntry.create({ data: priceEntryDoc });
         return res;
@@ -36,7 +38,9 @@ export const createPriceEntry = async (priceEntryDoc: any) => {
     }
 };
 
-export const createTransaction = async (bondBuyDoc: any) => {
+export const createTransaction = async (
+    bondBuyDoc: Prisma.BondBuyUncheckedCreateInput,
+) => {
     try {
         const res = await prisma.bondBuy.create({ data: bondBuyDoc });
         io.emit("Transaction Created", res);
@@ -47,7 +51,9 @@ export const createTransaction = async (bondBuyDoc: any) => {
     }
 };
 
-export const createAlphaChange = async (alphaChangeDoc: any) => {
+export const createAlphaChange = async (
+    alphaChangeDoc: Prisma.AlphaChangeUncheckedCreateInput,
+) => {
     try {
         const res = await prisma.alphaChange.create({ data: alphaChangeDoc });
         io.emit("Alpha Change Created", res);
@@ -58,7 +64,9 @@ export const createAlphaChange = async (alphaChangeDoc: any) => {
     }
 };
 
-export const createShareWithdrawal = async (shareWithdrawalDoc: any) => {
+export const createShareWithdrawal = async (
+    shareWithdrawalDoc: Prisma.ShareWithdrawalUncheckedCreateInput,
+) => {
     try {
         const res = await prisma.shareWithdrawal.create({
             data: shareWithdrawalDoc,
@@ -71,7 +79,9 @@ export const createShareWithdrawal = async (shareWithdrawalDoc: any) => {
     }
 };
 
-export const createReserveWithdrawal = async (reserveWithdrawalDoc: any) => {
+export const createReserveWithdrawal = async (
+    reserveWithdrawalDoc: Prisma.ReserveWithdrawalUncheckedCreateInput,
+) => {
     try {
         const res = await prisma.reserveWithdrawal.create({
             data: reserveWithdrawalDoc,
@@ -84,7 +94,9 @@ export const createReserveWithdrawal = async (reserveWithdrawalDoc: any) => {
     }
 };
 
-export const createOutcomePayment = async (outcomePaymentDoc: any) => {
+export const createOutcomePayment = async (
+    outcomePaymentDoc: Prisma.OutcomePaymentUncheckedCreateInput,
+) => {
     try {
         const res = await prisma.outcomePayment.create({
             data: outcomePaymentDoc,
