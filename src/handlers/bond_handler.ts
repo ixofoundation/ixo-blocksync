@@ -17,7 +17,9 @@ export const getLastPrice = async (bondDid: string) => {
     try {
         const res = await prisma.priceEntry.findFirst({
             where: { bondDid: bondDid },
-            take: -1,
+            orderBy: {
+                id: "desc",
+            },
         });
         return res;
     } catch (error) {
