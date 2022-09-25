@@ -54,6 +54,7 @@ class App {
                 watchPg: true,
                 graphiql: true,
                 enhanceGraphiql: true,
+                dynamicJson: true,
             }),
         );
     }

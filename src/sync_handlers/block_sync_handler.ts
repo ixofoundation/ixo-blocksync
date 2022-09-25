@@ -115,6 +115,11 @@ export const syncBlock = async (
                     role: value.data.role,
                     status: "0",
                 });
+                await ProjectHandler.updateAgentStats(
+                    value.projectDid,
+                    "0",
+                    value.data.role,
+                );
                 break;
             case MsgTypes.updateAgent:
                 if (value.data.status === "1")
@@ -125,6 +130,11 @@ export const syncBlock = async (
                 await ProjectHandler.updateAgentStatus(
                     value.data.did,
                     value.data.status,
+                );
+                await ProjectHandler.updateAgentStats(
+                    value.projectDid,
+                    value.data.status,
+                    value.data.role,
                 );
                 break;
             case MsgTypes.createClaim:
@@ -144,6 +154,10 @@ export const syncBlock = async (
                 );
                 await ProjectHandler.updateClaimStatus(
                     value.data.claimID,
+                    value.data.status,
+                );
+                await ProjectHandler.updateClaimStats(
+                    value.projectDid,
                     value.data.status,
                 );
                 break;

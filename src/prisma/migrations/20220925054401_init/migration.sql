@@ -177,8 +177,8 @@ CREATE TABLE "Agent" (
 -- CreateTable
 CREATE TABLE "Claim" (
     "claimId" TEXT NOT NULL,
-    "claimTemplateId" TEXT NOT NULL,
     "projectDid" TEXT NOT NULL,
+    "claimTemplateId" TEXT NOT NULL,
     "status" TEXT NOT NULL,
 
     CONSTRAINT "Claim_pkey" PRIMARY KEY ("claimId")
@@ -244,15 +244,6 @@ CREATE TABLE "ExecMsg" (
     "json" JSONB,
 
     CONSTRAINT "ExecMsg_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "Error" (
-    "id" SERIAL NOT NULL,
-    "type" TEXT NOT NULL,
-    "error" TEXT NOT NULL,
-
-    CONSTRAINT "Error_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex

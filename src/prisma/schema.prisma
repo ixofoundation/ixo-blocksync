@@ -171,9 +171,9 @@ model Agent {
 
 model Claim {
   claimId         String  @id
-  claimTemplateId String
   project         Project @relation(fields: [projectDid], references: [projectDid])
   projectDid      String
+  claimTemplateId String
   status          String
 }
 
@@ -230,10 +230,4 @@ model ExecMsg {
   address String
   funds   Json?
   json    Json?
-}
-
-model Error {
-  id    Int    @id @default(autoincrement())
-  type  String
-  error String
 }

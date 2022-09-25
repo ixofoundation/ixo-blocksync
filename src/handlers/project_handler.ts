@@ -3,7 +3,6 @@ import { io } from "../server";
 import axios from "axios";
 import axiosRetry from "axios-retry";
 import { REST } from "../util/secrets";
-import { createError } from "../util/error";
 
 axiosRetry(axios, { retries: 3 });
 
@@ -35,10 +34,6 @@ export const addAgent = async (agentDoc: any) => {
         io.emit("Agent Added", { agent: agentDoc });
         return res;
     } catch (error) {
-        await createError({
-            type: "project/CreateAgent",
-            error: String(error),
-        });
         console.log(error);
         return;
     }
@@ -117,10 +112,6 @@ export const addClaim = async (claimDoc: any) => {
         io.emit("Claim Added", { claim: claimDoc });
         return res;
     } catch (error) {
-        await createError({
-            type: "project/CreateClaim",
-            error: String(error),
-        });
         console.log(error);
         return;
     }
