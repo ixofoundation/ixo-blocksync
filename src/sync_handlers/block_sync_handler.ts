@@ -66,9 +66,11 @@ export const syncBlock = async (
                 });
                 break;
             case MsgTypes.withdrawShare:
+                const sTx = blockResult.txs_results[0];
+                sTx.log = JSON.parse(sTx.log);
                 await BondHandler.createShareWithdrawal({
                     rawValue: msg,
-                    transaction: blockResult.txs_results[0],
+                    transaction: sTx,
                     recipientDid: value.recipient_did,
                     bondDid: value.bond_did,
                     height: blockHeight,
@@ -76,9 +78,11 @@ export const syncBlock = async (
                 });
                 break;
             case MsgTypes.withdrawReserve:
+                const rTx = blockResult.txs_results[0];
+                rTx.log = JSON.parse(rTx.log);
                 await BondHandler.createReserveWithdrawal({
                     rawValue: msg,
-                    transaction: blockResult.txs_results[0],
+                    transaction: rTx,
                     withdrawerDid: value.withdrawer_did,
                     bondDid: value.bond_did,
                     height: blockHeight,
