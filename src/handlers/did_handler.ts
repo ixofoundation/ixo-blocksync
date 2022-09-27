@@ -4,8 +4,7 @@ import { io } from "../server";
 
 export const createDid = async (didDoc: Prisma.DIDCreateInput) => {
     try {
-        let res: any;
-        res = await prisma.dID.create({ data: didDoc });
+        const res = await prisma.dID.create({ data: didDoc });
         io.emit("DID Created", res);
         return res;
     } catch (error) {

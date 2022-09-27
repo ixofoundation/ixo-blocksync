@@ -1,11 +1,13 @@
 import * as Connection from "../util/connection";
 import * as ProjectHandler from "../handlers/project_handler";
 import * as StatHandler from "../handlers/stats_handler";
+import * as IidHandler from "../handlers/iid_handler";
 import * as DidHandler from "../handlers/did_handler";
 import * as BondHandler from "../handlers/bond_handler";
 import * as WasmHandler from "../handlers/wasm_handler";
 import { MsgTypes } from "../types/Msg";
 import * as ProjectTypes from "../types/Project";
+import * as IidTypes from "../types/IID";
 
 export const syncBlock = async (
     transactions: any,
@@ -20,6 +22,67 @@ export const syncBlock = async (
         const type = msg.type;
 
         switch (type) {
+            case MsgTypes.createDid:
+                const idocs = IidTypes.convertIID(value);
+                await IidHandler.createIid(
+                    {
+                        id: value.id,
+                        context: value.context,
+                        controller: value.controller,
+                        versionId: value.versionId,
+                        updated: timestamp,
+                        created: timestamp,
+                        deactivated: false,
+                    },
+                    idocs.verificationMethodDocs,
+                    idocs.serviceDocs,
+                );
+                break;
+            case MsgTypes.updateDid:
+                await IidHandler.updateIid(
+                    value.id,
+                    value.controller,
+                    timestamp,
+                );
+                break;
+            case MsgTypes.addVerification:
+                await IidHandler.addVerification(
+                    {
+                        id: value.verification.method.id,
+                        iid: value.id,
+                        relationships: value.verification.relationships,
+                        type: value.verification.method.type,
+                        controller: value.verification.method.controller,
+                        verificationMaterial:
+                            value.verification.method.verificationMaterial,
+                    },
+                    timestamp,
+                );
+                break;
+            case MsgTypes.setVerificationRelationships:
+                await IidHandler.setVerificationRelationships(
+                    value.method_id,
+                    value.relationships,
+                    timestamp,
+                );
+                break;
+            case MsgTypes.revokeVerification:
+                await IidHandler.revokeVerification(value.method_id, timestamp);
+                break;
+            case MsgTypes.addService:
+                await IidHandler.addService(
+                    {
+                        id: value.service_data.id,
+                        iid: value.id,
+                        type: value.service_data.type,
+                        serviceEndpoint: value.service_data.serviceEndpoint,
+                    },
+                    timestamp,
+                );
+                break;
+            case MsgTypes.deleteService:
+                await IidHandler.deleteService(value.service_id, timestamp);
+                break;
             case MsgTypes.createProject:
                 let projectDoc = value;
                 StatHandler.updateAllStats(
@@ -28,11 +91,11 @@ export const syncBlock = async (
                     "",
                     projectDoc.data.requiredClaims,
                 );
-                let docs = ProjectTypes.convertProject(projectDoc);
+                let pdocs = ProjectTypes.convertProject(projectDoc);
                 await ProjectHandler.createProject(
-                    docs.projectDoc,
-                    docs.agentDocs,
-                    docs.claimDocs,
+                    pdocs.projectDoc,
+                    pdocs.agentDocs,
+                    pdocs.claimDocs,
                 );
                 break;
             case MsgTypes.addDid:

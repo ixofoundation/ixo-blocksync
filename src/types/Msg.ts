@@ -1,4 +1,11 @@
 export enum MsgTypes {
+    createDid = "did/MsgCreateDidDocument",
+    updateDid = "did/MsgUpdateDidDocument",
+    addVerification = "did/MsgAddVerification",
+    setVerificationRelationships = "did/MsgSetVerificationRelationships",
+    revokeVerification = "did/MsgRevokeVerification",
+    addService = "did/MsgAddService",
+    deleteService = "did/MsgDeleteService",
     addDid = "did/AddDid",
     addCredential = "did/AddCredential",
     createBond = "bonds/MsgCreateBond",

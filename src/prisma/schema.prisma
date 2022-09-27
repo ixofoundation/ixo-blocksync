@@ -10,6 +10,36 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model IID {
+  id                 String               @id
+  context            String[]
+  controller         String[]
+  versionId          String
+  updated            DateTime
+  created            DateTime
+  deactivated        Boolean
+  VerificationMethod VerificationMethod[]
+  Service            Service[]
+}
+
+model VerificationMethod {
+  id                   String   @id
+  IID                  IID      @relation(fields: [iid], references: [id])
+  iid                  String
+  relationships        String[]
+  type                 String
+  controller           String
+  verificationMaterial String
+}
+
+model Service {
+  id              String @id
+  IID             IID    @relation(fields: [iid], references: [id])
+  iid             String
+  type            String
+  serviceEndpoint String
+}
+
 model DID {
   did        String       @id
   publicKey  String

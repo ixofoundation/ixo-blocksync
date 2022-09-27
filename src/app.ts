@@ -6,6 +6,7 @@ import * as compression from "compression";
 import * as Sentry from "@sentry/node";
 import * as ProjectHandler from "./handlers/project_handler";
 import * as DidHandler from "./handlers/did_handler";
+import * as IidHandler from "./handlers/iid_handler";
 import * as StatHandler from "./handlers/stats_handler";
 import * as EventHandler from "./handlers/event_handler";
 import * as AuthHandler from "./handlers/auth_handler";
@@ -292,6 +293,15 @@ class App {
             try {
                 const did = await DidHandler.getDidByDid(req.params.did);
                 res.json(did);
+            } catch (error) {
+                next(error);
+            }
+        });
+
+        this.express.get("api/iid/getByIid/:iid", async (req, res, next) => {
+            try {
+                const iid = await IidHandler.getIidByIid(req.params.iid);
+                res.json(iid);
             } catch (error) {
                 next(error);
             }

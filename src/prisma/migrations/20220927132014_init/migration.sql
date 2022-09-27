@@ -1,4 +1,39 @@
 -- CreateTable
+CREATE TABLE "IID" (
+    "id" TEXT NOT NULL,
+    "context" TEXT[],
+    "controller" TEXT[],
+    "versionId" TEXT NOT NULL,
+    "updated" TIMESTAMP(3) NOT NULL,
+    "created" TIMESTAMP(3) NOT NULL,
+    "deactivated" BOOLEAN NOT NULL,
+
+    CONSTRAINT "IID_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "VerificationMethod" (
+    "id" TEXT NOT NULL,
+    "iid" TEXT NOT NULL,
+    "relationships" TEXT[],
+    "type" TEXT NOT NULL,
+    "controller" TEXT NOT NULL,
+    "verificationMaterial" TEXT NOT NULL,
+
+    CONSTRAINT "VerificationMethod_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Service" (
+    "id" TEXT NOT NULL,
+    "iid" TEXT NOT NULL,
+    "type" TEXT NOT NULL,
+    "serviceEndpoint" TEXT NOT NULL,
+
+    CONSTRAINT "Service_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "DID" (
     "did" TEXT NOT NULL,
     "publicKey" TEXT NOT NULL,
@@ -275,6 +310,12 @@ CREATE INDEX "WasmContract_code_id_idx" ON "WasmContract"("code_id");
 
 -- CreateIndex
 CREATE INDEX "WasmContract_creator_idx" ON "WasmContract"("creator");
+
+-- AddForeignKey
+ALTER TABLE "VerificationMethod" ADD CONSTRAINT "VerificationMethod_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Service" ADD CONSTRAINT "Service_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Credential" ADD CONSTRAINT "Credential_did_fkey" FOREIGN KEY ("did") REFERENCES "DID"("did") ON DELETE RESTRICT ON UPDATE CASCADE;
