@@ -57,7 +57,9 @@ export const convertProject = (project: any) => {
     let createdOn = new Date(project["data"]["createdOn"]);
     let createdBy = project["data"]["createdBy"];
     let nodeDid = project["data"]["nodeDid"];
-    let status = project["data"]["status"] ? project["data"]["status"] : null;
+    let status = project["data"]["status"]
+        ? project["data"]["status"].toUpperCase()
+        : null;
     delete project["data"]["status"];
     delete project["data"]["ixo"];
     delete project["data"]["createdOn"];

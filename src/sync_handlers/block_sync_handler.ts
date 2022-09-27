@@ -176,7 +176,7 @@ export const syncBlock = async (
             case MsgTypes.updateProjectStatus:
                 await ProjectHandler.updateProjectStatus(
                     value.projectDid,
-                    value.data.status,
+                    value.data.status.toUpperCase(),
                 );
                 break;
             case MsgTypes.updateProjectDoc:
