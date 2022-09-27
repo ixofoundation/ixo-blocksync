@@ -10,7 +10,7 @@ export const startSync = async () => {
     while (true) {
         try {
             const blockResult = await Connection.getBlockResult(currentBlock);
-            if (blockResult) {
+            if (blockResult !== null) {
                 const block = await Connection.getBlock(currentBlock);
                 await blockQueue.add("Blocks", block);
                 await ChainHandler.updateChain({

@@ -392,9 +392,9 @@ class App {
             async (res, req, next) => {
                 try {
                     const transactions =
-                        await TransactionHandler.listBlockTransactions({
-                            type: req.params.type,
-                        });
+                        await TransactionHandler.listTransactionsByType(
+                            req.params.type,
+                        );
                     res.json(transactions);
                 } catch (error) {
                     next(error);
@@ -407,9 +407,9 @@ class App {
             async (res, req, next) => {
                 try {
                     const transactions =
-                        await TransactionHandler.listBlockTransactions({
-                            address: req.params.address,
-                        });
+                        await TransactionHandler.listTransactionsByAddress(
+                            req.params.address,
+                        );
                     res.json(transactions);
                 } catch (error) {
                     next(error);
@@ -422,10 +422,10 @@ class App {
             async (res, req, next) => {
                 try {
                     const transactions =
-                        await TransactionHandler.listBlockTransactions({
-                            type: req.params.type,
-                            address: req.params.address,
-                        });
+                        await TransactionHandler.listTransactionsByAddressAndType(
+                            req.params.address,
+                            req.params.type,
+                        );
                     res.json(transactions);
                 } catch (error) {
                     next(error);

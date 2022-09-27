@@ -39,6 +39,7 @@ export const getBlockResult = async (height: number | string) => {
         return res.data.result;
     } catch (error) {
         console.log(error);
+        return null;
     }
 };
 
