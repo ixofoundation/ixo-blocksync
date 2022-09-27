@@ -8,7 +8,7 @@ export const syncBondsInfo = async (bondsInfo: any, timestamp: Date) => {
         if (bondExists !== null) {
             const lastPrice = await BondHandler.getLastPrice(info.did);
             if (lastPrice !== null && lastPrice !== undefined) {
-                if (lastPrice.price.equals(amount)) {
+                if (!lastPrice.price.equals(amount)) {
                     await BondHandler.createPriceEntry({
                         bondDid: info.did,
                         time: timestamp,
