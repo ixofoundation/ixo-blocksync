@@ -231,19 +231,28 @@ export const updateProject = async (projectDid: string, projectDoc: any) => {
     }
 };
 
-export const listAllProjects = async () => {
-    const res = await prisma.project.findMany();
+export const listAllProjects = async (page: string, size: string) => {
+    const res = await prisma.project.findMany({
+        skip: Number(size) * (Number(page) - 1),
+        take: Number(size),
+    });
     io.emit("List all Projects", res);
     return res;
 };
 
-export const listAllProjectsFiltered = async (fields: string[]) => {
+export const listAllProjectsFiltered = async (
+    fields: string[],
+    page: string,
+    size: string,
+) => {
     let filter = {};
     for (const i in fields) {
         filter[fields[i]] = true;
     }
     const res = await prisma.project.findMany({
         select: filter,
+        skip: Number(size) * (Number(page) - 1),
+        take: Number(size),
     });
     io.emit("List Specified Fields of all Projects", res);
     return res;
@@ -257,17 +266,29 @@ export const listProjectByProjectDid = async (projectDid: string) => {
     return res;
 };
 
-export const listProjectByEntityType = async (entityType: string) => {
+export const listProjectByEntityType = async (
+    entityType: string,
+    page: string,
+    size: string,
+) => {
     const res = await prisma.project.findMany({
         where: { entityType: entityType },
+        skip: Number(size) * (Number(page) - 1),
+        take: Number(size),
     });
     io.emit("List Project by Entity Type", res);
     return res;
 };
 
-export const listProjectBySenderDid = async (senderDid: any) => {
+export const listProjectBySenderDid = async (
+    senderDid: any,
+    page: string,
+    size: string,
+) => {
     const res = await prisma.project.findMany({
         where: { senderDid: senderDid },
+        skip: Number(size) * (Number(page) - 1),
+        take: Number(size),
     });
     io.emit("List Project by Sender DID", res);
     return res;

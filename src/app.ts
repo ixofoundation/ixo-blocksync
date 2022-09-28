@@ -65,6 +65,82 @@ class App {
             res.send("API is Running");
         });
 
+        this.express.get("/api/bonds/listBonds", async (req, res, next) => {
+            try {
+                const bonds = await BondHandler.listAllBonds(
+                    req.query.page,
+                    req.query.size,
+                );
+                res.json(bonds);
+            } catch (error) {
+                next(error);
+            }
+        });
+
+        this.express.get(
+            "/api/bonds/listBondsFiltered",
+            async (req, res, next) => {
+                try {
+                    const bonds = await BondHandler.listAllBondsFiltered(
+                        req.body,
+                        req.query.page,
+                        req.query.size,
+                    );
+                    res.json(bonds);
+                } catch (error) {
+                    next(error);
+                }
+            },
+        );
+
+        this.express.get(
+            "/api/bonds/getByBondDid/:bondDid",
+            async (req, res, next) => {
+                try {
+                    const bond = await BondHandler.listBondByBondDid(
+                        req.params.bondDid,
+                    );
+                    res.json(bond);
+                } catch (error) {
+                    next(error);
+                }
+            },
+        );
+
+        this.express.get(
+            "/api/bonds/getPriceHistoryByBondDid/:bondDid",
+            async (req, res, next) => {
+                try {
+                    const priceHistory =
+                        await BondHandler.listBondPriceHistoryByBondDid(
+                            req.params.bondDid,
+                            req.body,
+                            req.query.page,
+                            req.query.size,
+                        );
+                    res.json(priceHistory);
+                } catch (error) {
+                    next(error);
+                }
+            },
+        );
+
+        this.express.get(
+            "/api/bonds/getByBondCreatorDid/:creatorDid",
+            async (req, res, next) => {
+                try {
+                    const bonds = await BondHandler.listBondByCreatorDid(
+                        req.params.creatorDid,
+                        req.query.page,
+                        req.query.size,
+                    );
+                    res.json(bonds);
+                } catch (error) {
+                    next(error);
+                }
+            },
+        );
+
         this.express.get(
             "/api/bond/get/outcomepayments/:bonddid",
             async (req, res, next) => {
@@ -72,6 +148,8 @@ class App {
                     const outcomePayments =
                         await BondHandler.getOutcomeHistoryByDid(
                             req.params.bonddid,
+                            req.query.page,
+                            req.query.size,
                         );
                     res.json(outcomePayments);
                 } catch (error) {
@@ -86,6 +164,8 @@ class App {
                 try {
                     const alphaHistory = await BondHandler.getAlphaHistoryByDid(
                         req.params.bonddid,
+                        req.query.page,
+                        req.query.size,
                     );
                     res.json(alphaHistory);
                 } catch (error) {
@@ -101,6 +181,8 @@ class App {
                     const transactions =
                         await BondHandler.getTransactionHistoryBond(
                             req.params.bonddid,
+                            req.query.page,
+                            req.query.size,
                         );
                     res.json(transactions);
                 } catch (error) {
@@ -116,6 +198,8 @@ class App {
                     const transactions =
                         await BondHandler.getTransactionHistoryBondBuyer(
                             req.params.buyerdid,
+                            req.query.page,
+                            req.query.size,
                         );
                     res.json(transactions);
                 } catch (error) {
@@ -131,6 +215,8 @@ class App {
                     const reserveWithdrawals =
                         await BondHandler.getWithdrawHistoryFromBondReserveByBondDid(
                             req.params.bonddid,
+                            req.query.page,
+                            req.query.size,
                         );
                     res.json(reserveWithdrawals);
                 } catch (error) {
@@ -146,6 +232,8 @@ class App {
                     const reserveWithdrawals =
                         await BondHandler.getWithdrawHistoryFromBondReserveByWithdrawerId(
                             req.params.recipientdid,
+                            req.query.page,
+                            req.query.size,
                         );
                     res.json(reserveWithdrawals);
                 } catch (error) {
@@ -161,6 +249,8 @@ class App {
                     const shareWithdrawals =
                         await BondHandler.getWithdrawHistoryFromBondShareByBondDid(
                             req.params.bonddid,
+                            req.query.page,
+                            req.query.size,
                         );
                     res.json(shareWithdrawals);
                 } catch (error) {
@@ -176,6 +266,8 @@ class App {
                     const shareWithdrawals =
                         await BondHandler.getWithdrawHistoryFromBondShareByRecipientDid(
                             req.params.recipientdid,
+                            req.query.page,
+                            req.query.size,
                         );
                     res.json(shareWithdrawals);
                 } catch (error) {
@@ -188,7 +280,10 @@ class App {
             "/api/project/listProjects",
             async (req, res, next) => {
                 try {
-                    const projects = await ProjectHandler.listAllProjects();
+                    const projects = await ProjectHandler.listAllProjects(
+                        req.query.page,
+                        req.query.size,
+                    );
                     res.json(projects);
                 } catch (error) {
                     next(error);
@@ -201,7 +296,11 @@ class App {
             async (req, res, next) => {
                 try {
                     const projects =
-                        await ProjectHandler.listAllProjectsFiltered(req.body);
+                        await ProjectHandler.listAllProjectsFiltered(
+                            req.body,
+                            req.query.page,
+                            req.query.size,
+                        );
                     res.json(projects);
                 } catch (error) {
                     next(error);
@@ -216,6 +315,8 @@ class App {
                     const projects =
                         await ProjectHandler.listProjectByEntityType(
                             req.params.entityType,
+                            req.query.page,
+                            req.query.size,
                         );
                     res.json(projects);
                 } catch (error) {
@@ -245,6 +346,8 @@ class App {
                 try {
                     const project = await ProjectHandler.listProjectBySenderDid(
                         req.params.senderDid,
+                        req.query.page,
+                        req.query.size,
                     );
                     res.json(project);
                 } catch (error) {
@@ -307,79 +410,14 @@ class App {
             }
         });
 
-        this.express.get("/api/bonds/listBonds", async (req, res, next) => {
-            try {
-                const bonds = await BondHandler.listAllBonds();
-                res.json(bonds);
-            } catch (error) {
-                next(error);
-            }
-        });
-
-        this.express.get(
-            "/api/bonds/listBondsFiltered",
-            async (req, res, next) => {
-                try {
-                    const bonds = await BondHandler.listAllBondsFiltered(
-                        req.body,
-                    );
-                    res.json(bonds);
-                } catch (error) {
-                    next(error);
-                }
-            },
-        );
-
-        this.express.get(
-            "/api/bonds/getByBondDid/:bondDid",
-            async (req, res, next) => {
-                try {
-                    const bond = await BondHandler.listBondByBondDid(
-                        req.params.bondDid,
-                    );
-                    res.json(bond);
-                } catch (error) {
-                    next(error);
-                }
-            },
-        );
-
-        this.express.get(
-            "/api/bonds/getPriceHistoryByBondDid/:bondDid",
-            async (req, res, next) => {
-                try {
-                    const priceHistory =
-                        await BondHandler.listBondPriceHistoryByBondDid(
-                            req.params.bondDid,
-                            req.body,
-                        );
-                    res.json(priceHistory);
-                } catch (error) {
-                    next(error);
-                }
-            },
-        );
-
-        this.express.get(
-            "/api/bonds/getByBondCreatorDid/:creatorDid",
-            async (req, res, next) => {
-                try {
-                    const bonds = await BondHandler.listBondByCreatorDid(
-                        req.params.creatorDid,
-                    );
-                    res.json(bonds);
-                } catch (error) {
-                    next(error);
-                }
-            },
-        );
-
         this.express.get(
             "/api/event/getEventByType/:type",
             async (req, res, next) => {
                 try {
                     const events = await EventHandler.getEventsByType(
                         req.params.type,
+                        req.query.page,
+                        req.query.size,
                     );
                     res.json(events);
                 } catch (error) {
@@ -404,6 +442,8 @@ class App {
                     const transactions =
                         await TransactionHandler.listTransactionsByType(
                             req.params.type,
+                            req.query.page,
+                            req.query.size,
                         );
                     res.json(transactions);
                 } catch (error) {
@@ -419,6 +459,8 @@ class App {
                     const transactions =
                         await TransactionHandler.listTransactionsByAddress(
                             req.params.address,
+                            req.query.page,
+                            req.query.size,
                         );
                     res.json(transactions);
                 } catch (error) {
@@ -435,6 +477,8 @@ class App {
                         await TransactionHandler.listTransactionsByAddressAndType(
                             req.params.address,
                             req.params.type,
+                            req.query.page,
+                            req.query.size,
                         );
                     res.json(transactions);
                 } catch (error) {

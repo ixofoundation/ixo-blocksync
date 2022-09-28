@@ -111,19 +111,28 @@ export const createOutcomePayment = async (
     }
 };
 
-export const listAllBonds = async () => {
-    const res = await prisma.bond.findMany();
+export const listAllBonds = async (page: string, size: string) => {
+    const res = await prisma.bond.findMany({
+        skip: Number(size) * (Number(page) - 1),
+        take: Number(size),
+    });
     io.emit("List all Bonds", res);
     return res;
 };
 
-export const listAllBondsFiltered = async (fields: string[]) => {
+export const listAllBondsFiltered = async (
+    fields: string[],
+    page: string,
+    size: string,
+) => {
     let filter = {};
     for (let i in fields) {
         filter[fields[i]] = true;
     }
     const res = await prisma.bond.findMany({
         select: filter,
+        skip: Number(size) * (Number(page) - 1),
+        take: Number(size),
     });
     io.emit("List Specified Fields of all Bonds", res);
     return res;
@@ -140,6 +149,8 @@ export const listBondByBondDid = async (bondDid: string) => {
 export const listBondPriceHistoryByBondDid = async (
     bondDid: string,
     reqBody: any,
+    page: string,
+    size: string,
 ) => {
     let fromTime = 0;
     let toTime = new Date().getTime();
@@ -160,69 +171,117 @@ export const listBondPriceHistoryByBondDid = async (
         select: {
             price: true,
         },
+        skip: Number(size) * (Number(page) - 1),
+        take: Number(size),
     });
     io.emit("List Bond Price History by DID", res);
     return res;
 };
 
-export const listBondByCreatorDid = async (creatorDid: string) => {
+export const listBondByCreatorDid = async (
+    creatorDid: string,
+    page: string,
+    size: string,
+) => {
     return prisma.bond.findMany({
         where: { creatorDid: creatorDid },
+        skip: Number(size) * (Number(page) - 1),
+        take: Number(size),
     });
 };
 
-export const getAlphaHistoryByDid = async (bondDid: string) => {
-    return prisma.alphaChange.findMany({
-        where: { bondDid: bondDid },
-    });
-};
-
-export const getOutcomeHistoryByDid = async (bondDid: string) => {
+export const getOutcomeHistoryByDid = async (
+    bondDid: string,
+    page: string,
+    size: string,
+) => {
     return prisma.outcomePayment.findMany({
         where: { bondDid: bondDid },
+        skip: Number(size) * (Number(page) - 1),
+        take: Number(size),
     });
 };
 
-export const getTransactionHistoryBond = async (bondDid: string) => {
+export const getAlphaHistoryByDid = async (
+    bondDid: string,
+    page: string,
+    size: string,
+) => {
+    return prisma.alphaChange.findMany({
+        where: { bondDid: bondDid },
+        skip: Number(size) * (Number(page) - 1),
+        take: Number(size),
+    });
+};
+
+export const getTransactionHistoryBond = async (
+    bondDid: string,
+    page: string,
+    size: string,
+) => {
     return prisma.bondBuy.findMany({
         where: { bondDid: bondDid },
+        skip: Number(size) * (Number(page) - 1),
+        take: Number(size),
     });
 };
 
-export const getTransactionHistoryBondBuyer = async (buyerDid: string) => {
+export const getTransactionHistoryBondBuyer = async (
+    buyerDid: string,
+    page: string,
+    size: string,
+) => {
     return prisma.bondBuy.findMany({
         where: { buyerDid: buyerDid },
+        skip: Number(size) * (Number(page) - 1),
+        take: Number(size),
     });
 };
 
 export const getWithdrawHistoryFromBondReserveByBondDid = async (
     bondDid: string,
+    page: string,
+    size: string,
 ) => {
     return prisma.reserveWithdrawal.findMany({
         where: { bondDid: bondDid },
+        skip: Number(size) * (Number(page) - 1),
+        take: Number(size),
     });
 };
 
 export const getWithdrawHistoryFromBondShareByBondDid = async (
     bondDid: string,
+    page: string,
+    size: string,
 ) => {
     return prisma.shareWithdrawal.findMany({
         where: { bondDid: bondDid },
+        skip: Number(size) * (Number(page) - 1),
+        take: Number(size),
     });
 };
 
 export const getWithdrawHistoryFromBondReserveByWithdrawerId = async (
     withdrawerdid: string,
+    page: string,
+    size: string,
 ) => {
     return prisma.reserveWithdrawal.findMany({
         where: { withdrawerDid: withdrawerdid },
+        skip: Number(size) * (Number(page) - 1),
+        take: Number(size),
     });
 };
 
 export const getWithdrawHistoryFromBondShareByRecipientDid = async (
     recipientdid: string,
+    page: string,
+    size: string,
 ) => {
     return prisma.shareWithdrawal.findMany({
         where: { recipientDid: recipientdid },
+        skip: Number(size) * (Number(page) - 1),
+        take: Number(size),
     });
 };
