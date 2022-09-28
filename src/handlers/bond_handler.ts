@@ -169,6 +169,7 @@ export const listBondPriceHistoryByBondDid = async (
             },
         },
         select: {
+            time: true,
             price: true,
         },
         skip: Number(size) * (Number(page) - 1),
