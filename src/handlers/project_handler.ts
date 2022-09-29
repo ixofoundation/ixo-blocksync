@@ -1,6 +1,5 @@
 import { prisma } from "../prisma/prisma_client";
 import { Prisma } from "@prisma/client";
-import { io } from "../server";
 import axios from "axios";
 import axiosRetry from "axios-retry";
 import { REST } from "../util/secrets";
@@ -21,7 +20,6 @@ export const createProject = async (
         if (claimDocs.length > 0) {
             res += await prisma.claim.createMany({ data: claimDocs });
         }
-        io.emit("Project Created", res);
         return res;
     } catch (error) {
         console.log(error);
@@ -32,7 +30,6 @@ export const createProject = async (
 export const addAgent = async (agentDoc: Prisma.AgentUncheckedCreateInput) => {
     try {
         const res = await prisma.agent.create({ data: agentDoc });
-        io.emit("Agent Added", { agent: agentDoc });
         return res;
     } catch (error) {
         console.log(error);
@@ -66,7 +63,6 @@ export const updateAgentStatus = async (agentDid: string, status: string) => {
             where: { agentDid: agentDid },
             data: { status: status },
         });
-        io.emit("Agent Updated", { agentDid: agentDid, status: status });
         return res;
     } catch (error) {
         console.log(error);
@@ -99,7 +95,6 @@ export const updateAgentStats = async (
             where: { projectDid: projectDid },
             data: stats,
         });
-        io.emit("Agent Stats Updated", res);
         return res;
     } catch (error) {
         console.log(error);
@@ -110,7 +105,6 @@ export const updateAgentStats = async (
 export const addClaim = async (claimDoc: Prisma.ClaimUncheckedCreateInput) => {
     try {
         const res = await prisma.claim.create({ data: claimDoc });
-        io.emit("Claim Added", { claim: claimDoc });
         return res;
     } catch (error) {
         console.log(error);
@@ -139,7 +133,6 @@ export const updateClaimStatus = async (claimId: string, status: string) => {
             where: { claimId: claimId },
             data: { status: status },
         });
-        io.emit("Claim Status Updated", { claimId: claimId, status: status });
         return res;
     } catch (error) {
         console.log(error);
@@ -160,10 +153,6 @@ export const updateClaimStats = async (projectDid: string, status: string) => {
             where: { projectDid: projectDid },
             data: stats,
         });
-        io.emit("Claim Stats Updated", {
-            projectDid: projectDid,
-            updatedStats: status,
-        });
         return res;
     } catch (error) {
         console.log(error);
@@ -179,10 +168,6 @@ export const updateProjectStatus = async (
         const res = await prisma.project.update({
             where: { projectDid: projectDid },
             data: { status: status },
-        });
-        io.emit("Project Status Updated", {
-            projectDid: projectDid,
-            status: status,
         });
         return res;
     } catch (error) {
@@ -223,7 +208,6 @@ export const updateProject = async (projectDid: string, projectDoc: any) => {
                 data: projectDoc,
             },
         });
-        io.emit("Project Updated", { projectDid: projectDid });
         return res;
     } catch (error) {
         console.log(error);
@@ -231,67 +215,77 @@ export const updateProject = async (projectDid: string, projectDoc: any) => {
     }
 };
 
-export const listAllProjects = async (page: string, size: string) => {
-    const res = await prisma.project.findMany({
-        skip: Number(size) * (Number(page) - 1),
-        take: Number(size),
-    });
-    io.emit("List all Projects", res);
-    return res;
+export const listAllProjects = async (page?: string, size?: string) => {
+    if (page && size) {
+        return prisma.project.findMany({
+            skip: Number(size) * (Number(page) - 1),
+            take: Number(size),
+        });
+    } else {
+        return prisma.project.findMany();
+    }
 };
 
 export const listAllProjectsFiltered = async (
     fields: string[],
-    page: string,
-    size: string,
+    page?: string,
+    size?: string,
 ) => {
     let filter = {};
     for (const i in fields) {
         filter[fields[i]] = true;
     }
-    const res = await prisma.project.findMany({
-        select: filter,
-        skip: Number(size) * (Number(page) - 1),
-        take: Number(size),
-    });
-    io.emit("List Specified Fields of all Projects", res);
-    return res;
+    if (page && size) {
+        return prisma.project.findMany({
+            select: filter,
+            skip: Number(size) * (Number(page) - 1),
+            take: Number(size),
+        });
+    } else {
+        return prisma.project.findMany({ select: filter });
+    }
 };
 
 export const listProjectByProjectDid = async (projectDid: string) => {
-    const res = await prisma.project.findFirst({
+    return prisma.project.findFirst({
         where: { projectDid: projectDid },
     });
-    io.emit("List Project by DID", res);
-    return res;
 };
 
 export const listProjectByEntityType = async (
     entityType: string,
-    page: string,
-    size: string,
+    page?: string,
+    size?: string,
 ) => {
-    const res = await prisma.project.findMany({
-        where: { entityType: entityType },
-        skip: Number(size) * (Number(page) - 1),
-        take: Number(size),
-    });
-    io.emit("List Project by Entity Type", res);
-    return res;
+    if (page && size) {
+        return prisma.project.findMany({
+            where: { entityType: entityType },
+            skip: Number(size) * (Number(page) - 1),
+            take: Number(size),
+        });
+    } else {
+        return prisma.project.findMany({
+            where: { entityType: entityType },
+        });
+    }
 };
 
 export const listProjectBySenderDid = async (
     senderDid: any,
-    page: string,
-    size: string,
+    page?: string,
+    size?: string,
 ) => {
-    const res = await prisma.project.findMany({
-        where: { senderDid: senderDid },
-        skip: Number(size) * (Number(page) - 1),
-        take: Number(size),
-    });
-    io.emit("List Project by Sender DID", res);
-    return res;
+    if (page && size) {
+        return prisma.project.findMany({
+            where: { senderDid: senderDid },
+            skip: Number(size) * (Number(page) - 1),
+            take: Number(size),
+        });
+    } else {
+        return prisma.project.findMany({
+            where: { senderDid: senderDid },
+        });
+    }
 };
 
 export const getProjectAccountsFromChain = async (projectDid: string) => {

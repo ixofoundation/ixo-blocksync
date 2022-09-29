@@ -27,8 +27,6 @@ const worker = new Worker(
 
         console.log(`Syncing Block ${blockHeight}`);
 
-        await CosmosHandler.createBlock(blockHash, block, blockResult);
-
         if (transactions.length > 0) {
             await TransactionSyncHandler.syncTransactions(
                 transactions,
@@ -47,6 +45,8 @@ const worker = new Worker(
         const bondsInfo = await Connection.getBondsInfo(blockHeight);
         if (bondsInfo.result)
             await BondSyncHandler.syncBondsInfo(bondsInfo.result, timestamp);
+
+        await CosmosHandler.createBlock(blockHash, block, blockResult);
     },
     { connection },
 );

@@ -1,6 +1,6 @@
 import { prisma } from "../prisma/prisma_client";
 import { Prisma } from "@prisma/client";
-import { io, statId } from "../server";
+import { statId } from "../index";
 import { AgentTypes, ClaimStatusTypes } from "../types/Project";
 import { MsgTypes } from "../types/Msg";
 
@@ -29,7 +29,6 @@ export const updateStats = async (statDoc: Prisma.StatsUpdateInput) => {
             },
             data: statDoc,
         });
-        io.emit("Stats Updated", statDoc);
         return res;
     } catch (error) {
         console.log(error);

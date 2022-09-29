@@ -1,6 +1,6 @@
 import * as Connection from "../util/connection";
 import * as ChainHandler from "../handlers/chain_handler";
-import { currentChain } from "../server";
+import { currentChain } from "../index";
 import { blockQueue } from "./queue";
 import { sleep } from "../util/sleep";
 
