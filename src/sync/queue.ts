@@ -3,8 +3,10 @@ import * as Connection from "../util/connection";
 import * as CosmosHandler from "../handlers/block_handler";
 import * as TransactionSyncHandler from "../sync_handlers/transaction_sync_handler";
 import * as BlockSyncHandler from "../sync_handlers/block_sync_handler";
+import * as ChainHandler from "../handlers/chain_handler";
 import * as EventSyncHandler from "../sync_handlers/event_sync_handler";
 import * as BondSyncHandler from "../sync_handlers/bondsinfo_sync_handler";
+import { currentChain } from "../index";
 import { Queue, Worker } from "bullmq";
 
 const connection = {
@@ -21,7 +23,6 @@ const worker = new Worker(
         const blockHeight = Number(block.header.height);
         const transactions = block.data.txs;
         const timestamp = new Date(Date.parse(block.header.time));
-
         const blockHash = await Connection.getBlockHash(blockHeight);
         const blockResult = await Connection.getBlockResult(blockHeight);
 
@@ -43,10 +44,16 @@ const worker = new Worker(
         await EventSyncHandler.syncEvents(blockResult, blockHeight, timestamp);
 
         const bondsInfo = await Connection.getBondsInfo(blockHeight);
-        if (bondsInfo.result)
+        if (bondsInfo.result) {
             await BondSyncHandler.syncBondsInfo(bondsInfo.result, timestamp);
+        }
 
         await CosmosHandler.createBlock(blockHash, block, blockResult);
+
+        await ChainHandler.updateChain({
+            chainId: currentChain.chainId,
+            blockHeight: blockHeight,
+        });
     },
     { connection },
 );

@@ -38,7 +38,7 @@ export const getBlockResult = async (height: number | string) => {
         );
         return res.data.result;
     } catch (error) {
-        console.log(error);
+        console.log("No Result for Block " + height);
         return null;
     }
 };
