@@ -5,7 +5,9 @@ import { sleep } from "../util/sleep";
 
 export const startSync = async () => {
     let currentBlock = await ChainHandler.getLastSyncedBlockHeight();
-    currentBlock++;
+    if (currentBlock !== 1) {
+        currentBlock++;
+    }
 
     while (true) {
         try {
