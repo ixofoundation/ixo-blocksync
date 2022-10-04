@@ -54,6 +54,8 @@ const worker = new Worker(
             chainId: currentChain.chainId,
             blockHeight: blockHeight,
         });
+
+        await job.remove();
     },
     { connection },
 );
