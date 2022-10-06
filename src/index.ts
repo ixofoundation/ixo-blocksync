@@ -28,7 +28,7 @@ const seedChain = async () => {
     } else {
         const res = await Connection.getLastBlock();
         const newChain = await ChainHandler.createChain({
-            chainId: res.header.chain_id,
+            chainId: res.block.header.chain_id,
             blockHeight: 1,
         });
         currentChain = newChain;

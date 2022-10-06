@@ -20,16 +20,16 @@ const worker = new Worker(
     "Blocks",
     async (job) => {
         const block = job.data;
-        const blockHeight = Number(block.header.height);
+        const blockHeight = Number(block.block.header.height);
 
         const blockExists = await CosmosHandler.isBlockSynced(blockHeight);
         if (blockExists) {
             return;
         }
 
-        const transactions = block.data.txs;
-        const timestamp = new Date(Date.parse(block.header.time));
-        const blockHash = await Connection.getBlockHash(blockHeight);
+        const transactions = block.block.data.txs;
+        const timestamp = new Date(Date.parse(block.block.header.time));
+        const blockHash = block.block_id.hash;
         const blockResult = await Connection.getBlockResult(blockHeight);
 
         console.log(`Syncing Block ${blockHeight}`);
@@ -54,7 +54,7 @@ const worker = new Worker(
             await BondSyncHandler.syncBondsInfo(bondsInfo.result, timestamp);
         }
 
-        await CosmosHandler.createBlock(blockHash, block, blockResult);
+        await CosmosHandler.createBlock(blockHash, block.block, blockResult);
 
         await ChainHandler.updateChain({
             chainId: currentChain.chainId,

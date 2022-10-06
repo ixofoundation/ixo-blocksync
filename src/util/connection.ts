@@ -16,7 +16,7 @@ export const testConnection = async () => {
 export const getBlock = async (height: number | string) => {
     try {
         const res = await axios.get(Secrets.RPC + "/block?height=" + height);
-        return res.data.result.block;
+        return res.data.result;
     } catch (error) {
         console.log(error);
     }
@@ -24,11 +24,6 @@ export const getBlock = async (height: number | string) => {
 
 export const getLastBlock = async () => {
     return getBlock("");
-};
-
-export const getBlockHash = async (height: number) => {
-    const res = await getBlock(height + 1);
-    return res.header.last_block_id.hash;
 };
 
 export const getBlockResult = async (height: number | string) => {
