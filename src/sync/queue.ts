@@ -21,6 +21,12 @@ const worker = new Worker(
     async (job) => {
         const block = job.data;
         const blockHeight = Number(block.header.height);
+
+        const blockExists = await CosmosHandler.isBlockSynced(blockHeight);
+        if (blockExists) {
+            return;
+        }
+
         const transactions = block.data.txs;
         const timestamp = new Date(Date.parse(block.header.time));
         const blockHash = await Connection.getBlockHash(blockHeight);

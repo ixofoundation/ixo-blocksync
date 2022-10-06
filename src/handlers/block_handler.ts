@@ -35,3 +35,14 @@ export const getLastSyncedBlock = async () => {
         },
     });
 };
+
+export const isBlockSynced = async (blockHeight: number) => {
+    const res = await prisma.block.findFirst({
+        where: { height: blockHeight },
+    });
+    if (res !== null) {
+        return true;
+    } else {
+        return false;
+    }
+};
