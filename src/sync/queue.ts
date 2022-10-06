@@ -8,6 +8,7 @@ import * as EventSyncHandler from "../sync_handlers/event_sync_handler";
 import * as BondSyncHandler from "../sync_handlers/bondsinfo_sync_handler";
 import { currentChain } from "../index";
 import { Queue, Worker } from "bullmq";
+import { restartSync } from "./sync_blocks";
 
 const connection = {
     host: Secrets.REDIS_HOST,
@@ -24,6 +25,7 @@ const worker = new Worker(
 
         const blockExists = await CosmosHandler.isBlockSynced(blockHeight);
         if (blockExists) {
+            await restartSync();
             return;
         }
 
