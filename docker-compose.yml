@@ -35,6 +35,10 @@ services:
         container_name: block-sync-qdb
         image: redis:7.0
         restart: always
+        environment:
+         - MAXMEMORY=500mb
+         - DATABASES=1
+         - LOGLEVEL=notice
 
     block-sync-db:
         container_name: block-sync-db

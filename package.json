@@ -6,7 +6,8 @@
     "scripts": {
         "start": "tsc && node build/dist/index.js",
         "build": "tsc",
-        "dev": "npx ts-node src/index.ts"
+        "dev": "npx ts-node src/index.ts",
+        "seed":"npx ts-node src/seed/seed.ts"
     },
     "repository": "https://github.com/ixofoundation/ixo-blocksync",
     "keywords": [
