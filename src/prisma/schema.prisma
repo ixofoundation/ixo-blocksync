@@ -11,15 +11,26 @@ datasource db {
 }
 
 model IID {
-  id                 String               @id
-  context            String[]
-  controller         String[]
-  versionId          String
-  updated            DateTime
-  created            DateTime
-  deactivated        Boolean
-  VerificationMethod VerificationMethod[]
-  Service            Service[]
+  id                   String               @id
+  versionId            String               @default(uuid())
+  updated              DateTime
+  created              DateTime
+  deactivated          Boolean?
+  entityType           String?
+  startDate            DateTime?
+  endDate              DateTime?
+  status               Int?
+  stage                String?
+  relayerNode          String?
+  verifiableCredential String?
+  credentials          String[]
+  Controller           String[]
+  Context              Json[]
+  VerificationMethod   VerificationMethod[]
+  Service              Service[]
+  AccordedRight        AccordedRight[]
+  LinkedResource       LinkedResource[]
+  LinkedEntity         LinkedEntity[]
 }
 
 model VerificationMethod {
@@ -38,6 +49,35 @@ model Service {
   iid             String
   type            String
   serviceEndpoint String
+}
+
+model AccordedRight {
+  id        String @id
+  IID       IID    @relation(fields: [iid], references: [id])
+  iid       String
+  type      String
+  mechanism String
+  service   String
+}
+
+model LinkedResource {
+  id              String @id
+  IID             IID    @relation(fields: [iid], references: [id])
+  iid             String
+  type            String
+  description     String
+  mediaType       String
+  serviceEndpoint String
+  proof           String
+  encrypted       String
+  right           String
+}
+
+model LinkedEntity {
+  id           String @id
+  IID          IID    @relation(fields: [iid], references: [id])
+  iid          String
+  relationship String
 }
 
 model DID {

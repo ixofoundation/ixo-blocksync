@@ -4,29 +4,56 @@ export const convertIID = (IID: any) => {
     let verificationMethodDocs: Prisma.VerificationMethodUncheckedCreateInput[] =
         [];
     let serviceDocs: Prisma.ServiceUncheckedCreateInput[] = [];
+    let accordedRightDocs: Prisma.AccordedRightUncheckedCreateInput[] = [];
+    let linkedResourceDocs: Prisma.LinkedResourceUncheckedCreateInput[] = [];
+    let linkedEntityDocs: Prisma.LinkedEntityUncheckedCreateInput[] = [];
 
     IID.verifications.forEach((verification) => {
         const verificationMethodDoc: Prisma.VerificationMethodUncheckedCreateInput =
             {
-                id: verification.method.id,
                 iid: IID.id,
-                relationships: verification.relationships,
-                type: verification.method.type,
-                controller: verification.method.controller,
-                verificationMaterial: verification.method.verificationMaterial,
+                ...verification.method,
             };
         verificationMethodDocs.push(verificationMethodDoc);
     });
 
     IID.services.forEach((service) => {
         const serviceDoc: Prisma.ServiceUncheckedCreateInput = {
-            id: service.service_data.id,
             iid: IID.id,
-            type: service.service_data.type,
-            serviceEndpoint: service.service_data.serviceEndpoint,
+            ...service.service_data,
         };
         serviceDocs.push(serviceDoc);
     });
 
-    return { verificationMethodDocs, serviceDocs };
+    IID.rights.forEach((right) => {
+        const accordedRightDoc: Prisma.AccordedRightUncheckedCreateInput = {
+            iid: IID.id,
+            ...right,
+        };
+        accordedRightDocs.push(accordedRightDoc);
+    });
+
+    IID.resources.forEach((resource) => {
+        const linkedResourceDoc: Prisma.LinkedResourceUncheckedCreateInput = {
+            iid: IID.id,
+            ...resource,
+        };
+        linkedResourceDocs.push(linkedResourceDoc);
+    });
+
+    IID.entities.forEach((entity) => {
+        const linkedEntityDoc: Prisma.LinkedEntityUncheckedCreateInput = {
+            iid: IID.id,
+            ...entity,
+        };
+        linkedEntityDocs.push(linkedEntityDoc);
+    });
+
+    return {
+        verificationMethodDocs,
+        serviceDocs,
+        accordedRightDocs,
+        linkedResourceDocs,
+        linkedEntityDocs,
+    };
 };

@@ -5,6 +5,9 @@ export const createIid = async (
     iidDoc: Prisma.IIDCreateInput,
     verificationMethodDocs: Prisma.VerificationMethodUncheckedCreateInput[],
     serviceDocs: Prisma.ServiceUncheckedCreateInput[],
+    accordedRightDocs: Prisma.AccordedRightUncheckedCreateInput[],
+    linkedResourceDocs: Prisma.LinkedResourceUncheckedCreateInput[],
+    linkedEntityDocs: Prisma.LinkedEntityUncheckedCreateInput[],
 ) => {
     try {
         let res: any;
@@ -16,6 +19,21 @@ export const createIid = async (
         }
         if (serviceDocs.length > 0) {
             res += await prisma.service.createMany({ data: serviceDocs });
+        }
+        if (accordedRightDocs.length > 0) {
+            res += await prisma.accordedRight.createMany({
+                data: accordedRightDocs,
+            });
+        }
+        if (linkedResourceDocs.length > 0) {
+            res += await prisma.linkedResource.createMany({
+                data: linkedResourceDocs,
+            });
+        }
+        if (linkedResourceDocs.length > 0) {
+            res += await prisma.linkedEntity.createMany({
+                data: linkedEntityDocs,
+            });
         }
         return res;
     } catch (error) {
@@ -32,8 +50,14 @@ export const updateIid = async (
     try {
         const res = await prisma.iID.update({
             where: { id: id },
-            data: { controller: controller, updated: timestamp },
-            include: { VerificationMethod: true, Service: true },
+            data: { Controller: controller, updated: timestamp },
+            include: {
+                VerificationMethod: true,
+                Service: true,
+                AccordedRight: true,
+                LinkedResource: true,
+                LinkedEntity: true,
+            },
         });
         return res;
     } catch (error) {
@@ -127,6 +151,178 @@ export const deleteService = async (service_id: string, timestamp: string) => {
             data: { updated: timestamp },
         });
         return res;
+    } catch (error) {
+        console.log(error);
+        return;
+    }
+};
+
+export const addAccordedRight = async (
+    accordedRightDoc: Prisma.AccordedRightUncheckedCreateInput,
+    timestamp: string,
+) => {
+    try {
+        const accordedRight = await prisma.accordedRight.create({
+            data: accordedRightDoc,
+        });
+        const res = await prisma.iID.update({
+            where: { id: accordedRight.iid },
+            data: { updated: timestamp },
+        });
+        return res;
+    } catch (error) {
+        console.log(error);
+        return;
+    }
+};
+
+export const deleteAccordedRight = async (
+    right_id: string,
+    timestamp: string,
+) => {
+    try {
+        const accordedRight = await prisma.accordedRight.delete({
+            where: { id: right_id },
+        });
+        const res = await prisma.iID.update({
+            where: { id: accordedRight.iid },
+            data: { updated: timestamp },
+        });
+        return res;
+    } catch (error) {
+        console.log(error);
+        return;
+    }
+};
+
+export const addLinkedEntity = async (
+    linkedEntityDoc: Prisma.LinkedEntityUncheckedCreateInput,
+    timestamp: string,
+) => {
+    try {
+        const linkedEntity = await prisma.linkedEntity.create({
+            data: linkedEntityDoc,
+        });
+        const res = await prisma.iID.update({
+            where: { id: linkedEntity.iid },
+            data: { updated: timestamp },
+        });
+        return res;
+    } catch (error) {
+        console.log(error);
+        return;
+    }
+};
+
+export const deleteLinkedEntity = async (
+    entity_id: string,
+    timestamp: string,
+) => {
+    try {
+        const linkedEntity = await prisma.linkedEntity.delete({
+            where: { id: entity_id },
+        });
+        const res = await prisma.iID.update({
+            where: { id: linkedEntity.iid },
+            data: { updated: timestamp },
+        });
+        return res;
+    } catch (error) {
+        console.log(error);
+        return;
+    }
+};
+
+export const addLinkedResource = async (
+    linkedResourceDoc: Prisma.LinkedResourceUncheckedCreateInput,
+    timestamp: string,
+) => {
+    try {
+        const linkedResource = await prisma.linkedResource.create({
+            data: linkedResourceDoc,
+        });
+        const res = await prisma.iID.update({
+            where: { id: linkedResource.iid },
+            data: { updated: timestamp },
+        });
+        return res;
+    } catch (error) {
+        console.log(error);
+        return;
+    }
+};
+
+export const deleteLinkedResource = async (
+    resource_id: string,
+    timestamp: string,
+) => {
+    try {
+        const linkedResource = await prisma.linkedResource.delete({
+            where: { id: resource_id },
+        });
+        const res = await prisma.iID.update({
+            where: { id: linkedResource.iid },
+            data: { updated: timestamp },
+        });
+        return res;
+    } catch (error) {
+        console.log(error);
+        return;
+    }
+};
+
+export const addContext = async (contextDoc: any, timestamp: string) => {
+    try {
+        const res = await prisma.iID.update({
+            where: {
+                id: contextDoc.id,
+            },
+            data: {
+                Context: {
+                    push: contextDoc.context,
+                },
+                updated: timestamp,
+            },
+        });
+        return res;
+    } catch (error) {
+        console.log(error);
+        return;
+    }
+};
+
+export const deleteContext = async (
+    id: string,
+    contextKey: string,
+    timestamp: string,
+) => {
+    try {
+        const iid = await prisma.iID.findFirst({ where: { id: id } });
+        let context: any = iid?.Context;
+        context = context?.filter((c: any) => c.key !== contextKey);
+        const updatedIid = await prisma.iID.update({
+            where: {
+                id: id,
+            },
+            data: {
+                Context: context,
+                updated: timestamp,
+            },
+        });
+        return updatedIid;
+    } catch (error) {
+        console.log(error);
+        return;
+    }
+};
+
+export const updateMetadata = async (id: string, meta: any) => {
+    try {
+        const iid = await prisma.iID.update({
+            where: { id: id },
+            data: meta,
+        });
+        return iid;
     } catch (error) {
         console.log(error);
         return;

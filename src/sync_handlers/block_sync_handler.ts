@@ -27,15 +27,17 @@ export const syncBlock = async (
                 await IidHandler.createIid(
                     {
                         id: value.id,
-                        context: value.context,
-                        controller: value.controller,
                         versionId: value.versionId,
                         updated: timestamp,
                         created: timestamp,
-                        deactivated: false,
+                        Controller: value.controllers,
+                        Context: value.context,
                     },
                     idocs.verificationMethodDocs,
                     idocs.serviceDocs,
+                    idocs.accordedRightDocs,
+                    idocs.linkedResourceDocs,
+                    idocs.linkedEntityDocs,
                 );
                 break;
             case MsgTypes.updateDid:
@@ -82,6 +84,61 @@ export const syncBlock = async (
                 break;
             case MsgTypes.deleteService:
                 await IidHandler.deleteService(value.service_id, timestamp);
+                break;
+            case MsgTypes.addAccordedRight:
+                await IidHandler.addAccordedRight(
+                    {
+                        iid: value.id,
+                        ...value,
+                    },
+                    timestamp,
+                );
+                break;
+            case MsgTypes.deleteAccordedRight:
+                await IidHandler.deleteAccordedRight(value.right_id, timestamp);
+                break;
+            case MsgTypes.addLinkedEntity:
+                await IidHandler.addLinkedEntity(
+                    {
+                        iid: value.id,
+                        ...value.linkedEntity,
+                    },
+                    timestamp,
+                );
+                break;
+            case MsgTypes.deleteLinkedEntity:
+                await IidHandler.deleteLinkedEntity(value.entity_id, timestamp);
+                break;
+            case MsgTypes.addLinkedResource:
+                await IidHandler.addLinkedResource(
+                    {
+                        iid: value.id,
+                        ...value.linkedResource,
+                    },
+                    timestamp,
+                );
+                break;
+            case MsgTypes.deleteLinkedResource:
+                await IidHandler.deleteLinkedResource(
+                    value.resource_id,
+                    timestamp,
+                );
+                break;
+            case MsgTypes.addContext:
+                await IidHandler.addContext(
+                    { id: value.id, context: value.context },
+                    timestamp,
+                );
+                break;
+            case MsgTypes.deleteContext:
+                await IidHandler.deleteContext(
+                    value.id,
+                    value.contextKey,
+                    timestamp,
+                );
+                break;
+            case MsgTypes.updateMetadata:
+                await IidHandler.updateMetadata(value.id, value.meta);
                 break;
             case MsgTypes.createProject:
                 let projectDoc = value;

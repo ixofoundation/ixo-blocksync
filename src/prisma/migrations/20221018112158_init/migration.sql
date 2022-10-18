@@ -1,12 +1,20 @@
 -- CreateTable
 CREATE TABLE "IID" (
     "id" TEXT NOT NULL,
-    "context" TEXT[],
-    "controller" TEXT[],
     "versionId" TEXT NOT NULL,
     "updated" TIMESTAMP(3) NOT NULL,
     "created" TIMESTAMP(3) NOT NULL,
-    "deactivated" BOOLEAN NOT NULL,
+    "deactivated" BOOLEAN,
+    "entityType" TEXT,
+    "startDate" TIMESTAMP(3),
+    "endDate" TIMESTAMP(3),
+    "status" INTEGER,
+    "stage" TEXT,
+    "relayerNode" TEXT,
+    "verifiableCredential" TEXT,
+    "credentials" TEXT[],
+    "Controller" TEXT[],
+    "Context" JSONB[],
 
     CONSTRAINT "IID_pkey" PRIMARY KEY ("id")
 );
@@ -31,6 +39,41 @@ CREATE TABLE "Service" (
     "serviceEndpoint" TEXT NOT NULL,
 
     CONSTRAINT "Service_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "AccordedRight" (
+    "id" TEXT NOT NULL,
+    "iid" TEXT NOT NULL,
+    "type" TEXT NOT NULL,
+    "mechanism" TEXT NOT NULL,
+    "service" TEXT NOT NULL,
+
+    CONSTRAINT "AccordedRight_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "LinkedResource" (
+    "id" TEXT NOT NULL,
+    "iid" TEXT NOT NULL,
+    "type" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "mediaType" TEXT NOT NULL,
+    "serviceEndpoint" TEXT NOT NULL,
+    "proof" TEXT NOT NULL,
+    "encrypted" TEXT NOT NULL,
+    "right" TEXT NOT NULL,
+
+    CONSTRAINT "LinkedResource_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "LinkedEntity" (
+    "id" TEXT NOT NULL,
+    "iid" TEXT NOT NULL,
+    "relationship" TEXT NOT NULL,
+
+    CONSTRAINT "LinkedEntity_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -316,6 +359,15 @@ ALTER TABLE "VerificationMethod" ADD CONSTRAINT "VerificationMethod_iid_fkey" FO
 
 -- AddForeignKey
 ALTER TABLE "Service" ADD CONSTRAINT "Service_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "AccordedRight" ADD CONSTRAINT "AccordedRight_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "LinkedResource" ADD CONSTRAINT "LinkedResource_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "LinkedEntity" ADD CONSTRAINT "LinkedEntity_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Credential" ADD CONSTRAINT "Credential_did_fkey" FOREIGN KEY ("did") REFERENCES "DID"("did") ON DELETE RESTRICT ON UPDATE CASCADE;
