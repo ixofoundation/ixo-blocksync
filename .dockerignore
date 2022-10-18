@@ -68,3 +68,5 @@ scratch.json
 
 # External Mongo data
 data/
+
+Dockerfile
