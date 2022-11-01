@@ -1,20 +1,23 @@
-FROM node:16.14.2
+FROM node:16.14.2 as build
 
-# Create app directory
-RUN mkdir /usr/src/app
 WORKDIR /usr/src/app
 
-# Install app dependencies
 COPY package*.json ./
-RUN npm install
+RUN yarn
 
-# Copy rest of files
 COPY . .
 
-# Generate Prisma client
 RUN npx prisma generate
 
-EXPOSE 8080
+
+RUN yarn build
+
+FROM node:16.14.2-alpine3.15
+WORKDIR /usr/src/app
+
+COPY --from=build /usr/src/app/build/ ./build
+COPY --from=build /usr/src/app/node_modules/ ./node_modules
+COPY --from=build /usr/src/app/package*.json ./
 
 # Start
-CMD ["npm", "start"]
+CMD ["tsc","&&","node","build/dist/index.js"]

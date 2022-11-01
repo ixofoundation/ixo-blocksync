@@ -1,4 +1,82 @@
 -- CreateTable
+CREATE TABLE "IID" (
+    "id" TEXT NOT NULL,
+    "versionId" TEXT NOT NULL,
+    "updated" TIMESTAMP(3) NOT NULL,
+    "created" TIMESTAMP(3) NOT NULL,
+    "deactivated" BOOLEAN,
+    "entityType" TEXT,
+    "startDate" TIMESTAMP(3),
+    "endDate" TIMESTAMP(3),
+    "status" INTEGER,
+    "stage" TEXT,
+    "relayerNode" TEXT,
+    "verifiableCredential" TEXT,
+    "credentials" TEXT[],
+    "Controller" TEXT[],
+    "Context" JSONB[],
+
+    CONSTRAINT "IID_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "VerificationMethod" (
+    "id" TEXT NOT NULL,
+    "iid" TEXT NOT NULL,
+    "relationships" TEXT[],
+    "type" TEXT NOT NULL,
+    "controller" TEXT NOT NULL,
+    "verificationMaterial" TEXT NOT NULL,
+
+    CONSTRAINT "VerificationMethod_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Service" (
+    "id" TEXT NOT NULL,
+    "iid" TEXT NOT NULL,
+    "type" TEXT NOT NULL,
+    "serviceEndpoint" TEXT NOT NULL,
+
+    CONSTRAINT "Service_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "AccordedRight" (
+    "id" TEXT NOT NULL,
+    "iid" TEXT NOT NULL,
+    "type" TEXT NOT NULL,
+    "mechanism" TEXT NOT NULL,
+    "service" TEXT NOT NULL,
+
+    CONSTRAINT "AccordedRight_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "LinkedResource" (
+    "id" TEXT NOT NULL,
+    "iid" TEXT NOT NULL,
+    "type" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "mediaType" TEXT NOT NULL,
+    "serviceEndpoint" TEXT NOT NULL,
+    "proof" TEXT NOT NULL,
+    "encrypted" TEXT NOT NULL,
+    "right" TEXT NOT NULL,
+
+    CONSTRAINT "LinkedResource_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "LinkedEntity" (
+    "id" TEXT NOT NULL,
+    "iid" TEXT NOT NULL,
+    "relationship" TEXT NOT NULL,
+
+    CONSTRAINT "LinkedEntity_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "DID" (
     "did" TEXT NOT NULL,
     "publicKey" TEXT NOT NULL,
@@ -33,17 +111,28 @@ CREATE TABLE "PriceEntry" (
     "id" SERIAL NOT NULL,
     "bondDid" TEXT NOT NULL,
     "time" TIMESTAMP(3) NOT NULL,
-    "denom" TEXT,
+    "denom" TEXT NOT NULL,
     "price" DECIMAL(65,30) NOT NULL,
 
     CONSTRAINT "PriceEntry_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
+CREATE TABLE "BondBuy" (
+    "id" SERIAL NOT NULL,
+    "bondDid" TEXT NOT NULL,
+    "buyerDid" TEXT NOT NULL,
+    "amount" TEXT NOT NULL,
+    "maxPrices" TEXT NOT NULL,
+
+    CONSTRAINT "BondBuy_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "AlphaChange" (
     "id" SERIAL NOT NULL,
     "bondDid" TEXT NOT NULL,
-    "rawValue" TEXT NOT NULL,
+    "rawValue" JSONB,
     "height" TEXT NOT NULL,
     "timestamp" TEXT NOT NULL,
 
@@ -54,7 +143,7 @@ CREATE TABLE "AlphaChange" (
 CREATE TABLE "OutcomePayment" (
     "id" SERIAL NOT NULL,
     "bondDid" TEXT NOT NULL,
-    "rawValue" TEXT NOT NULL,
+    "rawValue" JSONB,
     "senderDid" TEXT NOT NULL,
     "amount" TEXT NOT NULL,
     "height" TEXT NOT NULL,
@@ -67,8 +156,8 @@ CREATE TABLE "OutcomePayment" (
 CREATE TABLE "ReserveWithdrawal" (
     "id" SERIAL NOT NULL,
     "bondDid" TEXT NOT NULL,
-    "rawValue" TEXT NOT NULL,
-    "transaction" TEXT NOT NULL,
+    "rawValue" JSONB,
+    "transaction" JSONB,
     "withdrawerDid" TEXT NOT NULL,
     "height" TEXT NOT NULL,
     "timestamp" TEXT NOT NULL,
@@ -80,24 +169,13 @@ CREATE TABLE "ReserveWithdrawal" (
 CREATE TABLE "ShareWithdrawal" (
     "id" SERIAL NOT NULL,
     "bondDid" TEXT NOT NULL,
-    "rawValue" TEXT NOT NULL,
-    "transaction" TEXT NOT NULL,
+    "rawValue" JSONB,
+    "transaction" JSONB,
     "recipientDid" TEXT NOT NULL,
     "height" TEXT NOT NULL,
     "timestamp" TEXT NOT NULL,
 
     CONSTRAINT "ShareWithdrawal_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "Transaction" (
-    "id" SERIAL NOT NULL,
-    "bondDid" TEXT NOT NULL,
-    "buyerDid" TEXT NOT NULL,
-    "amount" TEXT NOT NULL,
-    "maxPrices" TEXT NOT NULL,
-
-    CONSTRAINT "Transaction_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -122,7 +200,7 @@ CREATE TABLE "Event" (
 );
 
 -- CreateTable
-CREATE TABLE "Stat" (
+CREATE TABLE "Stats" (
     "id" SERIAL NOT NULL,
     "totalServiceProviders" INTEGER NOT NULL,
     "totalProjects" INTEGER NOT NULL,
@@ -135,7 +213,7 @@ CREATE TABLE "Stat" (
     "rejectedClaims" INTEGER NOT NULL,
     "claimLocations" TEXT[],
 
-    CONSTRAINT "Stat_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Stats_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -169,7 +247,6 @@ CREATE TABLE "Agent" (
     "agentDid" TEXT NOT NULL,
     "projectDid" TEXT NOT NULL,
     "status" TEXT NOT NULL,
-    "kyc" BOOLEAN,
     "role" TEXT NOT NULL,
 
     CONSTRAINT "Agent_pkey" PRIMARY KEY ("agentDid")
@@ -179,34 +256,72 @@ CREATE TABLE "Agent" (
 CREATE TABLE "Claim" (
     "claimId" TEXT NOT NULL,
     "projectDid" TEXT NOT NULL,
-    "date" TIMESTAMP(3) NOT NULL,
-    "location" TEXT[],
+    "claimTemplateId" TEXT NOT NULL,
     "status" TEXT NOT NULL,
-    "saId" TEXT NOT NULL,
-    "eaId" TEXT,
 
     CONSTRAINT "Claim_pkey" PRIMARY KEY ("claimId")
 );
 
 -- CreateTable
-CREATE TABLE "BlockTransaction" (
+CREATE TABLE "Transaction" (
     "id" SERIAL NOT NULL,
     "blockHeight" INTEGER NOT NULL,
-    "msg" JSONB,
+    "type" TEXT NOT NULL,
+    "from" TEXT,
+    "value" JSONB,
     "fee" JSONB,
     "signatures" JSONB,
     "memo" TEXT NOT NULL,
     "timeoutHeight" TEXT NOT NULL,
 
-    CONSTRAINT "BlockTransaction_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Transaction_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "BlockTransactionHeight" (
-    "id" SERIAL NOT NULL,
-    "blockHeight" INTEGER NOT NULL,
+CREATE TABLE "Block" (
+    "height" INTEGER NOT NULL,
+    "hash" TEXT NOT NULL,
+    "num_txs" INTEGER NOT NULL DEFAULT 0,
+    "total_gas" INTEGER NOT NULL DEFAULT 0,
+    "proposer_address" TEXT,
+    "timestamp" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "BlockTransactionHeight_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Block_pkey" PRIMARY KEY ("height")
+);
+
+-- CreateTable
+CREATE TABLE "WasmCode" (
+    "code_id" INTEGER NOT NULL,
+    "creator" TEXT NOT NULL DEFAULT '',
+    "creation_time" TEXT NOT NULL DEFAULT '',
+    "height" INTEGER NOT NULL,
+
+    CONSTRAINT "WasmCode_pkey" PRIMARY KEY ("code_id")
+);
+
+-- CreateTable
+CREATE TABLE "WasmContract" (
+    "address" TEXT NOT NULL,
+    "code_id" INTEGER NOT NULL,
+    "creator" TEXT NOT NULL DEFAULT '',
+    "admin" TEXT NOT NULL DEFAULT '',
+    "label" TEXT NOT NULL DEFAULT '',
+    "creation_time" TEXT NOT NULL DEFAULT '',
+    "height" INTEGER NOT NULL,
+    "json" JSONB DEFAULT '{}',
+
+    CONSTRAINT "WasmContract_pkey" PRIMARY KEY ("address")
+);
+
+-- CreateTable
+CREATE TABLE "ExecMsg" (
+    "id" SERIAL NOT NULL,
+    "sender" TEXT NOT NULL,
+    "address" TEXT NOT NULL,
+    "funds" JSONB,
+    "json" JSONB,
+
+    CONSTRAINT "ExecMsg_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -221,11 +336,47 @@ CREATE INDEX "Event_type_idx" ON "Event"("type");
 -- CreateIndex
 CREATE INDEX "Project_projectDid_idx" ON "Project"("projectDid");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "Block_hash_key" ON "Block"("hash");
+
+-- CreateIndex
+CREATE INDEX "Block_hash_idx" ON "Block"("hash");
+
+-- CreateIndex
+CREATE INDEX "Block_proposer_address_idx" ON "Block"("proposer_address");
+
+-- CreateIndex
+CREATE INDEX "WasmCode_creator_idx" ON "WasmCode"("creator");
+
+-- CreateIndex
+CREATE INDEX "WasmContract_code_id_idx" ON "WasmContract"("code_id");
+
+-- CreateIndex
+CREATE INDEX "WasmContract_creator_idx" ON "WasmContract"("creator");
+
+-- AddForeignKey
+ALTER TABLE "VerificationMethod" ADD CONSTRAINT "VerificationMethod_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Service" ADD CONSTRAINT "Service_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "AccordedRight" ADD CONSTRAINT "AccordedRight_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "LinkedResource" ADD CONSTRAINT "LinkedResource_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "LinkedEntity" ADD CONSTRAINT "LinkedEntity_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
 -- AddForeignKey
 ALTER TABLE "Credential" ADD CONSTRAINT "Credential_did_fkey" FOREIGN KEY ("did") REFERENCES "DID"("did") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "PriceEntry" ADD CONSTRAINT "PriceEntry_bondDid_fkey" FOREIGN KEY ("bondDid") REFERENCES "Bond"("bondDid") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "BondBuy" ADD CONSTRAINT "BondBuy_bondDid_fkey" FOREIGN KEY ("bondDid") REFERENCES "Bond"("bondDid") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "AlphaChange" ADD CONSTRAINT "AlphaChange_bondDid_fkey" FOREIGN KEY ("bondDid") REFERENCES "Bond"("bondDid") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -238,9 +389,6 @@ ALTER TABLE "ReserveWithdrawal" ADD CONSTRAINT "ReserveWithdrawal_bondDid_fkey" 
 
 -- AddForeignKey
 ALTER TABLE "ShareWithdrawal" ADD CONSTRAINT "ShareWithdrawal_bondDid_fkey" FOREIGN KEY ("bondDid") REFERENCES "Bond"("bondDid") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Transaction" ADD CONSTRAINT "Transaction_bondDid_fkey" FOREIGN KEY ("bondDid") REFERENCES "Bond"("bondDid") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Agent" ADD CONSTRAINT "Agent_projectDid_fkey" FOREIGN KEY ("projectDid") REFERENCES "Project"("projectDid") ON DELETE RESTRICT ON UPDATE CASCADE;

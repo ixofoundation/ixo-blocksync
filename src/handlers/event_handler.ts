@@ -1,19 +1,32 @@
 import { prisma } from "../prisma/prisma_client";
-import { io } from "../server";
-import { IEvent } from "../prisma/interface_models/Event";
+import { Prisma } from "@prisma/client";
 
-export const createEvent = async (eventDoc: IEvent) => {
+export const createEvent = async (
+    eventDoc: Prisma.EventUncheckedCreateInput,
+) => {
     try {
         const res = await prisma.event.create({ data: eventDoc });
-        io.emit("Event Created", res);
+        return res;
     } catch (error) {
         console.log(error);
         return;
-    };
+    }
 };
 
-export const getEventsByType = async (type: string) => {
-    return prisma.event.findMany({
-        where: { type: type },
-    });
+export const getEventsByType = async (
+    type: string,
+    page?: string,
+    size?: string,
+) => {
+    if (page && size) {
+        return prisma.event.findMany({
+            where: { type: type },
+            skip: Number(size) * (Number(page) - 1),
+            take: Number(size),
+        });
+    } else {
+        return prisma.event.findMany({
+            where: { type: type },
+        });
+    }
 };

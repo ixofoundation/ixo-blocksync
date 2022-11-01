@@ -10,6 +10,76 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model IID {
+  id                   String               @id
+  versionId            String               @default(uuid())
+  updated              DateTime
+  created              DateTime
+  deactivated          Boolean?
+  entityType           String?
+  startDate            DateTime?
+  endDate              DateTime?
+  status               Int?
+  stage                String?
+  relayerNode          String?
+  verifiableCredential String?
+  credentials          String[]
+  Controller           String[]
+  Context              Json[]
+  VerificationMethod   VerificationMethod[]
+  Service              Service[]
+  AccordedRight        AccordedRight[]
+  LinkedResource       LinkedResource[]
+  LinkedEntity         LinkedEntity[]
+}
+
+model VerificationMethod {
+  id                   String   @id
+  IID                  IID      @relation(fields: [iid], references: [id])
+  iid                  String
+  relationships        String[]
+  type                 String
+  controller           String
+  verificationMaterial String
+}
+
+model Service {
+  id              String @id
+  IID             IID    @relation(fields: [iid], references: [id])
+  iid             String
+  type            String
+  serviceEndpoint String
+}
+
+model AccordedRight {
+  id        String @id
+  IID       IID    @relation(fields: [iid], references: [id])
+  iid       String
+  type      String
+  mechanism String
+  service   String
+}
+
+model LinkedResource {
+  id              String @id
+  IID             IID    @relation(fields: [iid], references: [id])
+  iid             String
+  type            String
+  description     String
+  mediaType       String
+  serviceEndpoint String
+  proof           String
+  encrypted       String
+  right           String
+}
+
+model LinkedEntity {
+  id           String @id
+  IID          IID    @relation(fields: [iid], references: [id])
+  iid          String
+  relationship String
+}
+
 model DID {
   did        String       @id
   publicKey  String
@@ -35,7 +105,7 @@ model Bond {
   creatorDid        String
   PriceEntry        PriceEntry[]
   AlphaChange       AlphaChange[]
-  Transaction       Transaction[]
+  BondBuy           BondBuy[]
   ShareWithdrawal   ShareWithdrawal[]
   ReserveWithdrawal ReserveWithdrawal[]
   OutcomePayment    OutcomePayment[]
@@ -46,15 +116,24 @@ model PriceEntry {
   bond    Bond     @relation(fields: [bondDid], references: [bondDid])
   bondDid String
   time    DateTime
-  denom   String?
+  denom   String
   price   Decimal
+}
+
+model BondBuy {
+  id        Int    @id @default(autoincrement())
+  bond      Bond   @relation(fields: [bondDid], references: [bondDid])
+  bondDid   String
+  buyerDid  String
+  amount    String
+  maxPrices String
 }
 
 model AlphaChange {
   id        Int    @id @default(autoincrement())
   bond      Bond   @relation(fields: [bondDid], references: [bondDid])
   bondDid   String
-  rawValue  String
+  rawValue  Json?
   height    String
   timestamp String
 }
@@ -63,7 +142,7 @@ model OutcomePayment {
   id        Int    @id @default(autoincrement())
   bond      Bond   @relation(fields: [bondDid], references: [bondDid])
   bondDid   String
-  rawValue  String
+  rawValue  Json?
   senderDid String
   amount    String
   height    String
@@ -74,8 +153,8 @@ model ReserveWithdrawal {
   id            Int    @id @default(autoincrement())
   bond          Bond   @relation(fields: [bondDid], references: [bondDid])
   bondDid       String
-  rawValue      String
-  transaction   String
+  rawValue      Json?
+  transaction   Json?
   withdrawerDid String
   height        String
   timestamp     String
@@ -85,20 +164,11 @@ model ShareWithdrawal {
   id           Int    @id @default(autoincrement())
   bond         Bond   @relation(fields: [bondDid], references: [bondDid])
   bondDid      String
-  rawValue     String
-  transaction  String
+  rawValue     Json?
+  transaction  Json?
   recipientDid String
   height       String
   timestamp    String
-}
-
-model Transaction {
-  id        Int    @id @default(autoincrement())
-  bond      Bond   @relation(fields: [bondDid], references: [bondDid])
-  bondDid   String
-  buyerDid  String
-  amount    String
-  maxPrices String
 }
 
 model Chain {
@@ -120,7 +190,7 @@ model Event {
   @@index([type])
 }
 
-model Stat {
+model Stats {
   id                    Int      @id @default(autoincrement())
   totalServiceProviders Int
   totalProjects         Int
@@ -162,36 +232,72 @@ model Project {
 }
 
 model Agent {
-  agentDid   String   @id
-  project    Project  @relation(fields: [projectDid], references: [projectDid])
+  agentDid   String  @id
+  project    Project @relation(fields: [projectDid], references: [projectDid])
   projectDid String
   status     String
-  kyc        Boolean?
   role       String
 }
 
 model Claim {
-  claimId    String   @id
-  project    Project  @relation(fields: [projectDid], references: [projectDid])
-  projectDid String
-  date       DateTime
-  location   String[]
-  status     String
-  saId       String
-  eaId       String?
+  claimId         String  @id
+  project         Project @relation(fields: [projectDid], references: [projectDid])
+  projectDid      String
+  claimTemplateId String
+  status          String
 }
 
-model BlockTransaction {
-  id            Int    @id @default(autoincrement())
+model Transaction {
+  id            Int     @id @default(autoincrement())
   blockHeight   Int
-  msg           Json?
+  type          String
+  from          String?
+  value         Json?
   fee           Json?
   signatures    Json?
   memo          String
   timeoutHeight String
 }
 
-model BlockTransactionHeight {
-  id          Int @id @default(autoincrement())
-  blockHeight Int
+model Block {
+  height           Int      @id
+  hash             String   @unique
+  num_txs          Int      @default(0)
+  total_gas        Int      @default(0)
+  proposer_address String?
+  timestamp        DateTime
+
+  @@index([hash])
+  @@index([proposer_address])
+}
+
+model WasmCode {
+  code_id       Int    @id
+  creator       String @default("")
+  creation_time String @default("")
+  height        Int
+
+  @@index([creator])
+}
+
+model WasmContract {
+  address       String @id
+  code_id       Int
+  creator       String @default("")
+  admin         String @default("")
+  label         String @default("")
+  creation_time String @default("")
+  height        Int
+  json          Json?  @default("{}")
+
+  @@index([code_id])
+  @@index([creator])
+}
+
+model ExecMsg {
+  id      Int    @id @default(autoincrement())
+  sender  String
+  address String
+  funds   Json?
+  json    Json?
 }
