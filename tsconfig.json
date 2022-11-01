@@ -18,7 +18,9 @@
         "noUnusedLocals": false,
         "experimentalDecorators": true,
         "resolveJsonModule": true,
-        "esModuleInterop": true
+        "esModuleInterop": true,
+        "strict": false,
+        "skipLibCheck": true
     },
-    "exclude": ["node_modules", "build", "docs", "src/seed"]
+    "exclude": ["node_modules", "build", "docs", "src/seed", "src/proto"]
 }
