@@ -64,7 +64,7 @@ services:
     params:
     storage:
       data: 
-        moutn: /var/lib/postgres
+        mount: /var/lib/postgres
     expose:
     - port: 5432 
       as: 5432
@@ -103,7 +103,23 @@ profiles:
             attributes:
               persistent: true
               class: beta2
-  placements:
+  placements:   #this sections needs to be configured
+    westcoast:    #example region
+      attributes: 
+        region: us-west #example region
+      pricing: 
+        blocksync-profile:
+          denom: #add token denom
+          amount: #add token amount
+        blocksync-grest-profile:
+          denom: #add token denom
+          amount: #add token amount
+        blocksync-qdb-profile:
+          denom: #add token denom
+          amount: #add token amount
+        blocksync-db-profile:
+          denom: #add token denom
+          amount: #add token amount
 deployment: 
   blocksync:
     akash:
