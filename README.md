@@ -57,6 +57,10 @@ docker build -t ixofoundation/ixo-blocksync:latest .
 docker compose up -d
 ```
 ---
+###Akash
+[![Akash](https://raw.githubusercontent.com/ixofoundation/ixo-blocksync/master/akash%20button.svg)](https://github.com/ixofoundation/ixo-blocksync/blob/master/akash.deploy.yaml) 
+
+---
 ### Seeding the Database with Previous MongoDB Data
 - Export all collections as JSON from the block-sync MongoDB database
 - Place the resulting JSON files within the `src/seed/json_exports` directory
