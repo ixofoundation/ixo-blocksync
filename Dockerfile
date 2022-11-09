@@ -20,4 +20,4 @@ COPY --from=build /usr/src/app/node_modules/ ./node_modules
 COPY --from=build /usr/src/app/package*.json ./
 
 # Start
-CMD ["tsc","&&","node","build/dist/index.js"]
+CMD ["npx tsc","&&","node","build/dist/index.js"]
