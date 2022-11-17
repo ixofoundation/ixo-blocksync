@@ -15,13 +15,12 @@ export const startSync = async () => {
 
     while (syncing) {
         try {
+            const block = await Proto.getBlockbyHeight(currentBlock);
             const txsEvent = await Proto.getTxsEvent(currentBlock);
-            if (txsEvent) {
-                const block = await Proto.getBlockbyHeight(currentBlock);
-                if (block) {
-                    await blockQueue.add("Blocks", { block, txsEvent });
-                    currentBlock++;
-                }
+            const bondsInfo = await Proto.getBondsInfo();
+            if (block && txsEvent && bondsInfo) {
+                await blockQueue.add("Blocks", { block, txsEvent, bondsInfo });
+                currentBlock++;
             } else {
                 await sleep(20000);
             }

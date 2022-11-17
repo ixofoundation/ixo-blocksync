@@ -1,4 +1,5 @@
 import { createQueryClient, createRegistry } from "@ixo/impactxclient-sdk";
+import { writeFileSync } from "fs";
 import Long from "long";
 import { RPC } from "./secrets";
 
@@ -65,13 +66,10 @@ export const getTxsEvent = async (height: number) => {
     }
 };
 
-export const getBondsInfo = async (height: number) => {
+export const getBondsInfo = async () => {
     try {
         const client = await createQueryClient(RPC);
-        const res = await client.ixo.bonds.v1beta1.bondsDetailed(
-            // {height: Long.fromNumber(Number(height))}
-            "1686753",
-        );
+        const res = await client.ixo.bonds.v1beta1.bondsDetailed();
         return res;
     } catch (error) {
         console.log(error);

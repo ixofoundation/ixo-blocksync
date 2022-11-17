@@ -1,5 +1,4 @@
 import * as Secrets from "../util/secrets";
-import * as Connection from "../util/connection";
 import * as CosmosHandler from "../handlers/block_handler";
 import * as TransactionSyncHandler from "../sync_handlers/transaction_sync_handler";
 import * as BlockSyncHandler from "../sync_handlers/block_sync_handler";
@@ -12,6 +11,7 @@ import { restartSync } from "./sync_blocks";
 import { getTimestamp, Uint8ArrayToJS } from "../util/proto";
 import { GetBlockByHeightResponse } from "@ixo/impactxclient-sdk/types/codegen/cosmos/base/tendermint/v1beta1/query";
 import { GetTxsEventResponse } from "@ixo/impactxclient-sdk/types/codegen/cosmos/tx/v1beta1/service";
+import { QueryBondsDetailedResponse } from "@ixo/impactxclient-sdk/types/codegen/ixo/bonds/v1beta1/query";
 
 const connection = {
     host: Secrets.REDIS_HOST,
@@ -33,6 +33,8 @@ const worker = new Worker(
         const txsEvent: GetTxsEventResponse = job.data.txsEvent;
         const transactions = txsEvent.txs;
         const events = txsEvent.txResponses[0].events;
+
+        const bondsInfo: QueryBondsDetailedResponse = job.data.bondsInfo;
 
         const blockExists = await CosmosHandler.isBlockSynced(blockHeight);
         if (blockExists) {
@@ -57,9 +59,8 @@ const worker = new Worker(
 
         await EventSyncHandler.syncEvents(events, blockHeight, timestamp);
 
-        const bondsInfo = await Connection.getBondsInfo(blockHeight);
-        if (bondsInfo.result) {
-            await BondSyncHandler.syncBondsInfo(bondsInfo.result, timestamp);
+        if (bondsInfo) {
+            await BondSyncHandler.syncBondsInfo(bondsInfo, timestamp);
         }
 
         await CosmosHandler.createBlock(
