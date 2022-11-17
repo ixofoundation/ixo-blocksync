@@ -25,8 +25,12 @@ const worker = new Worker(
     async (job) => {
         const block: GetBlockByHeightResponse = job.data.block;
         const blockHeight = Number(block.block?.header?.height.low);
-        //@ts-ignore
-        const timestamp = getTimestamp(block.block?.header?.time);
+        const timestamp = getTimestamp({
+            //@ts-ignore
+            seconds: block.block?.header?.time?.seconds.low,
+            //@ts-ignore
+            nanos: block.block?.header?.time?.nanos,
+        });
         //@ts-ignore
         const blockHash = Uint8ArrayToJS(block.blockId?.hash);
 
