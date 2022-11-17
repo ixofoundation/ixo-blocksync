@@ -1,24 +1,31 @@
+import { GetBlockByHeightResponse } from "@ixo/impactxclient-sdk/types/codegen/cosmos/base/tendermint/v1beta1/query";
+import { GetTxsEventResponse } from "@ixo/impactxclient-sdk/types/codegen/cosmos/tx/v1beta1/service";
 import { prisma } from "../prisma/prisma_client";
+import { Uint8ArrayToJS } from "../util/proto";
 
 export const createBlock = async (
+    blockHeight: number,
+    timestamp: Date,
     blockHash: string,
-    block: any,
-    blockResult: any,
+    block: GetBlockByHeightResponse,
+    txsEvent: GetTxsEventResponse,
 ) => {
     try {
         let total_gas = 0;
-        if (blockResult.txs_results) {
-            blockResult.txs_results.forEach((tx: any) => {
-                total_gas += parseInt(tx.gas_used);
-            });
-        }
+        txsEvent.txResponses.forEach((txRes) => {
+            total_gas += txRes.gasUsed.low;
+        });
+        const proposer_address = Uint8ArrayToJS(
+            //@ts-ignore
+            block.block?.header?.proposerAddress,
+        );
         const blockDoc = {
-            height: parseInt(block.header.height),
+            height: blockHeight,
             hash: blockHash,
-            num_txs: block.data.txs.length,
+            num_txs: txsEvent.txs.length,
             total_gas: total_gas,
-            proposer_address: block.header.proposer_address,
-            timestamp: new Date(Date.parse(block.header.time)),
+            proposer_address: proposer_address,
+            timestamp: timestamp,
         };
         const res = await prisma.block.create({ data: blockDoc });
         return res;
@@ -33,6 +40,7 @@ export const getLastSyncedBlock = async () => {
         orderBy: {
             height: "desc",
         },
+        take: 1,
     });
 };
 

@@ -1,4 +1,3 @@
-import * as Connection from "../util/connection";
 import * as ProjectHandler from "../handlers/project_handler";
 import * as StatHandler from "../handlers/stats_handler";
 import * as IidHandler from "../handlers/iid_handler";
@@ -8,16 +7,21 @@ import * as WasmHandler from "../handlers/wasm_handler";
 import { MsgTypes } from "../types/Msg";
 import * as ProjectTypes from "../types/Project";
 import * as IidTypes from "../types/IID";
+import { Tx } from "@ixo/impactxclient-sdk/types/codegen/cosmos/tx/v1beta1/tx";
+import { GetTxsEventResponse } from "@ixo/impactxclient-sdk/types/codegen/cosmos/tx/v1beta1/service";
+import { decode } from "../util/proto";
 
 export const syncBlock = async (
-    transactions: any,
+    transactions: Tx[],
     blockHeight: string,
     timestamp: string,
-    blockResult: any,
+    txsEvent: GetTxsEventResponse,
 ) => {
-    transactions.forEach(async (tx: any) => {
-        const transaction = await Connection.decodeTx(tx);
-        const msg = transaction.msg[0];
+    transactions.forEach(async (tx) => {
+        const msg = {
+            type: tx.body?.messages[0].typeUrl,
+            value: await decode(tx.body?.messages[0]),
+        };
         const value = msg.value;
         const type = msg.type;
 
@@ -185,30 +189,30 @@ export const syncBlock = async (
                     timestamp: timestamp,
                 });
                 break;
-            case MsgTypes.withdrawShare:
-                const sTx = blockResult.txs_results[0];
-                sTx.log = JSON.parse(sTx.log);
-                await BondHandler.createShareWithdrawal({
-                    rawValue: msg,
-                    transaction: sTx,
-                    recipientDid: value.recipient_did,
-                    bondDid: value.bond_did,
-                    height: blockHeight,
-                    timestamp: timestamp,
-                });
-                break;
-            case MsgTypes.withdrawReserve:
-                const rTx = blockResult.txs_results[0];
-                rTx.log = JSON.parse(rTx.log);
-                await BondHandler.createReserveWithdrawal({
-                    rawValue: msg,
-                    transaction: rTx,
-                    withdrawerDid: value.withdrawer_did,
-                    bondDid: value.bond_did,
-                    height: blockHeight,
-                    timestamp: timestamp,
-                });
-                break;
+            // case MsgTypes.withdrawShare:
+            //     const sTx = blockResult.txs_results[0];
+            //     sTx.log = JSON.parse(sTx.log);
+            //     await BondHandler.createShareWithdrawal({
+            //         rawValue: msg,
+            //         transaction: sTx,
+            //         recipientDid: value.recipient_did,
+            //         bondDid: value.bond_did,
+            //         height: blockHeight,
+            //         timestamp: timestamp,
+            //     });
+            //     break;
+            // case MsgTypes.withdrawReserve:
+            //     const rTx = blockResult.txs_results[0];
+            //     rTx.log = JSON.parse(rTx.log);
+            //     await BondHandler.createReserveWithdrawal({
+            //         rawValue: msg,
+            //         transaction: rTx,
+            //         withdrawerDid: value.withdrawer_did,
+            //         bondDid: value.bond_did,
+            //         height: blockHeight,
+            //         timestamp: timestamp,
+            //     });
+            //     break;
             case MsgTypes.makeOutcomePayment:
                 await BondHandler.createOutcomePayment({
                     rawValue: msg,

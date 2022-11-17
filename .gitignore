@@ -68,3 +68,8 @@ typings/
 scratch.json
 
 /data
+
+block.json
+blockEvent.json
+blockRes.json
+blockTx.json

@@ -2,7 +2,7 @@ require("log-timestamp");
 
 import { app } from "./app";
 import { Chain } from "@prisma/client";
-import * as Connection from "./util/connection";
+import * as Proto from "./util/proto";
 import * as StatsHandler from "./handlers/stats_handler";
 import * as ChainHandler from "./handlers/chain_handler";
 import * as SyncBlocks from "./sync/sync_blocks";
@@ -26,17 +26,20 @@ const seedChain = async () => {
     if (existingChain) {
         currentChain = existingChain;
     } else {
-        const res = await Connection.getLastBlock();
-        const newChain = await ChainHandler.createChain({
-            chainId: res.block.header.chain_id,
-            blockHeight: 1,
-        });
-        currentChain = newChain;
+        const res = await Proto.getLatestBlock();
+        if (res?.block?.header?.chainId) {
+            const newChain = await ChainHandler.createChain({
+                chainId: res.block?.header?.chainId,
+                blockHeight: 1,
+            });
+            currentChain = newChain;
+        } else {
+            console.log("No Chain Found on RPC Endpoint");
+            process.exit();
+        }
     }
 };
 seedChain();
-
-Connection.testConnection();
 
 SyncBlocks.startSync();
 

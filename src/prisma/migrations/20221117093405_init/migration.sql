@@ -192,8 +192,6 @@ CREATE TABLE "Event" (
     "type" TEXT NOT NULL,
     "attributes" JSONB[],
     "blockHeight" INTEGER NOT NULL,
-    "eventSource" TEXT NOT NULL,
-    "eventIndex" INTEGER[],
     "timestamp" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Event_pkey" PRIMARY KEY ("id")

@@ -16,11 +16,12 @@
     "author": "Nicolaas Vercuiel, Casey Pazera, Andrew Margetts",
     "license": "MIT",
     "dependencies": {
-        "@ixo/impactxclient-sdk": "^0.0.2",
+        "@ixo/impactxclient-sdk": "^0.0.5",
         "@prisma/client": "^4.4.0",
         "@sentry/node": "^6.19.7",
         "@sentry/tracing": "^6.19.7",
         "@types/lodash.memoize": "^4.1.7",
+        "@types/ws": "^8.5.3",
         "apisauce": "^2.1.6",
         "axios": "^0.21.4",
         "axios-retry": "^3.3.1",
@@ -54,6 +55,7 @@
         "typedoc": "^0.23.19",
         "typescript": "^4.8.4",
         "winston": "^2.4.6",
+        "ws": "^8.11.0",
         "xmlhttprequest": "^1.8.0"
     },
     "devDependencies": {

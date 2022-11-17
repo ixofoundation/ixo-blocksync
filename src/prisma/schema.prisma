@@ -183,8 +183,6 @@ model Event {
   type        String
   attributes  Json[]
   blockHeight Int
-  eventSource String
-  eventIndex  Int[]
   timestamp   DateTime
 
   @@index([type])
