@@ -259,7 +259,7 @@ model Transaction {
 
 model Block {
   height           Int      @id
-  hash             String   @unique
+  hash             String
   num_txs          Int      @default(0)
   total_gas        Int      @default(0)
   proposer_address String?

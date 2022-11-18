@@ -335,9 +335,6 @@ CREATE INDEX "Event_type_idx" ON "Event"("type");
 CREATE INDEX "Project_projectDid_idx" ON "Project"("projectDid");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Block_hash_key" ON "Block"("hash");
-
--- CreateIndex
 CREATE INDEX "Block_hash_idx" ON "Block"("hash");
 
 -- CreateIndex

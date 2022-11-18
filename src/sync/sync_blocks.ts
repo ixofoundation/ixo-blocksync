@@ -16,7 +16,6 @@ export const startSync = async () => {
     while (syncing) {
         try {
             const block = await Proto.getBlockbyHeight(currentBlock);
-            console.log(block?.block?.header?.height.low);
             const txsEvent = await Proto.getTxsEvent(currentBlock);
             const bondsInfo = await Proto.getBondsInfo();
             if (block !== undefined && txsEvent !== undefined) {
