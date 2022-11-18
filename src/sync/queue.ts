@@ -60,7 +60,6 @@ const worker = new Worker(
                     transactions,
                     String(blockHeight),
                     String(timestamp),
-                    txsEvent,
                 );
             }
 

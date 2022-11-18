@@ -8,14 +8,12 @@ import { MsgTypes } from "../types/Msg";
 import * as ProjectTypes from "../types/Project";
 import * as IidTypes from "../types/IID";
 import { Tx } from "@ixo/impactxclient-sdk/types/codegen/cosmos/tx/v1beta1/tx";
-import { GetTxsEventResponse } from "@ixo/impactxclient-sdk/types/codegen/cosmos/tx/v1beta1/service";
 import { decode } from "../util/proto";
 
 export const syncBlock = async (
     transactions: Tx[],
     blockHeight: string,
     timestamp: string,
-    txsEvent: GetTxsEventResponse,
 ) => {
     transactions.forEach(async (tx) => {
         const msg = {
@@ -181,38 +179,26 @@ export const syncBlock = async (
                     timestamp: timestamp,
                 });
                 break;
-            case MsgTypes.editAlphaSuccess:
-                await BondHandler.createAlphaChange({
-                    bondDid: value.bond_did,
+            case MsgTypes.withdrawShare:
+                await BondHandler.createShareWithdrawal({
                     rawValue: msg,
+                    transaction: value,
+                    recipientDid: value.recipient_did,
+                    bondDid: value.bond_did,
                     height: blockHeight,
                     timestamp: timestamp,
                 });
                 break;
-            // case MsgTypes.withdrawShare:
-            //     const sTx = blockResult.txs_results[0];
-            //     sTx.log = JSON.parse(sTx.log);
-            //     await BondHandler.createShareWithdrawal({
-            //         rawValue: msg,
-            //         transaction: sTx,
-            //         recipientDid: value.recipient_did,
-            //         bondDid: value.bond_did,
-            //         height: blockHeight,
-            //         timestamp: timestamp,
-            //     });
-            //     break;
-            // case MsgTypes.withdrawReserve:
-            //     const rTx = blockResult.txs_results[0];
-            //     rTx.log = JSON.parse(rTx.log);
-            //     await BondHandler.createReserveWithdrawal({
-            //         rawValue: msg,
-            //         transaction: rTx,
-            //         withdrawerDid: value.withdrawer_did,
-            //         bondDid: value.bond_did,
-            //         height: blockHeight,
-            //         timestamp: timestamp,
-            //     });
-            //     break;
+            case MsgTypes.withdrawReserve:
+                await BondHandler.createReserveWithdrawal({
+                    rawValue: msg,
+                    transaction: value,
+                    withdrawerDid: value.withdrawer_did,
+                    bondDid: value.bond_did,
+                    height: blockHeight,
+                    timestamp: timestamp,
+                });
+                break;
             case MsgTypes.makeOutcomePayment:
                 await BondHandler.createOutcomePayment({
                     rawValue: msg,

@@ -1,5 +1,4 @@
 import { createQueryClient, createRegistry } from "@ixo/impactxclient-sdk";
-import { writeFileSync } from "fs";
 import Long from "long";
 import { RPC } from "./secrets";
 
