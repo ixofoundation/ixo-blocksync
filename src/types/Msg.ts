@@ -1,6 +1,6 @@
 export enum MsgTypes {
-    createDid = "ixo.iid.v1beta1.MsgCreateIidDocument",
-    updateDid = "ixo.iid.v1beta1.MsgUpdateIidDocument",
+    createIid = "ixo.iid.v1beta1.MsgCreateIidDocument",
+    updateIid = "ixo.iid.v1beta1.MsgUpdateIidDocument",
     addVerification = "ixo.iid.v1beta1.MsgAddVerification",
     setVerificationRelationships = "ixo.iid.v1beta1.MsgSetVerificationRelationships",
     revokeVerification = "ixo.iid.v1beta1.MsgRevokeVerification",
@@ -15,8 +15,6 @@ export enum MsgTypes {
     addContext = "ixo.iid.v1beta1.MsgAddIidContext",
     deleteContext = "ixo.iid.v1beta1.MsgDeleteIidContext",
     updateMetadata = "ixo.iid.v1beta1.MsgUpdateIidMeta",
-    addDid = "did/AddDid",
-    addCredential = "did/AddCredential",
     createBond = "ixo.bonds.v1beta1.MsgCreateBond",
     buy = "ixo.bonds.v1beta1.MsgBuy",
     makeOutcomePayment = "ixo.bonds.v1beta1.MsgMakeOutcomePayment",

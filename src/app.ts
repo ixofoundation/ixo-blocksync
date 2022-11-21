@@ -8,7 +8,6 @@ import * as Sentry from "@sentry/node";
 import postgraphile from "postgraphile";
 
 import * as ProjectHandler from "./handlers/project_handler";
-import * as DidHandler from "./handlers/did_handler";
 import * as IidHandler from "./handlers/iid_handler";
 import * as StatHandler from "./handlers/stats_handler";
 import * as EventHandler from "./handlers/event_handler";
@@ -674,28 +673,6 @@ app.ws("/api/project/getProjectAccounts/:projectDid", async (ws, req, next) => {
                     req.params.projectDid,
                 );
             ws.send(JSON.stringify(projectAccounts));
-        } catch (error) {
-            next(error);
-        }
-    });
-});
-
-app.get(
-    "/api/did/getByDid/:did",
-    async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const did = await DidHandler.getDidByDid(req.params.did);
-            res.json(did);
-        } catch (error) {
-            next(error);
-        }
-    },
-);
-app.ws("/api/did/getByDid/:did", async (ws, req, next) => {
-    ws.on("message", async () => {
-        try {
-            const did = await DidHandler.getDidByDid(req.params.did);
-            ws.send(JSON.stringify(did));
         } catch (error) {
             next(error);
         }

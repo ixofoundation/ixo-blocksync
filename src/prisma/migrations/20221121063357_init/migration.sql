@@ -77,25 +77,6 @@ CREATE TABLE "LinkedEntity" (
 );
 
 -- CreateTable
-CREATE TABLE "DID" (
-    "did" TEXT NOT NULL,
-    "publicKey" TEXT NOT NULL,
-
-    CONSTRAINT "DID_pkey" PRIMARY KEY ("did")
-);
-
--- CreateTable
-CREATE TABLE "Credential" (
-    "id" SERIAL NOT NULL,
-    "did" TEXT NOT NULL,
-    "claimId" TEXT NOT NULL,
-    "claimKyc" BOOLEAN NOT NULL,
-    "issuer" TEXT NOT NULL,
-
-    CONSTRAINT "Credential_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "Bond" (
     "bondDid" TEXT NOT NULL,
     "token" TEXT NOT NULL,
@@ -323,9 +304,6 @@ CREATE TABLE "ExecMsg" (
 );
 
 -- CreateIndex
-CREATE INDEX "DID_did_idx" ON "DID"("did");
-
--- CreateIndex
 CREATE INDEX "Chain_chainId_idx" ON "Chain"("chainId");
 
 -- CreateIndex
@@ -363,9 +341,6 @@ ALTER TABLE "LinkedResource" ADD CONSTRAINT "LinkedResource_iid_fkey" FOREIGN KE
 
 -- AddForeignKey
 ALTER TABLE "LinkedEntity" ADD CONSTRAINT "LinkedEntity_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Credential" ADD CONSTRAINT "Credential_did_fkey" FOREIGN KEY ("did") REFERENCES "DID"("did") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "PriceEntry" ADD CONSTRAINT "PriceEntry_bondDid_fkey" FOREIGN KEY ("bondDid") REFERENCES "Bond"("bondDid") ON DELETE RESTRICT ON UPDATE CASCADE;

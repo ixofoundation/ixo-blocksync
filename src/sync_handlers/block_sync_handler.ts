@@ -1,7 +1,6 @@
 import * as ProjectHandler from "../handlers/project_handler";
 import * as StatHandler from "../handlers/stats_handler";
 import * as IidHandler from "../handlers/iid_handler";
-import * as DidHandler from "../handlers/did_handler";
 import * as BondHandler from "../handlers/bond_handler";
 import * as WasmHandler from "../handlers/wasm_handler";
 import { MsgTypes } from "../types/Msg";
@@ -9,6 +8,39 @@ import * as ProjectTypes from "../types/Project";
 import * as IidTypes from "../types/IID";
 import { Tx } from "@ixo/impactxclient-sdk/types/codegen/cosmos/tx/v1beta1/tx";
 import { decode } from "../util/proto";
+import {
+    MsgAddAccordedRight,
+    MsgAddIidContext,
+    MsgAddLinkedEntity,
+    MsgAddLinkedResource,
+    MsgAddService,
+    MsgAddVerification,
+    MsgCreateIidDocument,
+    MsgDeleteAccordedRight,
+    MsgDeleteIidContext,
+    MsgDeleteLinkedEntity,
+    MsgDeleteLinkedResource,
+    MsgDeleteService,
+    MsgRevokeVerification,
+    MsgSetVerificationRelationships,
+    MsgUpdateIidDocument,
+    MsgUpdateIidMeta,
+} from "@ixo/impactxclient-sdk/types/codegen/ixo/iid/v1beta1/tx";
+import {
+    MsgCreateAgent,
+    MsgCreateClaim,
+    MsgCreateEvaluation,
+    MsgUpdateAgent,
+    MsgUpdateProjectStatus,
+} from "@ixo/impactxclient-sdk/types/codegen/ixo/project/v1/tx";
+import {
+    MsgBuy,
+    MsgCreateBond,
+    MsgMakeOutcomePayment,
+    MsgSetNextAlpha,
+    MsgWithdrawReserve,
+    MsgWithdrawShare,
+} from "@ixo/impactxclient-sdk/types/codegen/ixo/bonds/v1beta1/tx";
 
 export const syncBlock = async (
     transactions: Tx[],
@@ -20,20 +52,19 @@ export const syncBlock = async (
             type: tx.body?.messages[0].typeUrl,
             value: await decode(tx.body?.messages[0]),
         };
-        const value = msg.value;
         const type = msg.type;
 
         switch (type) {
-            case MsgTypes.createDid:
-                const idocs = IidTypes.convertIID(value);
+            case MsgTypes.createIid:
+                const createIid: MsgCreateIidDocument = msg.value;
+                const idocs = IidTypes.convertIID(createIid);
                 await IidHandler.createIid(
                     {
-                        id: value.id,
-                        versionId: value.versionId,
+                        id: createIid.id,
                         updated: timestamp,
                         created: timestamp,
-                        Controller: value.controllers,
-                        Context: value.context,
+                        Controller: createIid.controllers,
+                        Context: JSON.stringify(createIid.context),
                     },
                     idocs.verificationMethodDocs,
                     idocs.serviceDocs,
@@ -42,108 +73,182 @@ export const syncBlock = async (
                     idocs.linkedEntityDocs,
                 );
                 break;
-            case MsgTypes.updateDid:
+            case MsgTypes.updateIid:
+                const updateIid: MsgUpdateIidDocument = msg.value;
                 await IidHandler.updateIid(
-                    value.id,
-                    value.controller,
+                    String(updateIid.doc?.id),
+                    updateIid.doc?.controller || [""],
                     timestamp,
                 );
                 break;
             case MsgTypes.addVerification:
+                const addVerification: MsgAddVerification = msg.value;
                 await IidHandler.addVerification(
                     {
-                        id: value.verification.method.id,
-                        iid: value.id,
-                        relationships: value.verification.relationships,
-                        type: value.verification.method.type,
-                        controller: value.verification.method.controller,
+                        id: String(addVerification.verification?.method?.id),
+                        iid: addVerification.id,
+                        relationships: addVerification.verification
+                            ?.relationships || [""],
+                        type: String(
+                            addVerification.verification?.method?.type,
+                        ),
+                        controller: String(
+                            addVerification.verification?.method?.controller,
+                        ),
                         verificationMaterial:
-                            value.verification.method.verificationMaterial,
+                            String(
+                                addVerification.verification?.method
+                                    ?.blockchainAccountID,
+                            ) ||
+                            String(
+                                addVerification.verification?.method
+                                    ?.publicKeyHex,
+                            ) ||
+                            String(
+                                addVerification.verification?.method
+                                    ?.publicKeyMultibase,
+                            ),
                     },
                     timestamp,
                 );
                 break;
             case MsgTypes.setVerificationRelationships:
+                const setVerificationRelationships: MsgSetVerificationRelationships =
+                    msg.value;
                 await IidHandler.setVerificationRelationships(
-                    value.method_id,
-                    value.relationships,
+                    setVerificationRelationships.methodId,
+                    setVerificationRelationships.relationships,
                     timestamp,
                 );
                 break;
             case MsgTypes.revokeVerification:
-                await IidHandler.revokeVerification(value.method_id, timestamp);
+                const revokeVerification: MsgRevokeVerification = msg.value;
+                await IidHandler.revokeVerification(
+                    revokeVerification.methodId,
+                    timestamp,
+                );
                 break;
             case MsgTypes.addService:
+                const addService: MsgAddService = msg.value;
                 await IidHandler.addService(
                     {
-                        id: value.service_data.id,
-                        iid: value.id,
-                        type: value.service_data.type,
-                        serviceEndpoint: value.service_data.serviceEndpoint,
+                        id: String(addService.serviceData?.id),
+                        iid: addService.id,
+                        type: String(addService.serviceData?.type),
+                        serviceEndpoint: String(
+                            addService.serviceData?.serviceEndpoint,
+                        ),
                     },
                     timestamp,
                 );
                 break;
             case MsgTypes.deleteService:
-                await IidHandler.deleteService(value.service_id, timestamp);
+                const deleteService: MsgDeleteService = msg.value;
+                await IidHandler.deleteService(
+                    deleteService.serviceId,
+                    timestamp,
+                );
                 break;
             case MsgTypes.addAccordedRight:
+                const addAccordedRight: MsgAddAccordedRight = msg.value;
                 await IidHandler.addAccordedRight(
                     {
-                        iid: value.id,
-                        ...value,
+                        iid: addAccordedRight.id,
+                        id: String(addAccordedRight.accordedRight?.id),
+                        type: String(addAccordedRight.accordedRight?.type),
+                        mechanism: String(
+                            addAccordedRight.accordedRight?.mechanism,
+                        ),
+                        service: String(
+                            addAccordedRight.accordedRight?.service,
+                        ),
                     },
                     timestamp,
                 );
                 break;
             case MsgTypes.deleteAccordedRight:
-                await IidHandler.deleteAccordedRight(value.right_id, timestamp);
+                const deleteAccordedRight: MsgDeleteAccordedRight = msg.value;
+                await IidHandler.deleteAccordedRight(
+                    deleteAccordedRight.rightId,
+                    timestamp,
+                );
                 break;
             case MsgTypes.addLinkedEntity:
+                const addLinkedEntity: MsgAddLinkedEntity = msg.value;
                 await IidHandler.addLinkedEntity(
                     {
-                        iid: value.id,
-                        ...value.linkedEntity,
+                        iid: addLinkedEntity.id,
+                        id: String(addLinkedEntity.linkedEntity?.id),
+                        relationship: String(
+                            addLinkedEntity.linkedEntity?.relationship,
+                        ),
                     },
                     timestamp,
                 );
                 break;
             case MsgTypes.deleteLinkedEntity:
-                await IidHandler.deleteLinkedEntity(value.entity_id, timestamp);
+                const deleteLinkedEntity: MsgDeleteLinkedEntity = msg.value;
+                await IidHandler.deleteLinkedEntity(
+                    deleteLinkedEntity.entityId,
+                    timestamp,
+                );
                 break;
             case MsgTypes.addLinkedResource:
+                const addLinkedResource: MsgAddLinkedResource = msg.value;
                 await IidHandler.addLinkedResource(
                     {
-                        iid: value.id,
-                        ...value.linkedResource,
+                        iid: addLinkedResource.id,
+                        id: String(addLinkedResource.linkedResource?.id),
+                        type: String(addLinkedResource.linkedResource?.type),
+                        description: String(
+                            addLinkedResource.linkedResource?.description,
+                        ),
+                        mediaType: String(
+                            addLinkedResource.linkedResource?.mediaType,
+                        ),
+                        serviceEndpoint: String(
+                            addLinkedResource.linkedResource?.serviceEndpoint,
+                        ),
+                        proof: String(addLinkedResource.linkedResource?.proof),
+                        encrypted: String(
+                            addLinkedResource.linkedResource?.encrypted,
+                        ),
+                        right: String(addLinkedResource.linkedResource?.right),
                     },
                     timestamp,
                 );
                 break;
             case MsgTypes.deleteLinkedResource:
+                const deleteLinkedResource: MsgDeleteLinkedResource = msg.value;
                 await IidHandler.deleteLinkedResource(
-                    value.resource_id,
+                    deleteLinkedResource.resourceId,
                     timestamp,
                 );
                 break;
             case MsgTypes.addContext:
+                const addContext: MsgAddIidContext = msg.value;
                 await IidHandler.addContext(
-                    { id: value.id, context: value.context },
+                    { id: addContext.id, context: addContext.context },
                     timestamp,
                 );
                 break;
             case MsgTypes.deleteContext:
+                const deleteContext: MsgDeleteIidContext = msg.value;
                 await IidHandler.deleteContext(
-                    value.id,
-                    value.contextKey,
+                    deleteContext.id,
+                    deleteContext.contextKey,
                     timestamp,
                 );
                 break;
             case MsgTypes.updateMetadata:
-                await IidHandler.updateMetadata(value.id, value.meta);
+                const updateMetadata: MsgUpdateIidMeta = msg.value;
+                await IidHandler.updateMetadata(
+                    updateMetadata.id,
+                    updateMetadata.meta,
+                );
                 break;
             case MsgTypes.createProject:
-                let projectDoc = value;
+                let projectDoc = msg.value;
                 StatHandler.updateAllStats(
                     MsgTypes.createProject,
                     "",
@@ -157,142 +262,139 @@ export const syncBlock = async (
                     pdocs.claimDocs,
                 );
                 break;
-            case MsgTypes.addDid:
-                await DidHandler.createDid({
-                    did: value.did,
-                    publicKey: value.pubKey,
-                });
-                break;
             case MsgTypes.buy:
+                const bondBuy: MsgBuy = msg.value;
                 await BondHandler.createTransaction({
-                    bondDid: value.bond_did,
-                    buyerDid: value.buyer_did,
-                    amount: value.amount.amount,
-                    maxPrices: value.max_prices[0].amount,
+                    bondDid: bondBuy.bondDid,
+                    buyerDid: bondBuy.buyerDid,
+                    amount: String(bondBuy.amount?.amount),
+                    maxPrices: bondBuy.maxPrices[0].amount,
                 });
                 break;
             case MsgTypes.setNextAlpha:
+                const setNextAlpha: MsgSetNextAlpha = msg.value;
                 await BondHandler.createAlphaChange({
-                    bondDid: value.bond_did,
+                    bondDid: setNextAlpha.bondDid,
                     rawValue: msg,
                     height: blockHeight,
                     timestamp: timestamp,
                 });
                 break;
             case MsgTypes.withdrawShare:
+                const withdrawShare: MsgWithdrawShare = msg.value;
                 await BondHandler.createShareWithdrawal({
                     rawValue: msg,
-                    transaction: value,
-                    recipientDid: value.recipient_did,
-                    bondDid: value.bond_did,
+                    transaction: JSON.stringify(withdrawShare),
+                    recipientDid: withdrawShare.recipientDid,
+                    bondDid: withdrawShare.bondDid,
                     height: blockHeight,
                     timestamp: timestamp,
                 });
                 break;
             case MsgTypes.withdrawReserve:
+                const withdrawReserve: MsgWithdrawReserve = msg.value;
                 await BondHandler.createReserveWithdrawal({
                     rawValue: msg,
-                    transaction: value,
-                    withdrawerDid: value.withdrawer_did,
-                    bondDid: value.bond_did,
+                    transaction: JSON.stringify(withdrawReserve),
+                    withdrawerDid: withdrawReserve.withdrawerDid,
+                    bondDid: withdrawReserve.bondDid,
                     height: blockHeight,
                     timestamp: timestamp,
                 });
                 break;
             case MsgTypes.makeOutcomePayment:
+                const makeOutcomePayment: MsgMakeOutcomePayment = msg.value;
                 await BondHandler.createOutcomePayment({
                     rawValue: msg,
-                    amount: value.amount,
-                    senderDid: value.sender_did,
+                    amount: makeOutcomePayment.amount,
+                    senderDid: makeOutcomePayment.senderDid,
                     height: blockHeight,
                     timestamp: timestamp,
-                    bondDid: value.bond_did,
+                    bondDid: makeOutcomePayment.bondDid,
                 });
                 break;
             case MsgTypes.createBond:
+                const createBond: MsgCreateBond = msg.value;
                 await BondHandler.createBond({
-                    bondDid: value.bond_did,
-                    token: value.token,
-                    name: value.name,
-                    description: value.description,
-                    creatorDid: value.creator_did,
+                    bondDid: createBond.bondDid,
+                    token: createBond.token,
+                    name: createBond.name,
+                    description: createBond.description,
+                    creatorDid: createBond.creatorDid,
                 });
                 break;
             case MsgTypes.createAgent:
+                const createAgent: MsgCreateAgent = msg.value;
                 await StatHandler.updateAllStats(
                     MsgTypes.createAgent,
-                    value.data.role,
+                    createAgent.data?.role,
                 );
                 await ProjectHandler.addAgent({
-                    agentDid: value.data.did,
-                    projectDid: value.projectDid,
-                    role: value.data.role,
+                    agentDid: String(createAgent.data?.agentDid),
+                    projectDid: createAgent.projectDid,
+                    role: String(createAgent.data?.role),
                     status: "0",
                 });
                 await ProjectHandler.updateAgentStats(
-                    value.projectDid,
+                    createAgent.projectDid,
                     "0",
-                    value.data.role,
+                    String(createAgent.data?.role),
                 );
                 break;
             case MsgTypes.updateAgent:
-                if (value.data.status === "1")
+                const updateAgent: MsgUpdateAgent = msg.value;
+                if (updateAgent.data?.status === "1")
                     await StatHandler.updateAllStats(
                         MsgTypes.updateAgent,
-                        value.data.role,
+                        updateAgent.data.role,
                     );
                 await ProjectHandler.updateAgentStatus(
-                    value.data.did,
-                    value.data.status,
+                    String(updateAgent.data?.did),
+                    String(updateAgent.data?.status),
                 );
                 await ProjectHandler.updateAgentStats(
-                    value.projectDid,
-                    value.data.status,
-                    value.data.role,
+                    updateAgent.projectDid,
+                    String(updateAgent.data?.status),
+                    String(updateAgent.data?.role),
                 );
                 break;
             case MsgTypes.createClaim:
+                const createClaim: MsgCreateClaim = msg.value;
                 await StatHandler.updateAllStats(MsgTypes.createClaim, "", "0");
                 await ProjectHandler.addClaim({
-                    claimId: value.data.claimID,
-                    claimTemplateId: value.data.claimTemplateID,
-                    projectDid: value.projectDid,
+                    claimId: String(createClaim.data?.claimId),
+                    claimTemplateId: String(createClaim.data?.claimTemplateId),
+                    projectDid: createClaim.projectDid,
                     status: "0",
                 });
                 break;
             case MsgTypes.evaluateClaim:
+                const evaluateClaim: MsgCreateEvaluation = msg.value;
                 await StatHandler.updateAllStats(
                     MsgTypes.evaluateClaim,
                     "",
-                    value.data.status,
+                    evaluateClaim.data?.status,
                 );
                 await ProjectHandler.updateClaimStatus(
-                    value.data.claimID,
-                    value.data.status,
+                    String(evaluateClaim.data?.claimId),
+                    String(evaluateClaim.data?.status),
                 );
                 await ProjectHandler.updateClaimStats(
-                    value.projectDid,
-                    value.data.status,
+                    evaluateClaim.projectDid,
+                    String(evaluateClaim.data?.status),
                 );
                 break;
-            case MsgTypes.addCredential:
-                await DidHandler.addCredential({
-                    did: value.credential.cliam.id,
-                    claimId: value.credential.claim.id,
-                    claimKyc: value.credential.claim.KYCValidated,
-                    issuer: value.credential.issuer,
-                });
-                break;
             case MsgTypes.updateProjectStatus:
+                const updateProjectStatus: MsgUpdateProjectStatus = msg.value;
                 await ProjectHandler.updateProjectStatus(
-                    value.projectDid,
-                    value.data.status.toUpperCase(),
+                    updateProjectStatus.projectDid,
+                    String(updateProjectStatus.data?.status.toUpperCase()),
                 );
                 break;
             case MsgTypes.updateProjectDoc:
                 await ProjectHandler.updateProject(
-                    value.projectDid,
-                    value.data,
+                    msg.value.projectDid,
+                    msg.value.data,
                 );
                 break;
             case MsgTypes.storeCode:

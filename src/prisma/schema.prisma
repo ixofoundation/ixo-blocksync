@@ -80,23 +80,6 @@ model LinkedEntity {
   relationship String
 }
 
-model DID {
-  did        String       @id
-  publicKey  String
-  Credential Credential[]
-
-  @@index([did])
-}
-
-model Credential {
-  id       Int     @id @default(autoincrement())
-  DID      DID     @relation(fields: [did], references: [did])
-  did      String
-  claimId  String
-  claimKyc Boolean
-  issuer   String
-}
-
 model Bond {
   bondDid           String              @id
   token             String
