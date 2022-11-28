@@ -12,6 +12,7 @@ import { getTimestamp, Uint8ArrayToJS } from "../util/proto";
 import { GetBlockByHeightResponse } from "@ixo/impactxclient-sdk/types/codegen/cosmos/base/tendermint/v1beta1/query";
 import { GetTxsEventResponse } from "@ixo/impactxclient-sdk/types/codegen/cosmos/tx/v1beta1/service";
 import { QueryBondsDetailedResponse } from "@ixo/impactxclient-sdk/types/codegen/ixo/bonds/v1beta1/query";
+import { io } from "../index";
 
 const connection = {
     host: Secrets.REDIS_HOST,
@@ -87,6 +88,8 @@ const worker = new Worker(
                 chainId: currentChain.chainId,
                 blockHeight: blockHeight,
             });
+
+            io.emit("Block Synced", { blockHeight, blockHash, timestamp });
         } catch (error) {
             console.log({ error });
         }

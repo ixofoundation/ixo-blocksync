@@ -1,6 +1,7 @@
 import { Tx } from "@ixo/impactxclient-sdk/types/codegen/cosmos/tx/v1beta1/tx";
 import { prisma } from "../prisma/prisma_client";
 import { decode, Uint8ArrayToJS } from "../util/proto";
+import { io } from "../index";
 
 export const syncTransactions = async (
     transactions: Tx[],
@@ -33,6 +34,17 @@ export const syncTransactions = async (
                 memo: memo,
                 timeoutHeight: timeoutHeight,
             },
+        });
+
+        io.emit("Transaction Synced", {
+            blockHeight,
+            type,
+            from,
+            value,
+            fee,
+            signatures,
+            memo,
+            timeoutHeight,
         });
     });
 };

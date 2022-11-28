@@ -1,6 +1,8 @@
 require("log-timestamp");
 
 import { app } from "./app";
+import http from "http";
+import { Server } from "socket.io";
 import { Chain } from "@prisma/client";
 import * as Proto from "./util/proto";
 import * as StatsHandler from "./handlers/stats_handler";
@@ -41,6 +43,16 @@ const seedChain = async () => {
 };
 seedChain();
 
+const server = http.createServer(app);
+export const io = new Server(server);
+
+server.listen(PORT, () => console.log(`Listening on ${PORT}`));
+
 SyncBlocks.startSync();
 
-app.listen(PORT, () => console.log(`Listening on ${PORT}`));
+io.on("connection", (socket) => {
+    console.log("User Connected");
+    socket.on("disconnect", () => {
+        console.log("User Disconnected");
+    });
+});
