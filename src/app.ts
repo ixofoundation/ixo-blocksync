@@ -336,6 +336,22 @@ app.get(
 );
 
 app.get(
+    "/api/project/getProjectsByCreatedBy/:createdBy",
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const project = await ProjectHandler.getProjectsByCreatedBy(
+                req.params.createdBy,
+                req.query.page ? String(req.query.page) : undefined,
+                req.query.size ? String(req.query.size) : undefined,
+            );
+            res.json(project);
+        } catch (error) {
+            next(error);
+        }
+    },
+);
+
+app.get(
     "/api/project/getByProjectSenderDid/:senderDid",
     async (req: Request, res: Response, next: NextFunction) => {
         try {

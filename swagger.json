@@ -502,6 +502,34 @@
                 }
             }
         },
+        "/api/project/getProjectsByCreatedBy/{createdBy}": {
+            "get": {
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "createdBy",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "type": "string"
+                    },
+                    {
+                        "name": "size",
+                        "in": "query",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/api/project/shields/status/{projectDid}": {
             "get": {
                 "description": "",

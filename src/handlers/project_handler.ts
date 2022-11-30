@@ -288,6 +288,24 @@ export const listProjectBySenderDid = async (
     }
 };
 
+export const getProjectsByCreatedBy = async (
+    createdBy: string,
+    page?: string,
+    size?: string,
+) => {
+    if (page && size) {
+        return prisma.project.findMany({
+            where: { createdBy: createdBy },
+            skip: Number(size) * (Number(page) - 1),
+            take: Number(size),
+        });
+    } else {
+        return prisma.project.findMany({
+            where: { createdBy: createdBy },
+        });
+    }
+};
+
 export const getProjectAccountsFromChain = async (projectDid: string) => {
     const res = await axios.get(REST + "/projectAccounts/" + projectDid);
     if (res.status == 200) {
