@@ -288,20 +288,28 @@ export const listProjectBySenderDid = async (
     }
 };
 
-export const getProjectsByCreatedBy = async (
-    createdBy: string,
+export const getProjectsByCreatedAndAgent = async (
+    did: string,
     page?: string,
     size?: string,
 ) => {
     if (page && size) {
         return prisma.project.findMany({
-            where: { createdBy: createdBy },
+            where: {
+                createdBy: did,
+                status: "STARTED",
+                Agent: { some: { agentDid: did } },
+            },
             skip: Number(size) * (Number(page) - 1),
             take: Number(size),
         });
     } else {
         return prisma.project.findMany({
-            where: { createdBy: createdBy },
+            where: {
+                createdBy: did,
+                status: "STARTED",
+                Agent: { some: { agentDid: did } },
+            },
         });
     }
 };

@@ -160,6 +160,24 @@
                 }
             }
         },
+        "/api/bonds/getAccountBonds/{account}": {
+            "get": {
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "account",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/api/bond/get/outcomepayments/{bonddid}": {
             "get": {
                 "description": "",
@@ -502,12 +520,12 @@
                 }
             }
         },
-        "/api/project/getProjectsByCreatedBy/{createdBy}": {
+        "/api/project/getProjectsByCreatedAndAgent/{did}": {
             "get": {
                 "description": "",
                 "parameters": [
                     {
-                        "name": "createdBy",
+                        "name": "did",
                         "in": "path",
                         "required": true,
                         "type": "string"

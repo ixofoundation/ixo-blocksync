@@ -22,6 +22,7 @@ const swaggerFile = require(`${__dirname}/../../swagger.json`);
 
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+import { getAccountBonds } from "./util/proto";
 
 export const app = express();
 
@@ -134,6 +135,18 @@ app.get(
                 req.query.page ? String(req.query.page) : undefined,
                 req.query.size ? String(req.query.size) : undefined,
             );
+            res.json(bonds);
+        } catch (error) {
+            next(error);
+        }
+    },
+);
+
+app.get(
+    "/api/bonds/getAccountBonds/:account",
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const bonds = await getAccountBonds(req.params.address);
             res.json(bonds);
         } catch (error) {
             next(error);
@@ -336,11 +349,11 @@ app.get(
 );
 
 app.get(
-    "/api/project/getProjectsByCreatedBy/:createdBy",
+    "/api/project/getProjectsByCreatedAndAgent/:did",
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const project = await ProjectHandler.getProjectsByCreatedBy(
-                req.params.createdBy,
+            const project = await ProjectHandler.getProjectsByCreatedAndAgent(
+                req.params.did,
                 req.query.page ? String(req.query.page) : undefined,
                 req.query.size ? String(req.query.size) : undefined,
             );
