@@ -6,21 +6,9 @@ import { REST } from "../util/secrets";
 
 axiosRetry(axios, { retries: 3 });
 
-export const createProject = async (
-    projectDoc: Prisma.ProjectCreateInput,
-    agentDocs: Prisma.AgentUncheckedCreateInput[],
-    claimDocs: Prisma.ClaimUncheckedCreateInput[],
-) => {
+export const createProject = async (projectDoc: Prisma.ProjectCreateInput) => {
     try {
-        let res: any;
-        res = await prisma.project.create({ data: projectDoc });
-        if (agentDocs.length > 0) {
-            res += await prisma.agent.createMany({ data: agentDocs });
-        }
-        if (claimDocs.length > 0) {
-            res += await prisma.claim.createMany({ data: claimDocs });
-        }
-        return res;
+        return prisma.project.create({ data: projectDoc });
     } catch (error) {
         console.log(error);
         return;
@@ -57,10 +45,14 @@ export const getAgentCount = async (
     }
 };
 
-export const updateAgentStatus = async (agentDid: string, status: string) => {
+export const updateAgentStatus = async (
+    agentDid: string,
+    projectDid: string,
+    status: string,
+) => {
     try {
-        const res = await prisma.agent.update({
-            where: { agentDid: agentDid },
+        const res = await prisma.agent.updateMany({
+            where: { agentDid: agentDid, projectDid: projectDid },
             data: { status: status },
         });
         return res;
@@ -176,39 +168,14 @@ export const updateProjectStatus = async (
     }
 };
 
-export const updateProject = async (projectDid: string, projectDoc: any) => {
+export const updateProject = async (projectDid: string, projectDoc: string) => {
     try {
-        if (projectDoc["data"]["claims"]) {
-            delete projectDoc["data"]["claims"];
-        }
-        if (projectDoc["data"]["agents"]) {
-            delete projectDoc["data"]["agents"];
-        }
-        if (projectDoc["data"]["ixo"]) {
-            delete projectDoc["data"]["ixo"];
-        }
-        if (projectDoc["data"]["createdOn"]) {
-            delete projectDoc["data"]["createdOn"];
-        }
-        if (projectDoc["data"]["createdBy"]) {
-            delete projectDoc["data"]["createdBy"];
-        }
-        if (projectDoc["data"]["nodeDid"]) {
-            delete projectDoc["data"]["nodeDid"];
-        }
-        if (projectDoc["data"]["agentStats"]) {
-            delete projectDoc["data"]["agentStats"];
-        }
-        if (projectDoc["data"]["claimStats"]) {
-            delete projectDoc["data"]["claimStats"];
-        }
-        const res = await prisma.project.update({
+        return prisma.project.update({
             where: { projectDid: projectDid },
             data: {
                 data: projectDoc,
             },
         });
-        return res;
     } catch (error) {
         console.log(error);
         return;

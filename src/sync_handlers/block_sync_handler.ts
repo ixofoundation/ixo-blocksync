@@ -4,10 +4,9 @@ import * as IidHandler from "../handlers/iid_handler";
 import * as BondHandler from "../handlers/bond_handler";
 import * as WasmHandler from "../handlers/wasm_handler";
 import { MsgTypes } from "../types/Msg";
-import * as ProjectTypes from "../types/Project";
 import * as IidTypes from "../types/IID";
 import { Tx } from "@ixo/impactxclient-sdk/types/codegen/cosmos/tx/v1beta1/tx";
-import { decode } from "../util/proto";
+import { decode, Uint8ArrayToJS } from "../util/proto";
 import {
     MsgAddAccordedRight,
     MsgAddIidContext,
@@ -30,14 +29,20 @@ import {
     MsgCreateAgent,
     MsgCreateClaim,
     MsgCreateEvaluation,
+    MsgCreateProject,
     MsgUpdateAgent,
+    MsgUpdateProjectDoc,
     MsgUpdateProjectStatus,
 } from "@ixo/impactxclient-sdk/types/codegen/ixo/project/v1/tx";
 import {
     MsgBuy,
     MsgCreateBond,
+    MsgEditBond,
     MsgMakeOutcomePayment,
+    MsgSell,
     MsgSetNextAlpha,
+    MsgSwap,
+    MsgUpdateBondState,
     MsgWithdrawReserve,
     MsgWithdrawShare,
 } from "@ixo/impactxclient-sdk/types/codegen/ixo/bonds/v1beta1/tx";
@@ -248,80 +253,53 @@ export const syncBlock = async (
                 );
                 break;
             case MsgTypes.createProject:
-                let projectDoc = msg.value;
+                const createProject: MsgCreateProject = msg.value;
+                const projectData = JSON.parse(
+                    Uint8ArrayToJS(createProject.data),
+                );
+                await ProjectHandler.createProject({
+                    projectDid: createProject.projectDid,
+                    txHash: createProject.txHash,
+                    senderDid: createProject.senderDid,
+                    pubKey: createProject.pubKey,
+                    data: JSON.stringify(projectData),
+                    projectAddress: createProject.projectAddress,
+                    status: projectData.status ?? "",
+                    entityType: projectData.entityType ?? "",
+                    createdOn: new Date(projectData.createdOn),
+                    createdBy: projectData.createdBy,
+                    successfulClaims: 0,
+                    rejectedClaims: 0,
+                    evaluators: 0,
+                    evaluatorsPending: 0,
+                    serviceProviders: 0,
+                    serviceProvidersPending: 0,
+                    investors: 0,
+                    investorsPending: 0,
+                });
                 StatHandler.updateAllStats(
                     MsgTypes.createProject,
                     "",
                     "",
-                    projectDoc.data.requiredClaims,
-                );
-                let pdocs = ProjectTypes.convertProject(projectDoc);
-                await ProjectHandler.createProject(
-                    pdocs.projectDoc,
-                    pdocs.agentDocs,
-                    pdocs.claimDocs,
+                    projectData.requiredClaims,
                 );
                 break;
-            case MsgTypes.buy:
-                const bondBuy: MsgBuy = msg.value;
-                await BondHandler.createTransaction({
-                    bondDid: bondBuy.bondDid,
-                    buyerDid: bondBuy.buyerDid,
-                    amount: String(bondBuy.amount?.amount),
-                    maxPrices: bondBuy.maxPrices[0].amount,
-                });
+            case MsgTypes.updateProjectStatus:
+                const updateProjectStatus: MsgUpdateProjectStatus = msg.value;
+                await ProjectHandler.updateProjectStatus(
+                    updateProjectStatus.projectDid,
+                    String(updateProjectStatus.data?.status.toUpperCase()),
+                );
                 break;
-            case MsgTypes.setNextAlpha:
-                const setNextAlpha: MsgSetNextAlpha = msg.value;
-                await BondHandler.createAlphaChange({
-                    bondDid: setNextAlpha.bondDid,
-                    rawValue: msg,
-                    height: blockHeight,
-                    timestamp: timestamp,
-                });
-                break;
-            case MsgTypes.withdrawShare:
-                const withdrawShare: MsgWithdrawShare = msg.value;
-                await BondHandler.createShareWithdrawal({
-                    rawValue: msg,
-                    transaction: JSON.stringify(withdrawShare),
-                    recipientDid: withdrawShare.recipientDid,
-                    bondDid: withdrawShare.bondDid,
-                    height: blockHeight,
-                    timestamp: timestamp,
-                });
-                break;
-            case MsgTypes.withdrawReserve:
-                const withdrawReserve: MsgWithdrawReserve = msg.value;
-                await BondHandler.createReserveWithdrawal({
-                    rawValue: msg,
-                    transaction: JSON.stringify(withdrawReserve),
-                    withdrawerDid: withdrawReserve.withdrawerDid,
-                    bondDid: withdrawReserve.bondDid,
-                    height: blockHeight,
-                    timestamp: timestamp,
-                });
-                break;
-            case MsgTypes.makeOutcomePayment:
-                const makeOutcomePayment: MsgMakeOutcomePayment = msg.value;
-                await BondHandler.createOutcomePayment({
-                    rawValue: msg,
-                    amount: makeOutcomePayment.amount,
-                    senderDid: makeOutcomePayment.senderDid,
-                    height: blockHeight,
-                    timestamp: timestamp,
-                    bondDid: makeOutcomePayment.bondDid,
-                });
-                break;
-            case MsgTypes.createBond:
-                const createBond: MsgCreateBond = msg.value;
-                await BondHandler.createBond({
-                    bondDid: createBond.bondDid,
-                    token: createBond.token,
-                    name: createBond.name,
-                    description: createBond.description,
-                    creatorDid: createBond.creatorDid,
-                });
+            case MsgTypes.updateProjectDoc:
+                const updateProject: MsgUpdateProjectDoc = msg.value;
+                const updateProjectData = JSON.parse(
+                    Uint8ArrayToJS(updateProject.data),
+                );
+                await ProjectHandler.updateProject(
+                    updateProject.projectDid,
+                    JSON.stringify(updateProjectData),
+                );
                 break;
             case MsgTypes.createAgent:
                 const createAgent: MsgCreateAgent = msg.value;
@@ -349,6 +327,7 @@ export const syncBlock = async (
                         updateAgent.data.role,
                     );
                 await ProjectHandler.updateAgentStatus(
+                    String(updateAgent.projectDid),
                     String(updateAgent.data?.did),
                     String(updateAgent.data?.status),
                 );
@@ -384,18 +363,128 @@ export const syncBlock = async (
                     String(evaluateClaim.data?.status),
                 );
                 break;
-            case MsgTypes.updateProjectStatus:
-                const updateProjectStatus: MsgUpdateProjectStatus = msg.value;
-                await ProjectHandler.updateProjectStatus(
-                    updateProjectStatus.projectDid,
-                    String(updateProjectStatus.data?.status.toUpperCase()),
-                );
+            case MsgTypes.createBond:
+                const createBond: MsgCreateBond = msg.value;
+                await BondHandler.createBond({
+                    bondDid: createBond.bondDid,
+                    token: createBond.token,
+                    name: createBond.name,
+                    description: createBond.description,
+                    functionType: createBond.functionType,
+                    functionParamaters: JSON.stringify(
+                        createBond.functionParameters,
+                    ),
+                    creatorDid: createBond.creatorDid,
+                    controllerDid: createBond.controllerDid,
+                    reserveTokens: createBond.reserveTokens,
+                    txFeePercentage: createBond.txFeePercentage,
+                    exitFeePercentage: createBond.exitFeePercentage,
+                    feeAddress: createBond.feeAddress,
+                    reserveWithdrawalAddress:
+                        createBond.reserveWithdrawalAddress,
+                    maxSupply: JSON.stringify(createBond.maxSupply),
+                    orderQuantityLimits: JSON.stringify(
+                        createBond.orderQuantityLimits,
+                    ),
+                    sanityRate: createBond.sanityRate,
+                    sanityMarginPercentage: createBond.sanityMarginPercentage,
+                    allowSells: createBond.allowSells,
+                    allowReserveWithdrawals: createBond.allowReserveWithdrawals,
+                    alphaBond: createBond.alphaBond,
+                    batchBlocks: createBond.batchBlocks,
+                    creatorAddress: createBond.creatorAddress,
+                });
                 break;
-            case MsgTypes.updateProjectDoc:
-                await ProjectHandler.updateProject(
-                    msg.value.projectDid,
-                    msg.value.data,
-                );
+            case MsgTypes.editBond:
+                const editBond: MsgEditBond = msg.value;
+                await BondHandler.editBond({
+                    bondDid: editBond.bondDid,
+                    name: editBond.name,
+                    description: editBond.description,
+                    orderQuantityLimits: editBond.orderQuantityLimits,
+                    sanityRate: editBond.sanityRate,
+                    sanityMarginPercentage: editBond.sanityMarginPercentage,
+                    editorDid: editBond.editorDid,
+                    editorAddress: editBond.editorAddress,
+                });
+            case MsgTypes.setNextAlpha:
+                const setNextAlpha: MsgSetNextAlpha = msg.value;
+                await BondHandler.createAlpha({
+                    bondDid: setNextAlpha.bondDid,
+                    alpha: setNextAlpha.alpha,
+                    editorDid: setNextAlpha.editorDid,
+                    height: blockHeight,
+                    timestamp: timestamp,
+                });
+                break;
+            case MsgTypes.updateBondState:
+                const updateBondState: MsgUpdateBondState = msg.value;
+                await BondHandler.updateBondState({
+                    bondDid: updateBondState.bondDid,
+                    status: updateBondState.state,
+                    editorDid: updateBondState.editorDid,
+                    editorAddress: updateBondState.editorAddress,
+                });
+                break;
+            case MsgTypes.buy:
+                const bondBuy: MsgBuy = msg.value;
+                await BondHandler.createBuy({
+                    bondDid: bondBuy.bondDid,
+                    buyerDid: bondBuy.buyerDid,
+                    buyerAddress: bondBuy.buyerAddress,
+                    amount: String(bondBuy.amount?.amount),
+                    maxPrices: JSON.stringify(bondBuy.maxPrices),
+                });
+                break;
+            case MsgTypes.sell:
+                const bondSell: MsgSell = msg.value;
+                await BondHandler.createSell({
+                    bondDid: bondSell.bondDid,
+                    sellerDid: bondSell.sellerDid,
+                    sellerAddress: bondSell.sellerAddress,
+                    amount: String(bondSell.amount?.amount),
+                });
+            case MsgTypes.swap:
+                const bondSwap: MsgSwap = msg.value;
+                await BondHandler.createSwap({
+                    bondDid: bondSwap.bondDid,
+                    swapperDid: bondSwap.swapperAddress,
+                    swapperAddress: bondSwap.swapperAddress,
+                    from: JSON.stringify(bondSwap.from),
+                    toToken: bondSwap.toToken,
+                });
+                break;
+            case MsgTypes.makeOutcomePayment:
+                const makeOutcomePayment: MsgMakeOutcomePayment = msg.value;
+                await BondHandler.createOutcomePayment({
+                    bondDid: makeOutcomePayment.bondDid,
+                    senderDid: makeOutcomePayment.senderDid,
+                    senderAddress: makeOutcomePayment.senderAddress,
+                    amount: makeOutcomePayment.amount,
+                    height: blockHeight,
+                    timestamp: timestamp,
+                });
+                break;
+            case MsgTypes.withdrawShare:
+                const withdrawShare: MsgWithdrawShare = msg.value;
+                await BondHandler.createShareWithdrawal({
+                    bondDid: withdrawShare.bondDid,
+                    recipientDid: withdrawShare.recipientDid,
+                    recipientAddress: withdrawShare.recipientAddress,
+                    height: blockHeight,
+                    timestamp: timestamp,
+                });
+                break;
+            case MsgTypes.withdrawReserve:
+                const withdrawReserve: MsgWithdrawReserve = msg.value;
+                await BondHandler.createReserveWithdrawal({
+                    bondDid: withdrawReserve.bondDid,
+                    withdrawerDid: withdrawReserve.withdrawerDid,
+                    withdrawerAddress: withdrawReserve.withdrawerAddress,
+                    amount: JSON.stringify(withdrawReserve.amount),
+                    height: blockHeight,
+                    timestamp: timestamp,
+                });
                 break;
             case MsgTypes.storeCode:
                 // await WasmHandler.createWasmCode({

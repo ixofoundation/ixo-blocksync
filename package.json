@@ -18,7 +18,7 @@
     "license": "MIT",
     "dependencies": {
         "@ixo/impactxclient-sdk": "^0.0.5",
-        "@prisma/client": "^4.4.0",
+        "@prisma/client": "^4.7.0",
         "@sentry/node": "^6.19.7",
         "@sentry/tracing": "^6.19.7",
         "@types/lodash.memoize": "^4.1.7",
@@ -80,7 +80,7 @@
         "mocha": "^8.4.0",
         "mocha-prepare": "^0.1.0",
         "mongo-unit": "^1.5.1",
-        "prisma": "^4.4.0"
+        "prisma": "^4.7.0"
     },
     "prisma": {
         "schema": "src/prisma/schema.prisma"

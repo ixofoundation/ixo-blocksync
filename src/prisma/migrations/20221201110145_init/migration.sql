@@ -79,10 +79,30 @@ CREATE TABLE "LinkedEntity" (
 -- CreateTable
 CREATE TABLE "Bond" (
     "bondDid" TEXT NOT NULL,
+    "status" TEXT,
     "token" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT NOT NULL,
+    "functionType" TEXT NOT NULL,
+    "functionParamaters" JSONB,
     "creatorDid" TEXT NOT NULL,
+    "controllerDid" TEXT NOT NULL,
+    "reserveTokens" TEXT[],
+    "txFeePercentage" TEXT NOT NULL,
+    "exitFeePercentage" TEXT NOT NULL,
+    "feeAddress" TEXT NOT NULL,
+    "reserveWithdrawalAddress" TEXT NOT NULL,
+    "maxSupply" JSONB,
+    "orderQuantityLimits" JSONB,
+    "sanityRate" TEXT NOT NULL,
+    "sanityMarginPercentage" TEXT NOT NULL,
+    "allowSells" BOOLEAN NOT NULL,
+    "allowReserveWithdrawals" BOOLEAN NOT NULL,
+    "alphaBond" BOOLEAN NOT NULL,
+    "batchBlocks" TEXT NOT NULL,
+    "creatorAddress" TEXT NOT NULL,
+    "editorDid" TEXT,
+    "editorAddress" TEXT,
 
     CONSTRAINT "Bond_pkey" PRIMARY KEY ("bondDid")
 );
@@ -103,29 +123,54 @@ CREATE TABLE "BondBuy" (
     "id" SERIAL NOT NULL,
     "bondDid" TEXT NOT NULL,
     "buyerDid" TEXT NOT NULL,
+    "buyerAddress" TEXT NOT NULL,
     "amount" TEXT NOT NULL,
-    "maxPrices" TEXT NOT NULL,
+    "maxPrices" JSONB,
 
     CONSTRAINT "BondBuy_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "AlphaChange" (
+CREATE TABLE "BondSell" (
     "id" SERIAL NOT NULL,
     "bondDid" TEXT NOT NULL,
-    "rawValue" JSONB,
+    "sellerDid" TEXT NOT NULL,
+    "sellerAddress" TEXT NOT NULL,
+    "amount" TEXT NOT NULL,
+
+    CONSTRAINT "BondSell_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "BondSwap" (
+    "id" SERIAL NOT NULL,
+    "bondDid" TEXT NOT NULL,
+    "swapperDid" TEXT NOT NULL,
+    "swapperAddress" TEXT NOT NULL,
+    "from" JSONB,
+    "toToken" TEXT NOT NULL,
+
+    CONSTRAINT "BondSwap_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Alpha" (
+    "id" SERIAL NOT NULL,
+    "bondDid" TEXT NOT NULL,
+    "alpha" TEXT NOT NULL,
+    "editorDid" TEXT NOT NULL,
     "height" TEXT NOT NULL,
     "timestamp" TEXT NOT NULL,
 
-    CONSTRAINT "AlphaChange_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Alpha_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "OutcomePayment" (
     "id" SERIAL NOT NULL,
     "bondDid" TEXT NOT NULL,
-    "rawValue" JSONB,
     "senderDid" TEXT NOT NULL,
+    "senderAddress" TEXT NOT NULL,
     "amount" TEXT NOT NULL,
     "height" TEXT NOT NULL,
     "timestamp" TEXT NOT NULL,
@@ -137,9 +182,9 @@ CREATE TABLE "OutcomePayment" (
 CREATE TABLE "ReserveWithdrawal" (
     "id" SERIAL NOT NULL,
     "bondDid" TEXT NOT NULL,
-    "rawValue" JSONB,
-    "transaction" JSONB,
     "withdrawerDid" TEXT NOT NULL,
+    "withdrawerAddress" TEXT NOT NULL,
+    "amount" JSONB,
     "height" TEXT NOT NULL,
     "timestamp" TEXT NOT NULL,
 
@@ -150,9 +195,8 @@ CREATE TABLE "ReserveWithdrawal" (
 CREATE TABLE "ShareWithdrawal" (
     "id" SERIAL NOT NULL,
     "bondDid" TEXT NOT NULL,
-    "rawValue" JSONB,
-    "transaction" JSONB,
     "recipientDid" TEXT NOT NULL,
+    "recipientAddress" TEXT NOT NULL,
     "height" TEXT NOT NULL,
     "timestamp" TEXT NOT NULL,
 
@@ -198,17 +242,15 @@ CREATE TABLE "Stats" (
 -- CreateTable
 CREATE TABLE "Project" (
     "projectDid" TEXT NOT NULL,
-    "data" JSONB,
     "txHash" TEXT NOT NULL,
     "senderDid" TEXT NOT NULL,
     "pubKey" TEXT NOT NULL,
+    "data" JSONB,
+    "projectAddress" TEXT NOT NULL,
     "status" TEXT,
     "entityType" TEXT,
-    "ixoStaked" DECIMAL(65,30) NOT NULL,
-    "ixoUsed" DECIMAL(65,30) NOT NULL,
     "createdOn" TIMESTAMP(3) NOT NULL,
     "createdBy" TEXT NOT NULL,
-    "nodeDid" TEXT NOT NULL,
     "successfulClaims" INTEGER NOT NULL,
     "rejectedClaims" INTEGER NOT NULL,
     "evaluators" INTEGER NOT NULL,
@@ -223,12 +265,13 @@ CREATE TABLE "Project" (
 
 -- CreateTable
 CREATE TABLE "Agent" (
+    "id" SERIAL NOT NULL,
     "agentDid" TEXT NOT NULL,
     "projectDid" TEXT NOT NULL,
     "status" TEXT NOT NULL,
     "role" TEXT NOT NULL,
 
-    CONSTRAINT "Agent_pkey" PRIMARY KEY ("agentDid")
+    CONSTRAINT "Agent_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -349,7 +392,13 @@ ALTER TABLE "PriceEntry" ADD CONSTRAINT "PriceEntry_bondDid_fkey" FOREIGN KEY ("
 ALTER TABLE "BondBuy" ADD CONSTRAINT "BondBuy_bondDid_fkey" FOREIGN KEY ("bondDid") REFERENCES "Bond"("bondDid") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "AlphaChange" ADD CONSTRAINT "AlphaChange_bondDid_fkey" FOREIGN KEY ("bondDid") REFERENCES "Bond"("bondDid") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "BondSell" ADD CONSTRAINT "BondSell_bondDid_fkey" FOREIGN KEY ("bondDid") REFERENCES "Bond"("bondDid") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "BondSwap" ADD CONSTRAINT "BondSwap_bondDid_fkey" FOREIGN KEY ("bondDid") REFERENCES "Bond"("bondDid") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Alpha" ADD CONSTRAINT "Alpha_bondDid_fkey" FOREIGN KEY ("bondDid") REFERENCES "Bond"("bondDid") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "OutcomePayment" ADD CONSTRAINT "OutcomePayment_bondDid_fkey" FOREIGN KEY ("bondDid") REFERENCES "Bond"("bondDid") ON DELETE RESTRICT ON UPDATE CASCADE;

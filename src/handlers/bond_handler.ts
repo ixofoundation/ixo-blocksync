@@ -11,6 +11,46 @@ export const createBond = async (bondDoc: Prisma.BondCreateInput) => {
     }
 };
 
+export const editBond = async (bondDoc: Prisma.BondUpdateInput) => {
+    try {
+        return prisma.bond.update({
+            where: {
+                bondDid: String(bondDoc.bondDid),
+            },
+            data: {
+                name: bondDoc.name,
+                description: bondDoc.description,
+                orderQuantityLimits: bondDoc.orderQuantityLimits,
+                sanityRate: bondDoc.sanityRate,
+                sanityMarginPercentage: bondDoc.sanityMarginPercentage,
+                editorDid: bondDoc.editorDid,
+                editorAddress: bondDoc.editorAddress,
+            },
+        });
+    } catch (error) {
+        console.log(error);
+        return;
+    }
+};
+
+export const updateBondState = async (bondDoc: Prisma.BondUpdateInput) => {
+    try {
+        return prisma.bond.update({
+            where: {
+                bondDid: String(bondDoc.bondDid),
+            },
+            data: {
+                status: bondDoc.status,
+                editorDid: bondDoc.editorDid,
+                editorAddress: bondDoc.editorAddress,
+            },
+        });
+    } catch (error) {
+        console.log(error);
+        return;
+    }
+};
+
 export const getLastPrice = async (bondDid: string) => {
     try {
         const res = await prisma.priceEntry.findFirst({
@@ -38,7 +78,7 @@ export const createPriceEntry = async (
     }
 };
 
-export const createTransaction = async (
+export const createBuy = async (
     bondBuyDoc: Prisma.BondBuyUncheckedCreateInput,
 ) => {
     try {
@@ -50,11 +90,33 @@ export const createTransaction = async (
     }
 };
 
-export const createAlphaChange = async (
-    alphaChangeDoc: Prisma.AlphaChangeUncheckedCreateInput,
+export const createSell = async (
+    bondSellDoc: Prisma.BondSellUncheckedCreateInput,
 ) => {
     try {
-        const res = await prisma.alphaChange.create({ data: alphaChangeDoc });
+        return prisma.bondSell.create({ data: bondSellDoc });
+    } catch (error) {
+        console.log(error);
+        return;
+    }
+};
+
+export const createSwap = async (
+    bondSwapDoc: Prisma.BondSwapUncheckedCreateInput,
+) => {
+    try {
+        return prisma.bondSwap.create({ data: bondSwapDoc });
+    } catch (error) {
+        console.log(error);
+        return;
+    }
+};
+
+export const createAlpha = async (
+    alphaDoc: Prisma.AlphaUncheckedCreateInput,
+) => {
+    try {
+        const res = await prisma.alpha.create({ data: alphaDoc });
         return res;
     } catch (error) {
         console.log(error);
@@ -230,13 +292,13 @@ export const getAlphaHistoryByDid = async (
     size?: string,
 ) => {
     if (page && size) {
-        return prisma.alphaChange.findMany({
+        return prisma.alpha.findMany({
             where: { bondDid: bondDid },
             skip: Number(size) * (Number(page) - 1),
             take: Number(size),
         });
     } else {
-        return prisma.alphaChange.findMany({
+        return prisma.alpha.findMany({
             where: { bondDid: bondDid },
         });
     }
