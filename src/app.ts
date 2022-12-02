@@ -14,6 +14,7 @@ import * as AuthHandler from "./handlers/auth_handler";
 import * as BondHandler from "./handlers/bond_handler";
 import * as TransactionHandler from "./handlers/transaction_handler";
 import * as BlockHandler from "./handlers/block_handler";
+import * as PaymentHandler from "./handlers/payment_handler";
 import { sendTransaction } from "./util/connection";
 import { SENTRYDSN, DATABASE_URL } from "./util/secrets";
 
@@ -513,6 +514,20 @@ app.get(
         try {
             const block = await BlockHandler.getLastSyncedBlock();
             res.json(block);
+        } catch (error) {
+            next(error);
+        }
+    },
+);
+
+app.get(
+    "api/block/getPaymentTemplateById/:id",
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const template = await PaymentHandler.getPaymentTemplateById(
+                req.params.id,
+            );
+            res.json(template);
         } catch (error) {
             next(error);
         }

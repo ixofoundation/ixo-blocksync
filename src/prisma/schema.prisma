@@ -269,6 +269,54 @@ model Claim {
   status          String
 }
 
+model PaymentTemplate {
+  id              String            @id
+  paymentAmount   Json?
+  paymentMinimum  Json?
+  paymentMaximum  Json?
+  discounts       Json?
+  creatorDid      String
+  creatorAddress  String
+  PaymentContract PaymentContract[]
+}
+
+model PaymentContract {
+  id                String          @id
+  paymentTemplate   PaymentTemplate @relation(fields: [paymentTemplateId], references: [id])
+  paymentTemplateId String
+  payer             String
+  recipients        Json?
+  canDeauthorise    Boolean
+  authorised        Boolean?
+  payerDid          String?
+  effected          Boolean?
+  senderDid         String?
+  creatorDid        String
+  creatorAddress    String
+  Subscription      Subscription[]
+  Discount          Discount[]
+}
+
+model Subscription {
+  id                String          @id
+  paymentContract   PaymentContract @relation(fields: [paymentContractId], references: [id])
+  paymentContractId String
+  maxPeriods        String
+  period            Json?
+  creatorDid        String
+  creatorAddress    String
+}
+
+model Discount {
+  id                String          @id
+  paymentContract   PaymentContract @relation(fields: [paymentContractId], references: [id])
+  paymentContractId String
+  recipient         String
+  granter           String
+  revoked           Boolean?
+  revoker           String?
+}
+
 model Transaction {
   id            Int     @id @default(autoincrement())
   blockHeight   Int

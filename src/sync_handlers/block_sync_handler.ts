@@ -2,6 +2,7 @@ import * as ProjectHandler from "../handlers/project_handler";
 import * as StatHandler from "../handlers/stats_handler";
 import * as IidHandler from "../handlers/iid_handler";
 import * as BondHandler from "../handlers/bond_handler";
+import * as PaymentHandler from "../handlers/payment_handler";
 import * as WasmHandler from "../handlers/wasm_handler";
 import { MsgTypes } from "../types/Msg";
 import * as IidTypes from "../types/IID";
@@ -46,6 +47,15 @@ import {
     MsgWithdrawReserve,
     MsgWithdrawShare,
 } from "@ixo/impactxclient-sdk/types/codegen/ixo/bonds/v1beta1/tx";
+import {
+    MsgCreatePaymentContract,
+    MsgCreatePaymentTemplate,
+    MsgCreateSubscription,
+    MsgEffectPayment,
+    MsgGrantDiscount,
+    MsgRevokeDiscount,
+    MsgSetPaymentContractAuthorisation,
+} from "@ixo/impactxclient-sdk/types/codegen/ixo/payments/v1/tx";
 
 export const syncBlock = async (
     transactions: Tx[],
@@ -484,6 +494,86 @@ export const syncBlock = async (
                     amount: JSON.stringify(withdrawReserve.amount),
                     height: blockHeight,
                     timestamp: timestamp,
+                });
+                break;
+            case MsgTypes.createPaymentTemplate:
+                const createPaymentTemplate: MsgCreatePaymentTemplate =
+                    msg.value;
+                await PaymentHandler.createPaymentTemplate({
+                    id: String(createPaymentTemplate.paymentTemplate?.id),
+                    paymentAmount: JSON.stringify(
+                        createPaymentTemplate.paymentTemplate?.paymentAmount,
+                    ),
+                    paymentMinimum: JSON.stringify(
+                        createPaymentTemplate.paymentTemplate?.paymentMinimum,
+                    ),
+                    paymentMaximum: JSON.stringify(
+                        createPaymentTemplate.paymentTemplate?.paymentMaximum,
+                    ),
+                    discounts: JSON.stringify(
+                        createPaymentTemplate.paymentTemplate?.discounts,
+                    ),
+                    creatorDid: createPaymentTemplate.creatorDid,
+                    creatorAddress: createPaymentTemplate.creatorAddress,
+                });
+                break;
+            case MsgTypes.createPaymentContract:
+                const createPaymentContract: MsgCreatePaymentContract =
+                    msg.value;
+                await PaymentHandler.createPaymentContract({
+                    id: createPaymentContract.paymentContractId,
+                    paymentTemplateId: createPaymentContract.paymentTemplateId,
+                    payer: createPaymentContract.payer,
+                    recipients: JSON.stringify(
+                        createPaymentContract.recipients,
+                    ),
+                    canDeauthorise: createPaymentContract.canDeauthorise,
+                    creatorDid: createPaymentContract.creatorDid,
+                    creatorAddress: createPaymentContract.creatorAddress,
+                });
+                break;
+            case MsgTypes.createSubscription:
+                const createSubscription: MsgCreateSubscription = msg.value;
+                await PaymentHandler.createSubscription({
+                    id: createSubscription.subscriptionId,
+                    paymentContractId: createSubscription.paymentContractId,
+                    maxPeriods: createSubscription.maxPeriods,
+                    period: JSON.stringify(createSubscription.period),
+                    creatorDid: createSubscription.creatorDid,
+                    creatorAddress: createSubscription.creatorAddress,
+                });
+                break;
+            case MsgTypes.setPaymentContractAuthorisation:
+                const setPaymentContractAuthorisation: MsgSetPaymentContractAuthorisation =
+                    msg.value;
+                await PaymentHandler.setPaymentContractAuthorisation({
+                    id: setPaymentContractAuthorisation.paymentContractId,
+                    authorised: setPaymentContractAuthorisation.authorised,
+                    payerDid: setPaymentContractAuthorisation.payerDid,
+                });
+                break;
+            case MsgTypes.grantDiscount:
+                const grantDiscount: MsgGrantDiscount = msg.value;
+                await PaymentHandler.grantDiscount({
+                    id: grantDiscount.discountId,
+                    paymentContractId: grantDiscount.paymentContractId,
+                    recipient: grantDiscount.recipient,
+                    granter: grantDiscount.senderDid,
+                });
+                break;
+            case MsgTypes.revokeDiscount:
+                const revokeDiscount: MsgRevokeDiscount = msg.value;
+                await PaymentHandler.revokeDiscount({
+                    senderDid: revokeDiscount.senderDid,
+                    paymentContractId: revokeDiscount.paymentContractId,
+                    holder: revokeDiscount.holder,
+                });
+                break;
+            case MsgTypes.effectPayment:
+                const effectPayment: MsgEffectPayment = msg.value;
+                await PaymentHandler.effectPayment({
+                    senderDid: effectPayment.senderDid,
+                    paymentContractId: effectPayment.paymentContractId,
                 });
                 break;
             case MsgTypes.storeCode:

@@ -285,6 +285,60 @@ CREATE TABLE "Claim" (
 );
 
 -- CreateTable
+CREATE TABLE "PaymentTemplate" (
+    "id" TEXT NOT NULL,
+    "paymentAmount" JSONB,
+    "paymentMinimum" JSONB,
+    "paymentMaximum" JSONB,
+    "discounts" JSONB,
+    "creatorDid" TEXT NOT NULL,
+    "creatorAddress" TEXT NOT NULL,
+
+    CONSTRAINT "PaymentTemplate_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "PaymentContract" (
+    "id" TEXT NOT NULL,
+    "paymentTemplateId" TEXT NOT NULL,
+    "payer" TEXT NOT NULL,
+    "recipients" JSONB,
+    "canDeauthorise" BOOLEAN NOT NULL,
+    "authorised" BOOLEAN,
+    "payerDid" TEXT,
+    "effected" BOOLEAN,
+    "senderDid" TEXT,
+    "creatorDid" TEXT NOT NULL,
+    "creatorAddress" TEXT NOT NULL,
+
+    CONSTRAINT "PaymentContract_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Subscription" (
+    "id" TEXT NOT NULL,
+    "paymentContractId" TEXT NOT NULL,
+    "maxPeriods" TEXT NOT NULL,
+    "period" JSONB,
+    "creatorDid" TEXT NOT NULL,
+    "creatorAddress" TEXT NOT NULL,
+
+    CONSTRAINT "Subscription_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Discount" (
+    "id" TEXT NOT NULL,
+    "paymentContractId" TEXT NOT NULL,
+    "recipient" TEXT NOT NULL,
+    "granter" TEXT NOT NULL,
+    "revoked" BOOLEAN,
+    "revoker" TEXT,
+
+    CONSTRAINT "Discount_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Transaction" (
     "id" SERIAL NOT NULL,
     "blockHeight" INTEGER NOT NULL,
@@ -414,3 +468,12 @@ ALTER TABLE "Agent" ADD CONSTRAINT "Agent_projectDid_fkey" FOREIGN KEY ("project
 
 -- AddForeignKey
 ALTER TABLE "Claim" ADD CONSTRAINT "Claim_projectDid_fkey" FOREIGN KEY ("projectDid") REFERENCES "Project"("projectDid") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "PaymentContract" ADD CONSTRAINT "PaymentContract_paymentTemplateId_fkey" FOREIGN KEY ("paymentTemplateId") REFERENCES "PaymentTemplate"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Subscription" ADD CONSTRAINT "Subscription_paymentContractId_fkey" FOREIGN KEY ("paymentContractId") REFERENCES "PaymentContract"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Discount" ADD CONSTRAINT "Discount_paymentContractId_fkey" FOREIGN KEY ("paymentContractId") REFERENCES "PaymentContract"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
