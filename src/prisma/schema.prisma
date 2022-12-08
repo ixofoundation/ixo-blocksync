@@ -155,13 +155,15 @@ model BondSwap {
 }
 
 model Alpha {
-  id        Int    @id @default(autoincrement())
-  bond      Bond   @relation(fields: [bondDid], references: [bondDid])
-  bondDid   String
-  alpha     String
-  editorDid String
-  height    String
-  timestamp String
+  id            Int    @id @default(autoincrement())
+  bond          Bond   @relation(fields: [bondDid], references: [bondDid])
+  bondDid       String
+  alpha         String
+  delta         String
+  oracleDid     String
+  oracleAddress String
+  height        String
+  timestamp     String
 }
 
 model OutcomePayment {

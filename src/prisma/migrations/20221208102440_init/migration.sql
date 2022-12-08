@@ -158,7 +158,9 @@ CREATE TABLE "Alpha" (
     "id" SERIAL NOT NULL,
     "bondDid" TEXT NOT NULL,
     "alpha" TEXT NOT NULL,
-    "editorDid" TEXT NOT NULL,
+    "delta" TEXT NOT NULL,
+    "oracleDid" TEXT NOT NULL,
+    "oracleAddress" TEXT NOT NULL,
     "height" TEXT NOT NULL,
     "timestamp" TEXT NOT NULL,
 

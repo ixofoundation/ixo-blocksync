@@ -422,7 +422,9 @@ export const syncBlock = async (
                 await BondHandler.createAlpha({
                     bondDid: setNextAlpha.bondDid,
                     alpha: setNextAlpha.alpha,
-                    editorDid: setNextAlpha.editorDid,
+                    delta: setNextAlpha.delta,
+                    oracleDid: setNextAlpha.oracleDid,
+                    oracleAddress: setNextAlpha.oracleAddress,
                     height: blockHeight,
                     timestamp: timestamp,
                 });
