@@ -2,7 +2,7 @@ version: "3.6"
 services:
     block-sync:
         container_name: block-sync
-        image: northroomza/ixo-blocksync:latest
+        image: northroomza/ixo-blocksync:dev
         env_file: .env
         restart: always
         ports:
