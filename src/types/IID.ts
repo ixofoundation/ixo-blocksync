@@ -1,6 +1,7 @@
+import { MsgCreateIidDocument } from "@ixo/impactxclient-sdk/types/codegen/ixo/iid/v1beta1/tx";
 import { Prisma } from "@prisma/client";
 
-export const convertIID = (IID: any) => {
+export const convertIID = (IID: MsgCreateIidDocument) => {
     let verificationMethodDocs: Prisma.VerificationMethodUncheckedCreateInput[] =
         [];
     let serviceDocs: Prisma.ServiceUncheckedCreateInput[] = [];
@@ -12,7 +13,14 @@ export const convertIID = (IID: any) => {
         const verificationMethodDoc: Prisma.VerificationMethodUncheckedCreateInput =
             {
                 iid: IID.id,
-                ...verification.method,
+                id: String(verification.method?.id),
+                relationships: verification.relationships,
+                type: String(verification.method?.type),
+                controller: String(verification.method?.controller),
+                verificationMaterial:
+                    String(verification.method?.blockchainAccountID) ||
+                    String(verification.method?.publicKeyHex) ||
+                    String(verification.method?.publicKeyMultibase),
             };
         verificationMethodDocs.push(verificationMethodDoc);
     });
@@ -20,12 +28,12 @@ export const convertIID = (IID: any) => {
     IID.services.forEach((service) => {
         const serviceDoc: Prisma.ServiceUncheckedCreateInput = {
             iid: IID.id,
-            ...service.service_data,
+            ...service,
         };
         serviceDocs.push(serviceDoc);
     });
 
-    IID.rights.forEach((right) => {
+    IID.accordedRight.forEach((right) => {
         const accordedRightDoc: Prisma.AccordedRightUncheckedCreateInput = {
             iid: IID.id,
             ...right,
@@ -33,7 +41,7 @@ export const convertIID = (IID: any) => {
         accordedRightDocs.push(accordedRightDoc);
     });
 
-    IID.resources.forEach((resource) => {
+    IID.linkedResource.forEach((resource) => {
         const linkedResourceDoc: Prisma.LinkedResourceUncheckedCreateInput = {
             iid: IID.id,
             ...resource,
@@ -41,7 +49,7 @@ export const convertIID = (IID: any) => {
         linkedResourceDocs.push(linkedResourceDoc);
     });
 
-    IID.entities.forEach((entity) => {
+    IID.linkedEntity.forEach((entity) => {
         const linkedEntityDoc: Prisma.LinkedEntityUncheckedCreateInput = {
             iid: IID.id,
             ...entity,

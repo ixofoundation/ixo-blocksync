@@ -1,26 +1,31 @@
+import { QueryBondsDetailedResponse } from "@ixo/impactxclient-sdk/types/codegen/ixo/bonds/v1beta1/query";
 import { Prisma } from "@prisma/client";
 import * as BondHandler from "../handlers/bond_handler";
 
-export const syncBondsInfo = async (bondsInfo: any, timestamp: Date) => {
-    bondsInfo.forEach(async (info: any) => {
-        const amount = new Prisma.Decimal(info.spot_price[0].amount);
-        const bondExists = await BondHandler.listBondByBondDid(info.did);
+export const syncBondsInfo = async (
+    bondsInfo: QueryBondsDetailedResponse,
+    timestamp: Date,
+) => {
+    bondsInfo.bondsDetailed.forEach(async (bond) => {
+        const amount = new Prisma.Decimal(bond.spotPrice[0].amount);
+        const denom = bond.spotPrice[0].denom;
+        const bondExists = await BondHandler.listBondByBondDid(bond.bondDid);
         if (bondExists !== null) {
-            const lastPrice = await BondHandler.getLastPrice(info.did);
+            const lastPrice = await BondHandler.getLastPrice(bond.bondDid);
             if (lastPrice !== null && lastPrice !== undefined) {
                 if (!lastPrice.price.equals(amount)) {
                     await BondHandler.createPriceEntry({
-                        bondDid: info.did,
+                        bondDid: bond.bondDid,
                         time: timestamp,
-                        denom: info.spot_price[0].denom,
+                        denom: denom,
                         price: amount,
                     });
                 }
             } else {
                 await BondHandler.createPriceEntry({
-                    bondDid: info.did,
+                    bondDid: bond.bondDid,
                     time: timestamp,
-                    denom: info.spot_price[0].denom,
+                    denom: denom,
                     price: amount,
                 });
             }

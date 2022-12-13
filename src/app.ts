@@ -1,5 +1,4 @@
 import express, { Request, Response, NextFunction } from "express";
-import expressWs from "express-ws";
 import cors from "cors";
 import bodyParser from "body-parser";
 import * as logger from "./util/logger";
@@ -8,7 +7,6 @@ import * as Sentry from "@sentry/node";
 import postgraphile from "postgraphile";
 
 import * as ProjectHandler from "./handlers/project_handler";
-import * as DidHandler from "./handlers/did_handler";
 import * as IidHandler from "./handlers/iid_handler";
 import * as StatHandler from "./handlers/stats_handler";
 import * as EventHandler from "./handlers/event_handler";
@@ -16,10 +14,18 @@ import * as AuthHandler from "./handlers/auth_handler";
 import * as BondHandler from "./handlers/bond_handler";
 import * as TransactionHandler from "./handlers/transaction_handler";
 import * as BlockHandler from "./handlers/block_handler";
+import * as PaymentHandler from "./handlers/payment_handler";
 import { sendTransaction } from "./util/connection";
 import { SENTRYDSN, DATABASE_URL } from "./util/secrets";
 
-export const app = expressWs(express()).app;
+import swaggerUi from "swagger-ui-express";
+const swaggerFile = require(`${__dirname}/../../swagger.json`);
+
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
+import { getAccountBonds } from "./util/proto";
+
+export const app = express();
 
 Sentry.init({ dsn: SENTRYDSN, tracesSampleRate: 1.0 });
 app.use(cors());
@@ -44,6 +50,15 @@ app.use(
         dynamicJson: true,
     }),
 );
+app.use("/swagger", swaggerUi.serve, swaggerUi.setup(swaggerFile));
+app.use(helmet());
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
+app.use(limiter);
 
 app.get("/", (req: Request, res) => {
     res.send("API is Running");
@@ -63,19 +78,6 @@ app.get(
         }
     },
 );
-app.ws("/api/bonds/listBonds", async (ws, req, next) => {
-    ws.on("message", async () => {
-        try {
-            const bonds = await BondHandler.listAllBonds(
-                req.query.page ? String(req.query.page) : undefined,
-                req.query.size ? String(req.query.size) : undefined,
-            );
-            ws.send(JSON.stringify(bonds));
-        } catch (error) {
-            next(error);
-        }
-    });
-});
 
 app.get(
     "/api/bonds/listBondsFiltered",
@@ -92,20 +94,6 @@ app.get(
         }
     },
 );
-app.ws("/api/bonds/listBondsFiltered", async (ws, req, next) => {
-    ws.on("message", async () => {
-        try {
-            const bonds = await BondHandler.listAllBondsFiltered(
-                req.body,
-                req.query.page ? String(req.query.page) : undefined,
-                req.query.size ? String(req.query.size) : undefined,
-            );
-            ws.send(JSON.stringify(bonds));
-        } catch (error) {
-            next(error);
-        }
-    });
-});
 
 app.get(
     "/api/bonds/getByBondDid/:bondDid",
@@ -120,18 +108,6 @@ app.get(
         }
     },
 );
-app.ws("/api/bonds/getByBondDid/:bondDid", async (ws, req, next) => {
-    ws.on("message", async () => {
-        try {
-            const bond = await BondHandler.listBondByBondDid(
-                req.params.bondDid,
-            );
-            ws.send(JSON.stringify(bond));
-        } catch (error) {
-            next(error);
-        }
-    });
-});
 
 app.get(
     "/api/bonds/getPriceHistoryByBondDid/:bondDid",
@@ -150,25 +126,6 @@ app.get(
         }
     },
 );
-app.ws(
-    "/api/bonds/getPriceHistoryByBondDid/:bondDid",
-    async (ws, req, next) => {
-        ws.on("message", async () => {
-            try {
-                const priceHistory =
-                    await BondHandler.listBondPriceHistoryByBondDid(
-                        req.params.bondDid,
-                        req.body,
-                        req.query.page ? String(req.query.page) : undefined,
-                        req.query.size ? String(req.query.size) : undefined,
-                    );
-                ws.send(JSON.stringify(priceHistory));
-            } catch (error) {
-                next(error);
-            }
-        });
-    },
-);
 
 app.get(
     "/api/bonds/getByBondCreatorDid/:creatorDid",
@@ -185,20 +142,18 @@ app.get(
         }
     },
 );
-app.ws("/api/bonds/getByBondCreatorDid/:creatorDid", async (ws, req, next) => {
-    ws.on("message", async () => {
+
+app.get(
+    "/api/bonds/getAccountBonds/:account",
+    async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const bonds = await BondHandler.listBondByCreatorDid(
-                req.params.creatorDid,
-                req.query.page ? String(req.query.page) : undefined,
-                req.query.size ? String(req.query.size) : undefined,
-            );
-            ws.send(JSON.stringify(bonds));
+            const bonds = await getAccountBonds(req.params.address);
+            res.json(bonds);
         } catch (error) {
             next(error);
         }
-    });
-});
+    },
+);
 
 app.get(
     "/api/bond/get/outcomepayments/:bonddid",
@@ -215,20 +170,6 @@ app.get(
         }
     },
 );
-app.ws("/api/bond/get/outcomepayments/:bonddid", async (ws, req, next) => {
-    ws.on("message", async () => {
-        try {
-            const outcomePayments = await BondHandler.getOutcomeHistoryByDid(
-                req.params.bonddid,
-                req.query.page ? String(req.query.page) : undefined,
-                req.query.size ? String(req.query.size) : undefined,
-            );
-            ws.send(JSON.stringify(outcomePayments));
-        } catch (error) {
-            next(error);
-        }
-    });
-});
 
 app.get(
     "/api/bond/get/alphas/:bonddid",
@@ -245,20 +186,6 @@ app.get(
         }
     },
 );
-app.ws("/api/bond/get/alphas/:bonddid", async (ws, req, next) => {
-    ws.on("message", async () => {
-        try {
-            const alphaHistory = await BondHandler.getAlphaHistoryByDid(
-                req.params.bonddid,
-                req.query.page ? String(req.query.page) : undefined,
-                req.query.size ? String(req.query.size) : undefined,
-            );
-            ws.send(JSON.stringify(alphaHistory));
-        } catch (error) {
-            next(error);
-        }
-    });
-});
 
 app.get(
     "/api/bond/get/transactions/:bonddid",
@@ -275,20 +202,6 @@ app.get(
         }
     },
 );
-app.ws("/api/bond/get/transactions/:bonddid", async (ws, req, next) => {
-    ws.on("message", async () => {
-        try {
-            const transactions = await BondHandler.getTransactionHistoryBond(
-                req.params.bonddid,
-                req.query.page ? String(req.query.page) : undefined,
-                req.query.size ? String(req.query.size) : undefined,
-            );
-            ws.send(JSON.stringify(transactions));
-        } catch (error) {
-            next(error);
-        }
-    });
-});
 
 app.get(
     "/api/bond/get/transactions/bybuyerdid/:buyerdid",
@@ -304,24 +217,6 @@ app.get(
         } catch (error) {
             next(error);
         }
-    },
-);
-app.ws(
-    "/api/bond/get/transactions/bybuyerdid/:buyerdid",
-    async (ws, req, next) => {
-        ws.on("message", async () => {
-            try {
-                const transactions =
-                    await BondHandler.getTransactionHistoryBondBuyer(
-                        req.params.buyerdid,
-                        req.query.page ? String(req.query.page) : undefined,
-                        req.query.size ? String(req.query.size) : undefined,
-                    );
-                ws.send(JSON.stringify(transactions));
-            } catch (error) {
-                next(error);
-            }
-        });
     },
 );
 
@@ -341,24 +236,6 @@ app.get(
         }
     },
 );
-app.ws(
-    "/api/bond/get/withdraw/reserve/bybonddid/:bonddid",
-    async (ws, req, next) => {
-        ws.on("message", async () => {
-            try {
-                const reserveWithdrawals =
-                    await BondHandler.getWithdrawHistoryFromBondReserveByBondDid(
-                        req.params.bonddid,
-                        req.query.page ? String(req.query.page) : undefined,
-                        req.query.size ? String(req.query.size) : undefined,
-                    );
-                ws.send(JSON.stringify(reserveWithdrawals));
-            } catch (error) {
-                next(error);
-            }
-        });
-    },
-);
 
 app.get(
     "/api/bond/get/withdraw/reserve/byrecipientdid/:recipientdid",
@@ -374,24 +251,6 @@ app.get(
         } catch (error) {
             next(error);
         }
-    },
-);
-app.ws(
-    "/api/bond/get/withdraw/reserve/byrecipientdid/:recipientdid",
-    async (ws, req, next) => {
-        ws.on("message", async () => {
-            try {
-                const reserveWithdrawals =
-                    await BondHandler.getWithdrawHistoryFromBondReserveByWithdrawerId(
-                        req.params.recipientdid,
-                        req.query.page ? String(req.query.page) : undefined,
-                        req.query.size ? String(req.query.size) : undefined,
-                    );
-                ws.send(JSON.stringify(reserveWithdrawals));
-            } catch (error) {
-                next(error);
-            }
-        });
     },
 );
 
@@ -411,24 +270,6 @@ app.get(
         }
     },
 );
-app.ws(
-    "/api/bond/get/withdraw/share/bybondid/:bonddid",
-    async (ws, req, next) => {
-        ws.on("message", async () => {
-            try {
-                const shareWithdrawals =
-                    await BondHandler.getWithdrawHistoryFromBondShareByBondDid(
-                        req.params.bonddid,
-                        req.query.page ? String(req.query.page) : undefined,
-                        req.query.size ? String(req.query.size) : undefined,
-                    );
-                ws.send(JSON.stringify(shareWithdrawals));
-            } catch (error) {
-                next(error);
-            }
-        });
-    },
-);
 
 app.get(
     "/api/bond/get/withdraw/share/byrecipientdid/:recipientdid",
@@ -446,24 +287,6 @@ app.get(
         }
     },
 );
-app.ws(
-    "/api/bond/get/withdraw/share/byrecipientdid/:recipientdid",
-    async (ws, req, next) => {
-        ws.on("message", async () => {
-            try {
-                const shareWithdrawals =
-                    await BondHandler.getWithdrawHistoryFromBondShareByRecipientDid(
-                        req.params.recipientdid,
-                        req.query.page ? String(req.query.page) : undefined,
-                        req.query.size ? String(req.query.size) : undefined,
-                    );
-                ws.send(JSON.stringify(shareWithdrawals));
-            } catch (error) {
-                next(error);
-            }
-        });
-    },
-);
 
 app.get(
     "/api/project/listProjects",
@@ -479,19 +302,6 @@ app.get(
         }
     },
 );
-app.ws("/api/project/listProjects", async (ws, req, next) => {
-    ws.on("message", async () => {
-        try {
-            const projects = await ProjectHandler.listAllProjects(
-                req.query.page ? String(req.query.page) : undefined,
-                req.query.size ? String(req.query.size) : undefined,
-            );
-            ws.send(JSON.stringify(projects));
-        } catch (error) {
-            next(error);
-        }
-    });
-});
 
 app.get(
     "/api/project/listProjectsFiltered",
@@ -508,20 +318,6 @@ app.get(
         }
     },
 );
-app.ws("/api/project/listProjectsFiltered", async (ws, req, next) => {
-    ws.on("message", async () => {
-        try {
-            const projects = await ProjectHandler.listAllProjectsFiltered(
-                req.body,
-                req.query.page ? String(req.query.page) : undefined,
-                req.query.size ? String(req.query.size) : undefined,
-            );
-            ws.send(JSON.stringify(projects));
-        } catch (error) {
-            next(error);
-        }
-    });
-});
 
 app.get(
     "/api/project/getByEntityType/:entityType",
@@ -538,20 +334,6 @@ app.get(
         }
     },
 );
-app.ws("/api/project/getByEntityType/:entityType", async (ws, req, next) => {
-    ws.on("message", async () => {
-        try {
-            const projects = await ProjectHandler.listProjectByEntityType(
-                req.params.entityType,
-                req.query.page ? String(req.query.page) : undefined,
-                req.query.size ? String(req.query.size) : undefined,
-            );
-            ws.send(JSON.stringify(projects));
-        } catch (error) {
-            next(error);
-        }
-    });
-});
 
 app.get(
     "/api/project/getByProjectDid/:projectDid",
@@ -566,18 +348,22 @@ app.get(
         }
     },
 );
-app.ws("/api/project/getByProjectDid/:projectDid", async (ws, req, next) => {
-    ws.on("message", async () => {
+
+app.get(
+    "/api/project/getProjectsByCreatedAndAgent/:did",
+    async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const project = await ProjectHandler.listProjectByProjectDid(
-                req.params.projectDid,
+            const project = await ProjectHandler.getProjectsByCreatedAndAgent(
+                req.params.did,
+                req.query.page ? String(req.query.page) : undefined,
+                req.query.size ? String(req.query.size) : undefined,
             );
-            ws.send(JSON.stringify(project));
+            res.json(project);
         } catch (error) {
             next(error);
         }
-    });
-});
+    },
+);
 
 app.get(
     "/api/project/getByProjectSenderDid/:senderDid",
@@ -592,23 +378,6 @@ app.get(
         } catch (error) {
             next(error);
         }
-    },
-);
-app.ws(
-    "/api/project/getByProjectSenderDid/:senderDid",
-    async (ws, req, next) => {
-        ws.on("message", async () => {
-            try {
-                const project = await ProjectHandler.listProjectBySenderDid(
-                    req.params.senderDid,
-                    req.query.page ? String(req.query.page) : undefined,
-                    req.query.size ? String(req.query.size) : undefined,
-                );
-                ws.send(JSON.stringify(project));
-            } catch (error) {
-                next(error);
-            }
-        });
     },
 );
 
@@ -631,26 +400,6 @@ app.get(
         }
     },
 );
-app.ws("/api/project/shields/status/:projectDid", async (ws, req, next) => {
-    ws.on("message", async () => {
-        try {
-            const project = await ProjectHandler.listProjectByProjectDid(
-                req.params.projectDid,
-            );
-            ws.send(
-                JSON.stringify({
-                    schemaVersion: 1,
-                    label: "status",
-                    message: project?.status ? project?.status : "null",
-                    color: "blue",
-                    cacheSeconds: 300,
-                }),
-            );
-        } catch (error) {
-            next(error);
-        }
-    });
-});
 
 app.get(
     "/api/project/getProjectAccounts/:projectDid",
@@ -666,41 +415,6 @@ app.get(
         }
     },
 );
-app.ws("/api/project/getProjectAccounts/:projectDid", async (ws, req, next) => {
-    ws.on("message", async () => {
-        try {
-            const projectAccounts =
-                await ProjectHandler.getProjectAccountsFromChain(
-                    req.params.projectDid,
-                );
-            ws.send(JSON.stringify(projectAccounts));
-        } catch (error) {
-            next(error);
-        }
-    });
-});
-
-app.get(
-    "/api/did/getByDid/:did",
-    async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const did = await DidHandler.getDidByDid(req.params.did);
-            res.json(did);
-        } catch (error) {
-            next(error);
-        }
-    },
-);
-app.ws("/api/did/getByDid/:did", async (ws, req, next) => {
-    ws.on("message", async () => {
-        try {
-            const did = await DidHandler.getDidByDid(req.params.did);
-            ws.send(JSON.stringify(did));
-        } catch (error) {
-            next(error);
-        }
-    });
-});
 
 app.get(
     "api/iid/getByIid/:iid",
@@ -713,16 +427,6 @@ app.get(
         }
     },
 );
-app.ws("api/iid/getByIid/:iid", async (ws, req, next) => {
-    ws.on("message", async () => {
-        try {
-            const iid = await IidHandler.getIidByIid(req.params.iid);
-            ws.send(JSON.stringify(iid));
-        } catch (error) {
-            next(error);
-        }
-    });
-});
 
 app.get(
     "/api/event/getEventByType/:type",
@@ -739,20 +443,6 @@ app.get(
         }
     },
 );
-app.ws("/api/event/getEventByType/:type", async (ws, req, next) => {
-    ws.on("message", async () => {
-        try {
-            const events = await EventHandler.getEventsByType(
-                req.params.type,
-                req.query.page ? String(req.query.page) : undefined,
-                req.query.size ? String(req.query.size) : undefined,
-            );
-            ws.send(JSON.stringify(events));
-        } catch (error) {
-            next(error);
-        }
-    });
-});
 
 app.get(
     "/api/stats/listStats",
@@ -765,16 +455,6 @@ app.get(
         }
     },
 );
-app.ws("/api/stats/listStats", async (ws, req, next) => {
-    ws.on("message", async () => {
-        try {
-            const stats = await StatHandler.getStats();
-            ws.send(JSON.stringify(stats));
-        } catch (error) {
-            next(error);
-        }
-    });
-});
 
 app.get(
     "api/transactions/listTransactionsByType/:type(*)",
@@ -792,24 +472,6 @@ app.get(
         }
     },
 );
-app.ws(
-    "api/transactions/listTransactionsByType/:type(*)",
-    async (ws, req, next) => {
-        ws.on("message", async () => {
-            try {
-                const transactions =
-                    await TransactionHandler.listTransactionsByType(
-                        req.params.type,
-                        req.query.page ? String(req.query.page) : undefined,
-                        req.query.size ? String(req.query.size) : undefined,
-                    );
-                ws.send(JSON.stringify(transactions));
-            } catch (error) {
-                next(error);
-            }
-        });
-    },
-);
 
 app.get(
     "api/transactions/listTransactionsByAddress/:address",
@@ -825,24 +487,6 @@ app.get(
         } catch (error) {
             next(error);
         }
-    },
-);
-app.ws(
-    "api/transactions/listTransactionsByAddress/:address",
-    async (ws, req, next) => {
-        ws.on("message", async () => {
-            try {
-                const transactions =
-                    await TransactionHandler.listTransactionsByAddress(
-                        req.params.address,
-                        req.query.page ? String(req.query.page) : undefined,
-                        req.query.size ? String(req.query.size) : undefined,
-                    );
-                ws.send(JSON.stringify(transactions));
-            } catch (error) {
-                next(error);
-            }
-        });
     },
 );
 
@@ -863,25 +507,6 @@ app.get(
         }
     },
 );
-app.ws(
-    "api/transactions/listTransactionsByAddressAndType/:address/:type(*)",
-    async (ws, req, next) => {
-        ws.on("message", async () => {
-            try {
-                const transactions =
-                    await TransactionHandler.listTransactionsByAddressAndType(
-                        req.params.address,
-                        req.params.type,
-                        req.query.page ? String(req.query.page) : undefined,
-                        req.query.size ? String(req.query.size) : undefined,
-                    );
-                ws.send(JSON.stringify(transactions));
-            } catch (error) {
-                next(error);
-            }
-        });
-    },
-);
 
 app.get(
     "/api/block/getLastSyncedBlock",
@@ -894,16 +519,20 @@ app.get(
         }
     },
 );
-app.ws("/api/block/getLastSyncedBlock", async (ws, req, next) => {
-    ws.on("message", async () => {
+
+app.get(
+    "api/block/getPaymentTemplateById/:id",
+    async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const block = await BlockHandler.getLastSyncedBlock();
-            ws.send(JSON.stringify(block));
+            const template = await PaymentHandler.getPaymentTemplateById(
+                req.params.id,
+            );
+            res.json(template);
         } catch (error) {
             next(error);
         }
-    });
-});
+    },
+);
 
 app.post(
     "/api/blockchain/txs",

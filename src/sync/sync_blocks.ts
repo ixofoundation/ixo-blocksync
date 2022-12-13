@@ -1,4 +1,4 @@
-import * as Connection from "../util/connection";
+import * as Proto from "../util/proto";
 import * as ChainHandler from "../handlers/chain_handler";
 import { blockQueue } from "./queue";
 import { sleep } from "../util/sleep";
@@ -15,10 +15,16 @@ export const startSync = async () => {
 
     while (syncing) {
         try {
-            const blockResult = await Connection.getBlockResult(currentBlock);
-            if (blockResult !== null) {
-                const block = await Connection.getBlock(currentBlock);
-                await blockQueue.add("Blocks", block);
+            const block = await Proto.getBlockbyHeight(currentBlock);
+            const txsEvent = await Proto.getTxsEvent(currentBlock);
+            const bondsInfo = await Proto.getBondsInfo();
+            if (block !== undefined && txsEvent !== undefined) {
+                const data = {
+                    block,
+                    txsEvent,
+                    bondsInfo,
+                };
+                await blockQueue.add("Blocks", data);
                 currentBlock++;
             } else {
                 await sleep(20000);
@@ -32,9 +38,9 @@ export const startSync = async () => {
 export const stopSync = async () => {
     syncing = false;
     await blockQueue.drain();
-}
+};
 
 export const restartSync = async () => {
     await stopSync();
     await startSync();
-}
+};
