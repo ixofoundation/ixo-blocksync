@@ -111,9 +111,14 @@ export const getAccountBonds = async (address: string) => {
 };
 
 export const decode = async (tx: any) => {
-    const registry = createRegistry();
-    //@ts-ignore
-    return registry.decode(tx);
+    try {
+        const registry = createRegistry();
+        //@ts-ignore
+        return registry.decode(tx);
+    } catch (error) {
+        console.log(error);
+        return;
+    }
 };
 
 function Utf8ArrayToStr(array: Uint8Array) {
