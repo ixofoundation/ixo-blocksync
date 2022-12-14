@@ -110,6 +110,17 @@ export const getAccountBonds = async (address: string) => {
     }
 };
 
+export const getIid = async (did: string) => {
+    try {
+        const client = await createQueryClient(RPC);
+        const iid = await client.ixo.iid.v1beta1.iidDocument({ id: did });
+        return iid.iidDocument;
+    } catch (error) {
+        console.log(error);
+        return;
+    }
+};
+
 export const decode = async (tx: any) => {
     try {
         const registry = createRegistry();
