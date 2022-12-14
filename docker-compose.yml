@@ -2,7 +2,7 @@ version: "3.6"
 services:
     block-sync:
         container_name: block-sync
-        image: northroomza/ixo-blocksync:latest
+        image: northroomza/ixo-blocksync:dev
         env_file: .env
         restart: always
         ports:
@@ -50,5 +50,5 @@ services:
         ports:
             - 5432:5432
         volumes:
-            - ./data/db:/data/db
-            - ./src/prisma/migrations/20221201110145_init/:/docker-entrypoint-initdb.d/
+            - ./data/db:/var/lib/postgresql/data
+            - ./src/prisma/migrations/20221208102440_init/:/docker-entrypoint-initdb.d/
