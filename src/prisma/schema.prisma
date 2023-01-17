@@ -272,19 +272,17 @@ model Claim {
 }
 
 model PaymentTemplate {
-  id              String            @id
-  paymentAmount   Json?
-  paymentMinimum  Json?
-  paymentMaximum  Json?
-  discounts       Json?
-  creatorDid      String
-  creatorAddress  String
-  PaymentContract PaymentContract[]
+  id             String @id
+  paymentAmount  Json?
+  paymentMinimum Json?
+  paymentMaximum Json?
+  discounts      Json?
+  creatorDid     String
+  creatorAddress String
 }
 
 model PaymentContract {
-  id                String          @id
-  paymentTemplate   PaymentTemplate @relation(fields: [paymentTemplateId], references: [id])
+  id                String         @id
   paymentTemplateId String
   payer             String
   recipients        Json?

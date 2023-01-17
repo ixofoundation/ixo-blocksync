@@ -472,9 +472,6 @@ ALTER TABLE "Agent" ADD CONSTRAINT "Agent_projectDid_fkey" FOREIGN KEY ("project
 ALTER TABLE "Claim" ADD CONSTRAINT "Claim_projectDid_fkey" FOREIGN KEY ("projectDid") REFERENCES "Project"("projectDid") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "PaymentContract" ADD CONSTRAINT "PaymentContract_paymentTemplateId_fkey" FOREIGN KEY ("paymentTemplateId") REFERENCES "PaymentTemplate"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "Subscription" ADD CONSTRAINT "Subscription_paymentContractId_fkey" FOREIGN KEY ("paymentContractId") REFERENCES "PaymentContract"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
