@@ -10,6 +10,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Storage {
+  cid  String @id
+  name String
+  ipfs String
+}
+
 model IID {
   id                   String               @id
   versionId            String               @default(uuid())

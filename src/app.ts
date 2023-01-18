@@ -5,7 +5,7 @@ import * as logger from "./util/logger";
 import compression from "compression";
 import * as Sentry from "@sentry/node";
 import postgraphile from "postgraphile";
-
+import * as StorageHandler from "./handlers/storage_handler";
 import * as ProjectHandler from "./handlers/project_handler";
 import * as IidHandler from "./handlers/iid_handler";
 import * as StatHandler from "./handlers/stats_handler";
@@ -62,6 +62,20 @@ app.use(limiter);
 
 app.get("/", (req: Request, res) => {
     res.send("API is Running");
+});
+
+app.post("/storage/store", async (req, res) => {
+    const file = await StorageHandler.store(
+        req.body.name,
+        req.body.contentType,
+        req.body.data,
+    );
+    res.json(file);
+});
+
+app.get("/storage/retrieve/:cid", async (req, res) => {
+    const file = await StorageHandler.retrieve(req.params.cid);
+    res.json(file);
 });
 
 app.get(

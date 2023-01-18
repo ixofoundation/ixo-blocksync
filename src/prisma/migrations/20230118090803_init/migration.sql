@@ -1,4 +1,13 @@
 -- CreateTable
+CREATE TABLE "Storage" (
+    "cid" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "ipfs" TEXT NOT NULL,
+
+    CONSTRAINT "Storage_pkey" PRIMARY KEY ("cid")
+);
+
+-- CreateTable
 CREATE TABLE "IID" (
     "id" TEXT NOT NULL,
     "versionId" TEXT NOT NULL,
