@@ -11,8 +11,8 @@ CREATE TABLE "Storage" (
 CREATE TABLE "IID" (
     "id" TEXT NOT NULL,
     "versionId" TEXT NOT NULL,
-    "updated" TIMESTAMP(3) NOT NULL,
-    "created" TIMESTAMP(3) NOT NULL,
+    "updated" TEXT NOT NULL,
+    "created" TEXT NOT NULL,
     "deactivated" BOOLEAN,
     "entityType" TEXT,
     "startDate" TIMESTAMP(3),

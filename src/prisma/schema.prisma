@@ -19,8 +19,8 @@ model Storage {
 model IID {
   id                   String               @id
   versionId            String               @default(uuid())
-  updated              DateTime
-  created              DateTime
+  updated              String
+  created              String
   deactivated          Boolean?
   entityType           String?
   startDate            DateTime?
