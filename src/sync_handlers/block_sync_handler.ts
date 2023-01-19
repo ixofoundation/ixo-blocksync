@@ -276,9 +276,10 @@ export const syncBlock = async (
                     break;
                 case MsgTypes.createProject:
                     const createProject: MsgCreateProject = msg.value;
-                    const projectData = JSON.parse(
-                        Uint8ArrayToJS(createProject.data),
-                    );
+                    const obj = Uint8ArrayToJS(createProject.data);
+                    console.log("After Uint8ArrayToJS: ", obj);
+                    const projectData = JSON.parse(obj);
+                    console.log("After JSON.parse: ", projectData);
                     await ProjectHandler.createProject({
                         projectDid: createProject.projectDid,
                         txHash: createProject.txHash,
@@ -316,9 +317,10 @@ export const syncBlock = async (
                     break;
                 case MsgTypes.updateProjectDoc:
                     const updateProject: MsgUpdateProjectDoc = msg.value;
-                    const updateProjectData = JSON.parse(
-                        Uint8ArrayToJS(updateProject.data),
-                    );
+                    const obj1 = Uint8ArrayToJS(updateProject.data);
+                    console.log("After Uint8ArrayToJS: ", obj1);
+                    const updateProjectData = JSON.parse(obj1);
+                    console.log("After JSON.parse: ", updateProjectData);
                     await ProjectHandler.updateProject(
                         updateProject.projectDid,
                         JSON.stringify(updateProjectData),
