@@ -63,7 +63,8 @@ docker compose up -d
 
 ---
 
-###Akash
+### Akash
+
 [![Akash](https://raw.githubusercontent.com/ixofoundation/ixo-blocksync/master/akash%20button.svg)](https://github.com/ixofoundation/ixo-blocksync/blob/master/akash.deploy.yaml)
 
 ---
