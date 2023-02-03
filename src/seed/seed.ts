@@ -3,6 +3,7 @@ import { prisma } from "../prisma/prisma_client";
 import { Prisma } from "@prisma/client";
 import { getIid } from "../util/proto";
 
+let alphaErrors = 0;
 const seedAlphas = async () => {
     try {
         const alphas = JSON.parse(
@@ -24,13 +25,16 @@ const seedAlphas = async () => {
                 });
             } catch (error) {
                 console.log(error);
+                alphaErrors++;
             }
         }
     } catch (error) {
         console.log(error);
+        alphaErrors++;
     }
 };
 
+let bondsErrors = 0;
 const seedBonds = async () => {
     try {
         const bonds = JSON.parse(
@@ -76,13 +80,16 @@ const seedBonds = async () => {
                 }
             } catch (error) {
                 console.log(error);
+                bondsErrors++;
             }
         }
     } catch (error) {
         console.log(error);
+        bondsErrors++;
     }
 };
 
+let chainsErrors = 0;
 const seedChains = async () => {
     try {
         const chains = JSON.parse(
@@ -98,13 +105,16 @@ const seedChains = async () => {
                 });
             } catch (error) {
                 console.log(error);
+                chainsErrors++;
             }
         }
     } catch (error) {
         console.log(error);
+        chainsErrors++;
     }
 };
 
+let didsErrors = 0;
 const seedDids = async () => {
     try {
         const dids = JSON.parse(
@@ -196,13 +206,16 @@ const seedDids = async () => {
                 }
             } catch (error) {
                 console.log(error);
+                didsErrors++;
             }
         }
     } catch (error) {
         console.log(error);
+        didsErrors++;
     }
 };
 
+let eventsErrors = 0;
 const seedEvents = async () => {
     try {
         const events = JSON.parse(
@@ -222,13 +235,16 @@ const seedEvents = async () => {
                 });
             } catch (error) {
                 console.log(error);
+                eventsErrors++;
             }
         }
     } catch (error) {
         console.log(error);
+        eventsErrors++;
     }
 };
 
+let paymentoutcomesErrors = 0;
 const seedPaymentOutcomes = async () => {
     try {
         const paymentOutcomes = JSON.parse(
@@ -251,13 +267,16 @@ const seedPaymentOutcomes = async () => {
                 });
             } catch (error) {
                 console.log(error);
+                paymentoutcomesErrors++;
             }
         }
     } catch (error) {
         console.log(error);
+        paymentoutcomesErrors++;
     }
 };
 
+let projectsErrors = 0;
 const seedProjects = async () => {
     try {
         const projects = JSON.parse(
@@ -299,11 +318,16 @@ const seedProjects = async () => {
                 });
             } catch (error) {
                 console.log(error);
+                projectsErrors++;
             }
         }
-    } catch (error) {}
+    } catch (error) {
+        console.log(error);
+        projectsErrors++;
+    }
 };
 
+let statsErrors = 0;
 const seedStats = async () => {
     try {
         const stats = JSON.parse(
@@ -327,13 +351,16 @@ const seedStats = async () => {
                 });
             } catch (error) {
                 console.log(error);
+                statsErrors++;
             }
         }
     } catch (error) {
         console.log(error);
+        statsErrors++;
     }
 };
 
+let transactionsErrors = 0;
 const seedTransactions = async () => {
     try {
         const transactions = JSON.parse(
@@ -353,13 +380,16 @@ const seedTransactions = async () => {
                 });
             } catch (error) {
                 console.log(error);
+                transactionsErrors++;
             }
         }
     } catch (error) {
         console.log(error);
+        transactionsErrors++;
     }
 };
 
+let withdrawreservesErrors = 0;
 const seedWithdrawReserves = async () => {
     try {
         const withdrawReserves = JSON.parse(
@@ -382,13 +412,16 @@ const seedWithdrawReserves = async () => {
                 });
             } catch (error) {
                 console.log(error);
+                withdrawreservesErrors++;
             }
         }
     } catch (error) {
         console.log(error);
+        withdrawreservesErrors++;
     }
 };
 
+let withdrawsharesErrors = 0;
 const seedWithdrawShares = async () => {
     try {
         const withdrawShares = JSON.parse(
@@ -409,8 +442,57 @@ const seedWithdrawShares = async () => {
                 });
             } catch (error) {
                 console.log(error);
+                withdrawsharesErrors++;
             }
         }
+    } catch (error) {
+        console.log(error);
+        withdrawsharesErrors++;
+    }
+};
+
+const countRecords = async () => {
+    try {
+        const alphas = await prisma.alpha.count();
+        const bonds = await prisma.bond.count();
+        const chains = await prisma.chain.count();
+        const dids = await prisma.iID.count();
+        const events = await prisma.event.count();
+        const paymentoutcomes = await prisma.outcomePayment.count();
+        const projects = await prisma.project.count();
+        const stats = await prisma.stats.count();
+        const transactions = await prisma.bondBuy.count();
+        const withdrawreserves = await prisma.reserveWithdrawal.count();
+        const withdrawshares = await prisma.shareWithdrawal.count();
+
+        console.log({
+            Succeeded: {
+                alphas,
+                bonds,
+                chains,
+                dids,
+                events,
+                paymentoutcomes,
+                projects,
+                stats,
+                transactions,
+                withdrawreserves,
+                withdrawshares,
+            },
+            Failed: {
+                alphas: alphaErrors,
+                bonds: bondsErrors,
+                chains: chainsErrors,
+                dids: didsErrors,
+                events: eventsErrors,
+                paymentoutcomes: paymentoutcomesErrors,
+                projects: projectsErrors,
+                stats: statsErrors,
+                transactions: transactionsErrors,
+                withdrawreserves: withdrawreservesErrors,
+                withdrawshares: withdrawsharesErrors,
+            },
+        });
     } catch (error) {
         console.log(error);
     }
@@ -427,3 +509,5 @@ const seedWithdrawShares = async () => {
 // seedTransactions();
 // seedWithdrawReserves();
 // seedWithdrawShares();
+
+// countRecords();
