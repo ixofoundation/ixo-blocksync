@@ -6,6 +6,8 @@ import { REST } from "../util/secrets";
 
 axiosRetry(axios, { retries: 3 });
 
+const prefixes = ["did:x:", "did:ixo:", "did:sov:"];
+
 export const createProject = async (projectDoc: Prisma.ProjectCreateInput) => {
     try {
         return prisma.project.create({ data: projectDoc });
@@ -215,7 +217,13 @@ export const listAllProjectsFiltered = async (
 
 export const listProjectByProjectDid = async (projectDid: string) => {
     return prisma.project.findFirst({
-        where: { projectDid: projectDid },
+        where: {
+            OR: [
+                { projectDid: prefixes[0] + projectDid },
+                { projectDid: prefixes[1] + projectDid },
+                { projectDid: prefixes[2] + projectDid },
+            ],
+        },
     });
 };
 
@@ -244,13 +252,25 @@ export const listProjectBySenderDid = async (
 ) => {
     if (page && size) {
         return prisma.project.findMany({
-            where: { senderDid: senderDid },
+            where: {
+                OR: [
+                    { senderDid: prefixes[0] + senderDid },
+                    { senderDid: prefixes[1] + senderDid },
+                    { senderDid: prefixes[2] + senderDid },
+                ],
+            },
             skip: Number(size) * (Number(page) - 1),
             take: Number(size),
         });
     } else {
         return prisma.project.findMany({
-            where: { senderDid: senderDid },
+            where: {
+                OR: [
+                    { senderDid: prefixes[0] + senderDid },
+                    { senderDid: prefixes[1] + senderDid },
+                    { senderDid: prefixes[2] + senderDid },
+                ],
+            },
         });
     }
 };
@@ -260,7 +280,6 @@ export const getProjectsByCreatedAndAgent = async (
     page?: string,
     size?: string,
 ) => {
-    const prefixes = ["did:x:", "did:ixo:", "did:sov:"];
     if (page && size) {
         return prisma.project.findMany({
             where: {

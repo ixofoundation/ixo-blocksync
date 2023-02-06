@@ -1,6 +1,8 @@
 import { prisma } from "../prisma/prisma_client";
 import { Prisma } from "@prisma/client";
 
+const prefixes = ["did:x:", "did:ixo:", "did:sov:"];
+
 export const createIid = async (
     iidDoc: Prisma.IIDCreateInput,
     verificationMethodDocs: Prisma.VerificationMethodUncheckedCreateInput[],
@@ -331,7 +333,13 @@ export const updateMetadata = async (id: string, meta: any) => {
 
 export const getIidByIid = async (id: string) => {
     return prisma.iID.findFirst({
-        where: { id: id },
+        where: {
+            OR: [
+                { id: prefixes[0] + id },
+                { id: prefixes[1] + id },
+                { id: prefixes[2] + id },
+            ],
+        },
         include: {
             VerificationMethod: true,
             Service: true,

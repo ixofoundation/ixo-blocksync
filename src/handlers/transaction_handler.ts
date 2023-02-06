@@ -1,5 +1,7 @@
 import { prisma } from "../prisma/prisma_client";
 
+const prefixes = ["did:x:", "did:ixo:", "did:sov:"];
+
 export const listTransactionsByType = async (
     type: string,
     page?: string,
@@ -25,7 +27,13 @@ export const listTransactionsByAddress = async (
 ) => {
     if (page && size) {
         return prisma.transaction.findMany({
-            where: { from: address },
+            where: {
+                OR: [
+                    { from: prefixes[0] + address },
+                    { from: prefixes[1] + address },
+                    { from: prefixes[2] + address },
+                ],
+            },
             skip: Number(size) * (Number(page) - 1),
             take: Number(size),
         });
@@ -43,7 +51,14 @@ export const listTransactionsByAddressAndType = async (
     size?: string,
 ) => {
     return prisma.transaction.findMany({
-        where: { from: address, type: type },
+        where: {
+            OR: [
+                { from: prefixes[0] + address },
+                { from: prefixes[1] + address },
+                { from: prefixes[2] + address },
+            ],
+            type: type,
+        },
         skip: Number(size) * (Number(page) - 1),
         take: Number(size),
     });

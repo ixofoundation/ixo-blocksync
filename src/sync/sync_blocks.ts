@@ -27,6 +27,7 @@ export const startSync = async () => {
                 await blockQueue.add("Blocks", data);
                 currentBlock++;
             } else {
+                console.log(`Error Adding Block ${currentBlock} to Queue`);
                 await sleep(20000);
             }
         } catch (error) {
