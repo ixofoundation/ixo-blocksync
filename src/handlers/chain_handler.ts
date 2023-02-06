@@ -37,7 +37,9 @@ export const getChain = async () => {
 
 export const getLastSyncedBlockHeight = async () => {
     try {
-        const res = await prisma.chain.findFirst();
+        const res = await prisma.chain.findFirst({
+            take: -1,
+        });
         if (res) return res.blockHeight;
         else return 1;
     } catch (error) {

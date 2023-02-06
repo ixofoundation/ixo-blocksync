@@ -9,6 +9,7 @@ export const startSync = async () => {
     syncing = true;
 
     let currentBlock = await ChainHandler.getLastSyncedBlockHeight();
+    console.log(`Starting Syncing at Block ${currentBlock}`);
     if (currentBlock !== 1) {
         currentBlock++;
     }
