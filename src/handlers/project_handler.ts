@@ -260,12 +260,33 @@ export const getProjectsByCreatedAndAgent = async (
     page?: string,
     size?: string,
 ) => {
+    const prefixes = ["did:x:", "did:ixo:", "did:sov:"];
     if (page && size) {
         return prisma.project.findMany({
             where: {
-                createdBy: did,
-                status: "STARTED",
-                Agent: { some: { agentDid: did } },
+                OR: [
+                    {
+                        createdBy: prefixes[0] + did,
+                        status: "STARTED",
+                        Agent: {
+                            some: { agentDid: { equals: prefixes[0] + did } },
+                        },
+                    },
+                    {
+                        createdBy: prefixes[1] + did,
+                        status: "STARTED",
+                        Agent: {
+                            some: { agentDid: { equals: prefixes[1] + did } },
+                        },
+                    },
+                    {
+                        createdBy: prefixes[2] + did,
+                        status: "STARTED",
+                        Agent: {
+                            some: { agentDid: { equals: prefixes[2] + did } },
+                        },
+                    },
+                ],
             },
             skip: Number(size) * (Number(page) - 1),
             take: Number(size),
@@ -273,9 +294,29 @@ export const getProjectsByCreatedAndAgent = async (
     } else {
         return prisma.project.findMany({
             where: {
-                createdBy: did,
-                status: "STARTED",
-                Agent: { some: { agentDid: did } },
+                OR: [
+                    {
+                        createdBy: prefixes[0] + did,
+                        status: "STARTED",
+                        Agent: {
+                            some: { agentDid: { equals: prefixes[0] + did } },
+                        },
+                    },
+                    {
+                        createdBy: prefixes[1] + did,
+                        status: "STARTED",
+                        Agent: {
+                            some: { agentDid: { equals: prefixes[1] + did } },
+                        },
+                    },
+                    {
+                        createdBy: prefixes[2] + did,
+                        status: "STARTED",
+                        Agent: {
+                            some: { agentDid: { equals: prefixes[2] + did } },
+                        },
+                    },
+                ],
             },
         });
     }
