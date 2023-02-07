@@ -283,24 +283,28 @@ export const getProjectsByCreatedAndAgent = async (
     if (page && size) {
         return prisma.project.findMany({
             where: {
+                status: "STARTED",
                 OR: [
                     {
                         createdBy: prefixes[0] + did,
-                        status: "STARTED",
+                    },
+                    {
                         Agent: {
                             some: { agentDid: prefixes[0] + did },
                         },
                     },
                     {
                         createdBy: prefixes[1] + did,
-                        status: "STARTED",
+                    },
+                    {
                         Agent: {
                             some: { agentDid: prefixes[1] + did },
                         },
                     },
                     {
                         createdBy: prefixes[2] + did,
-                        status: "STARTED",
+                    },
+                    {
                         Agent: {
                             some: { agentDid: prefixes[2] + did },
                         },
@@ -313,24 +317,28 @@ export const getProjectsByCreatedAndAgent = async (
     } else {
         return prisma.project.findMany({
             where: {
+                status: "STARTED",
                 OR: [
                     {
                         createdBy: prefixes[0] + did,
-                        status: "STARTED",
+                    },
+                    {
                         Agent: {
                             some: { agentDid: prefixes[0] + did },
                         },
                     },
                     {
                         createdBy: prefixes[1] + did,
-                        status: "STARTED",
+                    },
+                    {
                         Agent: {
                             some: { agentDid: prefixes[1] + did },
                         },
                     },
                     {
                         createdBy: prefixes[2] + did,
-                        status: "STARTED",
+                    },
+                    {
                         Agent: {
                             some: { agentDid: prefixes[2] + did },
                         },
