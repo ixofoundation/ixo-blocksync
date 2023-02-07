@@ -50,8 +50,6 @@ const worker = new Worker(
                 return;
             }
 
-            console.log(`Syncing Block ${blockHeight}`);
-
             if (transactions.length > 0) {
                 await TransactionSyncHandler.syncTransactions(
                     transactions,
@@ -88,6 +86,10 @@ const worker = new Worker(
                 chainId: currentChain.chainId,
                 blockHeight: blockHeight,
             });
+
+            if (blockHeight % 100 === 0) {
+                console.log(`Synced Block ${blockHeight}`);
+            }
 
             io.emit("Block Synced", { blockHeight, blockHash, timestamp });
         } catch (error) {

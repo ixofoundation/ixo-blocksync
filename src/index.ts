@@ -24,21 +24,22 @@ seedStats();
 
 export let currentChain: Chain;
 const seedChain = async () => {
+    const res = await Proto.getLatestBlock();
     const existingChain = await ChainHandler.getChain();
-    if (existingChain) {
-        currentChain = existingChain;
-    } else {
-        const res = await Proto.getLatestBlock();
-        if (res?.block?.header?.chainId) {
-            const newChain = await ChainHandler.createChain({
-                chainId: res.block?.header?.chainId,
-                blockHeight: 1,
-            });
-            currentChain = newChain;
-        } else {
-            console.log("No Chain Found on RPC Endpoint");
-            process.exit();
+    if (res?.block?.header?.chainId) {
+        if (res.block.header.chainId === existingChain?.chainId) {
+            currentChain = existingChain;
+            return;
         }
+        const newChain = await ChainHandler.createChain({
+            chainId: res.block?.header?.chainId,
+            blockHeight: 1,
+        });
+        currentChain = newChain;
+        return;
+    } else {
+        console.log("No Chain Found on RPC Endpoint");
+        process.exit();
     }
 };
 seedChain();
