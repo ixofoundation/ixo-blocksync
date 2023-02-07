@@ -277,6 +277,7 @@ const seedPaymentOutcomes = async () => {
 };
 
 let projectsErrors = 0;
+let agentsErrors = 0;
 const seedProjects = async () => {
     try {
         const projects = JSON.parse(
@@ -316,6 +317,21 @@ const seedProjects = async () => {
                             project.data.agentStats.investorsPending,
                     },
                 });
+                for (const agent of project.data.agents) {
+                    try {
+                        await prisma.agent.create({
+                            data: {
+                                agentDid: agent.did,
+                                projectDid: project.projectDid,
+                                status: agent.status,
+                                role: agent.role,
+                            },
+                        });
+                    } catch (error) {
+                        console.log(error);
+                        agentsErrors++;
+                    }
+                }
             } catch (error) {
                 console.log(error);
                 projectsErrors++;
@@ -453,6 +469,7 @@ const seedWithdrawShares = async () => {
 
 const countRecords = async () => {
     try {
+        const agents = await prisma.agent.count();
         const alphas = await prisma.alpha.count();
         const bonds = await prisma.bond.count();
         const chains = await prisma.chain.count();
@@ -467,6 +484,7 @@ const countRecords = async () => {
 
         console.log({
             Succeeded: {
+                agents,
                 alphas,
                 bonds,
                 chains,
@@ -480,6 +498,7 @@ const countRecords = async () => {
                 withdrawshares,
             },
             Failed: {
+                agents: agentsErrors,
                 alphas: alphaErrors,
                 bonds: bondsErrors,
                 chains: chainsErrors,

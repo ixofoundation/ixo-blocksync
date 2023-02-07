@@ -27,7 +27,9 @@ export const updateChain = async (chainDoc: Chain) => {
 
 export const getChain = async () => {
     try {
-        const res = await prisma.chain.findFirst();
+        const res = await prisma.chain.findFirst({
+            take: -1,
+        });
         return res;
     } catch (error) {
         console.log(error);
