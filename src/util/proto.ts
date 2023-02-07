@@ -34,6 +34,10 @@ export const getBlockbyHeight = async (height: number | string) => {
             });
         return res;
     } catch (error) {
+        if (error.toString().includes("(18)")) {
+            console.log("Waiting for Blocks");
+            return;
+        }
         console.log(error);
         return;
     }
@@ -60,6 +64,10 @@ export const getTxsEvent = async (height: number) => {
         });
         return res;
     } catch (error) {
+        if (error.toString().includes("(18)")) {
+            console.log("Waiting for Blocks");
+            return;
+        }
         console.log(error);
         return;
     }
