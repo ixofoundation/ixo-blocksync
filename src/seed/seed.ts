@@ -3,6 +3,35 @@ import { prisma } from "../prisma/prisma_client";
 import { Prisma } from "@prisma/client";
 import { getIid } from "../util/proto";
 
+let agentsErrors = 0;
+const seedAgents = async () => {
+    try {
+        const projects = JSON.parse(
+            readFileSync("src/seed/json_exports/projects.json").toString(),
+        );
+        for (const project of projects) {
+            for (const agent of project.data.agents) {
+                try {
+                    await prisma.agent.create({
+                        data: {
+                            agentDid: agent.did,
+                            projectDid: project.projectDid,
+                            status: agent.status,
+                            role: agent.role,
+                        },
+                    });
+                } catch (error) {
+                    console.log(error);
+                    agentsErrors++;
+                }
+            }
+        }
+    } catch (error) {
+        console.log(error);
+        agentsErrors++;
+    }
+};
+
 let alphaErrors = 0;
 const seedAlphas = async () => {
     try {
@@ -277,7 +306,6 @@ const seedPaymentOutcomes = async () => {
 };
 
 let projectsErrors = 0;
-let agentsErrors = 0;
 const seedProjects = async () => {
     try {
         const projects = JSON.parse(
@@ -317,21 +345,6 @@ const seedProjects = async () => {
                             project.data.agentStats.investorsPending,
                     },
                 });
-                for (const agent of project.data.agents) {
-                    try {
-                        await prisma.agent.create({
-                            data: {
-                                agentDid: agent.did,
-                                projectDid: project.projectDid,
-                                status: agent.status,
-                                role: agent.role,
-                            },
-                        });
-                    } catch (error) {
-                        console.log(error);
-                        agentsErrors++;
-                    }
-                }
             } catch (error) {
                 console.log(error);
                 projectsErrors++;
@@ -524,6 +537,7 @@ const countRecords = async () => {
 // seedEvents();
 // seedPaymentOutcomes();
 // seedProjects();
+// seedAgents();
 // seedStats();
 // seedTransactions();
 // seedWithdrawReserves();
