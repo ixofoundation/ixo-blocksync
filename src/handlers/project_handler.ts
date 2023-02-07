@@ -281,64 +281,62 @@ export const getProjectsByCreatedAndAgent = async (
     size?: string,
 ) => {
     if (page && size) {
-        const projects = await prisma.project.findMany({
+        return prisma.project.findMany({
             where: {
                 OR: [
                     {
                         createdBy: prefixes[0] + did,
                         status: "STARTED",
+                        Agent: {
+                            some: { agentDid: prefixes[0] + did },
+                        },
                     },
                     {
                         createdBy: prefixes[1] + did,
                         status: "STARTED",
+                        Agent: {
+                            some: { agentDid: prefixes[1] + did },
+                        },
                     },
                     {
                         createdBy: prefixes[2] + did,
                         status: "STARTED",
+                        Agent: {
+                            some: { agentDid: prefixes[2] + did },
+                        },
                     },
                 ],
-            },
-            include: {
-                Agent: {
-                    select: {
-                        agentDid: true,
-                    },
-                },
             },
             skip: Number(size) * (Number(page) - 1),
             take: Number(size),
         });
-        return projects.filter((project) => {
-            project.Agent.includes({ agentDid: project.createdBy });
-        });
     } else {
-        const projects = await prisma.project.findMany({
+        return prisma.project.findMany({
             where: {
                 OR: [
                     {
                         createdBy: prefixes[0] + did,
                         status: "STARTED",
+                        Agent: {
+                            some: { agentDid: prefixes[0] + did },
+                        },
                     },
                     {
                         createdBy: prefixes[1] + did,
                         status: "STARTED",
+                        Agent: {
+                            some: { agentDid: prefixes[1] + did },
+                        },
                     },
                     {
                         createdBy: prefixes[2] + did,
                         status: "STARTED",
+                        Agent: {
+                            some: { agentDid: prefixes[2] + did },
+                        },
                     },
                 ],
             },
-            include: {
-                Agent: {
-                    select: {
-                        agentDid: true,
-                    },
-                },
-            },
-        });
-        return projects.filter((project) => {
-            project.Agent.includes({ agentDid: project.createdBy });
         });
     }
 };
