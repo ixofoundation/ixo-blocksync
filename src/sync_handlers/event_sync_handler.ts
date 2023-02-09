@@ -10,14 +10,18 @@ export const syncEvents = async (
         console.log(
             `Syncing Transaction Result Events for Block ${blockHeight}`,
         );
-        events.forEach(async (event) => {
-            const eventDoc = getEvent(event);
-            await createEvent({
-                type: eventDoc.type,
-                attributes: eventDoc.attributes,
-                blockHeight: blockHeight,
-                timestamp: timestamp,
-            });
-        });
+        for (const event of events) {
+            try {
+                const eventDoc = getEvent(event);
+                await createEvent({
+                    type: eventDoc.type,
+                    attributes: eventDoc.attributes,
+                    blockHeight: blockHeight,
+                    timestamp: timestamp,
+                });
+            } catch (error) {
+                console.log(error);
+            }
+        }
     }
 };

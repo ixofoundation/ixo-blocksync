@@ -1,14 +1,14 @@
 import * as fs from "fs";
 import * as dotenv from "dotenv";
-import logger from "./logger";
+// import logger from "./logger";
 
-if (fs.existsSync(".env")) {
-    logger.debug("Using .env");
-    dotenv.config({ path: ".env" });
-} else {
-    logger.debug("Using .env-example");
-    dotenv.config({ path: ".env-example" });
-}
+// if (fs.existsSync(".env")) {
+//     logger.debug("Using .env");
+//     dotenv.config({ path: ".env" });
+// } else {
+//     logger.debug("Using .env-example");
+//     dotenv.config({ path: ".env-example" });
+// }
 
 export const PORT = Number(process.env.PORT) || 8080;
 export const ENVIRONMENT = process.env.NODE_ENV;

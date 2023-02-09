@@ -155,10 +155,9 @@ const seedDids = async () => {
                 await prisma.iID.create({
                     data: {
                         id: String(iid?.id),
-                        updated: new Date().toString(),
-                        created: new Date().toString(),
-                        Controller: iid?.controller,
-                        Context: JSON.stringify(iid?.context),
+                        controllers: iid?.controller,
+                        context: JSON.stringify(iid?.context),
+                        alsoKnownAs: iid?.alsoKnownAs || "",
                     },
                 });
                 if (iid?.verificationMethod) {
@@ -170,12 +169,13 @@ const seedDids = async () => {
                                 relationships: "",
                                 type: verificationMethod.type,
                                 controller: verificationMethod.controller,
-                                verificationMaterial:
-                                    verificationMethod.blockchainAccountID ||
-                                    verificationMethod.publicKeyHex ||
-                                    verificationMethod.publicKeyMultibase ||
-                                    verificationMethod.publicKeyBase58 ||
-                                    "",
+                                blockchainAccountID:
+                                    verificationMethod.blockchainAccountID,
+                                publicKeyHex: verificationMethod.publicKeyHex,
+                                publicKeyMultibase:
+                                    verificationMethod.publicKeyMultibase,
+                                publicKeyBase58:
+                                    verificationMethod.publicKeyBase58,
                             },
                         });
                     }
@@ -200,6 +200,7 @@ const seedDids = async () => {
                                 iid: iid.id,
                                 type: accordedRight.type,
                                 mechanism: accordedRight.mechanism,
+                                message: accordedRight.message,
                                 service: accordedRight.service,
                             },
                         });
@@ -228,7 +229,9 @@ const seedDids = async () => {
                             data: {
                                 id: linkedEntity.id,
                                 iid: iid.id,
+                                type: linkedEntity.type,
                                 relationship: linkedEntity.relationship,
+                                service: linkedEntity.type,
                             },
                         });
                     }

@@ -51,4 +51,4 @@ services:
             - 5432:5432
         volumes:
             - ./data/db:/var/lib/postgresql/data
-            - ./src/prisma/migrations/20230118132059_init/:/docker-entrypoint-initdb.d/
+            - ./src/prisma/migrations/20230208124514_init/:/docker-entrypoint-initdb.d/

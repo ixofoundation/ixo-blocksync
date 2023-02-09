@@ -9,53 +9,70 @@ export const convertIID = (IID: MsgCreateIidDocument) => {
     let linkedResourceDocs: Prisma.LinkedResourceUncheckedCreateInput[] = [];
     let linkedEntityDocs: Prisma.LinkedEntityUncheckedCreateInput[] = [];
 
-    IID.verifications.forEach((verification) => {
+    for (const verification of IID.verifications) {
         const verificationMethodDoc: Prisma.VerificationMethodUncheckedCreateInput =
             {
                 iid: IID.id,
-                id: String(verification.method?.id),
-                relationships: verification.relationships,
-                type: String(verification.method?.type),
-                controller: String(verification.method?.controller),
-                verificationMaterial:
-                    String(verification.method?.blockchainAccountID) ||
-                    String(verification.method?.publicKeyHex) ||
-                    String(verification.method?.publicKeyMultibase),
+                id: verification.method?.id || "",
+                relationships: verification.relationships || [],
+                type: verification.method?.type || "",
+                controller: verification.method?.controller || "",
+                blockchainAccountID: verification.method?.blockchainAccountID,
+                publicKeyHex: verification.method?.publicKeyHex,
+                publicKeyMultibase: verification.method?.publicKeyMultibase,
+                publicKeyBase58: verification.method?.publicKeyBase58,
+                context: verification.context,
             };
         verificationMethodDocs.push(verificationMethodDoc);
-    });
+    }
 
-    IID.services.forEach((service) => {
+    for (const service of IID.services) {
         const serviceDoc: Prisma.ServiceUncheckedCreateInput = {
             iid: IID.id,
-            ...service,
+            id: service.id,
+            type: service.type,
+            serviceEndpoint: service.serviceEndpoint,
         };
         serviceDocs.push(serviceDoc);
-    });
+    }
 
-    IID.accordedRight.forEach((right) => {
+    for (const right of IID.accordedRight) {
         const accordedRightDoc: Prisma.AccordedRightUncheckedCreateInput = {
             iid: IID.id,
-            ...right,
+            id: right.id,
+            type: right.type,
+            mechanism: right.mechanism,
+            message: right.message,
+            service: right.service,
         };
         accordedRightDocs.push(accordedRightDoc);
-    });
+    }
 
-    IID.linkedResource.forEach((resource) => {
+    for (const resource of IID.linkedResource) {
         const linkedResourceDoc: Prisma.LinkedResourceUncheckedCreateInput = {
             iid: IID.id,
-            ...resource,
+            id: resource.id,
+            type: resource.type,
+            description: resource.description,
+            mediaType: resource.mediaType,
+            serviceEndpoint: resource.serviceEndpoint,
+            proof: resource.proof,
+            encrypted: resource.encrypted,
+            right: resource.right,
         };
         linkedResourceDocs.push(linkedResourceDoc);
-    });
+    }
 
-    IID.linkedEntity.forEach((entity) => {
+    for (const entity of IID.linkedEntity) {
         const linkedEntityDoc: Prisma.LinkedEntityUncheckedCreateInput = {
             iid: IID.id,
-            ...entity,
+            id: entity.id,
+            type: entity.type,
+            relationship: entity.relationship,
+            service: entity.service,
         };
         linkedEntityDocs.push(linkedEntityDoc);
-    });
+    }
 
     return {
         verificationMethodDocs,

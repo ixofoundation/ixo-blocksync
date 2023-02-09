@@ -1,4 +1,8 @@
-import { createQueryClient, createRegistry } from "@ixo/impactxclient-sdk";
+import {
+    createQueryClient,
+    createRegistry,
+    utils,
+} from "@ixo/impactxclient-sdk";
 import Long from "long";
 import { RPC } from "./secrets";
 
@@ -96,7 +100,7 @@ export const getAccountBonds = async (address: string) => {
         }
         const bonds = await client.ixo.bonds.v1beta1.bondsDetailed();
         const accountBonds = bonds.bondsDetailed.filter((bond) => {
-            const supplyDenom = bond.supply?.denom ?? "";
+            const supplyDenom = bond.supply?.denom || "";
             return denoms.includes(supplyDenom);
         });
         const res: any[] = [];
@@ -140,67 +144,19 @@ export const decode = async (tx: any) => {
     }
 };
 
-function Utf8ArrayToStr(array: Uint8Array) {
-    let out, i, c;
-    let char2, char3;
-
-    out = "";
-    const len = array.length;
-    i = 0;
-    while (i < len) {
-        c = array[i++];
-        switch (c >> 4) {
-            case 0:
-            case 1:
-            case 2:
-            case 3:
-            case 4:
-            case 5:
-            case 6:
-            case 7:
-                // 0xxxxxxx
-                out += String.fromCharCode(c);
-                break;
-            case 12:
-            case 13:
-                // 110x xxxx   10xx xxxx
-                char2 = array[i++];
-                out += String.fromCharCode(((c & 0x1f) << 6) | (char2 & 0x3f));
-                break;
-            case 14:
-                // 1110 xxxx  10xx xxxx  10xx xxxx
-                char2 = array[i++];
-                char3 = array[i++];
-                out += String.fromCharCode(
-                    ((c & 0x0f) << 12) |
-                        ((char2 & 0x3f) << 6) |
-                        ((char3 & 0x3f) << 0),
-                );
-                break;
-        }
-    }
-
-    return out;
-}
-
-export function Uint8ArrayToJS(data: Uint8Array): string {
-    const decodedData = Utf8ArrayToStr(data);
-    return decodedData;
-}
-
 export const getTimestamp = (time: Timestamp) => {
     return new Date(Number(time.seconds) * 1000 + Number(time.nanos) / 1000000);
 };
 
 export const getEvent = (event: Event) => {
     const attributes: any[] = [];
-    event.attributes.forEach(async (attr) => {
+    for (const attr of event.attributes) {
         attributes.push({
-            key: Uint8ArrayToJS(attr.key),
-            value: Uint8ArrayToJS(attr.value),
+            key: utils.conversions.Uint8ArrayToJS(attr.key),
+            value: utils.conversions.Uint8ArrayToJS(attr.value),
             index: attr.index,
         });
-    });
+    }
     return {
         type: event.type,
         attributes: attributes,

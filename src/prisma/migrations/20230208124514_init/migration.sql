@@ -10,22 +10,31 @@ CREATE TABLE "Storage" (
 -- CreateTable
 CREATE TABLE "IID" (
     "id" TEXT NOT NULL,
-    "versionId" TEXT NOT NULL,
-    "updated" TEXT NOT NULL,
-    "created" TEXT NOT NULL,
-    "deactivated" BOOLEAN,
-    "entityType" TEXT,
-    "startDate" TIMESTAMP(3),
-    "endDate" TIMESTAMP(3),
-    "status" INTEGER,
-    "stage" TEXT,
-    "relayerNode" TEXT,
-    "verifiableCredential" TEXT,
-    "credentials" TEXT[],
-    "Controller" TEXT[],
-    "Context" JSONB[],
+    "state" BOOLEAN,
+    "alsoKnownAs" TEXT NOT NULL,
+    "controllers" TEXT[],
+    "context" JSONB[],
 
     CONSTRAINT "IID_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Entity" (
+    "id" TEXT NOT NULL,
+    "type" TEXT NOT NULL,
+    "status" TEXT NOT NULL,
+    "verified" BOOLEAN,
+    "controller" TEXT[],
+    "context" JSONB[],
+    "startDate" TIMESTAMP(3),
+    "endDate" TIMESTAMP(3),
+    "relayerNode" TEXT NOT NULL,
+    "credentials" TEXT[],
+    "ownerDid" TEXT NOT NULL,
+    "ownerAddress" TEXT NOT NULL,
+    "data" JSONB,
+
+    CONSTRAINT "Entity_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -35,7 +44,11 @@ CREATE TABLE "VerificationMethod" (
     "relationships" TEXT[],
     "type" TEXT NOT NULL,
     "controller" TEXT NOT NULL,
-    "verificationMaterial" TEXT NOT NULL,
+    "blockchainAccountID" TEXT,
+    "publicKeyHex" TEXT,
+    "publicKeyMultibase" TEXT,
+    "publicKeyBase58" TEXT,
+    "context" TEXT[],
 
     CONSTRAINT "VerificationMethod_pkey" PRIMARY KEY ("id")
 );
@@ -56,6 +69,7 @@ CREATE TABLE "AccordedRight" (
     "iid" TEXT NOT NULL,
     "type" TEXT NOT NULL,
     "mechanism" TEXT NOT NULL,
+    "message" TEXT NOT NULL,
     "service" TEXT NOT NULL,
 
     CONSTRAINT "AccordedRight_pkey" PRIMARY KEY ("id")
@@ -80,7 +94,9 @@ CREATE TABLE "LinkedResource" (
 CREATE TABLE "LinkedEntity" (
     "id" TEXT NOT NULL,
     "iid" TEXT NOT NULL,
+    "type" TEXT NOT NULL,
     "relationship" TEXT NOT NULL,
+    "service" TEXT NOT NULL,
 
     CONSTRAINT "LinkedEntity_pkey" PRIMARY KEY ("id")
 );
@@ -105,9 +121,9 @@ CREATE TABLE "Bond" (
     "orderQuantityLimits" JSONB,
     "sanityRate" TEXT NOT NULL,
     "sanityMarginPercentage" TEXT NOT NULL,
-    "allowSells" BOOLEAN NOT NULL,
-    "allowReserveWithdrawals" BOOLEAN NOT NULL,
-    "alphaBond" BOOLEAN NOT NULL,
+    "allowSells" BOOLEAN,
+    "allowReserveWithdrawals" BOOLEAN,
+    "alphaBond" BOOLEAN,
     "batchBlocks" TEXT NOT NULL,
     "creatorAddress" TEXT NOT NULL,
     "editorDid" TEXT,
@@ -296,6 +312,19 @@ CREATE TABLE "Claim" (
 );
 
 -- CreateTable
+CREATE TABLE "FundWithdrawal" (
+    "id" SERIAL NOT NULL,
+    "projectDid" TEXT NOT NULL,
+    "senderDid" TEXT NOT NULL,
+    "senderAddress" TEXT NOT NULL,
+    "recipientDid" TEXT NOT NULL,
+    "amount" TEXT NOT NULL,
+    "isRefund" BOOLEAN,
+
+    CONSTRAINT "FundWithdrawal_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "PaymentTemplate" (
     "id" TEXT NOT NULL,
     "paymentAmount" JSONB,
@@ -412,6 +441,9 @@ CREATE TABLE "ExecMsg" (
 );
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Entity_id_key" ON "Entity"("id");
+
+-- CreateIndex
 CREATE INDEX "Chain_chainId_idx" ON "Chain"("chainId");
 
 -- CreateIndex
@@ -434,6 +466,9 @@ CREATE INDEX "WasmContract_code_id_idx" ON "WasmContract"("code_id");
 
 -- CreateIndex
 CREATE INDEX "WasmContract_creator_idx" ON "WasmContract"("creator");
+
+-- AddForeignKey
+ALTER TABLE "Entity" ADD CONSTRAINT "Entity_id_fkey" FOREIGN KEY ("id") REFERENCES "IID"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "VerificationMethod" ADD CONSTRAINT "VerificationMethod_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -479,6 +514,9 @@ ALTER TABLE "Agent" ADD CONSTRAINT "Agent_projectDid_fkey" FOREIGN KEY ("project
 
 -- AddForeignKey
 ALTER TABLE "Claim" ADD CONSTRAINT "Claim_projectDid_fkey" FOREIGN KEY ("projectDid") REFERENCES "Project"("projectDid") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "FundWithdrawal" ADD CONSTRAINT "FundWithdrawal_projectDid_fkey" FOREIGN KEY ("projectDid") REFERENCES "Project"("projectDid") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Subscription" ADD CONSTRAINT "Subscription_paymentContractId_fkey" FOREIGN KEY ("paymentContractId") REFERENCES "PaymentContract"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

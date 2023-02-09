@@ -1,7 +1,7 @@
 import { GetBlockByHeightResponse } from "@ixo/impactxclient-sdk/types/codegen/cosmos/base/tendermint/v1beta1/query";
 import { GetTxsEventResponse } from "@ixo/impactxclient-sdk/types/codegen/cosmos/tx/v1beta1/service";
+import { utils } from "@ixo/impactxclient-sdk";
 import { prisma } from "../prisma/prisma_client";
-import { Uint8ArrayToJS } from "../util/proto";
 
 export const createBlock = async (
     blockHeight: number,
@@ -12,10 +12,10 @@ export const createBlock = async (
 ) => {
     try {
         let total_gas = 0;
-        txsEvent.txResponses.forEach((txRes) => {
+        for (const txRes of txsEvent.txResponses) {
             total_gas += txRes.gasUsed.low;
-        });
-        const proposer_address = Uint8ArrayToJS(
+        }
+        const proposer_address = utils.conversions.Uint8ArrayToJS(
             //@ts-ignore
             block.block?.header?.proposerAddress,
         );

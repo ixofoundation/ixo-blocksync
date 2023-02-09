@@ -1,7 +1,7 @@
 import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
-import * as logger from "./util/logger";
+// import * as logger from "./util/logger";
 import compression from "compression";
 import * as Sentry from "@sentry/node";
 import postgraphile from "postgraphile";
@@ -31,7 +31,7 @@ Sentry.init({ dsn: SENTRYDSN, tracesSampleRate: 1.0 });
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(logger.before);
+// app.use(logger.before);
 app.use(compression());
 app.use(Sentry.Handlers.requestHandler() as express.RequestHandler);
 app.use(
@@ -575,4 +575,4 @@ app.post(
     },
 );
 
-app.use(logger.after);
+// app.use(logger.after);

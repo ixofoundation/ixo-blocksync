@@ -1,22 +1,27 @@
 import * as ProjectHandler from "../handlers/project_handler";
 import * as StatHandler from "../handlers/stats_handler";
 import * as IidHandler from "../handlers/iid_handler";
+import * as EntityHandler from "../handlers/entity_handler";
 import * as BondHandler from "../handlers/bond_handler";
 import * as PaymentHandler from "../handlers/payment_handler";
 import * as WasmHandler from "../handlers/wasm_handler";
 import { MsgTypes } from "../types/Msg";
 import * as IidTypes from "../types/IID";
 import { Tx } from "@ixo/impactxclient-sdk/types/codegen/cosmos/tx/v1beta1/tx";
-import { decode, Uint8ArrayToJS } from "../util/proto";
+import { decode, getTimestamp } from "../util/proto";
+import { utils } from "@ixo/impactxclient-sdk";
 import {
     MsgAddAccordedRight,
+    MsgAddController,
     MsgAddIidContext,
     MsgAddLinkedEntity,
     MsgAddLinkedResource,
     MsgAddService,
     MsgAddVerification,
     MsgCreateIidDocument,
+    MsgDeactivateIID,
     MsgDeleteAccordedRight,
+    MsgDeleteController,
     MsgDeleteIidContext,
     MsgDeleteLinkedEntity,
     MsgDeleteLinkedResource,
@@ -24,7 +29,6 @@ import {
     MsgRevokeVerification,
     MsgSetVerificationRelationships,
     MsgUpdateIidDocument,
-    MsgUpdateIidMeta,
 } from "@ixo/impactxclient-sdk/types/codegen/ixo/iid/v1beta1/tx";
 import {
     MsgCreateAgent,
@@ -34,6 +38,7 @@ import {
     MsgUpdateAgent,
     MsgUpdateProjectDoc,
     MsgUpdateProjectStatus,
+    MsgWithdrawFunds,
 } from "@ixo/impactxclient-sdk/types/codegen/ixo/project/v1/tx";
 import {
     MsgBuy,
@@ -56,13 +61,19 @@ import {
     MsgRevokeDiscount,
     MsgSetPaymentContractAuthorisation,
 } from "@ixo/impactxclient-sdk/types/codegen/ixo/payments/v1/tx";
+import {
+    MsgCreateEntity,
+    MsgTransferEntity,
+    MsgUpdateEntity,
+    MsgUpdateEntityVerified,
+} from "@ixo/impactxclient-sdk/types/codegen/ixo/entity/v1beta1/tx";
 
 export const syncBlock = async (
     transactions: Tx[],
     blockHeight: string,
     timestamp: string,
 ) => {
-    transactions.forEach(async (tx) => {
+    for (const tx of transactions) {
         try {
             const msg = {
                 type: tx.body?.messages[0].typeUrl,
@@ -72,63 +83,116 @@ export const syncBlock = async (
             switch (type) {
                 case MsgTypes.createIid:
                     const createIid: MsgCreateIidDocument = msg.value;
-                    const idocs = IidTypes.convertIID(createIid);
+                    const createIidocs = IidTypes.convertIID(createIid);
                     await IidHandler.createIid(
                         {
                             id: createIid.id,
-                            updated: timestamp,
-                            created: timestamp,
-                            Controller: createIid.controllers,
-                            Context: JSON.stringify(createIid.context),
+                            alsoKnownAs: createIid.alsoKnownAs,
+                            controllers: createIid.controllers,
+                            context: JSON.stringify(createIid.context),
                         },
-                        idocs.verificationMethodDocs,
-                        idocs.serviceDocs,
-                        idocs.accordedRightDocs,
-                        idocs.linkedResourceDocs,
-                        idocs.linkedEntityDocs,
+                        createIidocs.verificationMethodDocs,
+                        createIidocs.serviceDocs,
+                        createIidocs.accordedRightDocs,
+                        createIidocs.linkedResourceDocs,
+                        createIidocs.linkedEntityDocs,
                     );
                     break;
                 case MsgTypes.updateIid:
                     const updateIid: MsgUpdateIidDocument = msg.value;
+                    const updateIidocs = IidTypes.convertIID(updateIid);
                     await IidHandler.updateIid(
-                        String(updateIid.doc?.id),
-                        updateIid.doc?.controller || [""],
-                        timestamp,
+                        updateIid.id,
+                        updateIid.controllers,
+                        JSON.stringify(updateIid.context),
+                        updateIidocs.verificationMethodDocs,
+                        updateIidocs.serviceDocs,
+                        updateIidocs.accordedRightDocs,
+                        updateIidocs.linkedResourceDocs,
+                        updateIidocs.linkedEntityDocs,
+                        updateIid.alsoKnownAs,
+                    );
+                    break;
+                case MsgTypes.createEntity:
+                    const createEntity: MsgCreateEntity = msg.value;
+                    await EntityHandler.createEntity({
+                        //@ts-ignore
+                        id: createEntity.id,
+                        type: createEntity.entityType,
+                        status: createEntity.entityStatus.toString(),
+                        controller: createEntity.controller,
+                        context: JSON.stringify(createEntity.context),
+                        startDate: createEntity.startDate
+                            ? getTimestamp(createEntity.startDate)
+                            : null,
+                        endDate: createEntity.endDate
+                            ? getTimestamp(createEntity.endDate)
+                            : null,
+                        relayerNode: createEntity.relayerNode,
+                        credentials: createEntity.credentials,
+                        ownerDid: createEntity.ownerDid,
+                        ownerAddress: createEntity.ownerAddress,
+                        data: utils.conversions.Uint8ArrayToJS(
+                            createEntity.data,
+                        ),
+                    });
+                    break;
+                case MsgTypes.updateEntity:
+                    const updateEntity: MsgUpdateEntity = msg.value;
+                    await EntityHandler.updateEntity(
+                        updateEntity.id,
+                        updateEntity.entityStatus.toString(),
+                        updateEntity.credentials,
+                        updateEntity.controllerDid,
+                        updateEntity.startDate
+                            ? getTimestamp(updateEntity.startDate)
+                            : undefined,
+                        updateEntity.endDate
+                            ? getTimestamp(updateEntity.endDate)
+                            : undefined,
+                    );
+                    break;
+                case MsgTypes.updateEntityVerified:
+                    const updateEntityVerified: MsgUpdateEntityVerified =
+                        msg.value;
+                    await EntityHandler.updateEntityVerified(
+                        updateEntityVerified.id,
+                        updateEntityVerified.entityVerified,
+                        updateEntityVerified.relayerNodeDid,
+                    );
+                    break;
+                case MsgTypes.transferEntity:
+                    const transferEntity: MsgTransferEntity = msg.value;
+                    await EntityHandler.transferEntity(
+                        transferEntity.id,
+                        transferEntity.ownerDid,
+                        transferEntity.ownerAddress,
                     );
                     break;
                 case MsgTypes.addVerification:
                     const addVerification: MsgAddVerification = msg.value;
-                    await IidHandler.addVerification(
-                        {
-                            id: String(
-                                addVerification.verification?.method?.id,
-                            ),
-                            iid: addVerification.id,
-                            relationships: addVerification.verification
-                                ?.relationships || [""],
-                            type: String(
-                                addVerification.verification?.method?.type,
-                            ),
-                            controller: String(
-                                addVerification.verification?.method
-                                    ?.controller,
-                            ),
-                            verificationMaterial:
-                                String(
-                                    addVerification.verification?.method
-                                        ?.blockchainAccountID,
-                                ) ||
-                                String(
-                                    addVerification.verification?.method
-                                        ?.publicKeyHex,
-                                ) ||
-                                String(
-                                    addVerification.verification?.method
-                                        ?.publicKeyMultibase,
-                                ),
-                        },
-                        timestamp,
-                    );
+                    await IidHandler.addVerification({
+                        iid: addVerification.id,
+                        id: addVerification.verification?.method?.id || "",
+                        relationships:
+                            addVerification.verification?.relationships,
+                        type: addVerification.verification?.method?.type || "",
+                        controller:
+                            addVerification.verification?.method?.controller ||
+                            "",
+                        blockchainAccountID:
+                            addVerification.verification?.method
+                                ?.blockchainAccountID,
+                        publicKeyHex:
+                            addVerification.verification?.method?.publicKeyHex,
+                        publicKeyMultibase:
+                            addVerification.verification?.method
+                                ?.publicKeyMultibase,
+                        publicKeyBase58:
+                            addVerification.verification?.method
+                                ?.publicKeyBase58,
+                        context: addVerification.verification?.context,
+                    });
                     break;
                 case MsgTypes.setVerificationRelationships:
                     const setVerificationRelationships: MsgSetVerificationRelationships =
@@ -136,127 +200,110 @@ export const syncBlock = async (
                     await IidHandler.setVerificationRelationships(
                         setVerificationRelationships.methodId,
                         setVerificationRelationships.relationships,
-                        timestamp,
                     );
                     break;
                 case MsgTypes.revokeVerification:
                     const revokeVerification: MsgRevokeVerification = msg.value;
                     await IidHandler.revokeVerification(
                         revokeVerification.methodId,
-                        timestamp,
                     );
                     break;
                 case MsgTypes.addService:
                     const addService: MsgAddService = msg.value;
-                    await IidHandler.addService(
-                        {
-                            id: String(addService.serviceData?.id),
-                            iid: addService.id,
-                            type: String(addService.serviceData?.type),
-                            serviceEndpoint: String(
-                                addService.serviceData?.serviceEndpoint,
-                            ),
-                        },
-                        timestamp,
-                    );
+                    await IidHandler.addService({
+                        id: addService.serviceData?.id || "",
+                        iid: addService.id,
+                        type: addService.serviceData?.type || "",
+                        serviceEndpoint:
+                            addService.serviceData?.serviceEndpoint || "",
+                    });
                     break;
                 case MsgTypes.deleteService:
                     const deleteService: MsgDeleteService = msg.value;
-                    await IidHandler.deleteService(
-                        deleteService.serviceId,
-                        timestamp,
+                    await IidHandler.deleteService(deleteService.serviceId);
+                    break;
+                case MsgTypes.addController:
+                    const addController: MsgAddController = msg.value;
+                    await IidHandler.addController(
+                        addController.id,
+                        addController.controllerDid,
                     );
                     break;
-                case MsgTypes.addAccordedRight:
-                    const addAccordedRight: MsgAddAccordedRight = msg.value;
-                    await IidHandler.addAccordedRight(
-                        {
-                            iid: addAccordedRight.id,
-                            id: String(addAccordedRight.accordedRight?.id),
-                            type: String(addAccordedRight.accordedRight?.type),
-                            mechanism: String(
-                                addAccordedRight.accordedRight?.mechanism,
-                            ),
-                            service: String(
-                                addAccordedRight.accordedRight?.service,
-                            ),
-                        },
-                        timestamp,
-                    );
-                    break;
-                case MsgTypes.deleteAccordedRight:
-                    const deleteAccordedRight: MsgDeleteAccordedRight =
-                        msg.value;
-                    await IidHandler.deleteAccordedRight(
-                        deleteAccordedRight.rightId,
-                        timestamp,
-                    );
-                    break;
-                case MsgTypes.addLinkedEntity:
-                    const addLinkedEntity: MsgAddLinkedEntity = msg.value;
-                    await IidHandler.addLinkedEntity(
-                        {
-                            iid: addLinkedEntity.id,
-                            id: String(addLinkedEntity.linkedEntity?.id),
-                            relationship: String(
-                                addLinkedEntity.linkedEntity?.relationship,
-                            ),
-                        },
-                        timestamp,
-                    );
-                    break;
-                case MsgTypes.deleteLinkedEntity:
-                    const deleteLinkedEntity: MsgDeleteLinkedEntity = msg.value;
-                    await IidHandler.deleteLinkedEntity(
-                        deleteLinkedEntity.entityId,
-                        timestamp,
+                case MsgTypes.deleteController:
+                    const deleteController: MsgDeleteController = msg.value;
+                    await IidHandler.deleteController(
+                        deleteController.id,
+                        deleteController.controllerDid,
                     );
                     break;
                 case MsgTypes.addLinkedResource:
                     const addLinkedResource: MsgAddLinkedResource = msg.value;
-                    await IidHandler.addLinkedResource(
-                        {
-                            iid: addLinkedResource.id,
-                            id: String(addLinkedResource.linkedResource?.id),
-                            type: String(
-                                addLinkedResource.linkedResource?.type,
-                            ),
-                            description: String(
-                                addLinkedResource.linkedResource?.description,
-                            ),
-                            mediaType: String(
-                                addLinkedResource.linkedResource?.mediaType,
-                            ),
-                            serviceEndpoint: String(
-                                addLinkedResource.linkedResource
-                                    ?.serviceEndpoint,
-                            ),
-                            proof: String(
-                                addLinkedResource.linkedResource?.proof,
-                            ),
-                            encrypted: String(
-                                addLinkedResource.linkedResource?.encrypted,
-                            ),
-                            right: String(
-                                addLinkedResource.linkedResource?.right,
-                            ),
-                        },
-                        timestamp,
-                    );
+                    await IidHandler.addLinkedResource({
+                        iid: addLinkedResource.id,
+                        id: addLinkedResource.linkedResource?.id || "",
+                        type: addLinkedResource.linkedResource?.type || "",
+                        description:
+                            addLinkedResource.linkedResource?.description || "",
+                        mediaType:
+                            addLinkedResource.linkedResource?.mediaType || "",
+                        serviceEndpoint:
+                            addLinkedResource.linkedResource?.serviceEndpoint ||
+                            "",
+                        proof: addLinkedResource.linkedResource?.proof || "",
+                        encrypted:
+                            addLinkedResource.linkedResource?.encrypted || "",
+                        right: addLinkedResource.linkedResource?.right || "",
+                    });
                     break;
                 case MsgTypes.deleteLinkedResource:
                     const deleteLinkedResource: MsgDeleteLinkedResource =
                         msg.value;
                     await IidHandler.deleteLinkedResource(
                         deleteLinkedResource.resourceId,
-                        timestamp,
                     );
                     break;
+                case MsgTypes.addLinkedEntity:
+                    const addLinkedEntity: MsgAddLinkedEntity = msg.value;
+                    await IidHandler.addLinkedEntity({
+                        iid: addLinkedEntity.id,
+                        id: addLinkedEntity.linkedEntity?.id || "",
+                        type: addLinkedEntity.linkedEntity?.type || "",
+                        relationship:
+                            addLinkedEntity.linkedEntity?.relationship || "",
+                        service: addLinkedEntity.linkedEntity?.service || "",
+                    });
+                    break;
+                case MsgTypes.deleteLinkedEntity:
+                    const deleteLinkedEntity: MsgDeleteLinkedEntity = msg.value;
+                    await IidHandler.deleteLinkedEntity(
+                        deleteLinkedEntity.entityId,
+                    );
+                    break;
+                case MsgTypes.addAccordedRight:
+                    const addAccordedRight: MsgAddAccordedRight = msg.value;
+                    await IidHandler.addAccordedRight({
+                        iid: addAccordedRight.id,
+                        id: addAccordedRight.accordedRight?.id || "",
+                        type: addAccordedRight.accordedRight?.type || "",
+                        mechanism:
+                            addAccordedRight.accordedRight?.mechanism || "",
+                        message: addAccordedRight.accordedRight?.message || "",
+                        service: addAccordedRight.accordedRight?.service || "",
+                    });
+                    break;
+                case MsgTypes.deleteAccordedRight:
+                    const deleteAccordedRight: MsgDeleteAccordedRight =
+                        msg.value;
+                    await IidHandler.deleteAccordedRight(
+                        deleteAccordedRight.rightId,
+                    );
+                    break;
+
                 case MsgTypes.addContext:
                     const addContext: MsgAddIidContext = msg.value;
                     await IidHandler.addContext(
-                        { id: addContext.id, context: addContext.context },
-                        timestamp,
+                        addContext.id,
+                        addContext.context || { key: "", val: "" },
                     );
                     break;
                 case MsgTypes.deleteContext:
@@ -264,19 +311,20 @@ export const syncBlock = async (
                     await IidHandler.deleteContext(
                         deleteContext.id,
                         deleteContext.contextKey,
-                        timestamp,
                     );
                     break;
-                case MsgTypes.updateMetadata:
-                    const updateMetadata: MsgUpdateIidMeta = msg.value;
-                    await IidHandler.updateMetadata(
-                        updateMetadata.id,
-                        updateMetadata.meta,
+                case MsgTypes.deactivateIid:
+                    const deactivateIid: MsgDeactivateIID = msg.value;
+                    await IidHandler.deactivateIid(
+                        deactivateIid.id,
+                        deactivateIid.state,
                     );
                     break;
                 case MsgTypes.createProject:
                     const createProject: MsgCreateProject = msg.value;
-                    const obj = Uint8ArrayToJS(createProject.data);
+                    const obj = utils.conversions.Uint8ArrayToJS(
+                        createProject.data,
+                    );
                     console.log("After Uint8ArrayToJS: ", obj);
                     const projectData = JSON.parse(obj);
                     console.log("After JSON.parse: ", projectData);
@@ -287,8 +335,8 @@ export const syncBlock = async (
                         pubKey: createProject.pubKey,
                         data: JSON.stringify(projectData),
                         projectAddress: createProject.projectAddress,
-                        status: projectData.status ?? "",
-                        entityType: projectData.entityType ?? "",
+                        status: projectData.status || "",
+                        entityType: projectData.entityType || "",
                         createdOn: new Date(projectData.createdOn),
                         createdBy: projectData.createdBy,
                         successfulClaims: 0,
@@ -312,12 +360,14 @@ export const syncBlock = async (
                         msg.value;
                     await ProjectHandler.updateProjectStatus(
                         updateProjectStatus.projectDid,
-                        String(updateProjectStatus.data?.status.toUpperCase()),
+                        updateProjectStatus.data?.status.toUpperCase() || "",
                     );
                     break;
                 case MsgTypes.updateProjectDoc:
                     const updateProject: MsgUpdateProjectDoc = msg.value;
-                    const obj1 = Uint8ArrayToJS(updateProject.data);
+                    const obj1 = utils.conversions.Uint8ArrayToJS(
+                        updateProject.data,
+                    );
                     console.log("After Uint8ArrayToJS: ", obj1);
                     const updateProjectData = JSON.parse(obj1);
                     console.log("After JSON.parse: ", updateProjectData);
@@ -333,15 +383,15 @@ export const syncBlock = async (
                         createAgent.data?.role,
                     );
                     await ProjectHandler.addAgent({
-                        agentDid: String(createAgent.data?.agentDid),
+                        agentDid: createAgent.data?.agentDid || "",
                         projectDid: createAgent.projectDid,
-                        role: String(createAgent.data?.role),
+                        role: createAgent.data?.role || "",
                         status: "0",
                     });
                     await ProjectHandler.updateAgentStats(
                         createAgent.projectDid,
                         "0",
-                        String(createAgent.data?.role),
+                        createAgent.data?.role || "",
                     );
                     break;
                 case MsgTypes.updateAgent:
@@ -352,14 +402,14 @@ export const syncBlock = async (
                             updateAgent.data.role,
                         );
                     await ProjectHandler.updateAgentStatus(
-                        String(updateAgent.projectDid),
-                        String(updateAgent.data?.did),
-                        String(updateAgent.data?.status),
+                        updateAgent.projectDid || "",
+                        updateAgent.data?.did || "",
+                        updateAgent.data?.status || "",
                     );
                     await ProjectHandler.updateAgentStats(
                         updateAgent.projectDid,
-                        String(updateAgent.data?.status),
-                        String(updateAgent.data?.role),
+                        updateAgent.data?.status || "",
+                        updateAgent.data?.role || "",
                     );
                     break;
                 case MsgTypes.createClaim:
@@ -370,10 +420,9 @@ export const syncBlock = async (
                         "0",
                     );
                     await ProjectHandler.addClaim({
-                        claimId: String(createClaim.data?.claimId),
-                        claimTemplateId: String(
-                            createClaim.data?.claimTemplateId,
-                        ),
+                        claimId: createClaim.data?.claimId || "",
+                        claimTemplateId:
+                            createClaim.data?.claimTemplateId || "",
                         projectDid: createClaim.projectDid,
                         status: "0",
                     });
@@ -386,13 +435,24 @@ export const syncBlock = async (
                         evaluateClaim.data?.status,
                     );
                     await ProjectHandler.updateClaimStatus(
-                        String(evaluateClaim.data?.claimId),
-                        String(evaluateClaim.data?.status),
+                        evaluateClaim.data?.claimId || "",
+                        evaluateClaim.data?.status || "",
                     );
                     await ProjectHandler.updateClaimStats(
                         evaluateClaim.projectDid,
-                        String(evaluateClaim.data?.status),
+                        evaluateClaim.data?.status || "",
                     );
+                    break;
+                case MsgTypes.withdrawFunds:
+                    const withdrawFunds: MsgWithdrawFunds = msg.value;
+                    await ProjectHandler.withdrawFunds({
+                        projectDid: withdrawFunds.data?.projectDid || "",
+                        senderDid: withdrawFunds.senderDid,
+                        senderAddress: withdrawFunds.senderAddress,
+                        recipientDid: withdrawFunds.data?.recipientDid || "",
+                        amount: withdrawFunds.data?.amount || "",
+                        isRefund: withdrawFunds.data?.isRefund,
+                    });
                     break;
                 case MsgTypes.createBond:
                     const createBond: MsgCreateBond = msg.value;
@@ -467,7 +527,7 @@ export const syncBlock = async (
                         bondDid: bondBuy.bondDid,
                         buyerDid: bondBuy.buyerDid,
                         buyerAddress: bondBuy.buyerAddress,
-                        amount: String(bondBuy.amount?.amount),
+                        amount: bondBuy.amount?.amount || "",
                         maxPrices: JSON.stringify(bondBuy.maxPrices),
                     });
                     break;
@@ -477,7 +537,7 @@ export const syncBlock = async (
                         bondDid: bondSell.bondDid,
                         sellerDid: bondSell.sellerDid,
                         sellerAddress: bondSell.sellerAddress,
-                        amount: String(bondSell.amount?.amount),
+                        amount: bondSell.amount?.amount || "",
                     });
                 case MsgTypes.swap:
                     const bondSwap: MsgSwap = msg.value;
@@ -525,7 +585,7 @@ export const syncBlock = async (
                     const createPaymentTemplate: MsgCreatePaymentTemplate =
                         msg.value;
                     await PaymentHandler.createPaymentTemplate({
-                        id: String(createPaymentTemplate.paymentTemplate?.id),
+                        id: createPaymentTemplate.paymentTemplate?.id || "",
                         paymentAmount: JSON.stringify(
                             createPaymentTemplate.paymentTemplate
                                 ?.paymentAmount,
@@ -646,5 +706,5 @@ export const syncBlock = async (
         } catch (error) {
             console.log(error);
         }
-    });
+    }
 };

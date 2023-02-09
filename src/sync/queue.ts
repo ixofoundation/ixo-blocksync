@@ -8,10 +8,11 @@ import * as BondSyncHandler from "../sync_handlers/bondsinfo_sync_handler";
 import { currentChain } from "../index";
 import { Queue, Worker } from "bullmq";
 import { restartSync } from "./sync_blocks";
-import { getTimestamp, Uint8ArrayToJS } from "../util/proto";
+import { getTimestamp } from "../util/proto";
 import { GetBlockByHeightResponse } from "@ixo/impactxclient-sdk/types/codegen/cosmos/base/tendermint/v1beta1/query";
 import { GetTxsEventResponse } from "@ixo/impactxclient-sdk/types/codegen/cosmos/tx/v1beta1/service";
 import { QueryBondsDetailedResponse } from "@ixo/impactxclient-sdk/types/codegen/ixo/bonds/v1beta1/query";
+import { utils } from "@ixo/impactxclient-sdk";
 import { io } from "../index";
 
 const connection = {
@@ -33,8 +34,10 @@ const worker = new Worker(
                 //@ts-ignore
                 nanos: block.block?.header?.time?.nanos,
             });
-            //@ts-ignore
-            const blockHash = Uint8ArrayToJS(block.blockId?.hash);
+            const blockHash = utils.conversions.Uint8ArrayToJS(
+                //@ts-ignore
+                block.blockId?.hash,
+            );
 
             const txsEvent: GetTxsEventResponse = job.data.txsEvent;
             const transactions = txsEvent.txs ? txsEvent.txs : [];

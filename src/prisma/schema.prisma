@@ -17,36 +17,48 @@ model Storage {
 }
 
 model IID {
-  id                   String               @id
-  versionId            String               @default(uuid())
-  updated              String
-  created              String
-  deactivated          Boolean?
-  entityType           String?
-  startDate            DateTime?
-  endDate              DateTime?
-  status               Int?
-  stage                String?
-  relayerNode          String?
-  verifiableCredential String?
-  credentials          String[]
-  Controller           String[]
-  Context              Json[]
-  VerificationMethod   VerificationMethod[]
-  Service              Service[]
-  AccordedRight        AccordedRight[]
-  LinkedResource       LinkedResource[]
-  LinkedEntity         LinkedEntity[]
+  id                 String               @id
+  state              Boolean?
+  alsoKnownAs        String
+  controllers        String[]
+  context            Json[]
+  VerificationMethod VerificationMethod[]
+  Service            Service[]
+  AccordedRight      AccordedRight[]
+  LinkedResource     LinkedResource[]
+  LinkedEntity       LinkedEntity[]
+  Entity             Entity?
+}
+
+model Entity {
+  IID          IID       @relation(fields: [id], references: [id])
+  id           String    @id @unique
+  type         String
+  status       String
+  verified     Boolean?
+  controller   String[]
+  context      Json[]
+  startDate    DateTime?
+  endDate      DateTime?
+  relayerNode  String
+  credentials  String[]
+  ownerDid     String
+  ownerAddress String
+  data         Json?
 }
 
 model VerificationMethod {
-  id                   String   @id
-  IID                  IID      @relation(fields: [iid], references: [id])
-  iid                  String
-  relationships        String[]
-  type                 String
-  controller           String
-  verificationMaterial String
+  id                  String   @id
+  IID                 IID      @relation(fields: [iid], references: [id])
+  iid                 String
+  relationships       String[]
+  type                String
+  controller          String
+  blockchainAccountID String?
+  publicKeyHex        String?
+  publicKeyMultibase  String?
+  publicKeyBase58     String?
+  context             String[]
 }
 
 model Service {
@@ -63,6 +75,7 @@ model AccordedRight {
   iid       String
   type      String
   mechanism String
+  message   String
   service   String
 }
 
@@ -83,7 +96,9 @@ model LinkedEntity {
   id           String @id
   IID          IID    @relation(fields: [iid], references: [id])
   iid          String
+  type         String
   relationship String
+  service      String
 }
 
 model Bond {
@@ -105,9 +120,9 @@ model Bond {
   orderQuantityLimits      Json?
   sanityRate               String
   sanityMarginPercentage   String
-  allowSells               Boolean
-  allowReserveWithdrawals  Boolean
-  alphaBond                Boolean
+  allowSells               Boolean?
+  allowReserveWithdrawals  Boolean?
+  alphaBond                Boolean?
   batchBlocks              String
   creatorAddress           String
   editorDid                String?
@@ -236,7 +251,7 @@ model Stats {
 }
 
 model Project {
-  projectDid              String   @id
+  projectDid              String           @id
   txHash                  String
   senderDid               String
   pubKey                  String
@@ -256,6 +271,7 @@ model Project {
   investorsPending        Int
   Agent                   Agent[]
   Claim                   Claim[]
+  FundWithdrawal          FundWithdrawal[]
 
   @@index([projectDid])
 }
@@ -275,6 +291,17 @@ model Claim {
   projectDid      String
   claimTemplateId String
   status          String
+}
+
+model FundWithdrawal {
+  id            Int      @id @default(autoincrement())
+  project       Project  @relation(fields: [projectDid], references: [projectDid])
+  projectDid    String
+  senderDid     String
+  senderAddress String
+  recipientDid  String
+  amount        String
+  isRefund      Boolean?
 }
 
 model PaymentTemplate {

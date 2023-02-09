@@ -184,6 +184,19 @@ export const updateProject = async (projectDid: string, projectDoc: string) => {
     }
 };
 
+export const withdrawFunds = async (
+    withdrawFundsDoc: Prisma.FundWithdrawalUncheckedCreateInput,
+) => {
+    try {
+        return prisma.fundWithdrawal.create({
+            data: withdrawFundsDoc,
+        });
+    } catch (error) {
+        console.log(error);
+        return;
+    }
+};
+
 export const listAllProjects = async (page?: string, size?: string) => {
     if (page && size) {
         return prisma.project.findMany({
