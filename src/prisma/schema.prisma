@@ -351,11 +351,9 @@ model Discount {
 }
 
 model Transaction {
-  id            Int     @id @default(autoincrement())
+  id            Int    @id @default(autoincrement())
   blockHeight   Int
-  type          String
-  from          String?
-  value         Json?
+  messages      Json?
   fee           Json?
   signatures    Json?
   memo          String

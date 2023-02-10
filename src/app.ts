@@ -470,57 +470,57 @@ app.get(
     },
 );
 
-app.get(
-    "api/transactions/listTransactionsByType/:type(*)",
-    async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const transactions =
-                await TransactionHandler.listTransactionsByType(
-                    req.params.type,
-                    req.query.page ? String(req.query.page) : undefined,
-                    req.query.size ? String(req.query.size) : undefined,
-                );
-            res.json(transactions);
-        } catch (error) {
-            next(error);
-        }
-    },
-);
+// app.get(
+//     "api/transactions/listTransactionsByType/:type(*)",
+//     async (req: Request, res: Response, next: NextFunction) => {
+//         try {
+//             const transactions =
+//                 await TransactionHandler.listTransactionsByType(
+//                     req.params.type,
+//                     req.query.page ? String(req.query.page) : undefined,
+//                     req.query.size ? String(req.query.size) : undefined,
+//                 );
+//             res.json(transactions);
+//         } catch (error) {
+//             next(error);
+//         }
+//     },
+// );
 
-app.get(
-    "api/transactions/listTransactionsByAddress/:address",
-    async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const transactions =
-                await TransactionHandler.listTransactionsByAddress(
-                    req.params.address,
-                    req.query.page ? String(req.query.page) : undefined,
-                    req.query.size ? String(req.query.size) : undefined,
-                );
-            res.json(transactions);
-        } catch (error) {
-            next(error);
-        }
-    },
-);
+// app.get(
+//     "api/transactions/listTransactionsByAddress/:address",
+//     async (req: Request, res: Response, next: NextFunction) => {
+//         try {
+//             const transactions =
+//                 await TransactionHandler.listTransactionsByAddress(
+//                     req.params.address,
+//                     req.query.page ? String(req.query.page) : undefined,
+//                     req.query.size ? String(req.query.size) : undefined,
+//                 );
+//             res.json(transactions);
+//         } catch (error) {
+//             next(error);
+//         }
+//     },
+// );
 
-app.get(
-    "api/transactions/listTransactionsByAddressAndType/:address/:type(*)",
-    async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const transactions =
-                await TransactionHandler.listTransactionsByAddressAndType(
-                    req.params.address,
-                    req.params.type,
-                    req.query.page ? String(req.query.page) : undefined,
-                    req.query.size ? String(req.query.size) : undefined,
-                );
-            res.json(transactions);
-        } catch (error) {
-            next(error);
-        }
-    },
-);
+// app.get(
+//     "api/transactions/listTransactionsByAddressAndType/:address/:type(*)",
+//     async (req: Request, res: Response, next: NextFunction) => {
+//         try {
+//             const transactions =
+//                 await TransactionHandler.listTransactionsByAddressAndType(
+//                     req.params.address,
+//                     req.params.type,
+//                     req.query.page ? String(req.query.page) : undefined,
+//                     req.query.size ? String(req.query.size) : undefined,
+//                 );
+//             res.json(transactions);
+//         } catch (error) {
+//             next(error);
+//         }
+//     },
+// );
 
 app.get(
     "/api/block/getLastSyncedBlock",

@@ -1,7 +1,6 @@
 import { Tx } from "@ixo/impactxclient-sdk/types/codegen/cosmos/tx/v1beta1/tx";
 import { prisma } from "../prisma/prisma_client";
-import { decode } from "../util/proto";
-import { utils } from "@ixo/impactxclient-sdk";
+import { createRegistry, utils } from "@ixo/impactxclient-sdk";
 import { io } from "../index";
 
 export const syncTransactions = async (
@@ -14,9 +13,20 @@ export const syncTransactions = async (
                 `Syncing Transaction ${index + 1} for Block ${blockHeight}`,
             );
 
-            const type = String(tx.body?.messages[0].typeUrl);
-            const value = await decode(tx.body?.messages[0]);
-            const from = value.from_address ? value.from_address : null;
+            const messages: any[] = [];
+            for (const message of tx.body?.messages || []) {
+                try {
+                    const registry = createRegistry();
+                    const msg = {
+                        type: message.typeUrl,
+                        value: await registry.decode(message),
+                    };
+                    messages.push(msg);
+                } catch (error) {
+                    console.log(error);
+                }
+            }
+
             const fee = tx.authInfo?.fee ? tx.authInfo.fee : {};
             const signatures: string[] = [""];
             for (const sig of tx.signatures) {
@@ -28,9 +38,7 @@ export const syncTransactions = async (
             await prisma.transaction.create({
                 data: {
                     blockHeight: blockHeight,
-                    type: type,
-                    from: from,
-                    value: value,
+                    messages: JSON.stringify(messages),
                     fee: fee,
                     signatures: signatures,
                     memo: memo,
@@ -40,9 +48,7 @@ export const syncTransactions = async (
 
             io.emit("Transaction Synced", {
                 blockHeight,
-                type,
-                from,
-                value,
+                messages,
                 fee,
                 signatures,
                 memo,

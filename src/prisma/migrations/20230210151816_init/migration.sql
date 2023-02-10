@@ -382,9 +382,7 @@ CREATE TABLE "Discount" (
 CREATE TABLE "Transaction" (
     "id" SERIAL NOT NULL,
     "blockHeight" INTEGER NOT NULL,
-    "type" TEXT NOT NULL,
-    "from" TEXT,
-    "value" JSONB,
+    "messages" JSONB,
     "fee" JSONB,
     "signatures" JSONB,
     "memo" TEXT NOT NULL,
