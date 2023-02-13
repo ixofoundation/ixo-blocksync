@@ -113,7 +113,7 @@ export const transferEntity = async (
     }
 };
 
-export const getEntity = async (id: string) => {
+export const getEntityById = async (id: string) => {
     return prisma.entity.findFirst({
         where: {
             id: id,
@@ -124,6 +124,18 @@ export const getEntity = async (id: string) => {
             AccordedRight: true,
             LinkedResource: true,
             LinkedEntity: true,
+        },
+    });
+};
+
+export const getEntitiesByOwnerDid = async (did: string) => {
+    return prisma.entity.findMany({
+        where: {
+            OR: [
+                { ownerDid: prefixes[0] + did },
+                { ownerDid: prefixes[1] + did },
+                { ownerDid: prefixes[2] + did },
+            ],
         },
     });
 };

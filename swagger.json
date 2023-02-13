@@ -108,6 +108,24 @@
                 }
             }
         },
+        "/api/entity/byOwnerDid/:did": {
+            "get": {
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "did",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/api/bonds/listBonds": {
             "get": {
                 "description": "",

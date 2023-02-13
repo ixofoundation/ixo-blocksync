@@ -121,6 +121,26 @@ Get an entity by its id
 | ---- | ----------- |
 | 200  | OK          |
 
+### /api/entity/byOwnerDid/:did
+
+#### GET
+
+##### Description:
+
+Get entities by owner did
+
+##### Parameters
+
+| Name | Located in | Description | Required | Schema |
+| ---- | ---------- | ----------- | -------- | ------ |
+| did  | path       |             | Yes      | string |
+
+##### Responses
+
+| Code | Description |
+| ---- | ----------- |
+| 200  | OK          |
+
 ### /api/bonds/listBonds
 
 #### GET

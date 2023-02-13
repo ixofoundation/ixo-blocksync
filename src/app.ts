@@ -83,8 +83,22 @@ app.get(
     "/api/entity/byId/:id",
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const entity = await EntityHandler.getEntity(req.params.id);
+            const entity = await EntityHandler.getEntityById(req.params.id);
             res.json(entity);
+        } catch (error) {
+            next(error);
+        }
+    },
+);
+
+app.get(
+    "/api/entity/byOwnerDid/:did",
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const entities = await EntityHandler.getEntitiesByOwnerDid(
+                req.params.did,
+            );
+            res.json(entities);
         } catch (error) {
             next(error);
         }
