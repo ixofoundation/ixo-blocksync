@@ -5,11 +5,39 @@ const prefixes = ["did:x:", "did:ixo:", "did:sov:"];
 
 export const createEntity = async (
     entityDoc: Prisma.EntityUncheckedCreateInput,
+    verificationDocs: Prisma.VerificationMethodUncheckedCreateInput[],
+    serviceDocs: Prisma.ServiceUncheckedCreateInput[],
+    accordedRightDocs: Prisma.AccordedRightUncheckedCreateInput[],
+    linkedResourceDocs: Prisma.LinkedResourceUncheckedCreateInput[],
+    linkedEntityDocs: Prisma.LinkedEntityUncheckedCreateInput[],
 ) => {
     try {
-        return prisma.entity.create({
-            data: entityDoc,
-        });
+        let res: any;
+        res = await prisma.entity.create({ data: entityDoc });
+        if (verificationDocs.length > 0) {
+            res += await prisma.verificationMethod.createMany({
+                data: verificationDocs,
+            });
+        }
+        if (serviceDocs.length > 0) {
+            res += await prisma.service.createMany({ data: serviceDocs });
+        }
+        if (accordedRightDocs.length > 0) {
+            res += await prisma.accordedRight.createMany({
+                data: accordedRightDocs,
+            });
+        }
+        if (linkedResourceDocs.length > 0) {
+            res += await prisma.linkedResource.createMany({
+                data: linkedResourceDocs,
+            });
+        }
+        if (linkedEntityDocs.length > 0) {
+            res += await prisma.linkedEntity.createMany({
+                data: linkedEntityDocs,
+            });
+        }
+        return res;
     } catch (error) {
         console.log(error);
         return;
@@ -88,22 +116,14 @@ export const transferEntity = async (
 export const getEntity = async (id: string) => {
     return prisma.entity.findFirst({
         where: {
-            OR: [
-                { id: prefixes[0] + id },
-                { id: prefixes[1] + id },
-                { id: prefixes[2] + id },
-            ],
+            id: id,
         },
         include: {
-            IID: {
-                include: {
-                    VerificationMethod: true,
-                    Service: true,
-                    AccordedRight: true,
-                    LinkedResource: true,
-                    LinkedEntity: true,
-                },
-            },
+            VerificationMethod: true,
+            Service: true,
+            AccordedRight: true,
+            LinkedResource: true,
+            LinkedEntity: true,
         },
     });
 };

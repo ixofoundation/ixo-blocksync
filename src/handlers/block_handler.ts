@@ -15,10 +15,11 @@ export const createBlock = async (
         for (const txRes of txsEvent.txResponses) {
             total_gas += txRes.gasUsed.low;
         }
-        const proposer_address = utils.conversions.Uint8ArrayToJS(
-            //@ts-ignore
-            block.block?.header?.proposerAddress,
-        );
+        const proposer_address = Buffer.from(
+            block.block?.header?.proposerAddress!,
+        )
+            .toString()
+            .toUpperCase();
         const blockDoc = {
             height: blockHeight,
             hash: blockHash,

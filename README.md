@@ -19,7 +19,6 @@ Syncs all the public info from an ixo blockchain to an instance of PostgreSQL.
 Requirements
 
 -   [PostgreSQL](https://www.postgresql.org/download/)
--   [Redis](https://redis.io/download/)
 
 ```bash
 git clone https://github.com/ixofoundation/ixo-blocksync.git

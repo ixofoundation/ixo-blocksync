@@ -40,7 +40,8 @@ CREATE TABLE "Entity" (
 -- CreateTable
 CREATE TABLE "VerificationMethod" (
     "id" TEXT NOT NULL,
-    "iid" TEXT NOT NULL,
+    "iid" TEXT,
+    "entityId" TEXT,
     "relationships" TEXT[],
     "type" TEXT NOT NULL,
     "controller" TEXT NOT NULL,
@@ -56,7 +57,8 @@ CREATE TABLE "VerificationMethod" (
 -- CreateTable
 CREATE TABLE "Service" (
     "id" TEXT NOT NULL,
-    "iid" TEXT NOT NULL,
+    "iid" TEXT,
+    "entityId" TEXT,
     "type" TEXT NOT NULL,
     "serviceEndpoint" TEXT NOT NULL,
 
@@ -66,7 +68,8 @@ CREATE TABLE "Service" (
 -- CreateTable
 CREATE TABLE "AccordedRight" (
     "id" TEXT NOT NULL,
-    "iid" TEXT NOT NULL,
+    "iid" TEXT,
+    "entityId" TEXT,
     "type" TEXT NOT NULL,
     "mechanism" TEXT NOT NULL,
     "message" TEXT NOT NULL,
@@ -78,7 +81,8 @@ CREATE TABLE "AccordedRight" (
 -- CreateTable
 CREATE TABLE "LinkedResource" (
     "id" TEXT NOT NULL,
-    "iid" TEXT NOT NULL,
+    "iid" TEXT,
+    "entityId" TEXT,
     "type" TEXT NOT NULL,
     "description" TEXT NOT NULL,
     "mediaType" TEXT NOT NULL,
@@ -93,7 +97,8 @@ CREATE TABLE "LinkedResource" (
 -- CreateTable
 CREATE TABLE "LinkedEntity" (
     "id" TEXT NOT NULL,
-    "iid" TEXT NOT NULL,
+    "iid" TEXT,
+    "entityId" TEXT,
     "type" TEXT NOT NULL,
     "relationship" TEXT NOT NULL,
     "service" TEXT NOT NULL,
@@ -439,9 +444,6 @@ CREATE TABLE "ExecMsg" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Entity_id_key" ON "Entity"("id");
-
--- CreateIndex
 CREATE INDEX "Chain_chainId_idx" ON "Chain"("chainId");
 
 -- CreateIndex
@@ -466,22 +468,34 @@ CREATE INDEX "WasmContract_code_id_idx" ON "WasmContract"("code_id");
 CREATE INDEX "WasmContract_creator_idx" ON "WasmContract"("creator");
 
 -- AddForeignKey
-ALTER TABLE "Entity" ADD CONSTRAINT "Entity_id_fkey" FOREIGN KEY ("id") REFERENCES "IID"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "VerificationMethod" ADD CONSTRAINT "VerificationMethod_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "VerificationMethod" ADD CONSTRAINT "VerificationMethod_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "VerificationMethod" ADD CONSTRAINT "VerificationMethod_entityId_fkey" FOREIGN KEY ("entityId") REFERENCES "Entity"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Service" ADD CONSTRAINT "Service_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Service" ADD CONSTRAINT "Service_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "AccordedRight" ADD CONSTRAINT "AccordedRight_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Service" ADD CONSTRAINT "Service_entityId_fkey" FOREIGN KEY ("entityId") REFERENCES "Entity"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "LinkedResource" ADD CONSTRAINT "LinkedResource_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "AccordedRight" ADD CONSTRAINT "AccordedRight_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "LinkedEntity" ADD CONSTRAINT "LinkedEntity_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "AccordedRight" ADD CONSTRAINT "AccordedRight_entityId_fkey" FOREIGN KEY ("entityId") REFERENCES "Entity"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "LinkedResource" ADD CONSTRAINT "LinkedResource_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "LinkedResource" ADD CONSTRAINT "LinkedResource_entityId_fkey" FOREIGN KEY ("entityId") REFERENCES "Entity"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "LinkedEntity" ADD CONSTRAINT "LinkedEntity_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "LinkedEntity" ADD CONSTRAINT "LinkedEntity_entityId_fkey" FOREIGN KEY ("entityId") REFERENCES "Entity"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "PriceEntry" ADD CONSTRAINT "PriceEntry_bondDid_fkey" FOREIGN KEY ("bondDid") REFERENCES "Bond"("bondDid") ON DELETE RESTRICT ON UPDATE CASCADE;

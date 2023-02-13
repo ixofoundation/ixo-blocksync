@@ -7,6 +7,7 @@ import * as PaymentHandler from "../handlers/payment_handler";
 import * as WasmHandler from "../handlers/wasm_handler";
 import { MsgTypes } from "../types/Msg";
 import * as IidTypes from "../types/IID";
+import * as EntityTypes from "../types/Entity";
 import { Tx } from "@ixo/impactxclient-sdk/types/codegen/cosmos/tx/v1beta1/tx";
 import { getTimestamp } from "../util/proto";
 import { createRegistry, utils } from "@ixo/impactxclient-sdk";
@@ -117,27 +118,37 @@ export const syncBlock = async (
                             break;
                         case MsgTypes.createEntity:
                             const createEntity: MsgCreateEntity = msg.value;
-                            await EntityHandler.createEntity({
-                                //@ts-ignore
-                                id: createEntity.id,
-                                type: createEntity.entityType,
-                                status: createEntity.entityStatus.toString(),
-                                controller: createEntity.controller,
-                                context: JSON.stringify(createEntity.context),
-                                startDate: createEntity.startDate
-                                    ? getTimestamp(createEntity.startDate)
-                                    : null,
-                                endDate: createEntity.endDate
-                                    ? getTimestamp(createEntity.endDate)
-                                    : null,
-                                relayerNode: createEntity.relayerNode,
-                                credentials: createEntity.credentials,
-                                ownerDid: createEntity.ownerDid,
-                                ownerAddress: createEntity.ownerAddress,
-                                data: utils.conversions.Uint8ArrayToJS(
-                                    createEntity.data,
-                                ),
-                            });
+                            const createEntityDocs =
+                                EntityTypes.convertEntity(createEntity);
+                            await EntityHandler.createEntity(
+                                {
+                                    id: createEntity.alsoKnownAs,
+                                    type: createEntity.entityType,
+                                    status: createEntity.entityStatus.toString(),
+                                    controller: createEntity.controller,
+                                    context: JSON.stringify(
+                                        createEntity.context,
+                                    ),
+                                    startDate: createEntity.startDate
+                                        ? getTimestamp(createEntity.startDate)
+                                        : null,
+                                    endDate: createEntity.endDate
+                                        ? getTimestamp(createEntity.endDate)
+                                        : null,
+                                    relayerNode: createEntity.relayerNode,
+                                    credentials: createEntity.credentials,
+                                    ownerDid: createEntity.ownerDid,
+                                    ownerAddress: createEntity.ownerAddress,
+                                    data: utils.conversions.Uint8ArrayToJS(
+                                        createEntity.data,
+                                    ),
+                                },
+                                createEntityDocs.verificationMethodDocs,
+                                createEntityDocs.serviceDocs,
+                                createEntityDocs.accordedRightDocs,
+                                createEntityDocs.linkedResourceDocs,
+                                createEntityDocs.linkedEntityDocs,
+                            );
                             break;
                         case MsgTypes.updateEntity:
                             const updateEntity: MsgUpdateEntity = msg.value;

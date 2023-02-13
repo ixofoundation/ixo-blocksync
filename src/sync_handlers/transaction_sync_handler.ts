@@ -30,7 +30,7 @@ export const syncTransactions = async (
             const fee = tx.authInfo?.fee ? tx.authInfo.fee : {};
             const signatures: string[] = [""];
             for (const sig of tx.signatures) {
-                signatures.push(utils.conversions.Uint8ArrayToJS(sig));
+                signatures.push(Buffer.from(sig).toString("hex").toUpperCase());
             }
             const memo = tx.body?.memo ? tx.body.memo : "";
             const timeoutHeight = String(tx.body?.timeoutHeight.low);
@@ -39,8 +39,8 @@ export const syncTransactions = async (
                 data: {
                     blockHeight: blockHeight,
                     messages: JSON.stringify(messages),
-                    fee: fee,
-                    signatures: signatures,
+                    fee: JSON.stringify(fee),
+                    signatures: JSON.stringify(signatures),
                     memo: memo,
                     timeoutHeight: timeoutHeight,
                 },

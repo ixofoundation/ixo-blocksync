@@ -1,7 +1,15 @@
 import * as Proto from "../util/proto";
 import * as ChainHandler from "../handlers/chain_handler";
-import { blockQueue } from "./queue";
 import { sleep } from "../util/sleep";
+
+import { getTimestamp } from "../util/proto";
+import { utils } from "@ixo/impactxclient-sdk";
+import * as CosmosHandler from "../handlers/block_handler";
+import * as TransactionSyncHandler from "../sync_handlers/transaction_sync_handler";
+import * as EventSyncHandler from "../sync_handlers/event_sync_handler";
+import * as BondSyncHandler from "../sync_handlers/bondsinfo_sync_handler";
+import * as BlockSyncHandler from "../sync_handlers/block_sync_handler";
+import { currentChain } from "..";
 
 let syncing: boolean;
 
@@ -20,12 +28,63 @@ export const startSync = async () => {
             const txsEvent = await Proto.getTxsEvent(currentBlock);
             const bondsInfo = await Proto.getBondsInfo();
             if (block !== undefined && txsEvent !== undefined) {
-                const data = {
+                const blockHeight = Number(block.block?.header?.height.low);
+                const timestamp = getTimestamp({
+                    //@ts-ignore
+                    seconds: block.block?.header?.time?.seconds.low,
+                    //@ts-ignore
+                    nanos: block.block?.header?.time?.nanos,
+                });
+                const blockHash = Buffer.from(block.blockId?.hash!)
+                    .toString("hex")
+                    .toUpperCase();
+
+                const transactions = txsEvent.txs ? txsEvent.txs : [];
+                const events = txsEvent.txResponses[0]
+                    ? txsEvent.txResponses[0].events
+                    : [];
+
+                if (transactions.length > 0) {
+                    await TransactionSyncHandler.syncTransactions(
+                        transactions,
+                        blockHeight,
+                    );
+                    await BlockSyncHandler.syncBlock(
+                        transactions,
+                        String(blockHeight),
+                        String(timestamp),
+                    );
+                }
+
+                if (events.length > 0) {
+                    await EventSyncHandler.syncEvents(
+                        events,
+                        blockHeight,
+                        timestamp,
+                    );
+                }
+
+                if (bondsInfo!.bondsDetailed.length > 0) {
+                    await BondSyncHandler.syncBondsInfo(bondsInfo!, timestamp);
+                }
+
+                await CosmosHandler.createBlock(
+                    blockHeight,
+                    timestamp,
+                    blockHash,
                     block,
                     txsEvent,
-                    bondsInfo,
-                };
-                await blockQueue.add("Blocks", data);
+                );
+
+                await ChainHandler.updateChain({
+                    chainId: currentChain.chainId,
+                    blockHeight: blockHeight,
+                });
+
+                if (blockHeight % 100 === 0) {
+                    console.log(`Synced Block ${blockHeight}`);
+                }
+
                 currentBlock++;
             } else {
                 console.log(`Error Adding Block ${currentBlock} to Queue`);
@@ -35,14 +94,4 @@ export const startSync = async () => {
             console.log(`Error Adding Block ${currentBlock} to Queue`);
         }
     }
-};
-
-export const stopSync = async () => {
-    syncing = false;
-    await blockQueue.drain();
-};
-
-export const restartSync = async () => {
-    await stopSync();
-    await startSync();
 };

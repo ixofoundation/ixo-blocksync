@@ -27,30 +27,35 @@ model IID {
   AccordedRight      AccordedRight[]
   LinkedResource     LinkedResource[]
   LinkedEntity       LinkedEntity[]
-  Entity             Entity?
 }
 
 model Entity {
-  IID          IID       @relation(fields: [id], references: [id])
-  id           String    @id @unique
-  type         String
-  status       String
-  verified     Boolean?
-  controller   String[]
-  context      Json[]
-  startDate    DateTime?
-  endDate      DateTime?
-  relayerNode  String
-  credentials  String[]
-  ownerDid     String
-  ownerAddress String
-  data         Json?
+  id                 String               @id
+  type               String
+  status             String
+  verified           Boolean?
+  controller         String[]
+  context            Json[]
+  startDate          DateTime?
+  endDate            DateTime?
+  relayerNode        String
+  credentials        String[]
+  ownerDid           String
+  ownerAddress       String
+  data               Json?
+  VerificationMethod VerificationMethod[]
+  Service            Service[]
+  AccordedRight      AccordedRight[]
+  LinkedResource     LinkedResource[]
+  LinkedEntity       LinkedEntity[]
 }
 
 model VerificationMethod {
   id                  String   @id
-  IID                 IID      @relation(fields: [iid], references: [id])
-  iid                 String
+  IID                 IID?     @relation(fields: [iid], references: [id])
+  iid                 String?
+  Entity              Entity?  @relation(fields: [entityId], references: [id])
+  entityId            String?
   relationships       String[]
   type                String
   controller          String
@@ -62,17 +67,21 @@ model VerificationMethod {
 }
 
 model Service {
-  id              String @id
-  IID             IID    @relation(fields: [iid], references: [id])
-  iid             String
+  id              String  @id
+  IID             IID?    @relation(fields: [iid], references: [id])
+  iid             String?
+  Entity          Entity? @relation(fields: [entityId], references: [id])
+  entityId        String?
   type            String
   serviceEndpoint String
 }
 
 model AccordedRight {
-  id        String @id
-  IID       IID    @relation(fields: [iid], references: [id])
-  iid       String
+  id        String  @id
+  IID       IID?    @relation(fields: [iid], references: [id])
+  iid       String?
+  Entity    Entity? @relation(fields: [entityId], references: [id])
+  entityId  String?
   type      String
   mechanism String
   message   String
@@ -80,9 +89,11 @@ model AccordedRight {
 }
 
 model LinkedResource {
-  id              String @id
-  IID             IID    @relation(fields: [iid], references: [id])
-  iid             String
+  id              String  @id
+  IID             IID?    @relation(fields: [iid], references: [id])
+  iid             String?
+  Entity          Entity? @relation(fields: [entityId], references: [id])
+  entityId        String?
   type            String
   description     String
   mediaType       String
@@ -93,9 +104,11 @@ model LinkedResource {
 }
 
 model LinkedEntity {
-  id           String @id
-  IID          IID    @relation(fields: [iid], references: [id])
-  iid          String
+  id           String  @id
+  IID          IID?    @relation(fields: [iid], references: [id])
+  iid          String?
+  Entity       Entity? @relation(fields: [entityId], references: [id])
+  entityId     String?
   type         String
   relationship String
   service      String
