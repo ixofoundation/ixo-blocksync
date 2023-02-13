@@ -101,6 +101,26 @@ Get the IPFS link for a web3.storage file
 | ---- | ----------- |
 | 200  | OK          |
 
+### /api/entity/byId/:id
+
+#### GET
+
+##### Description:
+
+Get an entity by its id
+
+##### Parameters
+
+| Name | Located in | Description | Required | Schema |
+| ---- | ---------- | ----------- | -------- | ------ |
+| id   | path       |             | Yes      | string |
+
+##### Responses
+
+| Code | Description |
+| ---- | ----------- |
+| 200  | OK          |
+
 ### /api/bonds/listBonds
 
 #### GET

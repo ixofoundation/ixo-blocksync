@@ -90,6 +90,24 @@
                 }
             }
         },
+        "/api/entity/byId/:id": {
+            "get": {
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/api/bonds/listBonds": {
             "get": {
                 "description": "",

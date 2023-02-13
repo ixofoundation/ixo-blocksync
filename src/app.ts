@@ -8,6 +8,7 @@ import postgraphile from "postgraphile";
 import * as StorageHandler from "./handlers/storage_handler";
 import * as ProjectHandler from "./handlers/project_handler";
 import * as IidHandler from "./handlers/iid_handler";
+import * as EntityHandler from "./handlers/entity_handler";
 import * as StatHandler from "./handlers/stats_handler";
 import * as EventHandler from "./handlers/event_handler";
 import * as AuthHandler from "./handlers/auth_handler";
@@ -77,6 +78,18 @@ app.get("/storage/retrieve/:cid", async (req, res) => {
     const file = await StorageHandler.retrieve(req.params.cid);
     res.json(file);
 });
+
+app.get(
+    "/api/entity/byId/:id",
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const entity = await EntityHandler.getEntity(req.params.id);
+            res.json(entity);
+        } catch (error) {
+            next(error);
+        }
+    },
+);
 
 app.get(
     "/api/bonds/listBonds",
