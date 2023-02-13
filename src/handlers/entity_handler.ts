@@ -137,5 +137,12 @@ export const getEntitiesByOwnerDid = async (did: string) => {
                 { ownerDid: prefixes[2] + did },
             ],
         },
+        include: {
+            VerificationMethod: true,
+            Service: true,
+            AccordedRight: true,
+            LinkedResource: true,
+            LinkedEntity: true,
+        },
     });
 };
