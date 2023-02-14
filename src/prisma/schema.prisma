@@ -51,7 +51,8 @@ model Entity {
 }
 
 model VerificationMethod {
-  id                  String   @id
+  aid                 Int      @id @default(autoincrement())
+  id                  String
   IID                 IID?     @relation(fields: [iid], references: [id])
   iid                 String?
   Entity              Entity?  @relation(fields: [entityId], references: [id])
@@ -67,7 +68,8 @@ model VerificationMethod {
 }
 
 model Service {
-  id              String  @id
+  aid             Int     @id @default(autoincrement())
+  id              String
   IID             IID?    @relation(fields: [iid], references: [id])
   iid             String?
   Entity          Entity? @relation(fields: [entityId], references: [id])
@@ -77,7 +79,8 @@ model Service {
 }
 
 model AccordedRight {
-  id        String  @id
+  aid       Int     @id @default(autoincrement())
+  id        String
   IID       IID?    @relation(fields: [iid], references: [id])
   iid       String?
   Entity    Entity? @relation(fields: [entityId], references: [id])
@@ -89,7 +92,8 @@ model AccordedRight {
 }
 
 model LinkedResource {
-  id              String  @id
+  aid             Int     @id @default(autoincrement())
+  id              String
   IID             IID?    @relation(fields: [iid], references: [id])
   iid             String?
   Entity          Entity? @relation(fields: [entityId], references: [id])
@@ -104,7 +108,8 @@ model LinkedResource {
 }
 
 model LinkedEntity {
-  id           String  @id
+  aid          Int     @id @default(autoincrement())
+  id           String
   IID          IID?    @relation(fields: [iid], references: [id])
   iid          String?
   Entity       Entity? @relation(fields: [entityId], references: [id])

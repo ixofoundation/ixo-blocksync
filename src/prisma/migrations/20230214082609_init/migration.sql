@@ -39,6 +39,7 @@ CREATE TABLE "Entity" (
 
 -- CreateTable
 CREATE TABLE "VerificationMethod" (
+    "aid" SERIAL NOT NULL,
     "id" TEXT NOT NULL,
     "iid" TEXT,
     "entityId" TEXT,
@@ -51,22 +52,24 @@ CREATE TABLE "VerificationMethod" (
     "publicKeyBase58" TEXT,
     "context" TEXT[],
 
-    CONSTRAINT "VerificationMethod_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "VerificationMethod_pkey" PRIMARY KEY ("aid")
 );
 
 -- CreateTable
 CREATE TABLE "Service" (
+    "aid" SERIAL NOT NULL,
     "id" TEXT NOT NULL,
     "iid" TEXT,
     "entityId" TEXT,
     "type" TEXT NOT NULL,
     "serviceEndpoint" TEXT NOT NULL,
 
-    CONSTRAINT "Service_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Service_pkey" PRIMARY KEY ("aid")
 );
 
 -- CreateTable
 CREATE TABLE "AccordedRight" (
+    "aid" SERIAL NOT NULL,
     "id" TEXT NOT NULL,
     "iid" TEXT,
     "entityId" TEXT,
@@ -75,11 +78,12 @@ CREATE TABLE "AccordedRight" (
     "message" TEXT NOT NULL,
     "service" TEXT NOT NULL,
 
-    CONSTRAINT "AccordedRight_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "AccordedRight_pkey" PRIMARY KEY ("aid")
 );
 
 -- CreateTable
 CREATE TABLE "LinkedResource" (
+    "aid" SERIAL NOT NULL,
     "id" TEXT NOT NULL,
     "iid" TEXT,
     "entityId" TEXT,
@@ -91,11 +95,12 @@ CREATE TABLE "LinkedResource" (
     "encrypted" TEXT NOT NULL,
     "right" TEXT NOT NULL,
 
-    CONSTRAINT "LinkedResource_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "LinkedResource_pkey" PRIMARY KEY ("aid")
 );
 
 -- CreateTable
 CREATE TABLE "LinkedEntity" (
+    "aid" SERIAL NOT NULL,
     "id" TEXT NOT NULL,
     "iid" TEXT,
     "entityId" TEXT,
@@ -103,7 +108,7 @@ CREATE TABLE "LinkedEntity" (
     "relationship" TEXT NOT NULL,
     "service" TEXT NOT NULL,
 
-    CONSTRAINT "LinkedEntity_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "LinkedEntity_pkey" PRIMARY KEY ("aid")
 );
 
 -- CreateTable

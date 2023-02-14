@@ -1,7 +1,7 @@
 import { MsgCreateEntity } from "@ixo/impactxclient-sdk/types/codegen/ixo/entity/v1beta1/tx";
 import { Prisma } from "@prisma/client";
 
-export const convertEntity = (Entity: MsgCreateEntity) => {
+export const convertEntity = (Entity: MsgCreateEntity, id: string) => {
     let verificationMethodDocs: Prisma.VerificationMethodUncheckedCreateInput[] =
         [];
     let serviceDocs: Prisma.ServiceUncheckedCreateInput[] = [];
@@ -12,7 +12,7 @@ export const convertEntity = (Entity: MsgCreateEntity) => {
     for (const verification of Entity.verification) {
         const verificationMethodDoc: Prisma.VerificationMethodUncheckedCreateInput =
             {
-                entityId: Entity.alsoKnownAs,
+                entityId: id,
                 id: verification.method?.id || "",
                 relationships: verification.relationships || [],
                 type: verification.method?.type || "",
@@ -28,7 +28,7 @@ export const convertEntity = (Entity: MsgCreateEntity) => {
 
     for (const service of Entity.service) {
         const serviceDoc: Prisma.ServiceUncheckedCreateInput = {
-            entityId: Entity.alsoKnownAs,
+            entityId: id,
             id: service.id,
             type: service.type,
             serviceEndpoint: service.serviceEndpoint,
@@ -38,7 +38,7 @@ export const convertEntity = (Entity: MsgCreateEntity) => {
 
     for (const right of Entity.accordedRight) {
         const accordedRightDoc: Prisma.AccordedRightUncheckedCreateInput = {
-            entityId: Entity.alsoKnownAs,
+            entityId: id,
             id: right.id,
             type: right.type,
             mechanism: right.mechanism,
@@ -50,7 +50,7 @@ export const convertEntity = (Entity: MsgCreateEntity) => {
 
     for (const resource of Entity.linkedResource) {
         const linkedResourceDoc: Prisma.LinkedResourceUncheckedCreateInput = {
-            entityId: Entity.alsoKnownAs,
+            entityId: id,
             id: resource.id,
             type: resource.type,
             description: resource.description,
@@ -65,7 +65,7 @@ export const convertEntity = (Entity: MsgCreateEntity) => {
 
     for (const entity of Entity.linkedEntity) {
         const linkedEntityDoc: Prisma.LinkedEntityUncheckedCreateInput = {
-            entityId: Entity.alsoKnownAs,
+            entityId: id,
             id: entity.id,
             type: entity.type,
             relationship: entity.relationship,

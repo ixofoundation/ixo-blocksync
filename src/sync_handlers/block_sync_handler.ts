@@ -2,6 +2,7 @@ import * as ProjectHandler from "../handlers/project_handler";
 import * as StatHandler from "../handlers/stats_handler";
 import * as IidHandler from "../handlers/iid_handler";
 import * as EntityHandler from "../handlers/entity_handler";
+import * as EventHandler from "../handlers/event_handler";
 import * as BondHandler from "../handlers/bond_handler";
 import * as PaymentHandler from "../handlers/payment_handler";
 import * as WasmHandler from "../handlers/wasm_handler";
@@ -118,11 +119,14 @@ export const syncBlock = async (
                             break;
                         case MsgTypes.createEntity:
                             const createEntity: MsgCreateEntity = msg.value;
-                            const createEntityDocs =
-                                EntityTypes.convertEntity(createEntity);
+                            const entityId = await EventHandler.getEntityId();
+                            const createEntityDocs = EntityTypes.convertEntity(
+                                createEntity,
+                                entityId,
+                            );
                             await EntityHandler.createEntity(
                                 {
-                                    id: createEntity.alsoKnownAs,
+                                    id: entityId,
                                     type: createEntity.entityType,
                                     status: createEntity.entityStatus.toString(),
                                     controller: createEntity.controller,
@@ -217,6 +221,7 @@ export const syncBlock = async (
                             const setVerificationRelationships: MsgSetVerificationRelationships =
                                 msg.value;
                             await IidHandler.setVerificationRelationships(
+                                setVerificationRelationships.id,
                                 setVerificationRelationships.methodId,
                                 setVerificationRelationships.relationships,
                             );
@@ -225,6 +230,7 @@ export const syncBlock = async (
                             const revokeVerification: MsgRevokeVerification =
                                 msg.value;
                             await IidHandler.revokeVerification(
+                                revokeVerification.id,
                                 revokeVerification.methodId,
                             );
                             break;
@@ -242,6 +248,7 @@ export const syncBlock = async (
                         case MsgTypes.deleteService:
                             const deleteService: MsgDeleteService = msg.value;
                             await IidHandler.deleteService(
+                                deleteService.id,
                                 deleteService.serviceId,
                             );
                             break;
@@ -293,6 +300,7 @@ export const syncBlock = async (
                             const deleteLinkedResource: MsgDeleteLinkedResource =
                                 msg.value;
                             await IidHandler.deleteLinkedResource(
+                                deleteLinkedResource.id,
                                 deleteLinkedResource.resourceId,
                             );
                             break;
@@ -314,6 +322,7 @@ export const syncBlock = async (
                             const deleteLinkedEntity: MsgDeleteLinkedEntity =
                                 msg.value;
                             await IidHandler.deleteLinkedEntity(
+                                deleteLinkedEntity.id,
                                 deleteLinkedEntity.entityId,
                             );
                             break;
@@ -340,6 +349,7 @@ export const syncBlock = async (
                             const deleteAccordedRight: MsgDeleteAccordedRight =
                                 msg.value;
                             await IidHandler.deleteAccordedRight(
+                                deleteAccordedRight.id,
                                 deleteAccordedRight.rightId,
                             );
                             break;

@@ -53,11 +53,11 @@ export const updateIid = async (
     id: string,
     controllers: string[],
     context: any,
-    verifications: Prisma.VerificationMethodUncheckedCreateInput[],
-    services: Prisma.ServiceUncheckedCreateInput[],
-    accordedRight: Prisma.AccordedRightUncheckedCreateInput[],
-    linkedResource: Prisma.LinkedResourceUncheckedCreateInput[],
-    linkedEntity: Prisma.LinkedEntityUncheckedCreateInput[],
+    verificationDocs: Prisma.VerificationMethodUncheckedCreateInput[],
+    serviceDocs: Prisma.ServiceUncheckedCreateInput[],
+    accordedRightDocs: Prisma.AccordedRightUncheckedCreateInput[],
+    linkedResourceDocs: Prisma.LinkedResourceUncheckedCreateInput[],
+    linkedEntityDocs: Prisma.LinkedEntityUncheckedCreateInput[],
     alsoKnownAs: string,
 ) => {
     try {
@@ -72,60 +72,28 @@ export const updateIid = async (
                 alsoKnownAs: alsoKnownAs,
             },
         });
-        if (verifications.length > 0) {
-            for (const verification of verifications) {
-                res += await prisma.verificationMethod.upsert({
-                    where: {
-                        id: verification.id,
-                    },
-                    update: verification,
-                    create: verification,
-                });
-            }
+        if (verificationDocs.length > 0) {
+            res += await prisma.verificationMethod.createMany({
+                data: verificationDocs,
+            });
         }
-        if (services.length > 0) {
-            for (const service of services) {
-                res += await prisma.service.upsert({
-                    where: {
-                        id: service.id,
-                    },
-                    update: service,
-                    create: service,
-                });
-            }
+        if (serviceDocs.length > 0) {
+            res += await prisma.service.createMany({ data: serviceDocs });
         }
-        if (accordedRight.length > 0) {
-            for (const right of accordedRight) {
-                res += await prisma.accordedRight.upsert({
-                    where: {
-                        id: right.id,
-                    },
-                    update: right,
-                    create: right,
-                });
-            }
+        if (accordedRightDocs.length > 0) {
+            res += await prisma.accordedRight.createMany({
+                data: accordedRightDocs,
+            });
         }
-        if (linkedResource.length > 0) {
-            for (const resource of linkedResource) {
-                res += await prisma.linkedResource.upsert({
-                    where: {
-                        id: resource.id,
-                    },
-                    update: resource,
-                    create: resource,
-                });
-            }
+        if (linkedResourceDocs.length > 0) {
+            res += await prisma.linkedResource.createMany({
+                data: linkedResourceDocs,
+            });
         }
-        if (linkedEntity.length > 0) {
-            for (const entity of linkedEntity) {
-                res += await prisma.linkedEntity.upsert({
-                    where: {
-                        id: entity.id,
-                    },
-                    update: entity,
-                    create: entity,
-                });
-            }
+        if (linkedEntityDocs.length > 0) {
+            res += await prisma.linkedEntity.createMany({
+                data: linkedEntityDocs,
+            });
         }
         return res;
     } catch (error) {
@@ -148,12 +116,13 @@ export const addVerification = async (
 };
 
 export const setVerificationRelationships = async (
+    iid: string,
     methodId: string,
     relationships: string[],
 ) => {
     try {
-        return prisma.verificationMethod.update({
-            where: { id: methodId },
+        return prisma.verificationMethod.updateMany({
+            where: { id: methodId, iid: iid },
             data: {
                 relationships: relationships,
             },
@@ -164,10 +133,10 @@ export const setVerificationRelationships = async (
     }
 };
 
-export const revokeVerification = async (methodId: string) => {
+export const revokeVerification = async (iid: string, methodId: string) => {
     try {
-        return prisma.verificationMethod.delete({
-            where: { id: methodId },
+        return prisma.verificationMethod.deleteMany({
+            where: { id: methodId, iid: iid },
         });
     } catch (error) {
         console.log(error);
@@ -186,10 +155,10 @@ export const addService = async (
     }
 };
 
-export const deleteService = async (serviceId: string) => {
+export const deleteService = async (iid: string, serviceId: string) => {
     try {
-        return prisma.service.delete({
-            where: { id: serviceId },
+        return prisma.service.deleteMany({
+            where: { id: serviceId, iid: iid },
         });
     } catch (error) {
         console.log(error);
@@ -250,10 +219,10 @@ export const addLinkedResource = async (
     }
 };
 
-export const deleteLinkedResource = async (resourceId: string) => {
+export const deleteLinkedResource = async (iid: string, resourceId: string) => {
     try {
-        return prisma.linkedResource.delete({
-            where: { id: resourceId },
+        return prisma.linkedResource.deleteMany({
+            where: { id: resourceId, iid: iid },
         });
     } catch (error) {
         console.log(error);
@@ -274,10 +243,10 @@ export const addLinkedEntity = async (
     }
 };
 
-export const deleteLinkedEntity = async (entityId: string) => {
+export const deleteLinkedEntity = async (iid: string, entityId: string) => {
     try {
-        return prisma.linkedEntity.delete({
-            where: { id: entityId },
+        return prisma.linkedEntity.deleteMany({
+            where: { id: entityId, iid: iid },
         });
     } catch (error) {
         console.log(error);
@@ -298,10 +267,10 @@ export const addAccordedRight = async (
     }
 };
 
-export const deleteAccordedRight = async (rightId: string) => {
+export const deleteAccordedRight = async (iid: string, rightId: string) => {
     try {
-        return prisma.accordedRight.delete({
-            where: { id: rightId },
+        return prisma.accordedRight.deleteMany({
+            where: { id: rightId, iid: iid },
         });
     } catch (error) {
         console.log(error);

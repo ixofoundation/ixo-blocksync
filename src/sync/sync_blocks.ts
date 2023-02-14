@@ -44,6 +44,14 @@ export const startSync = async () => {
                     ? txsEvent.txResponses[0].events
                     : [];
 
+                if (events.length > 0) {
+                    await EventSyncHandler.syncEvents(
+                        events,
+                        blockHeight,
+                        timestamp,
+                    );
+                }
+
                 if (transactions.length > 0) {
                     await TransactionSyncHandler.syncTransactions(
                         transactions,
@@ -53,14 +61,6 @@ export const startSync = async () => {
                         transactions,
                         String(blockHeight),
                         String(timestamp),
-                    );
-                }
-
-                if (events.length > 0) {
-                    await EventSyncHandler.syncEvents(
-                        events,
-                        blockHeight,
-                        timestamp,
                     );
                 }
 

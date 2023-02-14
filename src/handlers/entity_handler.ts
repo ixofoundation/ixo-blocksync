@@ -114,10 +114,8 @@ export const transferEntity = async (
 };
 
 export const getEntityById = async (id: string) => {
-    return prisma.entity.findFirst({
-        where: {
-            id: id,
-        },
+    let record = await prisma.entity.findFirst({
+        where: { id: id },
         include: {
             VerificationMethod: true,
             Service: true,
@@ -126,6 +124,22 @@ export const getEntityById = async (id: string) => {
             LinkedEntity: true,
         },
     });
+    let classVal = record!.context![1]!["val"];
+    while (true) {
+        record = await prisma.entity.findFirst({
+            where: { id: classVal },
+            include: {
+                VerificationMethod: true,
+                Service: true,
+                AccordedRight: true,
+                LinkedResource: true,
+                LinkedEntity: true,
+            },
+        });
+        if (!record) break;
+        classVal = record!.context![1]!["val"];
+    }
+    return record;
 };
 
 export const getEntitiesByOwnerDid = async (did: string) => {
