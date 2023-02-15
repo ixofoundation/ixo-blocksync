@@ -125,7 +125,9 @@ export const getEntityById = async (id: string) => {
         },
     });
     let classVal = record!.context![1]!["val"];
+    let prevRecord: any;
     while (true) {
+        prevRecord = record;
         record = await prisma.entity.findFirst({
             where: { id: classVal },
             include: {
@@ -139,7 +141,7 @@ export const getEntityById = async (id: string) => {
         if (!record) break;
         classVal = record!.context![1]!["val"];
     }
-    return record;
+    return prevRecord;
 };
 
 export const getEntitiesByOwnerDid = async (did: string) => {
