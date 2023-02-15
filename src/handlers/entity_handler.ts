@@ -114,17 +114,15 @@ export const transferEntity = async (
 };
 
 export const getEntityById = async (id: string) => {
-    const baseEntity = await prisma.entity.findFirst({
+    const baseEntity: any = await prisma.entity.findFirst({
         where: { id: id },
         include: {
-            VerificationMethod: true,
             Service: true,
             AccordedRight: true,
             LinkedResource: true,
             LinkedEntity: true,
         },
     });
-    const verificationIds = baseEntity!.VerificationMethod.map((v) => v.id);
     const serviceIds = baseEntity!.Service.map((s) => s.id);
     const accordedRightIds = baseEntity!.AccordedRight.map((a) => a.id);
     const linkedResourceIds = baseEntity!.LinkedResource.map((r) => r.id);
@@ -140,7 +138,6 @@ export const getEntityById = async (id: string) => {
             let record = await prisma.entity.findFirst({
                 where: { id: classVal },
                 include: {
-                    VerificationMethod: true,
                     Service: true,
                     AccordedRight: true,
                     LinkedResource: true,
@@ -150,12 +147,6 @@ export const getEntityById = async (id: string) => {
             if (!record) break;
             classArr = record!.context.filter((c: any) => c.key === "class");
             classVal = classArr[0].val;
-            for (const verification of record.VerificationMethod) {
-                if (!verificationIds.includes(verification.id)) {
-                    baseEntity!.VerificationMethod.push(verification);
-                    verificationIds.push(verification.id);
-                }
-            }
             for (const service of record.Service) {
                 if (!serviceIds.includes(service.id)) {
                     baseEntity!.Service.push(service);
@@ -182,6 +173,20 @@ export const getEntityById = async (id: string) => {
             }
         }
     }
+
+    const settings: any = {};
+    const settingsArr = baseEntity!.LinkedResource.filter(
+        (r) => r.type === "Settings",
+    );
+    baseEntity!.LinkedResource = baseEntity!.LinkedResource.filter(
+        (r) => r.type !== "Settings",
+    );
+    for (const setting of settingsArr) {
+        settings[`${setting.description}`] = {
+            ...setting,
+        };
+    }
+    baseEntity["settings"] = { ...settings };
 
     return baseEntity;
 };
