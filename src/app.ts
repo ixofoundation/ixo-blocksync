@@ -106,6 +106,46 @@ app.get(
 );
 
 app.get(
+    "/api/entity/collections",
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const entities = await EntityHandler.getEntityCollections();
+            res.json(entities);
+        } catch (error) {
+            next(error);
+        }
+    },
+);
+
+app.get(
+    "/api/entity/collectionById/:id",
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const entities = await EntityHandler.getEntityCollectionById(
+                req.params.id,
+            );
+            res.json(entities);
+        } catch (error) {
+            next(error);
+        }
+    },
+);
+
+app.get(
+    "/api/entity/collectionsByOwnerDid/:did",
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const entities = await EntityHandler.getEntityCollectionsByOwnerDid(
+                req.params.did,
+            );
+            res.json(entities);
+        } catch (error) {
+            next(error);
+        }
+    },
+);
+
+app.get(
     "/api/bonds/listBonds",
     async (req: Request, res: Response, next: NextFunction) => {
         try {

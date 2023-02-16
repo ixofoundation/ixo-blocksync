@@ -145,6 +145,7 @@ export const getEntityById = async (id: string) => {
                 },
             });
             if (!record) break;
+            //@ts-ignore
             classArr = record!.context.filter((c: any) => c.key === "class");
             classVal = classArr[0].val;
             for (const service of record.Service) {
@@ -208,4 +209,80 @@ export const getEntitiesByOwnerDid = async (did: string) => {
         entities.push(entity!);
     }
     return entities;
+};
+
+export const getEntityCollections = async () => {
+    const collections = await prisma.entity.findMany({
+        where: {
+            type: "asset/collection",
+        },
+    });
+    const res: any[] = [];
+    for (const c of collections) {
+        const collection = await getEntityById(c.id);
+        const entities = await prisma.entity.findMany({
+            where: {
+                context: {
+                    array_contains: [{ key: "class", val: c.id }],
+                },
+            },
+        });
+        const entityArr: any[] = [];
+        for (const e of entities) {
+            entityArr.push(await getEntityById(e.id));
+        }
+        res.push({ collection: collection, entities: entityArr });
+    }
+    return res;
+};
+
+export const getEntityCollectionById = async (id: string) => {
+    const collection = await getEntityById(id);
+    const entities = await prisma.entity.findMany({
+        where: {
+            context: {
+                array_contains: [{ key: "class", val: collection.id }],
+            },
+        },
+    });
+    let res: any;
+    const entityArr: any[] = [];
+    for (const e of entities) {
+        entityArr.push(await getEntityById(e.id));
+    }
+    res = {
+        collection: { ...collection },
+        entities: entityArr,
+    };
+    return res;
+};
+
+export const getEntityCollectionsByOwnerDid = async (did: string) => {
+    const collections = await prisma.entity.findMany({
+        where: {
+            type: "asset/collection",
+            OR: [
+                { ownerDid: prefixes[0] + did },
+                { ownerDid: prefixes[1] + did },
+                { ownerDid: prefixes[2] + did },
+            ],
+        },
+    });
+    const res: any[] = [];
+    for (const c of collections) {
+        const collection = await getEntityById(c.id);
+        const entities = await prisma.entity.findMany({
+            where: {
+                context: {
+                    array_contains: [{ key: "class", val: c.id }],
+                },
+            },
+        });
+        const entityArr: any[] = [];
+        for (const e of entities) {
+            entityArr.push(await getEntityById(e.id));
+        }
+        res.push({ collection: collection, entities: entityArr });
+    }
+    return res;
 };

@@ -13,7 +13,7 @@ CREATE TABLE "IID" (
     "state" BOOLEAN,
     "alsoKnownAs" TEXT NOT NULL,
     "controllers" TEXT[],
-    "context" JSONB[],
+    "context" JSONB,
 
     CONSTRAINT "IID_pkey" PRIMARY KEY ("id")
 );
@@ -25,7 +25,7 @@ CREATE TABLE "Entity" (
     "status" TEXT NOT NULL,
     "verified" BOOLEAN,
     "controller" TEXT[],
-    "context" JSONB[],
+    "context" JSONB,
     "startDate" TIMESTAMP(3),
     "endDate" TIMESTAMP(3),
     "relayerNode" TEXT NOT NULL,
@@ -252,7 +252,7 @@ CREATE TABLE "Chain" (
 CREATE TABLE "Event" (
     "id" SERIAL NOT NULL,
     "type" TEXT NOT NULL,
-    "attributes" JSONB[],
+    "attributes" JSONB,
     "blockHeight" INTEGER NOT NULL,
     "timestamp" TIMESTAMP(3) NOT NULL,
 

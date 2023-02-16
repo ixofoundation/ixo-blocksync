@@ -141,6 +141,65 @@ Get entities by owner did
 | ---- | ----------- |
 | 200  | OK          |
 
+### /api/entity/collections
+
+#### GET
+
+##### Description:
+
+Get all entity collections
+
+##### Parameters
+
+| Name | Located in | Description | Required | Schema |
+| ---- | ---------- | ----------- | -------- | ------ |
+
+##### Responses
+
+| Code | Description |
+| ---- | ----------- |
+| 200  | OK          |
+
+### /api/entity/collectionById/:id
+
+#### GET
+
+##### Description:
+
+Get an entity collection by id
+
+##### Parameters
+
+| Name | Located in | Description | Required | Schema |
+| ---- | ---------- | ----------- | -------- | ------ |
+| id   | path       |             | Yes      | string |
+
+##### Responses
+
+| Code | Description |
+| ---- | ----------- |
+| 200  | OK          |
+
+### /api/entity/collectionsByOwnerDid/:did
+
+#### GET
+
+##### Description:
+
+Get entity collections by ownerdid
+
+##### Parameters
+
+| Name | Located in | Description | Required | Schema |
+| ---- | ---------- | ----------- | -------- | ------ |
+| did  | path       |             | Yes      | string |
+
+##### Responses
+
+| Code | Description |
+| ---- | ----------- |
+| 200  | OK          |
+
 ### /api/bonds/listBonds
 
 #### GET

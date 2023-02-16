@@ -21,7 +21,7 @@ model IID {
   state              Boolean?
   alsoKnownAs        String
   controllers        String[]
-  context            Json[]
+  context            Json?
   VerificationMethod VerificationMethod[]
   Service            Service[]
   AccordedRight      AccordedRight[]
@@ -35,7 +35,7 @@ model Entity {
   status             String
   verified           Boolean?
   controller         String[]
-  context            Json[]
+  context            Json?
   startDate          DateTime?
   endDate            DateTime?
   relayerNode        String
@@ -247,7 +247,7 @@ model Chain {
 model Event {
   id          Int      @id @default(autoincrement())
   type        String
-  attributes  Json[]
+  attributes  Json?
   blockHeight Int
   timestamp   DateTime
 
