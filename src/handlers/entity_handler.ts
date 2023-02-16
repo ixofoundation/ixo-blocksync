@@ -128,9 +128,16 @@ export const getEntityById = async (id: string) => {
     const linkedResourceIds = baseEntity!.LinkedResource.map((r) => r.id);
     const linkedEntityIds = baseEntity!.LinkedEntity.map((e) => e.id);
 
-    let classArr: any[] = baseEntity!.context.filter(
-        (c: any) => c.key === "class",
-    );
+    let classArr: any[] = [];
+
+    if (
+        baseEntity?.context &&
+        typeof baseEntity?.context === "object" &&
+        Array.isArray(baseEntity?.context)
+    ) {
+        classArr = baseEntity!.context.filter((c: any) => c.key === "class");
+    }
+
     let classVal: string;
     if (classArr.length > 0) {
         classVal = classArr[0].val;
@@ -145,8 +152,15 @@ export const getEntityById = async (id: string) => {
                 },
             });
             if (!record) break;
-            //@ts-ignore
-            classArr = record!.context.filter((c: any) => c.key === "class");
+            if (
+                record?.context &&
+                typeof record?.context === "object" &&
+                Array.isArray(record?.context)
+            ) {
+                classArr = record!.context.filter(
+                    (c: any) => c.key === "class",
+                );
+            }
             classVal = classArr[0].val;
             for (const service of record.Service) {
                 if (!serviceIds.includes(service.id)) {
