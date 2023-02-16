@@ -10,6 +10,7 @@ interface Context {
 
 export const createIid = async (
     iidDoc: Prisma.IIDCreateInput,
+    contextDocs: Prisma.ContextUncheckedCreateInput[],
     verificationDocs: Prisma.VerificationMethodUncheckedCreateInput[],
     serviceDocs: Prisma.ServiceUncheckedCreateInput[],
     accordedRightDocs: Prisma.AccordedRightUncheckedCreateInput[],
@@ -19,6 +20,9 @@ export const createIid = async (
     try {
         let res: any;
         res = await prisma.iID.create({ data: iidDoc });
+        if (contextDocs.length > 0) {
+            res += await prisma.context.createMany({ data: contextDocs });
+        }
         if (verificationDocs.length > 0) {
             res += await prisma.verificationMethod.createMany({
                 data: verificationDocs,
@@ -52,7 +56,7 @@ export const createIid = async (
 export const updateIid = async (
     id: string,
     controllers: string[],
-    context: any,
+    contextDocs: Prisma.ContextUncheckedCreateInput[],
     verificationDocs: Prisma.VerificationMethodUncheckedCreateInput[],
     serviceDocs: Prisma.ServiceUncheckedCreateInput[],
     accordedRightDocs: Prisma.AccordedRightUncheckedCreateInput[],
@@ -68,10 +72,12 @@ export const updateIid = async (
             },
             data: {
                 controllers: controllers,
-                context: context,
                 alsoKnownAs: alsoKnownAs,
             },
         });
+        if (contextDocs.length > 0) {
+            res += await prisma.context.createMany({ data: contextDocs });
+        }
         if (verificationDocs.length > 0) {
             res += await prisma.verificationMethod.createMany({
                 data: verificationDocs,
@@ -280,14 +286,10 @@ export const deleteAccordedRight = async (iid: string, rightId: string) => {
 
 export const addContext = async (iid: string, context: Context) => {
     try {
-        return prisma.iID.update({
-            where: {
-                id: iid,
-            },
+        return prisma.context.create({
             data: {
-                context: {
-                    push: JSON.stringify(context),
-                },
+                iid: iid,
+                ...context,
             },
         });
     } catch (error) {
@@ -298,17 +300,10 @@ export const addContext = async (iid: string, context: Context) => {
 
 export const deleteContext = async (iid: string, contextKey: string) => {
     try {
-        const iidDoc = await prisma.iID.findFirst({ where: { id: iid } });
-        const context: any = iidDoc?.context;
-        const newContext = context.filter((con: any) => {
-            return con.key !== contextKey;
-        });
-        return prisma.iID.update({
+        return prisma.context.deleteMany({
             where: {
-                id: iid,
-            },
-            data: {
-                context: newContext,
+                iid: iid,
+                key: contextKey,
             },
         });
     } catch (error) {

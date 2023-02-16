@@ -21,7 +21,7 @@ model IID {
   state              Boolean?
   alsoKnownAs        String
   controllers        String[]
-  context            Json?
+  Context            Context[]
   VerificationMethod VerificationMethod[]
   Service            Service[]
   AccordedRight      AccordedRight[]
@@ -35,7 +35,6 @@ model Entity {
   status             String
   verified           Boolean?
   controller         String[]
-  context            Json?
   startDate          DateTime?
   endDate            DateTime?
   relayerNode        String
@@ -43,11 +42,22 @@ model Entity {
   ownerDid           String
   ownerAddress       String
   data               Json?
+  Context            Context[]
   VerificationMethod VerificationMethod[]
   Service            Service[]
   AccordedRight      AccordedRight[]
   LinkedResource     LinkedResource[]
   LinkedEntity       LinkedEntity[]
+}
+
+model Context {
+  aid      Int     @id @default(autoincrement())
+  IID      IID?    @relation(fields: [iid], references: [id])
+  iid      String?
+  Entity   Entity? @relation(fields: [entityId], references: [id])
+  entityId String?
+  key      String
+  val      String
 }
 
 model VerificationMethod {

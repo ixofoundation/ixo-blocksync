@@ -5,6 +5,7 @@ const prefixes = ["did:x:", "did:ixo:", "did:sov:"];
 
 export const createEntity = async (
     entityDoc: Prisma.EntityUncheckedCreateInput,
+    contextDocs: Prisma.ContextUncheckedCreateInput[],
     verificationDocs: Prisma.VerificationMethodUncheckedCreateInput[],
     serviceDocs: Prisma.ServiceUncheckedCreateInput[],
     accordedRightDocs: Prisma.AccordedRightUncheckedCreateInput[],
@@ -14,6 +15,9 @@ export const createEntity = async (
     try {
         let res: any;
         res = await prisma.entity.create({ data: entityDoc });
+        if (contextDocs.length > 0) {
+            res += await prisma.context.createMany({ data: contextDocs });
+        }
         if (verificationDocs.length > 0) {
             res += await prisma.verificationMethod.createMany({
                 data: verificationDocs,
@@ -117,6 +121,11 @@ export const getEntityById = async (id: string) => {
     const baseEntity: any = await prisma.entity.findFirst({
         where: { id: id },
         include: {
+            Context: {
+                where: {
+                    key: "class",
+                },
+            },
             Service: true,
             AccordedRight: true,
             LinkedResource: true,
@@ -128,40 +137,26 @@ export const getEntityById = async (id: string) => {
     const linkedResourceIds = baseEntity!.LinkedResource.map((r) => r.id);
     const linkedEntityIds = baseEntity!.LinkedEntity.map((e) => e.id);
 
-    let classArr: any[] = [];
-
-    if (
-        baseEntity?.context &&
-        typeof baseEntity?.context === "object" &&
-        Array.isArray(baseEntity?.context)
-    ) {
-        classArr = baseEntity!.context.filter((c: any) => c.key === "class");
-    }
-
     let classVal: string;
-    if (classArr.length > 0) {
-        classVal = classArr[0].val;
+    if (baseEntity!.Context.length > 0) {
+        classVal = baseEntity!.Context[0].val;
         while (true) {
             let record = await prisma.entity.findFirst({
                 where: { id: classVal },
                 include: {
+                    Context: {
+                        where: {
+                            key: "class",
+                        },
+                    },
                     Service: true,
                     AccordedRight: true,
                     LinkedResource: true,
                     LinkedEntity: true,
                 },
             });
-            if (!record) break;
-            if (
-                record?.context &&
-                typeof record?.context === "object" &&
-                Array.isArray(record?.context)
-            ) {
-                classArr = record!.context.filter(
-                    (c: any) => c.key === "class",
-                );
-            }
-            classVal = classArr[0].val;
+            if (!record?.Context[0]) break;
+            classVal = record!.Context[0].val;
             for (const service of record.Service) {
                 if (!serviceIds.includes(service.id)) {
                     baseEntity!.Service.push(service);
@@ -236,8 +231,8 @@ export const getEntityCollections = async () => {
         const collection = await getEntityById(c.id);
         const entities = await prisma.entity.findMany({
             where: {
-                context: {
-                    array_contains: [{ key: "class", val: c.id }],
+                Context: {
+                    some: { key: "class", val: c.id },
                 },
             },
         });
@@ -254,8 +249,8 @@ export const getEntityCollectionById = async (id: string) => {
     const collection = await getEntityById(id);
     const entities = await prisma.entity.findMany({
         where: {
-            context: {
-                array_contains: [{ key: "class", val: collection.id }],
+            Context: {
+                some: { key: "class", val: collection.id },
             },
         },
     });
@@ -287,8 +282,8 @@ export const getEntityCollectionsByOwnerDid = async (did: string) => {
         const collection = await getEntityById(c.id);
         const entities = await prisma.entity.findMany({
             where: {
-                context: {
-                    array_contains: [{ key: "class", val: c.id }],
+                Context: {
+                    some: { key: "class", val: c.id },
                 },
             },
         });

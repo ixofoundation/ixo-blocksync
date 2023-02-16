@@ -156,10 +156,20 @@ const seedDids = async () => {
                     data: {
                         id: String(iid?.id),
                         controllers: iid?.controller,
-                        context: JSON.stringify(iid?.context),
                         alsoKnownAs: iid?.alsoKnownAs || "",
                     },
                 });
+                if (iid?.context) {
+                    for (const context of iid.context) {
+                        await prisma.context.create({
+                            data: {
+                                iid: iid.id!,
+                                key: context.key,
+                                val: context.val,
+                            },
+                        });
+                    }
+                }
                 if (iid?.verificationMethod) {
                     for (const verificationMethod of iid.verificationMethod) {
                         await prisma.verificationMethod.create({

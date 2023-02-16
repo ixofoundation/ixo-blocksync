@@ -2,12 +2,22 @@ import { MsgCreateIidDocument } from "@ixo/impactxclient-sdk/types/codegen/ixo/i
 import { Prisma } from "@prisma/client";
 
 export const convertIID = (IID: MsgCreateIidDocument) => {
+    let contextDocs: Prisma.ContextUncheckedCreateInput[] = [];
     let verificationMethodDocs: Prisma.VerificationMethodUncheckedCreateInput[] =
         [];
     let serviceDocs: Prisma.ServiceUncheckedCreateInput[] = [];
     let accordedRightDocs: Prisma.AccordedRightUncheckedCreateInput[] = [];
     let linkedResourceDocs: Prisma.LinkedResourceUncheckedCreateInput[] = [];
     let linkedEntityDocs: Prisma.LinkedEntityUncheckedCreateInput[] = [];
+
+    for (const context of IID.context) {
+        const contextDoc: Prisma.ContextUncheckedCreateInput = {
+            iid: IID.id,
+            key: context.key,
+            val: context.val,
+        };
+        contextDocs.push(contextDoc);
+    }
 
     for (const verification of IID.verifications) {
         const verificationMethodDoc: Prisma.VerificationMethodUncheckedCreateInput =
@@ -75,6 +85,7 @@ export const convertIID = (IID: MsgCreateIidDocument) => {
     }
 
     return {
+        contextDocs,
         verificationMethodDocs,
         serviceDocs,
         accordedRightDocs,

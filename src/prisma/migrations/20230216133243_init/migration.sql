@@ -13,7 +13,6 @@ CREATE TABLE "IID" (
     "state" BOOLEAN,
     "alsoKnownAs" TEXT NOT NULL,
     "controllers" TEXT[],
-    "context" JSONB,
 
     CONSTRAINT "IID_pkey" PRIMARY KEY ("id")
 );
@@ -25,7 +24,6 @@ CREATE TABLE "Entity" (
     "status" TEXT NOT NULL,
     "verified" BOOLEAN,
     "controller" TEXT[],
-    "context" JSONB,
     "startDate" TIMESTAMP(3),
     "endDate" TIMESTAMP(3),
     "relayerNode" TEXT NOT NULL,
@@ -35,6 +33,17 @@ CREATE TABLE "Entity" (
     "data" JSONB,
 
     CONSTRAINT "Entity_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Context" (
+    "aid" SERIAL NOT NULL,
+    "iid" TEXT,
+    "entityId" TEXT,
+    "key" TEXT NOT NULL,
+    "val" TEXT NOT NULL,
+
+    CONSTRAINT "Context_pkey" PRIMARY KEY ("aid")
 );
 
 -- CreateTable
@@ -471,6 +480,12 @@ CREATE INDEX "WasmContract_code_id_idx" ON "WasmContract"("code_id");
 
 -- CreateIndex
 CREATE INDEX "WasmContract_creator_idx" ON "WasmContract"("creator");
+
+-- AddForeignKey
+ALTER TABLE "Context" ADD CONSTRAINT "Context_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Context" ADD CONSTRAINT "Context_entityId_fkey" FOREIGN KEY ("entityId") REFERENCES "Entity"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "VerificationMethod" ADD CONSTRAINT "VerificationMethod_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE SET NULL ON UPDATE CASCADE;

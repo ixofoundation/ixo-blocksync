@@ -93,8 +93,8 @@ export const syncBlock = async (
                                     id: createIid.id,
                                     alsoKnownAs: createIid.alsoKnownAs,
                                     controllers: createIid.controllers,
-                                    context: JSON.stringify(createIid.context),
                                 },
+                                createIidocs.contextDocs,
                                 createIidocs.verificationMethodDocs,
                                 createIidocs.serviceDocs,
                                 createIidocs.accordedRightDocs,
@@ -108,7 +108,7 @@ export const syncBlock = async (
                             await IidHandler.updateIid(
                                 updateIid.id,
                                 updateIid.controllers,
-                                JSON.stringify(updateIid.context),
+                                updateIid.context,
                                 updateIidocs.verificationMethodDocs,
                                 updateIidocs.serviceDocs,
                                 updateIidocs.accordedRightDocs,
@@ -130,9 +130,6 @@ export const syncBlock = async (
                                     type: createEntity.entityType,
                                     status: createEntity.entityStatus.toString(),
                                     controller: createEntity.controller,
-                                    context: JSON.stringify(
-                                        createEntity.context,
-                                    ),
                                     startDate: createEntity.startDate
                                         ? getTimestamp(createEntity.startDate)
                                         : null,
@@ -147,6 +144,7 @@ export const syncBlock = async (
                                         createEntity.data,
                                     ),
                                 },
+                                createEntityDocs.contextDocs,
                                 createEntityDocs.verificationMethodDocs,
                                 createEntityDocs.serviceDocs,
                                 createEntityDocs.accordedRightDocs,

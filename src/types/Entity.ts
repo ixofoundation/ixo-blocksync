@@ -2,12 +2,22 @@ import { MsgCreateEntity } from "@ixo/impactxclient-sdk/types/codegen/ixo/entity
 import { Prisma } from "@prisma/client";
 
 export const convertEntity = (Entity: MsgCreateEntity, id: string) => {
+    let contextDocs: Prisma.ContextUncheckedCreateInput[] = [];
     let verificationMethodDocs: Prisma.VerificationMethodUncheckedCreateInput[] =
         [];
     let serviceDocs: Prisma.ServiceUncheckedCreateInput[] = [];
     let accordedRightDocs: Prisma.AccordedRightUncheckedCreateInput[] = [];
     let linkedResourceDocs: Prisma.LinkedResourceUncheckedCreateInput[] = [];
     let linkedEntityDocs: Prisma.LinkedEntityUncheckedCreateInput[] = [];
+
+    for (const context of Entity.context) {
+        const contextDoc: Prisma.ContextUncheckedCreateInput = {
+            entityId: id,
+            key: context.key,
+            val: context.val,
+        };
+        contextDocs.push(contextDoc);
+    }
 
     for (const verification of Entity.verification) {
         const verificationMethodDoc: Prisma.VerificationMethodUncheckedCreateInput =
@@ -75,6 +85,7 @@ export const convertEntity = (Entity: MsgCreateEntity, id: string) => {
     }
 
     return {
+        contextDocs,
         verificationMethodDocs,
         serviceDocs,
         accordedRightDocs,
