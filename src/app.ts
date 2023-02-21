@@ -510,6 +510,18 @@ app.get(
 );
 
 app.get(
+    "did/getByDid/:did",
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const iid = await IidHandler.getDidByDid(req.params.did);
+            res.json(iid);
+        } catch (error) {
+            next(error);
+        }
+    },
+);
+
+app.get(
     "/api/event/getEventByType/:type",
     async (req: Request, res: Response, next: NextFunction) => {
         try {

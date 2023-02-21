@@ -343,3 +343,8 @@ export const getIidByIid = async (id: string) => {
         },
     });
 };
+
+export const getDidByDid = async (did: string) => {
+    const iid = await prisma.iID.findFirst({ where: { id: did } });
+    return { did: iid?.id, publicKey: iid?.publicKey };
+};

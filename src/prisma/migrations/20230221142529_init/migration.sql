@@ -12,6 +12,7 @@ CREATE TABLE "IID" (
     "id" TEXT NOT NULL,
     "state" BOOLEAN,
     "alsoKnownAs" TEXT NOT NULL,
+    "publicKey" TEXT,
     "controllers" TEXT[],
 
     CONSTRAINT "IID_pkey" PRIMARY KEY ("id")

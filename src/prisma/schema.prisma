@@ -20,6 +20,7 @@ model IID {
   id                 String               @id
   state              Boolean?
   alsoKnownAs        String
+  publicKey          String?
   controllers        String[]
   Context            Context[]
   VerificationMethod VerificationMethod[]

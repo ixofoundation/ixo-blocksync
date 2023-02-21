@@ -157,6 +157,7 @@ const seedDids = async () => {
                         id: String(iid?.id),
                         controllers: iid?.controller,
                         alsoKnownAs: iid?.alsoKnownAs || "",
+                        publicKey: did.publicKey,
                     },
                 });
                 if (iid?.context) {
