@@ -498,7 +498,7 @@ app.get(
 );
 
 app.get(
-    "api/iid/getByIid/:iid",
+    "/api/iid/getByIid/:iid",
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const iid = await IidHandler.getIidByIid(req.params.iid);
@@ -510,7 +510,7 @@ app.get(
 );
 
 app.get(
-    "did/getByDid/:did",
+    "/did/getByDid/:did",
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const iid = await IidHandler.getDidByDid(req.params.did);
@@ -550,7 +550,7 @@ app.get(
 );
 
 // app.get(
-//     "api/transactions/listTransactionsByType/:type(*)",
+//     "/api/transactions/listTransactionsByType/:type(*)",
 //     async (req: Request, res: Response, next: NextFunction) => {
 //         try {
 //             const transactions =
@@ -567,7 +567,7 @@ app.get(
 // );
 
 // app.get(
-//     "api/transactions/listTransactionsByAddress/:address",
+//     "/api/transactions/listTransactionsByAddress/:address",
 //     async (req: Request, res: Response, next: NextFunction) => {
 //         try {
 //             const transactions =
@@ -584,7 +584,7 @@ app.get(
 // );
 
 // app.get(
-//     "api/transactions/listTransactionsByAddressAndType/:address/:type(*)",
+//     "/api/transactions/listTransactionsByAddressAndType/:address/:type(*)",
 //     async (req: Request, res: Response, next: NextFunction) => {
 //         try {
 //             const transactions =
@@ -614,7 +614,7 @@ app.get(
 );
 
 app.get(
-    "api/block/getPaymentTemplateById/:id",
+    "/api/getPaymentTemplateById/:id",
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const template = await PaymentHandler.getPaymentTemplateById(
