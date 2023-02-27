@@ -508,7 +508,7 @@ app.get(
 );
 
 app.get(
-    "/did/getByDid/:did",
+    "/api/did/getByDid/:did",
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const iid = await IidHandler.getDidByDid(req.params.did);
