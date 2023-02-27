@@ -35,16 +35,19 @@ export const syncTransactions = async (
             const memo = tx.body?.memo ? tx.body.memo : "";
             const timeoutHeight = String(tx.body?.timeoutHeight.low);
 
-            await prisma.transaction.create({
-                data: {
-                    blockHeight: blockHeight,
-                    messages: JSON.stringify(messages),
-                    fee: JSON.stringify(fee),
-                    signatures: JSON.stringify(signatures),
-                    memo: memo,
-                    timeoutHeight: timeoutHeight,
-                },
-            });
+            for (const message of messages) {
+                await prisma.transaction.create({
+                    data: {
+                        blockHeight: blockHeight,
+                        type: message.type,
+                        value: JSON.stringify(message.value),
+                        fee: JSON.stringify(fee),
+                        signatures: JSON.stringify(signatures),
+                        memo: memo,
+                        timeoutHeight: timeoutHeight,
+                    },
+                });
+            }
 
             io.emit("Transaction Synced", {
                 blockHeight,

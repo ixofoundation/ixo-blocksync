@@ -10,37 +10,24 @@ CREATE TABLE "Storage" (
 -- CreateTable
 CREATE TABLE "IID" (
     "id" TEXT NOT NULL,
-    "state" BOOLEAN,
-    "alsoKnownAs" TEXT NOT NULL,
     "publicKey" TEXT,
-    "controllers" TEXT[],
+    "controller" TEXT[],
+    "verificationMethod" JSONB,
+    "authentication" TEXT[],
+    "assertionMethod" TEXT[],
+    "keyAgreement" TEXT[],
+    "capabilityInvocation" TEXT[],
+    "capabilityDelegation" TEXT[],
+    "alsoKnownAs" TEXT NOT NULL,
+    "metadata" JSONB,
 
     CONSTRAINT "IID_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "Entity" (
-    "id" TEXT NOT NULL,
-    "type" TEXT NOT NULL,
-    "status" TEXT NOT NULL,
-    "verified" BOOLEAN,
-    "controller" TEXT[],
-    "startDate" TIMESTAMP(3),
-    "endDate" TIMESTAMP(3),
-    "relayerNode" TEXT NOT NULL,
-    "credentials" TEXT[],
-    "ownerDid" TEXT NOT NULL,
-    "ownerAddress" TEXT NOT NULL,
-    "data" JSONB,
-
-    CONSTRAINT "Entity_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "Context" (
     "aid" SERIAL NOT NULL,
-    "iid" TEXT,
-    "entityId" TEXT,
+    "iid" TEXT NOT NULL,
     "key" TEXT NOT NULL,
     "val" TEXT NOT NULL,
 
@@ -48,77 +35,71 @@ CREATE TABLE "Context" (
 );
 
 -- CreateTable
-CREATE TABLE "VerificationMethod" (
-    "aid" SERIAL NOT NULL,
-    "id" TEXT NOT NULL,
-    "iid" TEXT,
-    "entityId" TEXT,
-    "relationships" TEXT[],
-    "type" TEXT NOT NULL,
-    "controller" TEXT NOT NULL,
-    "blockchainAccountID" TEXT,
-    "publicKeyHex" TEXT,
-    "publicKeyMultibase" TEXT,
-    "publicKeyBase58" TEXT,
-    "context" TEXT[],
-
-    CONSTRAINT "VerificationMethod_pkey" PRIMARY KEY ("aid")
-);
-
--- CreateTable
-CREATE TABLE "Service" (
-    "aid" SERIAL NOT NULL,
-    "id" TEXT NOT NULL,
-    "iid" TEXT,
-    "entityId" TEXT,
-    "type" TEXT NOT NULL,
-    "serviceEndpoint" TEXT NOT NULL,
-
-    CONSTRAINT "Service_pkey" PRIMARY KEY ("aid")
-);
-
--- CreateTable
 CREATE TABLE "AccordedRight" (
     "aid" SERIAL NOT NULL,
-    "id" TEXT NOT NULL,
-    "iid" TEXT,
-    "entityId" TEXT,
     "type" TEXT NOT NULL,
+    "id" TEXT NOT NULL,
     "mechanism" TEXT NOT NULL,
     "message" TEXT NOT NULL,
     "service" TEXT NOT NULL,
+    "iid" TEXT NOT NULL,
 
     CONSTRAINT "AccordedRight_pkey" PRIMARY KEY ("aid")
 );
 
 -- CreateTable
+CREATE TABLE "LinkedEntity" (
+    "aid" SERIAL NOT NULL,
+    "type" TEXT NOT NULL,
+    "id" TEXT NOT NULL,
+    "relationship" TEXT NOT NULL,
+    "service" TEXT NOT NULL,
+    "iid" TEXT NOT NULL,
+
+    CONSTRAINT "LinkedEntity_pkey" PRIMARY KEY ("aid")
+);
+
+-- CreateTable
 CREATE TABLE "LinkedResource" (
     "aid" SERIAL NOT NULL,
-    "id" TEXT NOT NULL,
-    "iid" TEXT,
-    "entityId" TEXT,
     "type" TEXT NOT NULL,
+    "id" TEXT NOT NULL,
     "description" TEXT NOT NULL,
     "mediaType" TEXT NOT NULL,
     "serviceEndpoint" TEXT NOT NULL,
     "proof" TEXT NOT NULL,
     "encrypted" TEXT NOT NULL,
     "right" TEXT NOT NULL,
+    "iid" TEXT NOT NULL,
 
     CONSTRAINT "LinkedResource_pkey" PRIMARY KEY ("aid")
 );
 
 -- CreateTable
-CREATE TABLE "LinkedEntity" (
+CREATE TABLE "Service" (
     "aid" SERIAL NOT NULL,
     "id" TEXT NOT NULL,
-    "iid" TEXT,
-    "entityId" TEXT,
     "type" TEXT NOT NULL,
-    "relationship" TEXT NOT NULL,
-    "service" TEXT NOT NULL,
+    "serviceEndpoint" TEXT NOT NULL,
+    "iid" TEXT NOT NULL,
 
-    CONSTRAINT "LinkedEntity_pkey" PRIMARY KEY ("aid")
+    CONSTRAINT "Service_pkey" PRIMARY KEY ("aid")
+);
+
+-- CreateTable
+CREATE TABLE "Entity" (
+    "id" TEXT NOT NULL,
+    "owner" TEXT NOT NULL,
+    "type" TEXT NOT NULL,
+    "startDate" TIMESTAMP(3),
+    "endDate" TIMESTAMP(3),
+    "status" INTEGER NOT NULL,
+    "relayerNode" TEXT NOT NULL,
+    "credentials" TEXT[],
+    "entityVerified" BOOLEAN NOT NULL,
+    "metadata" JSONB,
+
+    CONSTRAINT "Entity_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -402,7 +383,8 @@ CREATE TABLE "Discount" (
 CREATE TABLE "Transaction" (
     "id" SERIAL NOT NULL,
     "blockHeight" INTEGER NOT NULL,
-    "messages" JSONB,
+    "type" TEXT NOT NULL,
+    "value" JSONB,
     "fee" JSONB,
     "signatures" JSONB,
     "memo" TEXT NOT NULL,
@@ -423,100 +405,23 @@ CREATE TABLE "Block" (
     CONSTRAINT "Block_pkey" PRIMARY KEY ("height")
 );
 
--- CreateTable
-CREATE TABLE "WasmCode" (
-    "code_id" INTEGER NOT NULL,
-    "creator" TEXT NOT NULL DEFAULT '',
-    "creation_time" TEXT NOT NULL DEFAULT '',
-    "height" INTEGER NOT NULL,
-
-    CONSTRAINT "WasmCode_pkey" PRIMARY KEY ("code_id")
-);
-
--- CreateTable
-CREATE TABLE "WasmContract" (
-    "address" TEXT NOT NULL,
-    "code_id" INTEGER NOT NULL,
-    "creator" TEXT NOT NULL DEFAULT '',
-    "admin" TEXT NOT NULL DEFAULT '',
-    "label" TEXT NOT NULL DEFAULT '',
-    "creation_time" TEXT NOT NULL DEFAULT '',
-    "height" INTEGER NOT NULL,
-    "json" JSONB DEFAULT '{}',
-
-    CONSTRAINT "WasmContract_pkey" PRIMARY KEY ("address")
-);
-
--- CreateTable
-CREATE TABLE "ExecMsg" (
-    "id" SERIAL NOT NULL,
-    "sender" TEXT NOT NULL,
-    "address" TEXT NOT NULL,
-    "funds" JSONB,
-    "json" JSONB,
-
-    CONSTRAINT "ExecMsg_pkey" PRIMARY KEY ("id")
-);
-
--- CreateIndex
-CREATE INDEX "Chain_chainId_idx" ON "Chain"("chainId");
-
--- CreateIndex
-CREATE INDEX "Event_type_idx" ON "Event"("type");
-
--- CreateIndex
-CREATE INDEX "Project_projectDid_idx" ON "Project"("projectDid");
-
--- CreateIndex
-CREATE INDEX "Block_hash_idx" ON "Block"("hash");
-
--- CreateIndex
-CREATE INDEX "Block_proposer_address_idx" ON "Block"("proposer_address");
-
--- CreateIndex
-CREATE INDEX "WasmCode_creator_idx" ON "WasmCode"("creator");
-
--- CreateIndex
-CREATE INDEX "WasmContract_code_id_idx" ON "WasmContract"("code_id");
-
--- CreateIndex
-CREATE INDEX "WasmContract_creator_idx" ON "WasmContract"("creator");
+-- AddForeignKey
+ALTER TABLE "Context" ADD CONSTRAINT "Context_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Context" ADD CONSTRAINT "Context_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "AccordedRight" ADD CONSTRAINT "AccordedRight_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Context" ADD CONSTRAINT "Context_entityId_fkey" FOREIGN KEY ("entityId") REFERENCES "Entity"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "LinkedEntity" ADD CONSTRAINT "LinkedEntity_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "VerificationMethod" ADD CONSTRAINT "VerificationMethod_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "LinkedResource" ADD CONSTRAINT "LinkedResource_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "VerificationMethod" ADD CONSTRAINT "VerificationMethod_entityId_fkey" FOREIGN KEY ("entityId") REFERENCES "Entity"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Service" ADD CONSTRAINT "Service_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Service" ADD CONSTRAINT "Service_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Service" ADD CONSTRAINT "Service_entityId_fkey" FOREIGN KEY ("entityId") REFERENCES "Entity"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "AccordedRight" ADD CONSTRAINT "AccordedRight_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "AccordedRight" ADD CONSTRAINT "AccordedRight_entityId_fkey" FOREIGN KEY ("entityId") REFERENCES "Entity"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "LinkedResource" ADD CONSTRAINT "LinkedResource_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "LinkedResource" ADD CONSTRAINT "LinkedResource_entityId_fkey" FOREIGN KEY ("entityId") REFERENCES "Entity"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "LinkedEntity" ADD CONSTRAINT "LinkedEntity_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "LinkedEntity" ADD CONSTRAINT "LinkedEntity_entityId_fkey" FOREIGN KEY ("entityId") REFERENCES "Entity"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Entity" ADD CONSTRAINT "Entity_id_fkey" FOREIGN KEY ("id") REFERENCES "IID"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "PriceEntry" ADD CONSTRAINT "PriceEntry_bondDid_fkey" FOREIGN KEY ("bondDid") REFERENCES "Bond"("bondDid") ON DELETE RESTRICT ON UPDATE CASCADE;

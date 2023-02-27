@@ -1,0 +1,33 @@
+export enum EventTypes {
+    createIid = "ixo.iid.v1beta1.IidDocumentCreatedEvent",
+    updateIid = "ixo.iid.v1beta1.IidDocumentUpdatedEvent",
+    createEntity = "ixo.entity.v1beta1.EntityCreatedEvent",
+    udpateEntity = "ixo.entity.v1beta1.EntityUpdatedEvent",
+    updateEntityVerified = "ixo.entity.v1beta1.EntityVerifiedUpdatedEvent",
+    transferEntity = "ixo.entity.v1beta1.EntityTransferredEvent",
+    createToken = "ixo.token.v1beta1.TokenCreatedEvent",
+    updateToken = "ixo.token.v1beta1.TokenUpdatedEvent",
+    mintToken = "ixo.token.v1beta1.TokenMintedEvent",
+    transferToken = "ixo.token.v1beta1.TokenTransferredEvent",
+    cancelToken = "ixo.token.v1beta1.TokenCancelledEvent",
+    retireToken = "ixo.token.v1beta1.TokenRetiredEvent",
+    pauseToken = "ixo.token.v1beta1.TokenPausedEvent",
+    stopToken = "ixo.token.v1beta1.TokenStoppedEvent",
+}
+
+export const EventTypesArray = [
+    "ixo.iid.v1beta1.IidDocumentCreatedEvent",
+    "ixo.iid.v1beta1.IidDocumentUpdatedEvent",
+    "ixo.entity.v1beta1.EntityCreatedEvent",
+    "ixo.entity.v1beta1.EntityUpdatedEvent",
+    "ixo.entity.v1beta1.EntityVerifiedUpdatedEvent",
+    "ixo.entity.v1beta1.EntityTransferredEvent",
+    "ixo.token.v1beta1.TokenCreatedEvent",
+    "ixo.token.v1beta1.TokenUpdatedEvent",
+    "ixo.token.v1beta1.TokenMintedEvent",
+    "ixo.token.v1beta1.TokenTransferredEvent",
+    "ixo.token.v1beta1.TokenCancelledEvent",
+    "ixo.token.v1beta1.TokenRetiredEvent",
+    "ixo.token.v1beta1.TokenPausedEvent",
+    "ixo.token.v1beta1.TokenStoppedEvent",
+];

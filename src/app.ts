@@ -1,7 +1,6 @@
 import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
-// import * as logger from "./util/logger";
 import compression from "compression";
 import * as Sentry from "@sentry/node";
 import postgraphile from "postgraphile";
@@ -32,7 +31,6 @@ Sentry.init({ dsn: SENTRYDSN, tracesSampleRate: 1.0 });
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-// app.use(logger.before);
 app.use(compression());
 app.use(Sentry.Handlers.requestHandler() as express.RequestHandler);
 app.use(
@@ -54,10 +52,10 @@ app.use(
 app.use("/swagger", swaggerUi.serve, swaggerUi.setup(swaggerFile));
 app.use(helmet());
 const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100000, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
-    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+    windowMs: 15 * 60 * 1000,
+    max: 100000,
+    standardHeaders: true,
+    legacyHeaders: false,
 });
 app.use(limiter);
 
@@ -549,57 +547,22 @@ app.get(
     },
 );
 
-// app.get(
-//     "/api/transactions/listTransactionsByType/:type(*)",
-//     async (req: Request, res: Response, next: NextFunction) => {
-//         try {
-//             const transactions =
-//                 await TransactionHandler.listTransactionsByType(
-//                     req.params.type,
-//                     req.query.page ? String(req.query.page) : undefined,
-//                     req.query.size ? String(req.query.size) : undefined,
-//                 );
-//             res.json(transactions);
-//         } catch (error) {
-//             next(error);
-//         }
-//     },
-// );
-
-// app.get(
-//     "/api/transactions/listTransactionsByAddress/:address",
-//     async (req: Request, res: Response, next: NextFunction) => {
-//         try {
-//             const transactions =
-//                 await TransactionHandler.listTransactionsByAddress(
-//                     req.params.address,
-//                     req.query.page ? String(req.query.page) : undefined,
-//                     req.query.size ? String(req.query.size) : undefined,
-//                 );
-//             res.json(transactions);
-//         } catch (error) {
-//             next(error);
-//         }
-//     },
-// );
-
-// app.get(
-//     "/api/transactions/listTransactionsByAddressAndType/:address/:type(*)",
-//     async (req: Request, res: Response, next: NextFunction) => {
-//         try {
-//             const transactions =
-//                 await TransactionHandler.listTransactionsByAddressAndType(
-//                     req.params.address,
-//                     req.params.type,
-//                     req.query.page ? String(req.query.page) : undefined,
-//                     req.query.size ? String(req.query.size) : undefined,
-//                 );
-//             res.json(transactions);
-//         } catch (error) {
-//             next(error);
-//         }
-//     },
-// );
+app.get(
+    "/api/transactions/listTransactionsByType/:type(*)",
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const transactions =
+                await TransactionHandler.listTransactionsByType(
+                    req.params.type,
+                    req.query.page ? String(req.query.page) : undefined,
+                    req.query.size ? String(req.query.size) : undefined,
+                );
+            res.json(transactions);
+        } catch (error) {
+            next(error);
+        }
+    },
+);
 
 app.get(
     "/api/block/getLastSyncedBlock",
@@ -653,5 +616,3 @@ app.post(
         }
     },
 );
-
-// app.use(logger.after);

@@ -1,6 +1,5 @@
 import { GetBlockByHeightResponse } from "@ixo/impactxclient-sdk/types/codegen/cosmos/base/tendermint/v1beta1/query";
 import { GetTxsEventResponse } from "@ixo/impactxclient-sdk/types/codegen/cosmos/tx/v1beta1/service";
-import { utils } from "@ixo/impactxclient-sdk";
 import { prisma } from "../prisma/prisma_client";
 
 export const createBlock = async (

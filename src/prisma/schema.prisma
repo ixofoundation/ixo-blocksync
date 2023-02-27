@@ -17,117 +17,89 @@ model Storage {
 }
 
 model IID {
-  id                 String               @id
-  state              Boolean?
-  alsoKnownAs        String
-  publicKey          String?
-  controllers        String[]
-  Context            Context[]
-  VerificationMethod VerificationMethod[]
-  Service            Service[]
-  AccordedRight      AccordedRight[]
-  LinkedResource     LinkedResource[]
-  LinkedEntity       LinkedEntity[]
-}
-
-model Entity {
-  id                 String               @id
-  type               String
-  status             String
-  verified           Boolean?
-  controller         String[]
-  startDate          DateTime?
-  endDate            DateTime?
-  relayerNode        String
-  credentials        String[]
-  ownerDid           String
-  ownerAddress       String
-  data               Json?
-  Context            Context[]
-  VerificationMethod VerificationMethod[]
-  Service            Service[]
-  AccordedRight      AccordedRight[]
-  LinkedResource     LinkedResource[]
-  LinkedEntity       LinkedEntity[]
+  id                   String           @id
+  publicKey            String?
+  context              Context[]
+  controller           String[]
+  verificationMethod   Json?
+  service              Service[]
+  authentication       String[]
+  assertionMethod      String[]
+  keyAgreement         String[]
+  capabilityInvocation String[]
+  capabilityDelegation String[]
+  linkedResource       LinkedResource[]
+  accordedRight        AccordedRight[]
+  linkedEntity         LinkedEntity[]
+  alsoKnownAs          String
+  metadata             Json?
+  Entity               Entity?
 }
 
 model Context {
-  aid      Int     @id @default(autoincrement())
-  IID      IID?    @relation(fields: [iid], references: [id])
-  iid      String?
-  Entity   Entity? @relation(fields: [entityId], references: [id])
-  entityId String?
-  key      String
-  val      String
-}
-
-model VerificationMethod {
-  aid                 Int      @id @default(autoincrement())
-  id                  String
-  IID                 IID?     @relation(fields: [iid], references: [id])
-  iid                 String?
-  Entity              Entity?  @relation(fields: [entityId], references: [id])
-  entityId            String?
-  relationships       String[]
-  type                String
-  controller          String
-  blockchainAccountID String?
-  publicKeyHex        String?
-  publicKeyMultibase  String?
-  publicKeyBase58     String?
-  context             String[]
-}
-
-model Service {
-  aid             Int     @id @default(autoincrement())
-  id              String
-  IID             IID?    @relation(fields: [iid], references: [id])
-  iid             String?
-  Entity          Entity? @relation(fields: [entityId], references: [id])
-  entityId        String?
-  type            String
-  serviceEndpoint String
+  aid Int    @id @default(autoincrement())
+  IID IID    @relation(fields: [iid], references: [id])
+  iid String
+  key String
+  val String
 }
 
 model AccordedRight {
-  aid       Int     @id @default(autoincrement())
-  id        String
-  IID       IID?    @relation(fields: [iid], references: [id])
-  iid       String?
-  Entity    Entity? @relation(fields: [entityId], references: [id])
-  entityId  String?
+  aid       Int    @id @default(autoincrement())
   type      String
+  id        String
   mechanism String
   message   String
   service   String
+  IID       IID    @relation(fields: [iid], references: [id])
+  iid       String
+}
+
+model LinkedEntity {
+  aid          Int    @id @default(autoincrement())
+  type         String
+  id           String
+  relationship String
+  service      String
+  IID          IID    @relation(fields: [iid], references: [id])
+  iid          String
 }
 
 model LinkedResource {
-  aid             Int     @id @default(autoincrement())
-  id              String
-  IID             IID?    @relation(fields: [iid], references: [id])
-  iid             String?
-  Entity          Entity? @relation(fields: [entityId], references: [id])
-  entityId        String?
+  aid             Int    @id @default(autoincrement())
   type            String
+  id              String
   description     String
   mediaType       String
   serviceEndpoint String
   proof           String
   encrypted       String
   right           String
+  IID             IID    @relation(fields: [iid], references: [id])
+  iid             String
 }
 
-model LinkedEntity {
-  aid          Int     @id @default(autoincrement())
-  id           String
-  IID          IID?    @relation(fields: [iid], references: [id])
-  iid          String?
-  Entity       Entity? @relation(fields: [entityId], references: [id])
-  entityId     String?
-  type         String
-  relationship String
-  service      String
+model Service {
+  aid             Int    @id @default(autoincrement())
+  id              String
+  type            String
+  serviceEndpoint String
+  IID             IID    @relation(fields: [iid], references: [id])
+  iid             String
+}
+
+model Entity {
+  IID            IID       @relation(fields: [id], references: [id])
+  id             String    @id
+  owner          String
+  type           String
+  startDate      DateTime?
+  endDate        DateTime?
+  status         Int
+  relayerNode    String
+  credentials    String[]
+  entityVerified Boolean
+  metadata       Json?
 }
 
 model Bond {
@@ -251,8 +223,6 @@ model ShareWithdrawal {
 model Chain {
   chainId     String @id
   blockHeight Int
-
-  @@index([chainId])
 }
 
 model Event {
@@ -261,8 +231,6 @@ model Event {
   attributes  Json?
   blockHeight Int
   timestamp   DateTime
-
-  @@index([type])
 }
 
 model Stats {
@@ -301,8 +269,6 @@ model Project {
   Agent                   Agent[]
   Claim                   Claim[]
   FundWithdrawal          FundWithdrawal[]
-
-  @@index([projectDid])
 }
 
 model Agent {
@@ -382,7 +348,8 @@ model Discount {
 model Transaction {
   id            Int    @id @default(autoincrement())
   blockHeight   Int
-  messages      Json?
+  type          String
+  value         Json?
   fee           Json?
   signatures    Json?
   memo          String
@@ -396,38 +363,4 @@ model Block {
   total_gas        Int      @default(0)
   proposer_address String?
   timestamp        DateTime
-
-  @@index([hash])
-  @@index([proposer_address])
-}
-
-model WasmCode {
-  code_id       Int    @id
-  creator       String @default("")
-  creation_time String @default("")
-  height        Int
-
-  @@index([creator])
-}
-
-model WasmContract {
-  address       String @id
-  code_id       Int
-  creator       String @default("")
-  admin         String @default("")
-  label         String @default("")
-  creation_time String @default("")
-  height        Int
-  json          Json?  @default("{}")
-
-  @@index([code_id])
-  @@index([creator])
-}
-
-model ExecMsg {
-  id      Int    @id @default(autoincrement())
-  sender  String
-  address String
-  funds   Json?
-  json    Json?
 }

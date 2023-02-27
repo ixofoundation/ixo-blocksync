@@ -29,6 +29,11 @@ export interface Event {
     attributes: EventAttribute[];
 }
 
+export interface ConvertedEvent {
+    type: string;
+    attributes: any[];
+}
+
 export const getBlockbyHeight = async (height: number | string) => {
     try {
         const client = await createQueryClient(RPC);
@@ -145,7 +150,13 @@ export const decode = async (tx: any) => {
 };
 
 export const getTimestamp = (time: Timestamp) => {
-    return new Date(Number(time.seconds) * 1000 + Number(time.nanos) / 1000000);
+    try {
+        return new Date(
+            Number(time.seconds) * 1000 + Number(time.nanos) / 1000000,
+        );
+    } catch (error) {
+        return null;
+    }
 };
 
 export const getEvent = (event: Event) => {

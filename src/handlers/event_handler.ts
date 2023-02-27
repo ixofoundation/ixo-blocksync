@@ -30,17 +30,3 @@ export const getEventsByType = async (
         });
     }
 };
-
-export const getEntityId = async () => {
-    const res = await prisma.event.findFirst({
-        where: {
-            type: "ixo.entity.v1beta1.EntityCreatedEvent",
-        },
-        select: {
-            attributes: true,
-        },
-        take: -1,
-    });
-    const value = res!.attributes![0]!["value"];
-    return value.toString().slice(1, -1);
-};

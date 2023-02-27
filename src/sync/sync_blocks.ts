@@ -48,7 +48,7 @@ export const startSync = async () => {
                     await EventSyncHandler.syncEvents(
                         events,
                         blockHeight,
-                        timestamp,
+                        timestamp!,
                     );
                 }
 
@@ -65,12 +65,12 @@ export const startSync = async () => {
                 }
 
                 if (bondsInfo!.bondsDetailed.length > 0) {
-                    await BondSyncHandler.syncBondsInfo(bondsInfo!, timestamp);
+                    await BondSyncHandler.syncBondsInfo(bondsInfo!, timestamp!);
                 }
 
                 await CosmosHandler.createBlock(
                     blockHeight,
-                    timestamp,
+                    timestamp!,
                     blockHash,
                     block,
                     txsEvent,

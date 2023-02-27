@@ -152,100 +152,66 @@ const seedDids = async () => {
         for (const did of dids) {
             try {
                 const iid = await getIid(did.did);
-                await prisma.iID.create({
-                    data: {
-                        id: String(iid?.id),
-                        controllers: iid?.controller,
-                        alsoKnownAs: iid?.alsoKnownAs || "",
-                        publicKey: did.publicKey,
-                    },
-                });
-                if (iid?.context) {
-                    for (const context of iid.context) {
-                        await prisma.context.create({
-                            data: {
-                                iid: iid.id!,
-                                key: context.key,
-                                val: context.val,
-                            },
+                if (iid) {
+                    const contextArr: Prisma.ContextUncheckedCreateInput[] = [];
+                    for (const c of iid.context) {
+                        contextArr.push({
+                            iid: iid.id,
+                            key: c.key,
+                            val: c.val,
                         });
                     }
-                }
-                if (iid?.verificationMethod) {
-                    for (const verificationMethod of iid.verificationMethod) {
-                        await prisma.verificationMethod.create({
-                            data: {
-                                id: verificationMethod.id,
-                                iid: iid.id,
-                                relationships: "",
-                                type: verificationMethod.type,
-                                controller: verificationMethod.controller,
-                                blockchainAccountID:
-                                    verificationMethod.blockchainAccountID,
-                                publicKeyHex: verificationMethod.publicKeyHex,
-                                publicKeyMultibase:
-                                    verificationMethod.publicKeyMultibase,
-                                publicKeyBase58:
-                                    verificationMethod.publicKeyBase58,
-                            },
-                        });
-                    }
-                }
-                if (iid?.service) {
-                    for (const service of iid.service) {
+                    await prisma.iID.create({
+                        data: {
+                            id: iid.id,
+                            publicKey: did.publicKey,
+                            controller: iid.controller || [],
+                            verificationMethod:
+                                JSON.stringify(iid.verificationMethod) || "",
+                            authentication: iid.authentication || "",
+                            assertionMethod: iid.assertionMethod || "",
+                            keyAgreement: iid.keyAgreement || [],
+                            capabilityInvocation:
+                                iid.capabilityInvocation || "",
+                            capabilityDelegation:
+                                iid.capabilityDelegation || "",
+                            alsoKnownAs: iid.alsoKnownAs || "",
+                            metadata: JSON.stringify(iid.metadata) || "",
+                        },
+                    });
+                    for (const s of iid.service) {
                         await prisma.service.create({
                             data: {
-                                id: service.id,
                                 iid: iid.id,
-                                type: service.type,
-                                serviceEndpoint: service.serviceEndpoint,
+                                ...s,
                             },
                         });
                     }
-                }
-                if (iid?.accordedRight) {
-                    for (const accordedRight of iid.accordedRight) {
-                        await prisma.accordedRight.create({
-                            data: {
-                                id: accordedRight.id,
-                                iid: iid.id,
-                                type: accordedRight.type,
-                                mechanism: accordedRight.mechanism,
-                                message: accordedRight.message,
-                                service: accordedRight.service,
-                            },
-                        });
-                    }
-                }
-                if (iid?.linkedResource) {
-                    for (const linkedResource of iid.linkedResource) {
+                    for (const r of iid.linkedResource) {
                         await prisma.linkedResource.create({
                             data: {
-                                id: linkedResource.id,
                                 iid: iid.id,
-                                type: linkedResource.type,
-                                description: linkedResource.description,
-                                mediaType: linkedResource.mediaType,
-                                serviceEndpoint: linkedResource.serviceEndpoint,
-                                proof: linkedResource.proof,
-                                encrypted: linkedResource.encrypted,
-                                right: linkedResource.right,
+                                ...r,
                             },
                         });
                     }
-                }
-                if (iid?.linkedEntity) {
-                    for (const linkedEntity of iid.linkedEntity) {
+                    for (const a of iid.accordedRight) {
+                        await prisma.accordedRight.create({
+                            data: {
+                                iid: iid.id,
+                                ...a,
+                            },
+                        });
+                    }
+                    for (const e of iid.linkedEntity) {
                         await prisma.linkedEntity.create({
                             data: {
-                                id: linkedEntity.id,
                                 iid: iid.id,
-                                type: linkedEntity.type,
-                                relationship: linkedEntity.relationship,
-                                service: linkedEntity.type,
+                                ...e,
                             },
                         });
                     }
+                    await prisma.context.createMany({ data: contextArr });
                 }
             } catch (error) {
                 console.log(error);
