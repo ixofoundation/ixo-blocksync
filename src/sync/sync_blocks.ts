@@ -3,7 +3,6 @@ import * as ChainHandler from "../handlers/chain_handler";
 import { sleep } from "../util/sleep";
 
 import { getTimestamp } from "../util/proto";
-import { utils } from "@ixo/impactxclient-sdk";
 import * as CosmosHandler from "../handlers/block_handler";
 import * as TransactionSyncHandler from "../sync_handlers/transaction_sync_handler";
 import * as EventSyncHandler from "../sync_handlers/event_sync_handler";
@@ -41,7 +40,9 @@ export const startSync = async () => {
 
                 const transactions = txsEvent.txs ? txsEvent.txs : [];
                 const events = txsEvent.txResponses[0]
-                    ? txsEvent.txResponses[0].events
+                    ? txsEvent.txResponses.flatMap(
+                          (txResponse) => txResponse.events,
+                      )
                     : [];
 
                 if (events.length > 0) {

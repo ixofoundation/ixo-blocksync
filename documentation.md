@@ -2,25 +2,6 @@
 
 ## Version: 1.0.0
 
-### /
-
-#### GET
-
-##### Description:
-
-Responds with 'API is Running'
-
-##### Parameters
-
-| Name | Located in | Description | Required | Schema |
-| ---- | ---------- | ----------- | -------- | ------ |
-
-##### Responses
-
-| Code | Description |
-| ---- | ----------- |
-| 200  | OK          |
-
 ### /graphiql
 
 #### GET
@@ -46,7 +27,24 @@ GraphiQL IDE
 
 ##### Description:
 
-GraphQL endpoint
+GraphQL
+
+##### Parameters
+
+| Name | Located in | Description | Required | Schema |
+| ---- | ---------- | ----------- | -------- | ------ |
+
+##### Responses
+
+| Code | Description |
+| ---- | ----------- |
+| 200  | OK          |
+
+### /
+
+#### GET
+
+##### Description:
 
 ##### Parameters
 
@@ -65,15 +63,11 @@ GraphQL endpoint
 
 ##### Description:
 
-Upload a file to web3.storage
-
 ##### Parameters
 
-| Name        | Located in | Description | Required | Schema |
-| ----------- | ---------- | ----------- | -------- | ------ |
-| name        | body       |             | Yes      | string |
-| contentType | body       |             | Yes      | string |
-| data        | body       |             | Yes      | string |
+| Name | Located in | Description | Required | Schema |
+| ---- | ---------- | ----------- | -------- | ------ |
+| body | body       |             | No       | object |
 
 ##### Responses
 
@@ -81,13 +75,11 @@ Upload a file to web3.storage
 | ---- | ----------- |
 | 200  | OK          |
 
-### /storage/retrieve/:cid
+### /storage/retrieve/{cid}
 
 #### GET
 
 ##### Description:
-
-Get the IPFS link for a web3.storage file
 
 ##### Parameters
 
@@ -101,13 +93,11 @@ Get the IPFS link for a web3.storage file
 | ---- | ----------- |
 | 200  | OK          |
 
-### /api/entity/byId/:id
+### /api/entity/byId/{id}
 
 #### GET
 
 ##### Description:
-
-Get an entity by its id
 
 ##### Parameters
 
@@ -121,13 +111,11 @@ Get an entity by its id
 | ---- | ----------- |
 | 200  | OK          |
 
-### /api/entity/byOwnerDid/:did
+### /api/entity/byOwnerDid/{did}
 
 #### GET
 
 ##### Description:
-
-Get entities by owner did
 
 ##### Parameters
 
@@ -147,8 +135,6 @@ Get entities by owner did
 
 ##### Description:
 
-Get all entity collections
-
 ##### Parameters
 
 | Name | Located in | Description | Required | Schema |
@@ -160,13 +146,11 @@ Get all entity collections
 | ---- | ----------- |
 | 200  | OK          |
 
-### /api/entity/collectionById/:id
+### /api/entity/collectionById/{id}
 
 #### GET
 
 ##### Description:
-
-Get an entity collection by id
 
 ##### Parameters
 
@@ -180,13 +164,11 @@ Get an entity collection by id
 | ---- | ----------- |
 | 200  | OK          |
 
-### /api/entity/collectionsByOwnerDid/:did
+### /api/entity/collectionsByOwnerDid/{did}
 
 #### GET
 
 ##### Description:
-
-Get entity collections by ownerdid
 
 ##### Parameters
 
@@ -200,13 +182,83 @@ Get entity collections by ownerdid
 | ---- | ----------- |
 | 200  | OK          |
 
-### /api/bonds/listBonds
+### /api/tokenclass/contractaddress/{contractAddress}
 
 #### GET
 
 ##### Description:
 
-List all bonds
+##### Parameters
+
+| Name            | Located in | Description | Required | Schema |
+| --------------- | ---------- | ----------- | -------- | ------ |
+| contractAddress | path       |             | Yes      | string |
+
+##### Responses
+
+| Code | Description |
+| ---- | ----------- |
+| 200  | OK          |
+
+### /api/tokenclass/name/{name}
+
+#### GET
+
+##### Description:
+
+##### Parameters
+
+| Name | Located in | Description | Required | Schema |
+| ---- | ---------- | ----------- | -------- | ------ |
+| name | path       |             | Yes      | string |
+
+##### Responses
+
+| Code | Description |
+| ---- | ----------- |
+| 200  | OK          |
+
+### /api/token/name/{name}
+
+#### GET
+
+##### Description:
+
+##### Parameters
+
+| Name | Located in | Description | Required | Schema |
+| ---- | ---------- | ----------- | -------- | ------ |
+| name | path       |             | Yes      | string |
+
+##### Responses
+
+| Code | Description |
+| ---- | ----------- |
+| 200  | OK          |
+
+### /api/token/id/{id}
+
+#### GET
+
+##### Description:
+
+##### Parameters
+
+| Name | Located in | Description | Required | Schema |
+| ---- | ---------- | ----------- | -------- | ------ |
+| id   | path       |             | Yes      | string |
+
+##### Responses
+
+| Code | Description |
+| ---- | ----------- |
+| 200  | OK          |
+
+### /api/bonds/listBonds
+
+#### GET
+
+##### Description:
 
 ##### Parameters
 
@@ -227,8 +279,6 @@ List all bonds
 
 ##### Description:
 
-List all bonds with filter provided in request body
-
 ##### Parameters
 
 | Name | Located in | Description | Required | Schema |
@@ -248,8 +298,6 @@ List all bonds with filter provided in request body
 
 ##### Description:
 
-Get a bond by its DID
-
 ##### Parameters
 
 | Name    | Located in | Description | Required | Schema |
@@ -267,8 +315,6 @@ Get a bond by its DID
 #### GET
 
 ##### Description:
-
-Get a bond's price history by its DID
 
 ##### Parameters
 
@@ -290,8 +336,6 @@ Get a bond's price history by its DID
 
 ##### Description:
 
-Get all bonds created by a DID
-
 ##### Parameters
 
 | Name       | Located in | Description | Required | Schema |
@@ -312,8 +356,6 @@ Get all bonds created by a DID
 
 ##### Description:
 
-Get all bonds for an account address
-
 ##### Parameters
 
 | Name    | Located in | Description | Required | Schema |
@@ -331,8 +373,6 @@ Get all bonds for an account address
 #### GET
 
 ##### Description:
-
-Get all payment outcomes for a bond DID
 
 ##### Parameters
 
@@ -354,8 +394,6 @@ Get all payment outcomes for a bond DID
 
 ##### Description:
 
-Get all alpha changes for a bond DID
-
 ##### Parameters
 
 | Name    | Located in | Description | Required | Schema |
@@ -375,8 +413,6 @@ Get all alpha changes for a bond DID
 #### GET
 
 ##### Description:
-
-Get all transactions for a bond DID
 
 ##### Parameters
 
@@ -398,8 +434,6 @@ Get all transactions for a bond DID
 
 ##### Description:
 
-Get all transactions by a buyer DID
-
 ##### Parameters
 
 | Name     | Located in | Description | Required | Schema |
@@ -419,8 +453,6 @@ Get all transactions by a buyer DID
 #### GET
 
 ##### Description:
-
-Get all reserve withdrawals for a bond DID
 
 ##### Parameters
 
@@ -442,8 +474,6 @@ Get all reserve withdrawals for a bond DID
 
 ##### Description:
 
-Get all reserve withdrawals by recipient DID
-
 ##### Parameters
 
 | Name         | Located in | Description | Required | Schema |
@@ -463,8 +493,6 @@ Get all reserve withdrawals by recipient DID
 #### GET
 
 ##### Description:
-
-Get all share withdrawals for a bond DID
 
 ##### Parameters
 
@@ -486,8 +514,6 @@ Get all share withdrawals for a bond DID
 
 ##### Description:
 
-Get all share withdrawals by a recipient DID
-
 ##### Parameters
 
 | Name         | Located in | Description | Required | Schema |
@@ -508,8 +534,6 @@ Get all share withdrawals by a recipient DID
 
 ##### Description:
 
-List all projects
-
 ##### Parameters
 
 | Name | Located in | Description | Required | Schema |
@@ -529,8 +553,6 @@ List all projects
 
 ##### Description:
 
-List all projects with filter provided in request body
-
 ##### Parameters
 
 | Name | Located in | Description | Required | Schema |
@@ -549,8 +571,6 @@ List all projects with filter provided in request body
 #### GET
 
 ##### Description:
-
-Get projects by entity type
 
 ##### Parameters
 
@@ -572,8 +592,6 @@ Get projects by entity type
 
 ##### Description:
 
-Get a project by its DID
-
 ##### Parameters
 
 | Name       | Located in | Description | Required | Schema |
@@ -586,35 +604,11 @@ Get a project by its DID
 | ---- | ----------- |
 | 200  | OK          |
 
-### /api/project/getByProjectSenderDid/{senderDid}
-
-#### GET
-
-##### Description:
-
-Get all projects by a sender DID
-
-##### Parameters
-
-| Name      | Located in | Description | Required | Schema |
-| --------- | ---------- | ----------- | -------- | ------ |
-| senderDid | path       |             | Yes      | string |
-| page      | query      |             | No       | string |
-| size      | query      |             | No       | string |
-
-##### Responses
-
-| Code | Description |
-| ---- | ----------- |
-| 200  | OK          |
-
 ### /api/project/getProjectsByCreatedAndAgent/{did}
 
 #### GET
 
 ##### Description:
-
-Get all projects where the creator is also an agent by DID
 
 ##### Parameters
 
@@ -630,13 +624,31 @@ Get all projects where the creator is also an agent by DID
 | ---- | ----------- |
 | 200  | OK          |
 
-### /api/project/shields/status/{projectDid}
+### /api/project/getByProjectSenderDid/{senderDid}
 
 #### GET
 
 ##### Description:
 
-Get a project's status by its DID
+##### Parameters
+
+| Name      | Located in | Description | Required | Schema |
+| --------- | ---------- | ----------- | -------- | ------ |
+| senderDid | path       |             | Yes      | string |
+| page      | query      |             | No       | string |
+| size      | query      |             | No       | string |
+
+##### Responses
+
+| Code | Description |
+| ---- | ----------- |
+| 200  | OK          |
+
+### /api/project/shields/status/{projectDid}
+
+#### GET
+
+##### Description:
 
 ##### Parameters
 
@@ -656,8 +668,6 @@ Get a project's status by its DID
 
 ##### Description:
 
-Get all project accounts for a project DID
-
 ##### Parameters
 
 | Name       | Located in | Description | Required | Schema |
@@ -670,13 +680,11 @@ Get all project accounts for a project DID
 | ---- | ----------- |
 | 200  | OK          |
 
-### api/iid/getByIid/{iid}
+### /api/iid/getByIid/{iid}
 
 #### GET
 
 ##### Description:
-
-Get an IID document by its IID
 
 ##### Parameters
 
@@ -690,13 +698,29 @@ Get an IID document by its IID
 | ---- | ----------- |
 | 200  | OK          |
 
-### /api/event/getEventByType/{type}
+### /api/did/getByDid/{did}
 
 #### GET
 
 ##### Description:
 
-Get events by type
+##### Parameters
+
+| Name | Located in | Description | Required | Schema |
+| ---- | ---------- | ----------- | -------- | ------ |
+| did  | path       |             | Yes      | string |
+
+##### Responses
+
+| Code | Description |
+| ---- | ----------- |
+| 200  | OK          |
+
+### /api/event/getEventByType/{type}
+
+#### GET
+
+##### Description:
 
 ##### Parameters
 
@@ -718,8 +742,6 @@ Get events by type
 
 ##### Description:
 
-List all project related stats for the chain
-
 ##### Parameters
 
 | Name | Located in | Description | Required | Schema |
@@ -731,63 +753,16 @@ List all project related stats for the chain
 | ---- | ----------- |
 | 200  | OK          |
 
-### api/transactions/listTransactionsByType/{type(\*)}
+### /api/transactions/listTransactionsByType/{type(\*)}
 
 #### GET
 
 ##### Description:
-
-List all transactions by type
 
 ##### Parameters
 
 | Name     | Located in | Description | Required | Schema |
 | -------- | ---------- | ----------- | -------- | ------ |
-| type(\*) | path       |             | Yes      | string |
-| page     | query      |             | No       | string |
-| size     | query      |             | No       | string |
-
-##### Responses
-
-| Code | Description |
-| ---- | ----------- |
-| 200  | OK          |
-
-### api/transactions/listTransactionsByAddress/{address}
-
-#### GET
-
-##### Description:
-
-List all transactions by an address
-
-##### Parameters
-
-| Name    | Located in | Description | Required | Schema |
-| ------- | ---------- | ----------- | -------- | ------ |
-| address | path       |             | Yes      | string |
-| page    | query      |             | No       | string |
-| size    | query      |             | No       | string |
-
-##### Responses
-
-| Code | Description |
-| ---- | ----------- |
-| 200  | OK          |
-
-### api/transactions/listTransactionsByAddressAndType/{address}/{type(\*)}
-
-#### GET
-
-##### Description:
-
-List all transactions by an address and type
-
-##### Parameters
-
-| Name     | Located in | Description | Required | Schema |
-| -------- | ---------- | ----------- | -------- | ------ |
-| address  | path       |             | Yes      | string |
 | type(\*) | path       |             | Yes      | string |
 | page     | query      |             | No       | string |
 | size     | query      |             | No       | string |
@@ -804,8 +779,6 @@ List all transactions by an address and type
 
 ##### Description:
 
-Get Blocksync's last synced block
-
 ##### Parameters
 
 | Name | Located in | Description | Required | Schema |
@@ -817,13 +790,11 @@ Get Blocksync's last synced block
 | ---- | ----------- |
 | 200  | OK          |
 
-### api/block/getPaymentTemplateById/{id}
+### /api/getPaymentTemplateById/{id}
 
 #### GET
 
 ##### Description:
-
-Get a payment template by its ID
 
 ##### Parameters
 
@@ -843,8 +814,6 @@ Get a payment template by its ID
 
 ##### Description:
 
-Pass a transaction to the chain
-
 ##### Parameters
 
 | Name | Located in | Description | Required | Schema |
@@ -861,8 +830,6 @@ Pass a transaction to the chain
 #### POST
 
 ##### Description:
-
-Pass a sign data request to the chain
 
 ##### Parameters
 

@@ -103,6 +103,36 @@ CREATE TABLE "Entity" (
 );
 
 -- CreateTable
+CREATE TABLE "TokenClass" (
+    "contractAddress" TEXT NOT NULL,
+    "minter" TEXT NOT NULL,
+    "class" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "image" TEXT NOT NULL,
+    "type" TEXT NOT NULL,
+    "cap" TEXT NOT NULL,
+    "supply" TEXT NOT NULL,
+    "paused" BOOLEAN NOT NULL,
+    "stopped" BOOLEAN NOT NULL,
+    "retired" JSONB,
+    "cancelled" JSONB,
+
+    CONSTRAINT "TokenClass_pkey" PRIMARY KEY ("contractAddress")
+);
+
+-- CreateTable
+CREATE TABLE "Token" (
+    "id" TEXT NOT NULL,
+    "index" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "collection" TEXT NOT NULL,
+    "tokenData" JSONB,
+
+    CONSTRAINT "Token_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Bond" (
     "bondDid" TEXT NOT NULL,
     "status" TEXT,

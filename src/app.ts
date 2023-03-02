@@ -8,6 +8,7 @@ import * as StorageHandler from "./handlers/storage_handler";
 import * as ProjectHandler from "./handlers/project_handler";
 import * as IidHandler from "./handlers/iid_handler";
 import * as EntityHandler from "./handlers/entity_handler";
+import * as TokenHandler from "./handlers/token_handler";
 import * as StatHandler from "./handlers/stats_handler";
 import * as EventHandler from "./handlers/event_handler";
 import * as AuthHandler from "./handlers/auth_handler";
@@ -47,6 +48,7 @@ app.use(
         graphiql: true,
         enhanceGraphiql: true,
         dynamicJson: true,
+        disableDefaultMutations: true,
     }),
 );
 app.use("/swagger", swaggerUi.serve, swaggerUi.setup(swaggerFile));
@@ -137,6 +139,59 @@ app.get(
                 req.params.did,
             );
             res.json(entities);
+        } catch (error) {
+            next(error);
+        }
+    },
+);
+
+app.get(
+    "/api/tokenclass/contractaddress/:contractAddress",
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const tokenClass =
+                await TokenHandler.getTokenClassByContractAddress(
+                    req.params.contractAddress,
+                );
+            res.json(tokenClass);
+        } catch (error) {
+            next(error);
+        }
+    },
+);
+
+app.get(
+    "/api/tokenclass/name/:name",
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const tokenClass = await TokenHandler.getTokenClassByName(
+                req.params.name,
+            );
+            res.json(tokenClass);
+        } catch (error) {
+            next(error);
+        }
+    },
+);
+
+app.get(
+    "/api/token/name/:name",
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const tokens = await TokenHandler.getTokensByName(req.params.name);
+            res.json(tokens);
+        } catch (error) {
+            next(error);
+        }
+    },
+);
+
+app.get(
+    "/api/token/id/:id",
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const token = await TokenHandler.getTokenById(req.params.id);
+            res.json(token);
         } catch (error) {
             next(error);
         }

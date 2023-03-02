@@ -9,17 +9,6 @@
     "basePath": "",
     "schemes": ["http"],
     "paths": {
-        "/": {
-            "get": {
-                "description": "",
-                "parameters": [],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
         "/graphiql": {
             "get": {
                 "description": "GraphiQL IDE",
@@ -42,27 +31,38 @@
                 }
             }
         },
+        "/": {
+            "get": {
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/storage/store": {
             "post": {
                 "description": "",
                 "parameters": [
                     {
-                        "name": "name",
+                        "name": "body",
                         "in": "body",
-                        "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "name": "contentType",
-                        "in": "body",
-                        "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "type": "string"
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "example": "any"
+                                },
+                                "contentType": {
+                                    "example": "any"
+                                },
+                                "data": {
+                                    "example": "any"
+                                }
+                            }
+                        }
                     }
                 ],
                 "responses": {
@@ -72,7 +72,7 @@
                 }
             }
         },
-        "/storage/retrieve/:cid": {
+        "/storage/retrieve/{cid}": {
             "get": {
                 "description": "",
                 "parameters": [
@@ -90,7 +90,7 @@
                 }
             }
         },
-        "/api/entity/byId/:id": {
+        "/api/entity/byId/{id}": {
             "get": {
                 "description": "",
                 "parameters": [
@@ -108,7 +108,7 @@
                 }
             }
         },
-        "/api/entity/byOwnerDid/:did": {
+        "/api/entity/byOwnerDid/{did}": {
             "get": {
                 "description": "",
                 "parameters": [
@@ -137,7 +137,7 @@
                 }
             }
         },
-        "/api/entity/collectionById/:id": {
+        "/api/entity/collectionById/{id}": {
             "get": {
                 "description": "",
                 "parameters": [
@@ -155,12 +155,84 @@
                 }
             }
         },
-        "/api/entity/collectionsByOwnerDid/:did": {
+        "/api/entity/collectionsByOwnerDid/{did}": {
             "get": {
                 "description": "",
                 "parameters": [
                     {
                         "name": "did",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/tokenclass/contractaddress/{contractAddress}": {
+            "get": {
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "contractAddress",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/tokenclass/name/{name}": {
+            "get": {
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/token/name/{name}": {
+            "get": {
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/token/id/{id}": {
+            "get": {
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "id",
                         "in": "path",
                         "required": true,
                         "type": "string"
@@ -623,12 +695,12 @@
                 }
             }
         },
-        "/api/project/getByProjectSenderDid/{senderDid}": {
+        "/api/project/getProjectsByCreatedAndAgent/{did}": {
             "get": {
                 "description": "",
                 "parameters": [
                     {
-                        "name": "senderDid",
+                        "name": "did",
                         "in": "path",
                         "required": true,
                         "type": "string"
@@ -651,12 +723,12 @@
                 }
             }
         },
-        "/api/project/getProjectsByCreatedAndAgent/{did}": {
+        "/api/project/getByProjectSenderDid/{senderDid}": {
             "get": {
                 "description": "",
                 "parameters": [
                     {
-                        "name": "did",
+                        "name": "senderDid",
                         "in": "path",
                         "required": true,
                         "type": "string"
@@ -715,12 +787,30 @@
                 }
             }
         },
-        "api/iid/getByIid/{iid}": {
+        "/api/iid/getByIid/{iid}": {
             "get": {
                 "description": "",
                 "parameters": [
                     {
                         "name": "iid",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/did/getByDid/{did}": {
+            "get": {
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "did",
                         "in": "path",
                         "required": true,
                         "type": "string"
@@ -772,72 +862,10 @@
                 }
             }
         },
-        "api/transactions/listTransactionsByType/{type(*)}": {
+        "/api/transactions/listTransactionsByType/{type(*)}": {
             "get": {
                 "description": "",
                 "parameters": [
-                    {
-                        "name": "type(*)",
-                        "in": "path",
-                        "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "name": "page",
-                        "in": "query",
-                        "type": "string"
-                    },
-                    {
-                        "name": "size",
-                        "in": "query",
-                        "type": "string"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
-        "api/transactions/listTransactionsByAddress/{address}": {
-            "get": {
-                "description": "",
-                "parameters": [
-                    {
-                        "name": "address",
-                        "in": "path",
-                        "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "name": "page",
-                        "in": "query",
-                        "type": "string"
-                    },
-                    {
-                        "name": "size",
-                        "in": "query",
-                        "type": "string"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
-        "api/transactions/listTransactionsByAddressAndType/{address}/{type(*)}": {
-            "get": {
-                "description": "",
-                "parameters": [
-                    {
-                        "name": "address",
-                        "in": "path",
-                        "required": true,
-                        "type": "string"
-                    },
                     {
                         "name": "type(*)",
                         "in": "path",
@@ -873,7 +901,7 @@
                 }
             }
         },
-        "api/block/getPaymentTemplateById/{id}": {
+        "/api/getPaymentTemplateById/{id}": {
             "get": {
                 "description": "",
                 "parameters": [

@@ -1,10 +1,12 @@
 import { Entity } from "@ixo/impactxclient-sdk/types/codegen/ixo/entity/v1beta1/entity";
 import { IidDocument } from "@ixo/impactxclient-sdk/types/codegen/ixo/iid/v1beta1/iid";
-import { TokenBatch } from "@ixo/impactxclient-sdk/types/codegen/ixo/token/v1beta1/tx";
 import { EventTypes } from "../types/Event";
 import { ConvertedEvent, getTimestamp } from "../util/proto";
 import { prisma } from "../prisma/prisma_client";
-import { Prisma } from "@prisma/client";
+import {
+    TokenPropertiesSDKType,
+    TokenSDKType,
+} from "@ixo/impactxclient-sdk/types/codegen/ixo/token/v1beta1/token";
 
 export const syncEventData = async (event: ConvertedEvent) => {
     try {
@@ -13,15 +15,6 @@ export const syncEventData = async (event: ConvertedEvent) => {
                 const createIid: IidDocument = JSON.parse(
                     event.attributes[0].value,
                 );
-                const createIidContextArr: Prisma.ContextUncheckedCreateInput[] =
-                    [];
-                for (const c of createIid.context) {
-                    createIidContextArr.push({
-                        iid: createIid.id,
-                        key: c.key,
-                        val: c.val,
-                    });
-                }
                 await prisma.iID.create({
                     data: {
                         id: createIid.id,
@@ -38,6 +31,15 @@ export const syncEventData = async (event: ConvertedEvent) => {
                         metadata: JSON.stringify(createIid.metadata) || "",
                     },
                 });
+                for (const c of createIid.context) {
+                    await prisma.context.create({
+                        data: {
+                            iid: createIid.id,
+                            key: c.key,
+                            val: c.val,
+                        },
+                    });
+                }
                 for (const s of createIid.service) {
                     await prisma.service.create({
                         data: {
@@ -70,21 +72,11 @@ export const syncEventData = async (event: ConvertedEvent) => {
                         },
                     });
                 }
-                await prisma.context.createMany({ data: createIidContextArr });
                 break;
             case EventTypes.updateIid:
                 const updateIid: IidDocument = JSON.parse(
                     event.attributes[0].value,
                 );
-                const updateIidContextArr: Prisma.ContextUncheckedCreateInput[] =
-                    [];
-                for (const c of updateIid.context) {
-                    updateIidContextArr.push({
-                        iid: updateIid.id,
-                        key: c.key,
-                        val: c.val,
-                    });
-                }
                 await prisma.iID.update({
                     where: { id: updateIid.id },
                     data: {
@@ -102,6 +94,9 @@ export const syncEventData = async (event: ConvertedEvent) => {
                         metadata: JSON.stringify(updateIid.metadata) || "",
                     },
                 });
+                await prisma.context.deleteMany({
+                    where: { iid: updateIid.id },
+                });
                 await prisma.service.deleteMany({
                     where: { iid: updateIid.id },
                 });
@@ -114,6 +109,15 @@ export const syncEventData = async (event: ConvertedEvent) => {
                 await prisma.linkedEntity.deleteMany({
                     where: { iid: updateIid.id },
                 });
+                for (const c of updateIid.context) {
+                    await prisma.context.create({
+                        data: {
+                            iid: updateIid.id,
+                            key: c.key,
+                            val: c.val,
+                        },
+                    });
+                }
                 for (const s of updateIid.service) {
                     await prisma.service.create({
                         data: {
@@ -146,10 +150,6 @@ export const syncEventData = async (event: ConvertedEvent) => {
                         },
                     });
                 }
-                await prisma.context.deleteMany({
-                    where: { iid: updateIid.id },
-                });
-                await prisma.context.createMany({ data: updateIidContextArr });
                 break;
             case EventTypes.createEntity:
                 const createEntity: Entity = JSON.parse(
@@ -196,22 +196,6 @@ export const syncEventData = async (event: ConvertedEvent) => {
                     },
                 });
                 break;
-            case EventTypes.updateEntityVerified:
-                const updateEntityVerifiedId: string =
-                    event.attributes[0].value.slice(1, -1);
-                const updateEntityVerifiedOwner: string =
-                    event.attributes[1].value.slice(1, -1);
-                const updateEntityVerifiedVerified: boolean =
-                    event.attributes[2].value;
-                await prisma.entity.update({
-                    where: {
-                        id: updateEntityVerifiedId,
-                    },
-                    data: {
-                        entityVerified: updateEntityVerifiedVerified,
-                    },
-                });
-                break;
             case EventTypes.transferEntity:
                 const transferEntityId: string =
                     event.attributes[0].value.slice(1, -1);
@@ -229,70 +213,65 @@ export const syncEventData = async (event: ConvertedEvent) => {
                 });
                 break;
             case EventTypes.createToken:
-                const createTokenContract: string =
-                    event.attributes[0].value.slice(1, -1);
-                const createTokenMinter: string =
-                    event.attributes[1].value.slice(1, -1);
+                const createTokenToken: TokenSDKType = JSON.parse(
+                    event.attributes[0].value,
+                );
+                await prisma.tokenClass.create({
+                    data: {
+                        contractAddress: createTokenToken.contract_address,
+                        minter: createTokenToken.minter,
+                        class: createTokenToken.class,
+                        name: createTokenToken.name,
+                        description: createTokenToken.description,
+                        image: createTokenToken.image,
+                        type: createTokenToken.type,
+                        cap: createTokenToken.cap,
+                        supply: createTokenToken.supply,
+                        paused: createTokenToken.paused,
+                        stopped: createTokenToken.stopped,
+                        retired: JSON.stringify(createTokenToken.retired),
+                        cancelled: JSON.stringify(createTokenToken.cancelled),
+                    },
+                });
                 break;
             case EventTypes.updateToken:
-                const updateTokenContract: string =
-                    event.attributes[0].value.slice(1, -1);
-                const updateTokenOwner: string =
-                    event.attributes[1].value.slice(1, -1);
+                const updateTokenToken: TokenSDKType = JSON.parse(
+                    event.attributes[0].value,
+                );
+                await prisma.tokenClass.update({
+                    where: {
+                        contractAddress: updateTokenToken.contract_address,
+                    },
+                    data: {
+                        minter: updateTokenToken.minter,
+                        class: updateTokenToken.class,
+                        name: updateTokenToken.name,
+                        description: updateTokenToken.description,
+                        image: updateTokenToken.image,
+                        type: updateTokenToken.type,
+                        cap: updateTokenToken.cap,
+                        supply: updateTokenToken.supply,
+                        paused: updateTokenToken.paused,
+                        stopped: updateTokenToken.stopped,
+                        retired: JSON.stringify(updateTokenToken.retired),
+                        cancelled: JSON.stringify(updateTokenToken.cancelled),
+                    },
+                });
                 break;
             case EventTypes.mintToken:
-                const mintTokenContract: string =
-                    event.attributes[0].value.slice(1, -1);
-                const mintTokenMinter: string = event.attributes[1].value.slice(
-                    1,
-                    -1,
-                );
-                const mintTokenOwner: string = event.attributes[2].value.slice(
-                    1,
-                    -1,
-                );
-                const mintTokenBatches: TokenBatch[] = JSON.parse(
-                    event.attributes[3].value,
-                );
-                break;
-            case EventTypes.transferToken:
-                const transferTokenOwner: string =
-                    event.attributes[0].value.slice(1, -1);
-                const transferTokenRecipient: string =
-                    event.attributes[1].value.slice(1, -1);
-                const transferTokenTokens: TokenBatch[] = JSON.parse(
-                    event.attributes[2].value,
-                );
-                break;
-            case EventTypes.cancelToken:
-                const cancelTokenOwner: string =
-                    event.attributes[0].value.slice(1, -1);
-                const cancelTokenTokens: TokenBatch[] = JSON.parse(
-                    event.attributes[1].value,
-                );
-                break;
-            case EventTypes.retireToken:
-                const retireTokenOwner: string =
-                    event.attributes[0].value.slice(1, -1);
-                const retireTokenTokens: TokenBatch[] = JSON.parse(
-                    event.attributes[1].value,
-                );
-                break;
-            case EventTypes.pauseToken:
-                const pauseTokenMinter: string =
-                    event.attributes[0].value.slice(1, -1);
-                const pauseTokenContract: string =
-                    event.attributes[1].value.slice(1, -1);
-                const pauseTokenPaused: boolean = event.attributes[2].value;
-                break;
-            case EventTypes.stopToken:
-                const stopTokenMinter: string = event.attributes[0].value.slice(
-                    1,
-                    -1,
-                );
-                const stopTokenContract: string =
-                    event.attributes[1].value.slice(1, -1);
-                const stopTokenStopped: boolean = event.attributes[2].value;
+                const mintTokenTokenProperties: TokenPropertiesSDKType =
+                    JSON.parse(event.attributes[4].value);
+                await prisma.token.create({
+                    data: {
+                        id: mintTokenTokenProperties.id,
+                        index: mintTokenTokenProperties.index,
+                        name: mintTokenTokenProperties.name,
+                        collection: mintTokenTokenProperties.collection,
+                        tokenData: JSON.stringify(
+                            mintTokenTokenProperties.tokenData,
+                        ),
+                    },
+                });
                 break;
         }
     } catch (error) {

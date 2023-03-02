@@ -24,10 +24,4 @@ export enum MsgTypes {
     grantDiscount = "/ixo.payments.v1.MsgGrantDiscount",
     revokeDiscount = "/ixo.payments.v1.MsgRevokeDiscount",
     effectPayment = "/ixo.payments.v1.MsgEffectPayment",
-    storeCode = "wasm/MsgStoreCode",
-    instantiateContract = "wasm/MsgInstantiateContract",
-    migrateContract = "wasm/MsgMigrateContract",
-    clearAdmin = "wasm/MsgClearAdmin",
-    updateAdmin = "wasm/MsgUpdateAdmin",
-    executeContract = "wasm/MsgExecuteContract",
 }

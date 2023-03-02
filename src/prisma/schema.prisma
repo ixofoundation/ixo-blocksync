@@ -102,6 +102,30 @@ model Entity {
   metadata       Json?
 }
 
+model TokenClass {
+  contractAddress String  @id
+  minter          String
+  class           String
+  name            String
+  description     String
+  image           String
+  type            String
+  cap             String
+  supply          String
+  paused          Boolean
+  stopped         Boolean
+  retired         Json?
+  cancelled       Json?
+}
+
+model Token {
+  id         String @id
+  index      String
+  name       String
+  collection String
+  tokenData  Json?
+}
+
 model Bond {
   bondDid                  String              @id
   status                   String?
