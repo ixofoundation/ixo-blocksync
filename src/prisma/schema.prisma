@@ -128,7 +128,7 @@ model ClaimCollection {
   approved  Int
   rejected  Int
   disputed  Int
-  state     Int
+  state     String
   payments  Json?
 }
 

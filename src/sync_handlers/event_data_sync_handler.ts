@@ -7,10 +7,10 @@ import {
     TokenPropertiesSDKType,
     TokenSDKType,
 } from "@ixo/impactxclient-sdk/types/codegen/ixo/token/v1beta1/token";
-import { Collection } from "@ixo/impactxclient-sdk/types/codegen/ixo/claims/v1beta1/claims";
 import {
-    Claim,
-    Dispute,
+    ClaimSDKType,
+    CollectionSDKType,
+    DisputeSDKType,
 } from "@ixo/impactxclient-sdk/types/codegen/ixo/claims/v1beta1/claims";
 
 export const syncEventData = async (event: ConvertedEvent) => {
@@ -215,34 +215,32 @@ export const syncEventData = async (event: ConvertedEvent) => {
                 });
                 break;
             case EventTypes.createCollection:
-                const createCollection: Collection = JSON.parse(
+                const createCollection: CollectionSDKType = JSON.parse(
                     event.attributes[0].value,
                 );
-                console.log(createCollection);
                 await prisma.claimCollection.create({
                     data: {
                         id: createCollection.id,
                         entity: createCollection.entity,
                         admin: createCollection.admin,
                         protocol: createCollection.protocol,
-                        startDate: getTimestamp(createCollection.startDate!),
-                        endDate: getTimestamp(createCollection.endDate!),
+                        startDate: String(createCollection.start_date!),
+                        endDate: String(createCollection.end_date!),
                         quota: Number(createCollection.quota),
                         count: Number(createCollection.count),
                         evaluated: Number(createCollection.evaluated),
                         approved: Number(createCollection.approved),
                         rejected: Number(createCollection.rejected),
                         disputed: Number(createCollection.disputed),
-                        state: createCollection.state,
+                        state: createCollection.state.toString(),
                         payments: JSON.stringify(createCollection.payments),
                     },
                 });
                 break;
             case EventTypes.updateCollection:
-                const updateCollection: Collection = JSON.parse(
+                const updateCollection: CollectionSDKType = JSON.parse(
                     event.attributes[0].value,
                 );
-                console.log(updateCollection);
                 await prisma.claimCollection.update({
                     where: {
                         id: updateCollection.id,
@@ -252,73 +250,66 @@ export const syncEventData = async (event: ConvertedEvent) => {
                         entity: updateCollection.entity,
                         admin: updateCollection.admin,
                         protocol: updateCollection.protocol,
-                        startDate: getTimestamp(updateCollection.startDate!),
-                        endDate: getTimestamp(updateCollection.endDate!),
+                        startDate: String(updateCollection.start_date!),
+                        endDate: String(updateCollection.end_date!),
                         quota: Number(updateCollection.quota),
                         count: Number(updateCollection.count),
                         evaluated: Number(updateCollection.evaluated),
                         approved: Number(updateCollection.approved),
                         rejected: Number(updateCollection.rejected),
                         disputed: Number(updateCollection.disputed),
-                        state: updateCollection.state,
+                        state: updateCollection.state.toString(),
                         payments: JSON.stringify(updateCollection.payments),
                     },
                 });
                 break;
             case EventTypes.submitClaim:
-                const submitClaim: Claim = JSON.parse(
+                const submitClaim: ClaimSDKType = JSON.parse(
                     event.attributes[0].value,
                 );
-                console.log(submitClaim);
                 await prisma.iClaim.create({
                     data: {
-                        claimId: submitClaim.claimId,
-                        collectionId: submitClaim.collectionId,
-                        agentDid: submitClaim.agentDid,
-                        agentAddress: submitClaim.agentAddress,
-                        submissionDate: getTimestamp(
-                            submitClaim.submissionDate!,
-                        ),
+                        claimId: submitClaim.claim_id,
+                        collectionId: submitClaim.collection_id,
+                        agentDid: submitClaim.agent_did,
+                        agentAddress: submitClaim.agent_address,
+                        submissionDate: String(submitClaim.submission_date!),
                         evaluation: JSON.stringify(submitClaim.evaluation),
                         paymentsStatus: JSON.stringify(
-                            submitClaim.paymentsStatus,
+                            submitClaim.payments_status,
                         ),
                     },
                 });
                 break;
             case EventTypes.updateClaim:
-                const updateClaim: Claim = JSON.parse(
+                const updateClaim: ClaimSDKType = JSON.parse(
                     event.attributes[0].value,
                 );
-                console.log(updateClaim);
                 await prisma.iClaim.update({
                     where: {
-                        claimId: updateClaim.claimId,
+                        claimId: updateClaim.claim_id,
                     },
                     data: {
-                        claimId: updateClaim.claimId,
-                        collectionId: updateClaim.collectionId,
-                        agentDid: updateClaim.agentDid,
-                        agentAddress: updateClaim.agentAddress,
-                        submissionDate: getTimestamp(
-                            updateClaim.submissionDate!,
-                        ),
+                        claimId: updateClaim.claim_id,
+                        collectionId: updateClaim.collection_id,
+                        agentDid: updateClaim.agent_did,
+                        agentAddress: updateClaim.agent_address,
+                        submissionDate: String(updateClaim.submission_date!),
                         evaluation: JSON.stringify(updateClaim.evaluation),
                         paymentsStatus: JSON.stringify(
-                            updateClaim.paymentsStatus,
+                            updateClaim.payments_status,
                         ),
                     },
                 });
                 break;
             case EventTypes.disputeClaim:
-                const disputeClaim: Dispute = JSON.parse(
+                const disputeClaim: DisputeSDKType = JSON.parse(
                     event.attributes[0].value,
                 );
-                console.log(disputeClaim);
                 await prisma.dispute.create({
                     data: {
                         proof: disputeClaim.data!.proof,
-                        subjectId: disputeClaim.subjectId,
+                        subjectId: disputeClaim.subject_id,
                         type: disputeClaim.type,
                         data: JSON.stringify(disputeClaim.data!),
                     },

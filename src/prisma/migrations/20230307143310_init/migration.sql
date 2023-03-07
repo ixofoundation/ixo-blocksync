@@ -130,7 +130,7 @@ CREATE TABLE "ClaimCollection" (
     "approved" INTEGER NOT NULL,
     "rejected" INTEGER NOT NULL,
     "disputed" INTEGER NOT NULL,
-    "state" INTEGER NOT NULL,
+    "state" TEXT NOT NULL,
     "payments" JSONB,
 
     CONSTRAINT "ClaimCollection_pkey" PRIMARY KEY ("id")
