@@ -1,4 +1,4 @@
-import { Entity } from "@ixo/impactxclient-sdk/types/codegen/ixo/entity/v1beta1/entity";
+import { EntitySDKType } from "@ixo/impactxclient-sdk/types/codegen/ixo/entity/v1beta1/entity";
 import { IidDocument } from "@ixo/impactxclient-sdk/types/codegen/ixo/iid/v1beta1/iid";
 import { EventTypes } from "../types/Event";
 import { ConvertedEvent, getTimestamp } from "../util/proto";
@@ -7,6 +7,11 @@ import {
     TokenPropertiesSDKType,
     TokenSDKType,
 } from "@ixo/impactxclient-sdk/types/codegen/ixo/token/v1beta1/token";
+import { Collection } from "@ixo/impactxclient-sdk/types/codegen/ixo/claims/v1beta1/claims";
+import {
+    Claim,
+    Dispute,
+} from "@ixo/impactxclient-sdk/types/codegen/ixo/claims/v1beta1/claims";
 
 export const syncEventData = async (event: ConvertedEvent) => {
     try {
@@ -45,6 +50,14 @@ export const syncEventData = async (event: ConvertedEvent) => {
                         data: {
                             iid: createIid.id,
                             ...s,
+                        },
+                    });
+                }
+                for (const c of createIid.linkedClaim) {
+                    await prisma.linkedClaim.create({
+                        data: {
+                            iid: createIid.id,
+                            ...c,
                         },
                     });
                 }
@@ -103,6 +116,9 @@ export const syncEventData = async (event: ConvertedEvent) => {
                 await prisma.linkedResource.deleteMany({
                     where: { iid: updateIid.id },
                 });
+                await prisma.linkedClaim.deleteMany({
+                    where: { iid: updateIid.id },
+                });
                 await prisma.accordedRight.deleteMany({
                     where: { iid: updateIid.id },
                 });
@@ -123,6 +139,14 @@ export const syncEventData = async (event: ConvertedEvent) => {
                         data: {
                             iid: updateIid.id,
                             ...s,
+                        },
+                    });
+                }
+                for (const c of updateIid.linkedClaim) {
+                    await prisma.linkedClaim.create({
+                        data: {
+                            iid: updateIid.id,
+                            ...c,
                         },
                     });
                 }
@@ -152,63 +176,151 @@ export const syncEventData = async (event: ConvertedEvent) => {
                 }
                 break;
             case EventTypes.createEntity:
-                const createEntity: Entity = JSON.parse(
+                const createEntity: EntitySDKType = JSON.parse(
                     event.attributes[0].value,
                 );
-                const createEntityOwner: string =
-                    event.attributes[1].value.slice(1, -1);
                 await prisma.entity.create({
                     data: {
                         id: createEntity.id,
-                        owner: createEntityOwner,
                         type: createEntity.type,
-                        startDate: getTimestamp(createEntity.startDate!),
-                        endDate: getTimestamp(createEntity.endDate!),
+                        startDate: getTimestamp(createEntity.start_date!),
+                        endDate: getTimestamp(createEntity.end_date!),
                         status: createEntity.status,
-                        relayerNode: createEntity.relayerNode,
+                        relayerNode: createEntity.relayer_node,
                         credentials: createEntity.credentials,
-                        entityVerified: createEntity.entityVerified,
+                        entityVerified: createEntity.entity_verified,
                         metadata: JSON.stringify(createEntity.metadata),
                     },
                 });
                 break;
-            case EventTypes.udpateEntity:
-                const updateEntity: Entity = JSON.parse(
+            case EventTypes.updateEntity:
+                const updateEntity: EntitySDKType = JSON.parse(
                     event.attributes[0].value,
                 );
-                const updateEntityOwner: string =
-                    event.attributes[1].value.slice(1, -1);
                 await prisma.entity.update({
                     where: {
                         id: updateEntity.id,
                     },
                     data: {
                         id: updateEntity.id,
-                        owner: updateEntityOwner,
                         type: updateEntity.type,
-                        startDate: getTimestamp(updateEntity.startDate!),
-                        endDate: getTimestamp(updateEntity.endDate!),
+                        startDate: getTimestamp(updateEntity.start_date!),
+                        endDate: getTimestamp(updateEntity.end_date!),
                         status: updateEntity.status,
-                        relayerNode: updateEntity.relayerNode,
+                        relayerNode: updateEntity.relayer_node,
                         credentials: updateEntity.credentials,
-                        entityVerified: updateEntity.entityVerified,
+                        entityVerified: updateEntity.entity_verified,
                         metadata: JSON.stringify(updateEntity.metadata),
                     },
                 });
                 break;
-            case EventTypes.transferEntity:
-                const transferEntityId: string =
-                    event.attributes[0].value.slice(1, -1);
-                const transferEntityFrom: string =
-                    event.attributes[1].value.slice(1, -1);
-                const transferEntityTo: string =
-                    event.attributes[2].value.slice(1, -1);
-                await prisma.entity.update({
+            case EventTypes.createCollection:
+                const createCollection: Collection = JSON.parse(
+                    event.attributes[0].value,
+                );
+                console.log(createCollection);
+                await prisma.claimCollection.create({
+                    data: {
+                        id: createCollection.id,
+                        entity: createCollection.entity,
+                        admin: createCollection.admin,
+                        protocol: createCollection.protocol,
+                        startDate: getTimestamp(createCollection.startDate!),
+                        endDate: getTimestamp(createCollection.endDate!),
+                        quota: Number(createCollection.quota),
+                        count: Number(createCollection.count),
+                        evaluated: Number(createCollection.evaluated),
+                        approved: Number(createCollection.approved),
+                        rejected: Number(createCollection.rejected),
+                        disputed: Number(createCollection.disputed),
+                        state: createCollection.state,
+                        payments: JSON.stringify(createCollection.payments),
+                    },
+                });
+                break;
+            case EventTypes.updateCollection:
+                const updateCollection: Collection = JSON.parse(
+                    event.attributes[0].value,
+                );
+                console.log(updateCollection);
+                await prisma.claimCollection.update({
                     where: {
-                        id: transferEntityId,
+                        id: updateCollection.id,
                     },
                     data: {
-                        owner: transferEntityTo,
+                        id: updateCollection.id,
+                        entity: updateCollection.entity,
+                        admin: updateCollection.admin,
+                        protocol: updateCollection.protocol,
+                        startDate: getTimestamp(updateCollection.startDate!),
+                        endDate: getTimestamp(updateCollection.endDate!),
+                        quota: Number(updateCollection.quota),
+                        count: Number(updateCollection.count),
+                        evaluated: Number(updateCollection.evaluated),
+                        approved: Number(updateCollection.approved),
+                        rejected: Number(updateCollection.rejected),
+                        disputed: Number(updateCollection.disputed),
+                        state: updateCollection.state,
+                        payments: JSON.stringify(updateCollection.payments),
+                    },
+                });
+                break;
+            case EventTypes.submitClaim:
+                const submitClaim: Claim = JSON.parse(
+                    event.attributes[0].value,
+                );
+                console.log(submitClaim);
+                await prisma.iClaim.create({
+                    data: {
+                        claimId: submitClaim.claimId,
+                        collectionId: submitClaim.collectionId,
+                        agentDid: submitClaim.agentDid,
+                        agentAddress: submitClaim.agentAddress,
+                        submissionDate: getTimestamp(
+                            submitClaim.submissionDate!,
+                        ),
+                        evaluation: JSON.stringify(submitClaim.evaluation),
+                        paymentsStatus: JSON.stringify(
+                            submitClaim.paymentsStatus,
+                        ),
+                    },
+                });
+                break;
+            case EventTypes.updateClaim:
+                const updateClaim: Claim = JSON.parse(
+                    event.attributes[0].value,
+                );
+                console.log(updateClaim);
+                await prisma.iClaim.update({
+                    where: {
+                        claimId: updateClaim.claimId,
+                    },
+                    data: {
+                        claimId: updateClaim.claimId,
+                        collectionId: updateClaim.collectionId,
+                        agentDid: updateClaim.agentDid,
+                        agentAddress: updateClaim.agentAddress,
+                        submissionDate: getTimestamp(
+                            updateClaim.submissionDate!,
+                        ),
+                        evaluation: JSON.stringify(updateClaim.evaluation),
+                        paymentsStatus: JSON.stringify(
+                            updateClaim.paymentsStatus,
+                        ),
+                    },
+                });
+                break;
+            case EventTypes.disputeClaim:
+                const disputeClaim: Dispute = JSON.parse(
+                    event.attributes[0].value,
+                );
+                console.log(disputeClaim);
+                await prisma.dispute.create({
+                    data: {
+                        proof: disputeClaim.data!.proof,
+                        subjectId: disputeClaim.subjectId,
+                        type: disputeClaim.type,
+                        data: JSON.stringify(disputeClaim.data!),
                     },
                 });
                 break;

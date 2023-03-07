@@ -29,6 +29,7 @@ model IID {
   capabilityInvocation String[]
   capabilityDelegation String[]
   linkedResource       LinkedResource[]
+  linkedClaim          LinkedClaim[]
   accordedRight        AccordedRight[]
   linkedEntity         LinkedEntity[]
   alsoKnownAs          String
@@ -42,6 +43,42 @@ model Context {
   iid String
   key String
   val String
+}
+
+model Service {
+  aid             Int    @id @default(autoincrement())
+  id              String
+  type            String
+  serviceEndpoint String
+  IID             IID    @relation(fields: [iid], references: [id])
+  iid             String
+}
+
+model LinkedResource {
+  aid             Int    @id @default(autoincrement())
+  type            String
+  id              String
+  description     String
+  mediaType       String
+  serviceEndpoint String
+  proof           String
+  encrypted       String
+  right           String
+  IID             IID    @relation(fields: [iid], references: [id])
+  iid             String
+}
+
+model LinkedClaim {
+  aid             Int    @id @default(autoincrement())
+  id              String
+  type            String
+  description     String
+  serviceEndpoint String
+  proof           String
+  encrypted       String
+  right           String
+  IID             IID    @relation(fields: [iid], references: [id])
+  iid             String
 }
 
 model AccordedRight {
@@ -65,33 +102,9 @@ model LinkedEntity {
   iid          String
 }
 
-model LinkedResource {
-  aid             Int    @id @default(autoincrement())
-  type            String
-  id              String
-  description     String
-  mediaType       String
-  serviceEndpoint String
-  proof           String
-  encrypted       String
-  right           String
-  IID             IID    @relation(fields: [iid], references: [id])
-  iid             String
-}
-
-model Service {
-  aid             Int    @id @default(autoincrement())
-  id              String
-  type            String
-  serviceEndpoint String
-  IID             IID    @relation(fields: [iid], references: [id])
-  iid             String
-}
-
 model Entity {
   IID            IID       @relation(fields: [id], references: [id])
   id             String    @id
-  owner          String
   type           String
   startDate      DateTime?
   endDate        DateTime?
@@ -100,6 +113,40 @@ model Entity {
   credentials    String[]
   entityVerified Boolean
   metadata       Json?
+}
+
+model ClaimCollection {
+  id        String    @id
+  entity    String
+  admin     String
+  protocol  String
+  startDate DateTime?
+  endDate   DateTime?
+  quota     Int
+  count     Int
+  evaluated Int
+  approved  Int
+  rejected  Int
+  disputed  Int
+  state     Int
+  payments  Json?
+}
+
+model IClaim {
+  claimId        String    @id
+  collectionId   String
+  agentDid       String
+  agentAddress   String
+  submissionDate DateTime?
+  evaluation     Json?
+  paymentsStatus Json?
+}
+
+model Dispute {
+  proof     String @id
+  subjectId String
+  type      Int
+  data      Json?
 }
 
 model TokenClass {

@@ -24,7 +24,7 @@ const swaggerFile = require(`${__dirname}/../../swagger.json`);
 
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
-import { getAccountBonds } from "./util/proto";
+import { getAccountBonds, getEntityOwner } from "./util/proto";
 
 export const app = express();
 
@@ -92,11 +92,11 @@ app.get(
 );
 
 app.get(
-    "/api/entity/byOwnerDid/:did",
+    "/api/entity/byOwnerAddress/:address",
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const entities = await EntityHandler.getEntitiesByOwnerDid(
-                req.params.did,
+            const entities = await EntityHandler.getEntitiesByOwnerAddress(
+                req.params.address,
             );
             res.json(entities);
         } catch (error) {
@@ -132,13 +132,26 @@ app.get(
 );
 
 app.get(
-    "/api/entity/collectionsByOwnerDid/:did",
+    "/api/entity/collectionsByOwnerAddress/:address",
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const entities = await EntityHandler.getEntityCollectionsByOwnerDid(
-                req.params.did,
-            );
+            const entities =
+                await EntityHandler.getEntityCollectionsByOwnerAddress(
+                    req.params.address,
+                );
             res.json(entities);
+        } catch (error) {
+            next(error);
+        }
+    },
+);
+
+app.get(
+    "/api/entity/owner/:id",
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const owner = await getEntityOwner(req.params.id);
+            res.json({ owner });
         } catch (error) {
             next(error);
         }

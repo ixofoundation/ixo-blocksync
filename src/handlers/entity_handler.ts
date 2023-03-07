@@ -1,6 +1,5 @@
 import { prisma } from "../prisma/prisma_client";
-
-const prefixes = ["did:x:", "did:ixo:", "did:sov:"];
+import { getAccountEntities } from "../util/proto";
 
 export const getEntityById = async (id: string) => {
     const baseEntity: any = await prisma.entity.findFirst({
@@ -88,24 +87,14 @@ export const getEntityById = async (id: string) => {
         };
     }
     baseEntity["settings"] = { ...settings };
-
     return baseEntity;
 };
 
-export const getEntitiesByOwnerDid = async (did: string) => {
-    const ids = await prisma.entity.findMany({
-        where: {
-            OR: [
-                { owner: prefixes[0] + did },
-                { owner: prefixes[1] + did },
-                { owner: prefixes[2] + did },
-            ],
-        },
-        select: { id: true },
-    });
+export const getEntitiesByOwnerAddress = async (address: string) => {
+    const ids = await getAccountEntities(address);
     const entities: any[] = [];
     for (const id of ids) {
-        const entity = await getEntityById(id.id);
+        const entity = await getEntityById(id);
         entities.push(entity);
     }
     return entities;
@@ -119,21 +108,7 @@ export const getEntityCollections = async () => {
     });
     const res: any[] = [];
     for (const c of collections) {
-        const collection = await getEntityById(c.id);
-        const entities = await prisma.entity.findMany({
-            where: {
-                IID: {
-                    context: {
-                        some: { key: "class", val: c.id },
-                    },
-                },
-            },
-        });
-        const entityArr: any[] = [];
-        for (const e of entities) {
-            entityArr.push(await getEntityById(e.id));
-        }
-        res.push({ collection: collection, entities: entityArr });
+        res.push(await getEntityCollectionById(c.id));
     }
     return res;
 };
@@ -161,34 +136,12 @@ export const getEntityCollectionById = async (id: string) => {
     return res;
 };
 
-export const getEntityCollectionsByOwnerDid = async (did: string) => {
-    const collections = await prisma.entity.findMany({
-        where: {
-            type: "asset/collection",
-            OR: [
-                { owner: prefixes[0] + did },
-                { owner: prefixes[1] + did },
-                { owner: prefixes[2] + did },
-            ],
-        },
-    });
+export const getEntityCollectionsByOwnerAddress = async (address: string) => {
+    const entities = await getEntitiesByOwnerAddress(address);
+    const collections = entities.filter((e) => e.type === "asset/collection");
     const res: any[] = [];
-    for (const c of collections) {
-        const collection = await getEntityById(c.id);
-        const entities = await prisma.entity.findMany({
-            where: {
-                IID: {
-                    context: {
-                        some: { key: "class", val: c.id },
-                    },
-                },
-            },
-        });
-        const entityArr: any[] = [];
-        for (const e of entities) {
-            entityArr.push(await getEntityById(e.id));
-        }
-        res.push({ collection: collection, entities: entityArr });
+    for (const collection of collections) {
+        res.push(await getEntityCollectionById(collection.id));
     }
     return res;
 };

@@ -127,6 +127,49 @@ export const getAccountBonds = async (address: string) => {
     }
 };
 
+export const getAccountEntities = async (address: string) => {
+    try {
+        const client = await createQueryClient(RPC);
+        const entityParams = await client.ixo.entity.v1beta1.params();
+        const contractAddress = entityParams.params!.nftContractAddress;
+        const msg = {
+            tokens: {
+                owner: address,
+            },
+        };
+        const res = await client.cosmwasm.wasm.v1.smartContractState({
+            address: contractAddress,
+            queryData: utils.conversions.JsonToArray(JSON.stringify(msg)),
+        });
+        return JSON.parse(utils.conversions.Uint8ArrayToJS(res.data)).tokens;
+    } catch (error) {
+        console.log(error);
+        return;
+    }
+};
+
+export const getEntityOwner = async (did: string) => {
+    try {
+        const client = await createQueryClient(RPC);
+        const entityParams = await client.ixo.entity.v1beta1.params();
+        const contractAddress = entityParams.params!.nftContractAddress;
+        const msg = {
+            all_nft_info: {
+                token_id: did,
+            },
+        };
+        const res = await client.cosmwasm.wasm.v1.smartContractState({
+            address: contractAddress,
+            queryData: utils.conversions.JsonToArray(JSON.stringify(msg)),
+        });
+        return JSON.parse(utils.conversions.Uint8ArrayToJS(res.data)).access
+            .owner;
+    } catch (error) {
+        console.log(error);
+        return;
+    }
+};
+
 export const getIid = async (did: string) => {
     try {
         const client = await createQueryClient(RPC);

@@ -35,6 +35,48 @@ CREATE TABLE "Context" (
 );
 
 -- CreateTable
+CREATE TABLE "Service" (
+    "aid" SERIAL NOT NULL,
+    "id" TEXT NOT NULL,
+    "type" TEXT NOT NULL,
+    "serviceEndpoint" TEXT NOT NULL,
+    "iid" TEXT NOT NULL,
+
+    CONSTRAINT "Service_pkey" PRIMARY KEY ("aid")
+);
+
+-- CreateTable
+CREATE TABLE "LinkedResource" (
+    "aid" SERIAL NOT NULL,
+    "type" TEXT NOT NULL,
+    "id" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "mediaType" TEXT NOT NULL,
+    "serviceEndpoint" TEXT NOT NULL,
+    "proof" TEXT NOT NULL,
+    "encrypted" TEXT NOT NULL,
+    "right" TEXT NOT NULL,
+    "iid" TEXT NOT NULL,
+
+    CONSTRAINT "LinkedResource_pkey" PRIMARY KEY ("aid")
+);
+
+-- CreateTable
+CREATE TABLE "LinkedClaim" (
+    "aid" SERIAL NOT NULL,
+    "id" TEXT NOT NULL,
+    "type" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "serviceEndpoint" TEXT NOT NULL,
+    "proof" TEXT NOT NULL,
+    "encrypted" TEXT NOT NULL,
+    "right" TEXT NOT NULL,
+    "iid" TEXT NOT NULL,
+
+    CONSTRAINT "LinkedClaim_pkey" PRIMARY KEY ("aid")
+);
+
+-- CreateTable
 CREATE TABLE "AccordedRight" (
     "aid" SERIAL NOT NULL,
     "type" TEXT NOT NULL,
@@ -60,36 +102,8 @@ CREATE TABLE "LinkedEntity" (
 );
 
 -- CreateTable
-CREATE TABLE "LinkedResource" (
-    "aid" SERIAL NOT NULL,
-    "type" TEXT NOT NULL,
-    "id" TEXT NOT NULL,
-    "description" TEXT NOT NULL,
-    "mediaType" TEXT NOT NULL,
-    "serviceEndpoint" TEXT NOT NULL,
-    "proof" TEXT NOT NULL,
-    "encrypted" TEXT NOT NULL,
-    "right" TEXT NOT NULL,
-    "iid" TEXT NOT NULL,
-
-    CONSTRAINT "LinkedResource_pkey" PRIMARY KEY ("aid")
-);
-
--- CreateTable
-CREATE TABLE "Service" (
-    "aid" SERIAL NOT NULL,
-    "id" TEXT NOT NULL,
-    "type" TEXT NOT NULL,
-    "serviceEndpoint" TEXT NOT NULL,
-    "iid" TEXT NOT NULL,
-
-    CONSTRAINT "Service_pkey" PRIMARY KEY ("aid")
-);
-
--- CreateTable
 CREATE TABLE "Entity" (
     "id" TEXT NOT NULL,
-    "owner" TEXT NOT NULL,
     "type" TEXT NOT NULL,
     "startDate" TIMESTAMP(3),
     "endDate" TIMESTAMP(3),
@@ -100,6 +114,49 @@ CREATE TABLE "Entity" (
     "metadata" JSONB,
 
     CONSTRAINT "Entity_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "ClaimCollection" (
+    "id" TEXT NOT NULL,
+    "entity" TEXT NOT NULL,
+    "admin" TEXT NOT NULL,
+    "protocol" TEXT NOT NULL,
+    "startDate" TIMESTAMP(3),
+    "endDate" TIMESTAMP(3),
+    "quota" INTEGER NOT NULL,
+    "count" INTEGER NOT NULL,
+    "evaluated" INTEGER NOT NULL,
+    "approved" INTEGER NOT NULL,
+    "rejected" INTEGER NOT NULL,
+    "disputed" INTEGER NOT NULL,
+    "state" INTEGER NOT NULL,
+    "payments" JSONB,
+
+    CONSTRAINT "ClaimCollection_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "IClaim" (
+    "claimId" TEXT NOT NULL,
+    "collectionId" TEXT NOT NULL,
+    "agentDid" TEXT NOT NULL,
+    "agentAddress" TEXT NOT NULL,
+    "submissionDate" TIMESTAMP(3),
+    "evaluation" JSONB,
+    "paymentsStatus" JSONB,
+
+    CONSTRAINT "IClaim_pkey" PRIMARY KEY ("claimId")
+);
+
+-- CreateTable
+CREATE TABLE "Dispute" (
+    "proof" TEXT NOT NULL,
+    "subjectId" TEXT NOT NULL,
+    "type" INTEGER NOT NULL,
+    "data" JSONB,
+
+    CONSTRAINT "Dispute_pkey" PRIMARY KEY ("proof")
 );
 
 -- CreateTable
@@ -439,16 +496,19 @@ CREATE TABLE "Block" (
 ALTER TABLE "Context" ADD CONSTRAINT "Context_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "AccordedRight" ADD CONSTRAINT "AccordedRight_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "LinkedEntity" ADD CONSTRAINT "LinkedEntity_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Service" ADD CONSTRAINT "Service_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "LinkedResource" ADD CONSTRAINT "LinkedResource_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Service" ADD CONSTRAINT "Service_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "LinkedClaim" ADD CONSTRAINT "LinkedClaim_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "AccordedRight" ADD CONSTRAINT "AccordedRight_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "LinkedEntity" ADD CONSTRAINT "LinkedEntity_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Entity" ADD CONSTRAINT "Entity_id_fkey" FOREIGN KEY ("id") REFERENCES "IID"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

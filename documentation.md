@@ -111,7 +111,7 @@ GraphQL
 | ---- | ----------- |
 | 200  | OK          |
 
-### /api/entity/byOwnerDid/{did}
+### /api/entity/byOwnerAddress/{address}
 
 #### GET
 
@@ -119,9 +119,9 @@ GraphQL
 
 ##### Parameters
 
-| Name | Located in | Description | Required | Schema |
-| ---- | ---------- | ----------- | -------- | ------ |
-| did  | path       |             | Yes      | string |
+| Name    | Located in | Description | Required | Schema |
+| ------- | ---------- | ----------- | -------- | ------ |
+| address | path       |             | Yes      | string |
 
 ##### Responses
 
@@ -164,7 +164,25 @@ GraphQL
 | ---- | ----------- |
 | 200  | OK          |
 
-### /api/entity/collectionsByOwnerDid/{did}
+### /api/entity/collectionsByOwnerAddress/{address}
+
+#### GET
+
+##### Description:
+
+##### Parameters
+
+| Name    | Located in | Description | Required | Schema |
+| ------- | ---------- | ----------- | -------- | ------ |
+| address | path       |             | Yes      | string |
+
+##### Responses
+
+| Code | Description |
+| ---- | ----------- |
+| 200  | OK          |
+
+### /api/entity/owner/{id}
 
 #### GET
 
@@ -174,7 +192,7 @@ GraphQL
 
 | Name | Located in | Description | Required | Schema |
 | ---- | ---------- | ----------- | -------- | ------ |
-| did  | path       |             | Yes      | string |
+| id   | path       |             | Yes      | string |
 
 ##### Responses
 

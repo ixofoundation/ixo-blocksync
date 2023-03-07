@@ -108,12 +108,12 @@
                 }
             }
         },
-        "/api/entity/byOwnerDid/{did}": {
+        "/api/entity/byOwnerAddress/{address}": {
             "get": {
                 "description": "",
                 "parameters": [
                     {
-                        "name": "did",
+                        "name": "address",
                         "in": "path",
                         "required": true,
                         "type": "string"
@@ -155,12 +155,30 @@
                 }
             }
         },
-        "/api/entity/collectionsByOwnerDid/{did}": {
+        "/api/entity/collectionsByOwnerAddress/{address}": {
             "get": {
                 "description": "",
                 "parameters": [
                     {
-                        "name": "did",
+                        "name": "address",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/entity/owner/{id}": {
+            "get": {
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "id",
                         "in": "path",
                         "required": true,
                         "type": "string"
