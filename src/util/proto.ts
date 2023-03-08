@@ -216,3 +216,13 @@ export const getEvent = (event: Event) => {
         attributes: attributes,
     };
 };
+
+export const getTransaction = async (hash: string) => {
+    try {
+        const client = await createQueryClient(RPC);
+        return client.cosmos.tx.v1beta1.getTx({ hash: hash });
+    } catch (error) {
+        console.log(error);
+        return;
+    }
+};

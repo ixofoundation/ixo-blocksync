@@ -39,6 +39,7 @@ export const startSync = async () => {
                     .toUpperCase();
 
                 const transactions = txsEvent.txs ? txsEvent.txs : [];
+                const transactionResponses = txsEvent.txResponses;
                 const events = txsEvent.txResponses[0]
                     ? txsEvent.txResponses.flatMap(
                           (txResponse) => txResponse.events,
@@ -53,11 +54,13 @@ export const startSync = async () => {
                     );
                 }
 
-                if (transactions.length > 0) {
+                if (transactionResponses.length > 0) {
                     await TransactionSyncHandler.syncTransactions(
-                        transactions,
-                        blockHeight,
+                        transactionResponses,
                     );
+                }
+
+                if (transactions.length > 0) {
                     await BlockSyncHandler.syncBlock(
                         transactions,
                         String(blockHeight),

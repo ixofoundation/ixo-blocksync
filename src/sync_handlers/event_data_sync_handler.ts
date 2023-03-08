@@ -1,7 +1,7 @@
 import { EntitySDKType } from "@ixo/impactxclient-sdk/types/codegen/ixo/entity/v1beta1/entity";
 import { IidDocument } from "@ixo/impactxclient-sdk/types/codegen/ixo/iid/v1beta1/iid";
 import { EventTypes } from "../types/Event";
-import { ConvertedEvent, getTimestamp } from "../util/proto";
+import { ConvertedEvent } from "../util/proto";
 import { prisma } from "../prisma/prisma_client";
 import {
     TokenPropertiesSDKType,
@@ -183,8 +183,14 @@ export const syncEventData = async (event: ConvertedEvent) => {
                     data: {
                         id: createEntity.id,
                         type: createEntity.type,
-                        startDate: getTimestamp(createEntity.start_date!),
-                        endDate: getTimestamp(createEntity.end_date!),
+                        startDate:
+                            String(createEntity.start_date) === "null"
+                                ? null
+                                : String(createEntity.start_date),
+                        endDate:
+                            String(createEntity.end_date) === "null"
+                                ? null
+                                : String(createEntity.end_date),
                         status: createEntity.status,
                         relayerNode: createEntity.relayer_node,
                         credentials: createEntity.credentials,
@@ -204,8 +210,14 @@ export const syncEventData = async (event: ConvertedEvent) => {
                     data: {
                         id: updateEntity.id,
                         type: updateEntity.type,
-                        startDate: getTimestamp(updateEntity.start_date!),
-                        endDate: getTimestamp(updateEntity.end_date!),
+                        startDate:
+                            String(updateEntity.start_date) === "null"
+                                ? null
+                                : String(updateEntity.start_date),
+                        endDate:
+                            String(updateEntity.end_date) === "null"
+                                ? null
+                                : String(updateEntity.end_date),
                         status: updateEntity.status,
                         relayerNode: updateEntity.relayer_node,
                         credentials: updateEntity.credentials,

@@ -468,16 +468,27 @@ CREATE TABLE "Discount" (
 
 -- CreateTable
 CREATE TABLE "Transaction" (
-    "id" SERIAL NOT NULL,
-    "blockHeight" INTEGER NOT NULL,
-    "type" TEXT NOT NULL,
-    "value" JSONB,
+    "hash" TEXT NOT NULL,
+    "height" INTEGER NOT NULL,
+    "code" INTEGER NOT NULL,
     "fee" JSONB,
-    "signatures" JSONB,
-    "memo" TEXT NOT NULL,
-    "timeoutHeight" TEXT NOT NULL,
+    "gasUsed" TEXT NOT NULL,
+    "gasWanted" TEXT NOT NULL,
+    "time" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "Transaction_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Transaction_pkey" PRIMARY KEY ("hash")
+);
+
+-- CreateTable
+CREATE TABLE "Message" (
+    "id" SERIAL NOT NULL,
+    "transactionHash" TEXT NOT NULL,
+    "typeUrl" TEXT NOT NULL,
+    "value" JSONB,
+    "from" TEXT,
+    "to" TEXT,
+
+    CONSTRAINT "Message_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -551,3 +562,6 @@ ALTER TABLE "Subscription" ADD CONSTRAINT "Subscription_paymentContractId_fkey" 
 
 -- AddForeignKey
 ALTER TABLE "Discount" ADD CONSTRAINT "Discount_paymentContractId_fkey" FOREIGN KEY ("paymentContractId") REFERENCES "PaymentContract"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Message" ADD CONSTRAINT "Message_transactionHash_fkey" FOREIGN KEY ("transactionHash") REFERENCES "Transaction"("hash") ON DELETE RESTRICT ON UPDATE CASCADE;

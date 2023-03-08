@@ -616,6 +616,20 @@ app.get(
 );
 
 app.get(
+    "/api/transactions/getLatestTransactions/:address",
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const transactions = await TransactionHandler.getLatestTransactions(
+                req.params.address,
+            );
+            res.json(transactions);
+        } catch (error) {
+            next(error);
+        }
+    },
+);
+
+app.get(
     "/api/transactions/listTransactionsByType/:type(*)",
     async (req: Request, res: Response, next: NextFunction) => {
         try {

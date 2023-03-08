@@ -791,6 +791,24 @@ GraphQL
 | ---- | ----------- |
 | 200  | OK          |
 
+### /api/transactions/getLatestTransactions/{address}
+
+#### GET
+
+##### Description:
+
+##### Parameters
+
+| Name    | Located in | Description | Required | Schema |
+| ------- | ---------- | ----------- | -------- | ------ |
+| address | query      |             | Yes      | string |
+
+##### Responses
+
+| Code | Description |
+| ---- | ----------- |
+| 200  | OK          |
+
 ### /api/block/getLastSyncedBlock
 
 #### GET

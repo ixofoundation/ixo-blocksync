@@ -1,61 +1,47 @@
-import { Tx } from "@ixo/impactxclient-sdk/types/codegen/cosmos/tx/v1beta1/tx";
 import { prisma } from "../prisma/prisma_client";
-import { createRegistry, utils } from "@ixo/impactxclient-sdk";
+import { createRegistry } from "@ixo/impactxclient-sdk";
 import { io } from "../index";
+import { TxResponse } from "@ixo/impactxclient-sdk/types/codegen/cosmos/base/abci/v1beta1/abci";
+import { getTransaction } from "../util/proto";
 
-export const syncTransactions = async (
-    transactions: Tx[],
-    blockHeight: number,
-) => {
-    for (const [index, tx] of transactions.entries()) {
+export const syncTransactions = async (transactionResponses: TxResponse[]) => {
+    for (const transactionResponse of transactionResponses) {
         try {
-            console.log(
-                `Syncing Transaction ${index + 1} for Block ${blockHeight}`,
+            const registry = createRegistry();
+            const transaction = await getTransaction(
+                transactionResponse.txhash,
             );
-
-            const messages: any[] = [];
-            for (const message of tx.body?.messages || []) {
-                try {
-                    const registry = createRegistry();
-                    const msg = {
-                        type: message.typeUrl,
-                        value: await registry.decode(message),
-                    };
-                    messages.push(msg);
-                } catch (error) {
-                    console.log(error);
-                }
-            }
-
-            const fee = tx.authInfo?.fee ? tx.authInfo.fee : {};
-            const signatures: string[] = [""];
-            for (const sig of tx.signatures) {
-                signatures.push(Buffer.from(sig).toString("hex").toUpperCase());
-            }
-            const memo = tx.body?.memo ? tx.body.memo : "";
-            const timeoutHeight = String(tx.body?.timeoutHeight.low);
-
-            for (const message of messages) {
-                await prisma.transaction.create({
+            await prisma.transaction.create({
+                data: {
+                    hash: transactionResponse.txhash,
+                    height: Number(transactionResponse.height),
+                    code: transactionResponse.code,
+                    fee: JSON.stringify(transaction!.tx!.authInfo!.fee),
+                    gasUsed: transactionResponse.gasUsed.toString(),
+                    gasWanted: transactionResponse.gasWanted.toString(),
+                    time: new Date(transactionResponse.timestamp),
+                },
+            });
+            for (const message of transaction!.tx!.body!.messages) {
+                const value = await registry.decode(message);
+                await prisma.message.create({
                     data: {
-                        blockHeight: blockHeight,
-                        type: message.type,
-                        value: JSON.stringify(message.value),
-                        fee: JSON.stringify(fee),
-                        signatures: JSON.stringify(signatures),
-                        memo: memo,
-                        timeoutHeight: timeoutHeight,
+                        transactionHash: transactionResponse.txhash,
+                        typeUrl: message.typeUrl,
+                        value: JSON.stringify(value),
+                        from: value.fromAddress ? value.fromAddress : "",
+                        to: value.toAddress ? value.toAddress : "",
                     },
                 });
             }
-
             io.emit("Transaction Synced", {
-                blockHeight,
-                messages,
-                fee,
-                signatures,
-                memo,
-                timeoutHeight,
+                hash: transactionResponse.txhash,
+                height: Number(transactionResponse.height),
+                code: transactionResponse.code,
+                fee: JSON.stringify(transaction!.tx!.authInfo!.fee),
+                gasUsed: transactionResponse.gasUsed.toString(),
+                gasWanted: transactionResponse.gasWanted.toString(),
+                time: new Date(transactionResponse.timestamp),
             });
         } catch (error) {
             console.log(error);

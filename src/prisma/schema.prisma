@@ -417,14 +417,24 @@ model Discount {
 }
 
 model Transaction {
-  id            Int    @id @default(autoincrement())
-  blockHeight   Int
-  type          String
-  value         Json?
-  fee           Json?
-  signatures    Json?
-  memo          String
-  timeoutHeight String
+  hash      String    @id
+  height    Int
+  code      Int
+  fee       Json?
+  gasUsed   String
+  gasWanted String
+  time      DateTime
+  messages  Message[]
+}
+
+model Message {
+  id              Int         @id @default(autoincrement())
+  Transaction     Transaction @relation(fields: [transactionHash], references: [hash])
+  transactionHash String
+  typeUrl         String
+  value           Json?
+  from            String?
+  to              String?
 }
 
 model Block {
