@@ -196,6 +196,7 @@ export const syncEventData = async (event: ConvertedEvent) => {
                         credentials: createEntity.credentials,
                         entityVerified: createEntity.entity_verified,
                         metadata: JSON.stringify(createEntity.metadata),
+                        accounts: JSON.stringify(createEntity.accounts),
                     },
                 });
                 break;
@@ -223,6 +224,7 @@ export const syncEventData = async (event: ConvertedEvent) => {
                         credentials: updateEntity.credentials,
                         entityVerified: updateEntity.entity_verified,
                         metadata: JSON.stringify(updateEntity.metadata),
+                        accounts: JSON.stringify(updateEntity.accounts),
                     },
                 });
                 break;

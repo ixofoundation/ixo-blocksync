@@ -113,6 +113,7 @@ model Entity {
   credentials    String[]
   entityVerified Boolean
   metadata       Json?
+  accounts       Json?
 }
 
 model ClaimCollection {

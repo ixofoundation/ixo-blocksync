@@ -112,6 +112,7 @@ CREATE TABLE "Entity" (
     "credentials" TEXT[],
     "entityVerified" BOOLEAN NOT NULL,
     "metadata" JSONB,
+    "accounts" JSONB,
 
     CONSTRAINT "Entity_pkey" PRIMARY KEY ("id")
 );
