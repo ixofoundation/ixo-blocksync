@@ -1,9 +1,9 @@
-import { prisma } from "../prisma/prisma_client";
+import { parseJson, prisma } from "../prisma/prisma_client";
 
 const prefixes = ["did:x:", "did:ixo:", "did:sov:"];
 
 export const getIidByIid = async (id: string) => {
-    return prisma.iID.findFirst({
+    const iid = await prisma.iID.findFirst({
         where: {
             OR: [
                 { id: prefixes[0] + id },
@@ -12,6 +12,9 @@ export const getIidByIid = async (id: string) => {
             ],
         },
     });
+    iid!.verificationMethod = parseJson(iid!.verificationMethod);
+    iid!.metadata = parseJson(iid!.metadata);
+    return iid;
 };
 
 export const getDidByDid = async (did: string) => {

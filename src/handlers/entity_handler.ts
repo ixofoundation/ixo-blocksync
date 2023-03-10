@@ -1,4 +1,4 @@
-import { prisma } from "../prisma/prisma_client";
+import { parseJson, prisma } from "../prisma/prisma_client";
 import { getAccountEntities } from "../util/proto";
 
 export const getEntityById = async (id: string) => {
@@ -87,6 +87,10 @@ export const getEntityById = async (id: string) => {
         };
     }
     baseEntity["settings"] = { ...settings };
+
+    baseEntity.verificationMethod = parseJson(baseEntity.verificationMethod);
+    baseEntity.metadata = parseJson(baseEntity.metadata);
+    baseEntity.accounts = parseJson(baseEntity.accounts);
     return baseEntity;
 };
 
