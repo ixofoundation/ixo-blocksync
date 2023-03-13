@@ -15,10 +15,11 @@ export const createBlock = async (
             total_gas += txRes.gasUsed.low;
         }
         const proposer_address = Buffer.from(
-            block.block?.header?.proposerAddress!,
+            block!.block!.header!.proposerAddress,
         )
-            .toString()
+            .toString("hex")
             .toUpperCase();
+
         const blockDoc = {
             height: blockHeight,
             hash: blockHash,

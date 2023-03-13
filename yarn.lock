@@ -55,7 +55,7 @@
     "@noble/hashes" "^1.0.0"
     protobufjs "^6.8.8"
 
-"@cosmjs/amino@0.27.1":
+"@cosmjs/amino@^0.27.1", "@cosmjs/amino@0.27.1":
   version "0.27.1"
   resolved "https://registry.npmjs.org/@cosmjs/amino/-/amino-0.27.1.tgz"
   integrity sha512-w56ar/nK9+qlvWDpBPRmD0Blk2wfkkLqRi1COs1x7Ll1LF0AtkIBUjbRKplENLbNovK0T3h+w8bHiFm+GBGQOA==
@@ -99,7 +99,7 @@
     ripemd160 "^2.0.2"
     sha.js "^2.4.11"
 
-"@cosmjs/encoding@0.27.1":
+"@cosmjs/encoding@^0.27.1", "@cosmjs/encoding@0.27.1":
   version "0.27.1"
   resolved "https://registry.npmjs.org/@cosmjs/encoding/-/encoding-0.27.1.tgz"
   integrity sha512-rayLsA0ojHeniaRfWWcqSsrE/T1rl1gl0OXVNtXlPwLJifKBeLEefGbOUiAQaT0wgJ8VNGBazVtAZBpJidfDhw==
@@ -274,10 +274,10 @@
   dependencies:
     multiformats "^9.5.4"
 
-"@ixo/impactxclient-sdk@^0.0.18":
-  version "0.0.18"
-  resolved "https://registry.npmjs.org/@ixo/impactxclient-sdk/-/impactxclient-sdk-0.0.18.tgz"
-  integrity sha512-nJC41hsx7BTxjMWqps1tUYnnXwdbaIvEVQ+GOhc4T65s1hBcdCT8DIHa+zGNMBEoGOaXrUvf3pH4KR20WLNmHA==
+"@ixo/impactxclient-sdk@^0.0.19":
+  version "0.0.19"
+  resolved "https://registry.npmjs.org/@ixo/impactxclient-sdk/-/impactxclient-sdk-0.0.19.tgz"
+  integrity sha512-xd91eJfHGeO8OW9DoRlkRA9et1id7Y0XbZjX0Llx0NETCLudlrcSiVLYQYqhswD9UaAbiEOuPJeD9rcgrRbADw==
   dependencies:
     "@babel/runtime" "7.19.4"
     "@cosmjs/amino" "0.27.1"

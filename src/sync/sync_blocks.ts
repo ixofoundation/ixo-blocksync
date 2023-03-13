@@ -1,14 +1,13 @@
 import * as Proto from "../util/proto";
 import * as ChainHandler from "../handlers/chain_handler";
 import { sleep } from "../util/sleep";
-
-import { getTimestamp } from "../util/proto";
 import * as CosmosHandler from "../handlers/block_handler";
 import * as TransactionSyncHandler from "../sync_handlers/transaction_sync_handler";
 import * as EventSyncHandler from "../sync_handlers/event_sync_handler";
 import * as BondSyncHandler from "../sync_handlers/bondsinfo_sync_handler";
 import * as BlockSyncHandler from "../sync_handlers/block_sync_handler";
 import { currentChain } from "..";
+import { utils } from "@ixo/impactxclient-sdk";
 
 let syncing: boolean;
 
@@ -28,12 +27,9 @@ export const startSync = async () => {
             const bondsInfo = await Proto.getBondsInfo();
             if (block !== undefined && txsEvent !== undefined) {
                 const blockHeight = Number(block.block?.header?.height.low);
-                const timestamp = getTimestamp({
-                    //@ts-ignore
-                    seconds: block.block?.header?.time?.seconds.low,
-                    //@ts-ignore
-                    nanos: block.block?.header?.time?.nanos,
-                });
+                const timestamp = utils.proto.fromTimestamp(
+                    block.block!.header!.time!,
+                );
                 const blockHash = Buffer.from(block.blockId?.hash!)
                     .toString("hex")
                     .toUpperCase();

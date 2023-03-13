@@ -2,7 +2,7 @@ import { prisma } from "../prisma/prisma_client";
 import { createRegistry } from "@ixo/impactxclient-sdk";
 import { io } from "../index";
 import { TxResponse } from "@ixo/impactxclient-sdk/types/codegen/cosmos/base/abci/v1beta1/abci";
-import { getTransaction } from "../util/proto";
+import { getAddressFromDid, getTransaction } from "../util/proto";
 
 export const syncTransactions = async (transactionResponses: TxResponse[]) => {
     for (const transactionResponse of transactionResponses) {
@@ -24,13 +24,23 @@ export const syncTransactions = async (transactionResponses: TxResponse[]) => {
             });
             for (const message of transaction!.tx!.body!.messages) {
                 const value = await registry.decode(message);
+                let from: string | undefined;
+                let to: string | undefined;
+                if (value.fromAddress) from = value.fromAddress;
+                if (value.toAddress) to = value.toAddress;
+                if (value.ownerAddress) from = value.ownerAddress;
+                if (value.recipientDid)
+                    to = await getAddressFromDid(value.recipientDid);
+                if (value.delegatorAddress) from = value.delegatorAddress;
+                if (value.owner) from = value.owner;
+                if (value.recipient) to = value.recipient;
                 await prisma.message.create({
                     data: {
                         transactionHash: transactionResponse.txhash,
                         typeUrl: message.typeUrl,
                         value: JSON.stringify(value),
-                        from: value.fromAddress ? value.fromAddress : "",
-                        to: value.toAddress ? value.toAddress : "",
+                        from: from,
+                        to: to,
                     },
                 });
             }

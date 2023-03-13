@@ -3,6 +3,12 @@ import {
     createRegistry,
     utils,
 } from "@ixo/impactxclient-sdk";
+import {
+    rawEd25519PubkeyToRawAddress,
+    rawSecp256k1PubkeyToRawAddress,
+} from "@cosmjs/amino";
+import { Bech32 } from "@cosmjs/encoding";
+import base58 from "bs58";
 import Long from "long";
 import { RPC } from "./secrets";
 
@@ -192,16 +198,6 @@ export const decode = async (tx: any) => {
     }
 };
 
-export const getTimestamp = (time: Timestamp) => {
-    try {
-        return new Date(
-            Number(time.seconds) * 1000 + Number(time.nanos) / 1000000,
-        );
-    } catch (error) {
-        return null;
-    }
-};
-
 export const getEvent = (event: Event) => {
     const attributes: any[] = [];
     for (const attr of event.attributes) {
@@ -221,6 +217,27 @@ export const getTransaction = async (hash: string) => {
     try {
         const client = await createQueryClient(RPC);
         return client.cosmos.tx.v1beta1.getTx({ hash: hash });
+    } catch (error) {
+        console.log(error);
+        return;
+    }
+};
+
+export const getAddressFromDid = async (did: string, ed = false) => {
+    try {
+        const client = await createQueryClient(RPC);
+        const iid = await client.ixo.iid.v1beta1.iidDocument({ id: did });
+        let publicKeyBase = ed
+            ? iid.iidDocument!.verificationMethod[0].publicKeyBase58!
+            : iid.iidDocument!.verificationMethod[0].publicKeyMultibase!;
+        for (const method of iid.iidDocument!.verificationMethod) {
+            if (method.publicKeyBase58) publicKeyBase = method.publicKeyBase58;
+        }
+        const key = ed
+            ? rawEd25519PubkeyToRawAddress(base58.decode(publicKeyBase))
+            : rawSecp256k1PubkeyToRawAddress(base58.decode(publicKeyBase));
+        const address = Bech32.encode("ixo", key);
+        return address;
     } catch (error) {
         console.log(error);
         return;
