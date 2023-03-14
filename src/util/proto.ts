@@ -154,6 +154,28 @@ export const getAccountEntities = async (address: string) => {
     }
 };
 
+export const getMintAuthGrants = async (granter: string, grantee: string) => {
+    try {
+        const client = await createQueryClient(RPC);
+        const registry = createRegistry();
+        const grants = await client.cosmos.authz.v1beta1.grants({
+            granter: granter,
+            grantee: grantee,
+            msgTypeUrl: "/ixo.token.v1beta1.MintAuthorization",
+        });
+        if (grants.grants.length > 0) {
+            return grants.grants.map((grant) => ({
+                authorization: registry.decode(grant.authorization!),
+                expiration: grant.expiration,
+            }));
+        }
+        return [];
+    } catch (error) {
+        console.log(error);
+        return;
+    }
+};
+
 export const getEntityOwner = async (did: string) => {
     try {
         const client = await createQueryClient(RPC);

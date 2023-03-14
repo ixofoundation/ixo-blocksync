@@ -317,6 +317,30 @@
                 }
             }
         },
+        "/api/token/mintauth/{granter}/{grantee}": {
+            "get": {
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "granter",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "grantee",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/api/bonds/listBonds": {
             "get": {
                 "description": "",

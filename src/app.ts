@@ -23,7 +23,11 @@ const swaggerFile = require(`${__dirname}/../../swagger.json`);
 
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
-import { getAccountBonds, getEntityOwner } from "./util/proto";
+import {
+    getAccountBonds,
+    getEntityOwner,
+    getMintAuthGrants,
+} from "./util/proto";
 
 export const app = express();
 
@@ -246,6 +250,21 @@ app.get(
                 req.params.id,
             );
             res.json(tokens);
+        } catch (error) {
+            next(error);
+        }
+    },
+);
+
+app.get(
+    "/api/token/mintauth/:granter/:grantee",
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const grants = await getMintAuthGrants(
+                req.params.granter,
+                req.params.grantee,
+            );
+            res.json(grants);
         } catch (error) {
             next(error);
         }

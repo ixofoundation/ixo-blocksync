@@ -326,6 +326,25 @@ GraphQL
 | ---- | ----------- |
 | 200  | OK          |
 
+### /api/token/mintauth/{granter}/{grantee}
+
+#### GET
+
+##### Description:
+
+##### Parameters
+
+| Name    | Located in | Description | Required | Schema |
+| ------- | ---------- | ----------- | -------- | ------ |
+| granter | path       |             | Yes      | string |
+| grantee | path       |             | Yes      | string |
+
+##### Responses
+
+| Code | Description |
+| ---- | ----------- |
+| 200  | OK          |
+
 ### /api/bonds/listBonds
 
 #### GET
