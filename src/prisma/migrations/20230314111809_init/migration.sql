@@ -185,9 +185,21 @@ CREATE TABLE "Token" (
     "index" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "collection" TEXT NOT NULL,
-    "tokenData" JSONB,
 
     CONSTRAINT "Token_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "TokenData" (
+    "aid" SERIAL NOT NULL,
+    "uri" TEXT NOT NULL,
+    "encrypted" BOOLEAN NOT NULL,
+    "proof" TEXT NOT NULL,
+    "type" TEXT NOT NULL,
+    "id" TEXT NOT NULL,
+    "tokenId" TEXT NOT NULL,
+
+    CONSTRAINT "TokenData_pkey" PRIMARY KEY ("aid")
 );
 
 -- CreateTable
@@ -414,60 +426,6 @@ CREATE TABLE "FundWithdrawal" (
 );
 
 -- CreateTable
-CREATE TABLE "PaymentTemplate" (
-    "id" TEXT NOT NULL,
-    "paymentAmount" JSONB,
-    "paymentMinimum" JSONB,
-    "paymentMaximum" JSONB,
-    "discounts" JSONB,
-    "creatorDid" TEXT NOT NULL,
-    "creatorAddress" TEXT NOT NULL,
-
-    CONSTRAINT "PaymentTemplate_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "PaymentContract" (
-    "id" TEXT NOT NULL,
-    "paymentTemplateId" TEXT NOT NULL,
-    "payer" TEXT NOT NULL,
-    "recipients" JSONB,
-    "canDeauthorise" BOOLEAN NOT NULL,
-    "authorised" BOOLEAN,
-    "payerDid" TEXT,
-    "effected" BOOLEAN,
-    "senderDid" TEXT,
-    "creatorDid" TEXT NOT NULL,
-    "creatorAddress" TEXT NOT NULL,
-
-    CONSTRAINT "PaymentContract_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "Subscription" (
-    "id" TEXT NOT NULL,
-    "paymentContractId" TEXT NOT NULL,
-    "maxPeriods" TEXT NOT NULL,
-    "period" JSONB,
-    "creatorDid" TEXT NOT NULL,
-    "creatorAddress" TEXT NOT NULL,
-
-    CONSTRAINT "Subscription_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "Discount" (
-    "id" TEXT NOT NULL,
-    "paymentContractId" TEXT NOT NULL,
-    "recipient" TEXT NOT NULL,
-    "granter" TEXT NOT NULL,
-    "revoked" BOOLEAN,
-    "revoker" TEXT,
-
-    CONSTRAINT "Discount_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "Transaction" (
     "hash" TEXT NOT NULL,
     "height" INTEGER NOT NULL,
@@ -526,6 +484,9 @@ ALTER TABLE "LinkedEntity" ADD CONSTRAINT "LinkedEntity_iid_fkey" FOREIGN KEY ("
 ALTER TABLE "Entity" ADD CONSTRAINT "Entity_id_fkey" FOREIGN KEY ("id") REFERENCES "IID"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "TokenData" ADD CONSTRAINT "TokenData_tokenId_fkey" FOREIGN KEY ("tokenId") REFERENCES "Token"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "PriceEntry" ADD CONSTRAINT "PriceEntry_bondDid_fkey" FOREIGN KEY ("bondDid") REFERENCES "Bond"("bondDid") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -557,12 +518,6 @@ ALTER TABLE "Claim" ADD CONSTRAINT "Claim_projectDid_fkey" FOREIGN KEY ("project
 
 -- AddForeignKey
 ALTER TABLE "FundWithdrawal" ADD CONSTRAINT "FundWithdrawal_projectDid_fkey" FOREIGN KEY ("projectDid") REFERENCES "Project"("projectDid") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Subscription" ADD CONSTRAINT "Subscription_paymentContractId_fkey" FOREIGN KEY ("paymentContractId") REFERENCES "PaymentContract"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Discount" ADD CONSTRAINT "Discount_paymentContractId_fkey" FOREIGN KEY ("paymentContractId") REFERENCES "PaymentContract"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Message" ADD CONSTRAINT "Message_transactionHash_fkey" FOREIGN KEY ("transactionHash") REFERENCES "Transaction"("hash") ON DELETE RESTRICT ON UPDATE CASCADE;

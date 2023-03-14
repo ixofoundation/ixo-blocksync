@@ -143,6 +143,43 @@ const seedChains = async () => {
     }
 };
 
+let claimsErrors = 0;
+const seedClaims = async () => {
+    try {
+        const projects = JSON.parse(
+            readFileSync("src/seed/json_exports/projects.json").toString(),
+        );
+        for (const project of projects) {
+            if (project.data.claims != undefined) {
+                for (const claim of project.data.claims) {
+                    try {
+                        if (
+                            claim.claimId &&
+                            claim.claimTemplateId &&
+                            claim.status
+                        ) {
+                            await prisma.claim.create({
+                                data: {
+                                    claimId: claim.claimId,
+                                    projectDid: project.projectDid,
+                                    claimTemplateId: claim.claimTemplateId,
+                                    status: claim.status,
+                                },
+                            });
+                        }
+                    } catch (error) {
+                        console.log(error);
+                        claimsErrors++;
+                    }
+                }
+            }
+        }
+    } catch (error) {
+        console.log(error);
+        claimsErrors++;
+    }
+};
+
 let didsErrors = 0;
 const seedDids = async () => {
     try {
@@ -466,6 +503,7 @@ const countRecords = async () => {
         const alphas = await prisma.alpha.count();
         const bonds = await prisma.bond.count();
         const chains = await prisma.chain.count();
+        const claims = await prisma.claim.count();
         const dids = await prisma.iID.count();
         const events = await prisma.event.count();
         const paymentoutcomes = await prisma.outcomePayment.count();
@@ -481,6 +519,7 @@ const countRecords = async () => {
                 alphas,
                 bonds,
                 chains,
+                claims,
                 dids,
                 events,
                 paymentoutcomes,
@@ -495,6 +534,7 @@ const countRecords = async () => {
                 alphas: alphaErrors,
                 bonds: bondsErrors,
                 chains: chainsErrors,
+                claims: claimsErrors,
                 dids: didsErrors,
                 events: eventsErrors,
                 paymentoutcomes: paymentoutcomesErrors,
@@ -510,17 +550,21 @@ const countRecords = async () => {
     }
 };
 
-// seedAlphas();
-// seedBonds();
-// seedChains();
-// seedDids();
-// seedEvents();
-// seedPaymentOutcomes();
-// seedProjects();
-// seedAgents();
-// seedStats();
-// seedTransactions();
-// seedWithdrawReserves();
-// seedWithdrawShares();
+const seed = async () => {
+    // await seedAlphas();
+    // await seedBonds();
+    // await seedChains();
+    // await seedDids();
+    // await seedEvents();
+    // await seedPaymentOutcomes();
+    // await seedProjects();
+    // await seedAgents();
+    // await seedClaims();
+    // await seedStats();
+    // await seedTransactions();
+    // await seedWithdrawReserves();
+    // await seedWithdrawShares();
+    // await countRecords();
+};
 
-// countRecords();
+// seed();

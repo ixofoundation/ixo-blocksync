@@ -227,6 +227,24 @@
                 }
             }
         },
+        "/api/tokenclass/class/{id}": {
+            "get": {
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/api/token/name/{name}": {
             "get": {
                 "description": "",
@@ -246,6 +264,42 @@
             }
         },
         "/api/token/id/{id}": {
+            "get": {
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/token/entity/{id}": {
+            "get": {
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/token/collection/{id}": {
             "get": {
                 "description": "",
                 "parameters": [
@@ -930,24 +984,6 @@
             "get": {
                 "description": "",
                 "parameters": [],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
-        "/api/getPaymentTemplateById/{id}": {
-            "get": {
-                "description": "",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "type": "string"
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "OK"

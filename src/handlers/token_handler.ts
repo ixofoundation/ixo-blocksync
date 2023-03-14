@@ -20,20 +20,57 @@ export const getTokenClassByName = async (name: string) => {
     return tokenClass;
 };
 
-export const getTokensByName = async (name: string) => {
-    const tokens = await prisma.token.findMany({ where: { name: name } });
-    for (const token of tokens) {
-        token.tokenData = parseJson(token.tokenData);
+export const getTokenClassesByClass = async (id: string) => {
+    const tokenClasses = await prisma.tokenClass.findMany({
+        where: {
+            class: id,
+        },
+    });
+    for (const tokenClass of tokenClasses) {
+        tokenClass!.retired = parseJson(tokenClass!.retired);
+        tokenClass!.cancelled = parseJson(tokenClass!.cancelled);
     }
-    return tokens;
+    return tokenClasses;
+};
+
+export const getTokensByName = async (name: string) => {
+    return prisma.token.findMany({
+        where: { name: name },
+        include: { tokenData: true },
+    });
 };
 
 export const getTokenById = async (id: string) => {
-    const token = await prisma.token.findFirst({
+    return prisma.token.findFirst({
         where: {
             id: id,
         },
+        include: { tokenData: true },
     });
-    token!.tokenData = parseJson(token!.tokenData);
-    return token;
+};
+
+export const getTokensByEntityId = async (id: string) => {
+    return prisma.token.findMany({
+        where: {
+            tokenData: {
+                some: {
+                    id: id,
+                },
+            },
+        },
+        include: {
+            tokenData: true,
+        },
+    });
+};
+
+export const getTokensByCollection = async (id: string) => {
+    return prisma.token.findMany({
+        where: {
+            collection: id,
+        },
+        include: {
+            tokenData: true,
+        },
+    });
 };

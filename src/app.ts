@@ -15,7 +15,6 @@ import * as AuthHandler from "./handlers/auth_handler";
 import * as BondHandler from "./handlers/bond_handler";
 import * as TransactionHandler from "./handlers/transaction_handler";
 import * as BlockHandler from "./handlers/block_handler";
-import * as PaymentHandler from "./handlers/payment_handler";
 import { sendTransaction } from "./util/connection";
 import { SENTRYDSN, DATABASE_URL } from "./util/secrets";
 
@@ -188,6 +187,20 @@ app.get(
 );
 
 app.get(
+    "/api/tokenclass/class/:id",
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const tokenClasses = await TokenHandler.getTokenClassesByClass(
+                req.params.id,
+            );
+            res.json(tokenClasses);
+        } catch (error) {
+            next(error);
+        }
+    },
+);
+
+app.get(
     "/api/token/name/:name",
     async (req: Request, res: Response, next: NextFunction) => {
         try {
@@ -205,6 +218,34 @@ app.get(
         try {
             const token = await TokenHandler.getTokenById(req.params.id);
             res.json(token);
+        } catch (error) {
+            next(error);
+        }
+    },
+);
+
+app.get(
+    "/api/token/entity/:id",
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const tokens = await TokenHandler.getTokensByEntityId(
+                req.params.id,
+            );
+            res.json(tokens);
+        } catch (error) {
+            next(error);
+        }
+    },
+);
+
+app.get(
+    "/api/token/collection/:id",
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const tokens = await TokenHandler.getTokensByCollection(
+                req.params.id,
+            );
+            res.json(tokens);
         } catch (error) {
             next(error);
         }
@@ -652,20 +693,6 @@ app.get(
         try {
             const block = await BlockHandler.getLastSyncedBlock();
             res.json(block);
-        } catch (error) {
-            next(error);
-        }
-    },
-);
-
-app.get(
-    "/api/getPaymentTemplateById/:id",
-    async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const template = await PaymentHandler.getPaymentTemplateById(
-                req.params.id,
-            );
-            res.json(template);
         } catch (error) {
             next(error);
         }

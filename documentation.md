@@ -236,6 +236,24 @@ GraphQL
 | ---- | ----------- |
 | 200  | OK          |
 
+### /api/tokenclass/class/{id}
+
+#### GET
+
+##### Description:
+
+##### Parameters
+
+| Name | Located in | Description | Required | Schema |
+| ---- | ---------- | ----------- | -------- | ------ |
+| id   | path       |             | Yes      | string |
+
+##### Responses
+
+| Code | Description |
+| ---- | ----------- |
+| 200  | OK          |
+
 ### /api/token/name/{name}
 
 #### GET
@@ -255,6 +273,42 @@ GraphQL
 | 200  | OK          |
 
 ### /api/token/id/{id}
+
+#### GET
+
+##### Description:
+
+##### Parameters
+
+| Name | Located in | Description | Required | Schema |
+| ---- | ---------- | ----------- | -------- | ------ |
+| id   | path       |             | Yes      | string |
+
+##### Responses
+
+| Code | Description |
+| ---- | ----------- |
+| 200  | OK          |
+
+### /api/token/entity/{id}
+
+#### GET
+
+##### Description:
+
+##### Parameters
+
+| Name | Located in | Description | Required | Schema |
+| ---- | ---------- | ----------- | -------- | ------ |
+| id   | path       |             | Yes      | string |
+
+##### Responses
+
+| Code | Description |
+| ---- | ----------- |
+| 200  | OK          |
+
+### /api/token/collection/{id}
 
 #### GET
 
@@ -819,24 +873,6 @@ GraphQL
 
 | Name | Located in | Description | Required | Schema |
 | ---- | ---------- | ----------- | -------- | ------ |
-
-##### Responses
-
-| Code | Description |
-| ---- | ----------- |
-| 200  | OK          |
-
-### /api/getPaymentTemplateById/{id}
-
-#### GET
-
-##### Description:
-
-##### Parameters
-
-| Name | Located in | Description | Required | Schema |
-| ---- | ---------- | ----------- | -------- | ------ |
-| id   | path       |             | Yes      | string |
 
 ##### Responses
 

@@ -384,11 +384,20 @@ export const syncEventData = async (event: ConvertedEvent) => {
                         index: mintTokenTokenProperties.index,
                         name: mintTokenTokenProperties.name,
                         collection: mintTokenTokenProperties.collection,
-                        tokenData: JSON.stringify(
-                            mintTokenTokenProperties.tokenData,
-                        ),
                     },
                 });
+                for (const tokenData of mintTokenTokenProperties.tokenData) {
+                    await prisma.tokenData.create({
+                        data: {
+                            uri: tokenData.uri,
+                            encrypted: tokenData.encrypted,
+                            proof: tokenData.proof,
+                            type: tokenData.type,
+                            id: tokenData.id,
+                            tokenId: mintTokenTokenProperties.id,
+                        },
+                    });
+                }
                 break;
         }
     } catch (error) {

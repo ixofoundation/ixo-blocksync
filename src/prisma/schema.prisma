@@ -167,11 +167,22 @@ model TokenClass {
 }
 
 model Token {
-  id         String @id
+  id         String      @id
   index      String
   name       String
   collection String
-  tokenData  Json?
+  tokenData  TokenData[]
+}
+
+model TokenData {
+  aid       Int     @id @default(autoincrement())
+  uri       String
+  encrypted Boolean
+  proof     String
+  type      String
+  id        String
+  Token     Token   @relation(fields: [tokenId], references: [id])
+  tokenId   String
 }
 
 model Bond {
@@ -369,52 +380,6 @@ model FundWithdrawal {
   recipientDid  String
   amount        String
   isRefund      Boolean?
-}
-
-model PaymentTemplate {
-  id             String @id
-  paymentAmount  Json?
-  paymentMinimum Json?
-  paymentMaximum Json?
-  discounts      Json?
-  creatorDid     String
-  creatorAddress String
-}
-
-model PaymentContract {
-  id                String         @id
-  paymentTemplateId String
-  payer             String
-  recipients        Json?
-  canDeauthorise    Boolean
-  authorised        Boolean?
-  payerDid          String?
-  effected          Boolean?
-  senderDid         String?
-  creatorDid        String
-  creatorAddress    String
-  Subscription      Subscription[]
-  Discount          Discount[]
-}
-
-model Subscription {
-  id                String          @id
-  paymentContract   PaymentContract @relation(fields: [paymentContractId], references: [id])
-  paymentContractId String
-  maxPeriods        String
-  period            Json?
-  creatorDid        String
-  creatorAddress    String
-}
-
-model Discount {
-  id                String          @id
-  paymentContract   PaymentContract @relation(fields: [paymentContractId], references: [id])
-  paymentContractId String
-  recipient         String
-  granter           String
-  revoked           Boolean?
-  revoker           String?
 }
 
 model Transaction {
