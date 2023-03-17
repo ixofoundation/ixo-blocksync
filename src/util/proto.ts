@@ -223,7 +223,16 @@ export const getAccountTokenBalances = async (address: string) => {
             };
             classes.push(tClass);
         }
-        return classes;
+        return classes.map((c) => {
+            const name = Object.keys(c)[0];
+            const tokenData: any[] = [];
+            for (const d of c[name]) {
+                const id = Object.keys(d)[0];
+                const balance = d[id];
+                tokenData.push({ id, balance });
+            }
+            return { name, tokenData };
+        });
     } catch (error) {
         console.log(error);
         return;
