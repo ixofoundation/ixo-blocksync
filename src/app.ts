@@ -95,6 +95,32 @@ app.get(
 );
 
 app.get(
+    "/api/entity/all",
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const entities = await EntityHandler.getEntitiesByType();
+            res.json(entities);
+        } catch (error) {
+            next(error);
+        }
+    },
+);
+
+app.get(
+    "/api/entity/byType/:type",
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const entities = await EntityHandler.getEntitiesByType(
+                req.params.type,
+            );
+            res.json(entities);
+        } catch (error) {
+            next(error);
+        }
+    },
+);
+
+app.get(
     "/api/entity/byOwnerAddress/:address",
     async (req: Request, res: Response, next: NextFunction) => {
         try {

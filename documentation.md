@@ -111,6 +111,41 @@ GraphQL
 | ---- | ----------- |
 | 200  | OK          |
 
+### /api/entity/all
+
+#### GET
+
+##### Description:
+
+##### Parameters
+
+| Name | Located in | Description | Required | Schema |
+| ---- | ---------- | ----------- | -------- | ------ |
+
+##### Responses
+
+| Code | Description |
+| ---- | ----------- |
+| 200  | OK          |
+
+### /api/entity/byType/{type}
+
+#### GET
+
+##### Description:
+
+##### Parameters
+
+| Name | Located in | Description | Required | Schema |
+| ---- | ---------- | ----------- | -------- | ------ |
+| type | path       |             | Yes      | string |
+
+##### Responses
+
+| Code | Description |
+| ---- | ----------- |
+| 200  | OK          |
+
 ### /api/entity/byOwnerAddress/{address}
 
 #### GET

@@ -108,6 +108,35 @@
                 }
             }
         },
+        "/api/entity/all": {
+            "get": {
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/entity/byType/{type}": {
+            "get": {
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/api/entity/byOwnerAddress/{address}": {
             "get": {
                 "description": "",

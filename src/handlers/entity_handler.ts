@@ -149,3 +149,27 @@ export const getEntityCollectionsByOwnerAddress = async (address: string) => {
     }
     return res;
 };
+
+export const getEntitiesByType = async (type?: string) => {
+    if (type) {
+        const records = await prisma.entity.findMany({
+            where: {
+                type: type,
+            },
+            select: {
+                id: true,
+            },
+        });
+        const res: any[] = [];
+        for (const record of records) {
+            res.push(await getEntityById(record.id));
+        }
+        return res;
+    }
+    const records = await prisma.entity.findMany({ select: { id: true } });
+    const res: any[] = [];
+    for (const record of records) {
+        res.push(await getEntityById(record.id));
+    }
+    return res;
+};
