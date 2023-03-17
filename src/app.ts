@@ -25,6 +25,8 @@ import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import {
     getAccountBonds,
+    getAccountTokenBalances,
+    getAccountTokens,
     getEntityOwner,
     getMintAuthGrants,
 } from "./util/proto";
@@ -224,6 +226,30 @@ app.get(
                 req.params.id,
             );
             res.json(tokenClasses);
+        } catch (error) {
+            next(error);
+        }
+    },
+);
+
+app.get(
+    "/api/token/ids/:address",
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const tokens = await getAccountTokens(req.params.address);
+            res.json(tokens);
+        } catch (error) {
+            next(error);
+        }
+    },
+);
+
+app.get(
+    "/api/token/balances/:address",
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const tokens = await getAccountTokenBalances(req.params.address);
+            res.json(tokens);
         } catch (error) {
             next(error);
         }

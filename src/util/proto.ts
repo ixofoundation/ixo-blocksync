@@ -11,6 +11,7 @@ import { Bech32 } from "@cosmjs/encoding";
 import base58 from "bs58";
 import Long from "long";
 import { RPC } from "./secrets";
+import { prisma } from "../prisma/prisma_client";
 
 enum OrderBy {
     ORDER_BY_UNSPECIFIED = 0,
@@ -148,6 +149,81 @@ export const getAccountEntities = async (address: string) => {
             queryData: utils.conversions.JsonToArray(JSON.stringify(msg)),
         });
         return JSON.parse(utils.conversions.Uint8ArrayToJS(res.data)).tokens;
+    } catch (error) {
+        console.log(error);
+        return;
+    }
+};
+
+export const getAccountTokens = async (address: string) => {
+    try {
+        const client = await createQueryClient(RPC);
+        const tokenClasses = await prisma.tokenClass.findMany();
+        const tokens: any[] = [];
+        for (const tokenClass of tokenClasses) {
+            const msg = {
+                tokens: {
+                    owner: address,
+                },
+            };
+            const contractRes =
+                await client.cosmwasm.wasm.v1.smartContractState({
+                    address: tokenClass.contractAddress,
+                    queryData: utils.conversions.JsonToArray(
+                        JSON.stringify(msg),
+                    ),
+                });
+            const res = JSON.parse(
+                utils.conversions.Uint8ArrayToJS(contractRes.data),
+            ).tokens;
+            tokens.push({
+                [tokenClass.name]: {
+                    tokens: res,
+                    contractAddress: tokenClass.contractAddress,
+                },
+            });
+        }
+        return tokens;
+    } catch (error) {
+        console.log(error);
+        return;
+    }
+};
+
+export const getAccountTokenBalances = async (address: string) => {
+    try {
+        const client = await createQueryClient(RPC);
+        const tokens = await getAccountTokens(address);
+        const classes: any[] = [];
+        for (const token of tokens!) {
+            const name = Object.keys(token)[0];
+            const contractAddress = token[name].contractAddress;
+            const balances: any[] = [];
+            for (const id of token[name].tokens) {
+                const msg = {
+                    balance: {
+                        owner: address,
+                        token_id: id,
+                    },
+                };
+                const res = await client.cosmwasm.wasm.v1.smartContractState({
+                    address: contractAddress,
+                    queryData: utils.conversions.JsonToArray(
+                        JSON.stringify(msg),
+                    ),
+                });
+                const balance = {
+                    [id]: JSON.parse(utils.conversions.Uint8ArrayToJS(res.data))
+                        .balance,
+                };
+                balances.push(balance);
+            }
+            const tClass = {
+                [name]: balances,
+            };
+            classes.push(tClass);
+        }
+        return classes;
     } catch (error) {
         console.log(error);
         return;

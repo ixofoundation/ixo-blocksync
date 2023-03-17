@@ -274,6 +274,42 @@
                 }
             }
         },
+        "/api/token/ids/{address}": {
+            "get": {
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "address",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/token/balances/{address}": {
+            "get": {
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "address",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/api/token/name/{name}": {
             "get": {
                 "description": "",
