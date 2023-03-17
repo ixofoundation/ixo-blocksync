@@ -382,16 +382,10 @@
                 }
             }
         },
-        "/api/token/mintauth/{granter}/{grantee}": {
+        "/api/token/mintauth/{grantee}": {
             "get": {
                 "description": "",
                 "parameters": [
-                    {
-                        "name": "granter",
-                        "in": "path",
-                        "required": true,
-                        "type": "string"
-                    },
                     {
                         "name": "grantee",
                         "in": "path",

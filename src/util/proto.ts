@@ -230,22 +230,24 @@ export const getAccountTokenBalances = async (address: string) => {
     }
 };
 
-export const getMintAuthGrants = async (granter: string, grantee: string) => {
+export const getMintAuthGrants = async (grantee: string) => {
     try {
         const client = await createQueryClient(RPC);
         const registry = createRegistry();
-        const grants = await client.cosmos.authz.v1beta1.grants({
-            granter: granter,
+        const grants = await client.cosmos.authz.v1beta1.granteeGrants({
             grantee: grantee,
-            msgTypeUrl: "/ixo.token.v1beta1.MintAuthorization",
         });
-        if (grants.grants.length > 0) {
-            return grants.grants.map((grant) => ({
-                authorization: registry.decode(grant.authorization!),
-                expiration: grant.expiration,
-            }));
-        }
-        return [];
+        const decodedGrants = grants.grants.map((grant) => ({
+            granter: grant.granter,
+            grantee: grant.grantee,
+            authorization: registry.decode(grant.authorization!),
+            expiration: grant.expiration,
+        }));
+        return decodedGrants.filter(
+            (grant) =>
+                grant.authorization.typeURL ===
+                "/ixo.token.v1beta1.MsgMintToken",
+        );
     } catch (error) {
         console.log(error);
         return;

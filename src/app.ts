@@ -309,13 +309,10 @@ app.get(
 );
 
 app.get(
-    "/api/token/mintauth/:granter/:grantee",
+    "/api/token/mintauth/:grantee",
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const grants = await getMintAuthGrants(
-                req.params.granter,
-                req.params.grantee,
-            );
+            const grants = await getMintAuthGrants(req.params.grantee);
             res.json(grants);
         } catch (error) {
             next(error);
