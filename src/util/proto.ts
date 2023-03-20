@@ -254,7 +254,7 @@ export const getMintAuthGrants = async (grantee: string) => {
         }));
         return decodedGrants.filter(
             (grant) =>
-                grant.authorization.typeURL ===
+                grant.authorization.typeUrl ===
                 "/ixo.token.v1beta1.MsgMintToken",
         );
     } catch (error) {
