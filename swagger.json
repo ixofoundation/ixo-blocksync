@@ -1035,6 +1035,24 @@
                 }
             }
         },
+        "/api/transactions/getTokenTransfers/{address}": {
+            "get": {
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "address",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/api/transactions/listTransactionsByType/{type(*)}": {
             "get": {
                 "description": "",

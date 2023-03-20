@@ -32,6 +32,7 @@ export const syncTransactions = async (transactionResponses: TxResponse[]) => {
                 if (value.recipientDid)
                     to = await getAddressFromDid(value.recipientDid);
                 if (value.owner) from = value.owner;
+                if (value.recipient) to = value.recipient;
                 await prisma.message.create({
                     data: {
                         transactionHash: transactionResponse.txhash,

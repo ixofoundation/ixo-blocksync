@@ -13,6 +13,7 @@ export const getLatestTransactions = async (address: string) => {
                         { typeUrl: "/ixo.entity.v1beta1.MsgTransferEntity" },
                         { typeUrl: "/ixo.token.v1beta1.MsgMintToken" },
                         { typeUrl: "/ixo.token.v1beta1.MsgRetireToken" },
+                        { typeUrl: "/ixo.token.v1beta1.MsgTransferToken" },
                     ],
                 },
             ],
@@ -24,6 +25,24 @@ export const getLatestTransactions = async (address: string) => {
             id: "desc",
         },
         take: 3,
+        include: {
+            Transaction: true,
+        },
+    });
+};
+
+export const getTokenTransfers = async (address: string) => {
+    return prisma.message.findMany({
+        where: {
+            OR: [{ from: address }, { to: address }],
+            typeUrl: "/ixo.token.v1beta1.MsgTransferToken",
+            Transaction: {
+                code: 0,
+            },
+        },
+        orderBy: {
+            id: "desc",
+        },
         include: {
             Transaction: true,
         },

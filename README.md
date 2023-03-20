@@ -8,7 +8,7 @@ Syncs all the public info from an ixo blockchain to an instance of PostgreSQL.
 
 ## Documentation
 
--   [Endpoints](/documentation.md)
+-   [Endpoints](/swagger.json)
 -   [Typedoc](https://ixo-blocksync.docs.ixo.earth/)
 -   The `/swagger` endpoint.
 
