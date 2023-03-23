@@ -1,4 +1,10 @@
-import { prisma } from "../prisma/prisma_client";
+import {
+    MsgMintToken,
+    MsgRetireToken,
+    MsgTransferToken,
+} from "@ixo/impactxclient-sdk/types/codegen/ixo/token/v1beta1/tx";
+import { parseJson, prisma } from "../prisma/prisma_client";
+import { getTokenById } from "./token_handler";
 
 export const getLatestTransactions = async (address: string) => {
     return prisma.message.findMany({
@@ -31,11 +37,20 @@ export const getLatestTransactions = async (address: string) => {
     });
 };
 
-export const getTokenTransfers = async (address: string) => {
-    return prisma.message.findMany({
+export const getTokenTransactions = async (address: string) => {
+    const messages = await prisma.message.findMany({
         where: {
-            OR: [{ from: address }, { to: address }],
-            typeUrl: "/ixo.token.v1beta1.MsgTransferToken",
+            OR: [
+                { from: address },
+                { to: address },
+                {
+                    OR: [
+                        { typeUrl: "/ixo.token.v1beta1.MsgMintToken" },
+                        { typeUrl: "/ixo.token.v1beta1.MsgRetireToken" },
+                        { typeUrl: "/ixo.token.v1beta1.MsgTransferToken" },
+                    ],
+                },
+            ],
             Transaction: {
                 code: 0,
             },
@@ -47,6 +62,52 @@ export const getTokenTransfers = async (address: string) => {
             Transaction: true,
         },
     });
+    const transactions: any[] = [];
+    for (const message of messages) {
+        switch (message.typeUrl) {
+            case "/ixo.token.v1beta1.MsgMintToken":
+                const mintValue: MsgMintToken = parseJson(message.value);
+                for (const token of mintValue.mintBatch) {
+                    transactions.push({
+                        type: "mint",
+                        owner: mintValue.owner,
+                        amount: token.amount,
+                        name: token.name,
+                        collection: token.collection,
+                    });
+                }
+                break;
+            case "/ixo.token.v1beta1.MsgRetireToken":
+                const retireValue: MsgRetireToken = parseJson(message.value);
+                for (const token of retireValue.tokens) {
+                    const tokenRecord = await getTokenById(token.id);
+                    transactions.push({
+                        type: "retire",
+                        owner: retireValue.owner,
+                        amount: token.amount,
+                        name: tokenRecord!.name,
+                        collection: tokenRecord!.collection,
+                    });
+                }
+                break;
+            case "/ixo.token.v1beta1.MsgTransferToken":
+                const transferValue: MsgTransferToken = parseJson(
+                    message.value,
+                );
+                for (const token of transferValue.tokens) {
+                    const tokenRecord = await getTokenById(token.id);
+                    transactions.push({
+                        type: "transfer",
+                        from: transferValue.owner,
+                        to: transferValue.recipient,
+                        amount: token.amount,
+                        name: tokenRecord!.name,
+                    });
+                }
+                break;
+        }
+    }
+    return transactions;
 };
 
 export const listTransactionsByType = async (

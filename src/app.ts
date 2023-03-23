@@ -739,10 +739,10 @@ app.get(
 );
 
 app.get(
-    "/api/transactions/getTokenTransfers/:address",
+    "/api/transactions/getTokenTransactions/:address",
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const transactions = await TransactionHandler.getTokenTransfers(
+            const transactions = await TransactionHandler.getTokenTransactions(
                 req.params.address,
             );
             res.json(transactions);

@@ -1035,7 +1035,7 @@
                 }
             }
         },
-        "/api/transactions/getTokenTransfers/{address}": {
+        "/api/transactions/getTokenTransactions/{address}": {
             "get": {
                 "description": "",
                 "parameters": [
