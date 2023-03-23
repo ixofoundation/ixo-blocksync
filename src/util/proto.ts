@@ -246,17 +246,27 @@ export const getMintAuthGrants = async (grantee: string) => {
         const grants = await client.cosmos.authz.v1beta1.granteeGrants({
             grantee: grantee,
         });
-        const decodedGrants = grants.grants.map((grant) => ({
-            granter: grant.granter,
-            grantee: grant.grantee,
-            authorization: registry.decode(grant.authorization!),
-            expiration: grant.expiration,
-        }));
-        return decodedGrants.filter(
-            (grant) =>
-                grant.authorization.typeUrl ===
-                "/ixo.token.v1beta1.MsgMintToken",
-        );
+        return grants.grants
+            .filter(
+                (grant) =>
+                    grant.authorization!.typeUrl ===
+                    "/ixo.token.v1beta1.MintAuthorization",
+            )
+            .map((grant) => ({
+                granter: grant.granter,
+                grantee: grant.grantee,
+                authorization: registry.decode(grant.authorization!),
+                exipration: grant.expiration,
+            }))
+            .flatMap((grant) =>
+                grant.authorization.constraints.map((constraint) => ({
+                    amount: constraint.amount,
+                    name: constraint.name,
+                    index: constraint.index,
+                    nftCollection: constraint.collection,
+                    nftEntity: constraint.tokenData[0].id,
+                })),
+            );
     } catch (error) {
         console.log(error);
         return;

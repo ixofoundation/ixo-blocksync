@@ -73,7 +73,8 @@ export const getTokenTransactions = async (address: string) => {
                         owner: mintValue.owner,
                         amount: token.amount,
                         name: token.name,
-                        collection: token.collection,
+                        nftCollection: token.collection,
+                        nftEntity: token.tokenData[0].id,
                     });
                 }
                 break;
@@ -86,7 +87,8 @@ export const getTokenTransactions = async (address: string) => {
                         owner: retireValue.owner,
                         amount: token.amount,
                         name: tokenRecord!.name,
-                        collection: tokenRecord!.collection,
+                        nftCollection: tokenRecord!.collection,
+                        nftEntity: tokenRecord!.tokenData[0].id,
                     });
                 }
                 break;
