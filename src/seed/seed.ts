@@ -330,6 +330,14 @@ const seedProjects = async () => {
         );
         for (const project of projects) {
             try {
+                let createdOn: Date | string;
+                if (project.data.createdOn.$date === undefined) {
+                    createdOn = project.data.createdOn.toString();
+                } else {
+                    createdOn = new Date(
+                        Number(project.data.createdOn["$date"]["$numberLong"]),
+                    );
+                }
                 await prisma.project.create({
                     data: {
                         projectDid: project.projectDid,
@@ -340,26 +348,32 @@ const seedProjects = async () => {
                         projectAddress: "",
                         status: project.status,
                         entityType: "",
-                        createdOn:
-                            new Date(
-                                Number(
-                                    project.data.createdOn.$date.$numberLong,
-                                ),
-                            ) || new Date(),
+                        createdOn: createdOn,
                         createdBy: project.data.createdBy,
-                        successfulClaims:
-                            project.data.claimStats.currentSuccessful,
-                        rejectedClaims: project.data.claimStats.currentRejected,
-                        evaluators: project.data.agentStats.evaluators,
-                        evaluatorsPending:
-                            project.data.agentStats.evaluatorsPending,
-                        serviceProviders:
-                            project.data.agentStats.serviceProviders,
-                        serviceProvidersPending:
-                            project.data.agentStats.serviceProvidersPending,
-                        investors: project.data.agentStats.investors,
-                        investorsPending:
-                            project.data.agentStats.investorsPending,
+                        successfulClaims: project.data.claimStats
+                            ? project.data.claimStats.currentSuccessful
+                            : 0,
+                        rejectedClaims: project.data.claimStats
+                            ? project.data.claimStats.currentRejected
+                            : 0,
+                        evaluators: project.data.agentStats
+                            ? project.data.agentStats.evaluators
+                            : 0,
+                        evaluatorsPending: project.data.agentStats
+                            ? project.data.agentStats.evaluatorsPending
+                            : 0,
+                        serviceProviders: project.data.agentStats
+                            ? project.data.agentStats.serviceProviders
+                            : 0,
+                        serviceProvidersPending: project.data.agentStats
+                            ? project.data.agentStats.serviceProvidersPending
+                            : 0,
+                        investors: project.data.agentStats
+                            ? project.data.agentStats.investors
+                            : 0,
+                        investorsPending: project.data.agentStats
+                            ? project.data.agentStats.investorsPending
+                            : 0,
                     },
                 });
             } catch (error) {
