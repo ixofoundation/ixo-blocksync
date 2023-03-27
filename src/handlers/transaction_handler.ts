@@ -70,6 +70,7 @@ export const getTokenTransactions = async (address: string) => {
                 for (const token of mintValue.mintBatch) {
                     transactions.push({
                         type: "mint",
+                        time: message.Transaction.time.toUTCString(),
                         owner: mintValue.owner,
                         amount: token.amount,
                         name: token.name,
@@ -84,6 +85,7 @@ export const getTokenTransactions = async (address: string) => {
                     const tokenRecord = await getTokenById(token.id);
                     transactions.push({
                         type: "retire",
+                        time: message.Transaction.time.toUTCString(),
                         owner: retireValue.owner,
                         amount: token.amount,
                         name: tokenRecord!.name,
@@ -100,6 +102,7 @@ export const getTokenTransactions = async (address: string) => {
                     const tokenRecord = await getTokenById(token.id);
                     transactions.push({
                         type: "transfer",
+                        time: message.Transaction.time.toUTCString(),
                         from: transferValue.owner,
                         to: transferValue.recipient,
                         amount: token.amount,
