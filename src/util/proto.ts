@@ -12,6 +12,7 @@ import base58 from "bs58";
 import Long from "long";
 import { RPC } from "./secrets";
 import { prisma } from "../prisma/prisma_client";
+import { getTokensByEntityId } from "../handlers/token_handler";
 
 enum OrderBy {
     ORDER_BY_UNSPECIFIED = 0,
@@ -267,6 +268,21 @@ export const getMintAuthGrants = async (grantee: string) => {
                     nftEntity: constraint.tokenData[0].id,
                 })),
             );
+    } catch (error) {
+        console.log(error);
+        return;
+    }
+};
+
+export const getEntityTokens = async (did: string) => {
+    try {
+        const tokens = await getTokensByEntityId(did);
+        const owner = await getEntityOwner(did);
+        const balances = await getAccountTokenBalances(owner);
+        const entityBalances = balances!.flatMap((b) =>
+            b.tokenData.filter((t) => tokens.map((t) => t.id).includes(t.id)),
+        );
+        return entityBalances;
     } catch (error) {
         console.log(error);
         return;

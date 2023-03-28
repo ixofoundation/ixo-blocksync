@@ -9,6 +9,17 @@
     "basePath": "",
     "schemes": ["http"],
     "paths": {
+        "/": {
+            "get": {
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/graphiql": {
             "get": {
                 "description": "GraphiQL IDE",
@@ -23,17 +34,6 @@
         "/graphql": {
             "post": {
                 "description": "GraphQL",
-                "parameters": [],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
-        "/": {
-            "get": {
-                "description": "",
                 "parameters": [],
                 "responses": {
                     "200": {
@@ -220,6 +220,24 @@
                 }
             }
         },
+        "/api/entity/tokens/{id}": {
+            "get": {
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/api/tokenclass/contractaddress/{contractAddress}": {
             "get": {
                 "description": "",
@@ -388,6 +406,54 @@
                 "parameters": [
                     {
                         "name": "grantee",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/token/retired/{name}/{id}": {
+            "get": {
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/token/cancelled/{name}/{id}": {
+            "get": {
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "id",
                         "in": "path",
                         "required": true,
                         "type": "string"

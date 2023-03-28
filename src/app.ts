@@ -28,6 +28,7 @@ import {
     getAccountTokenBalances,
     getAccountTokens,
     getEntityOwner,
+    getEntityTokens,
     getMintAuthGrants,
 } from "./util/proto";
 
@@ -190,6 +191,18 @@ app.get(
 );
 
 app.get(
+    "/api/entity/tokens/:id",
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const balances = await getEntityTokens(req.params.id);
+            res.json(balances);
+        } catch (error) {
+            next(error);
+        }
+    },
+);
+
+app.get(
     "/api/tokenclass/contractaddress/:contractAddress",
     async (req: Request, res: Response, next: NextFunction) => {
         try {
@@ -314,6 +327,36 @@ app.get(
         try {
             const grants = await getMintAuthGrants(req.params.grantee);
             res.json(grants);
+        } catch (error) {
+            next(error);
+        }
+    },
+);
+
+app.get(
+    "/api/token/retired/:name/:id",
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const token = await TokenHandler.getTokenRetiredAmount(
+                req.params.name,
+                req.params.id,
+            );
+            res.json(token);
+        } catch (error) {
+            next(error);
+        }
+    },
+);
+
+app.get(
+    "/api/token/cancelled/:name/:id",
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const token = await TokenHandler.getTokenCancelledAmount(
+                req.params.name,
+                req.params.id,
+            );
+            res.json(token);
         } catch (error) {
             next(error);
         }

@@ -74,3 +74,57 @@ export const getTokensByCollection = async (id: string) => {
         },
     });
 };
+
+export const getTokenRetiredAmount = async (name: string, id: string) => {
+    const tokenClass = await prisma.tokenClass.findFirst({
+        where: {
+            name: name,
+        },
+    });
+    if (tokenClass) {
+        const retired = parseJson(tokenClass.retired);
+        if (retired.length > 0) {
+            const tokens = retired.filter((r) => r.id === id);
+            if (tokens.length > 0) {
+                return {
+                    id: tokens[0].id,
+                    amount: tokens[0].amount,
+                    owner: tokens[0].owner,
+                };
+            } else {
+                return {};
+            }
+        } else {
+            return {};
+        }
+    } else {
+        return {};
+    }
+};
+
+export const getTokenCancelledAmount = async (name: string, id: string) => {
+    const tokenClass = await prisma.tokenClass.findFirst({
+        where: {
+            name: name,
+        },
+    });
+    if (tokenClass) {
+        const cancelled = parseJson(tokenClass.cancelled);
+        if (cancelled.length > 0) {
+            const tokens = cancelled.filter((c) => c.id === id);
+            if (tokens.length > 0) {
+                return {
+                    id: tokens[0].id,
+                    amount: tokens[0].amount,
+                    owner: tokens[0].owner,
+                };
+            } else {
+                return {};
+            }
+        } else {
+            return {};
+        }
+    } else {
+        return {};
+    }
+};
