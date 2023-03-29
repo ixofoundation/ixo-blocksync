@@ -278,11 +278,13 @@ export const getEntityTokens = async (did: string) => {
     try {
         const tokens = await getTokensByEntityId(did);
         const owner = await getEntityOwner(did);
-        const balances = await getAccountTokenBalances(owner);
-        const entityBalances = balances!.flatMap((b) =>
-            b.tokenData.filter((t) => tokens.map((t) => t.id).includes(t.id)),
+        const accountBalances = await getAccountTokenBalances(owner);
+        const balances = accountBalances!.flatMap((b) =>
+            b.tokenData
+                .map((t) => ({ ...t, name: b.name }))
+                .filter((t) => tokens.map((t) => t.id).includes(t.id)),
         );
-        return entityBalances;
+        return balances;
     } catch (error) {
         console.log(error);
         return;
