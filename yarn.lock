@@ -274,10 +274,10 @@
   dependencies:
     multiformats "^9.5.4"
 
-"@ixo/impactxclient-sdk@^0.0.21":
-  version "0.0.21"
-  resolved "https://registry.npmjs.org/@ixo/impactxclient-sdk/-/impactxclient-sdk-0.0.21.tgz"
-  integrity sha512-an6WhsUge/vTBapnCXwzuevVRd1bf/yw+IbiT+m2cTknwgNYdnFt/kdQ3wHooYdbrLfBIL9WMQrqnClNIEHQlQ==
+"@ixo/impactxclient-sdk@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.npmjs.org/@ixo/impactxclient-sdk/-/impactxclient-sdk-1.0.0.tgz"
+  integrity sha512-TPALLj3YT9U3AGcYnCF35NkBqAiTaIaj6shLWDCWa3KjyVobgmwi9FNBbMSzXdpNNahsY2LRD9v7yQzxoZHogQ==
   dependencies:
     "@babel/runtime" "7.19.4"
     "@cosmjs/amino" "0.27.1"

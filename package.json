@@ -19,7 +19,7 @@
     "dependencies": {
         "@cosmjs/amino": "^0.27.1",
         "@cosmjs/encoding": "^0.27.1",
-        "@ixo/impactxclient-sdk": "^0.0.21",
+        "@ixo/impactxclient-sdk": "^1.0.0",
         "@prisma/client": "^4.11.0",
         "@sentry/node": "^7.36.0",
         "@sentry/tracing": "^7.36.0",
