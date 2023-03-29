@@ -173,3 +173,28 @@ export const getEntitiesByType = async (type?: string) => {
     }
     return res;
 };
+
+export const getEntityLastTransferredDate = async (id: string) => {
+    const messages = await prisma.message.findMany({
+        where: {
+            typeUrl: "/ixo.entity.v1beta1.MsgTransferEntity",
+            Transaction: {
+                code: 0,
+            },
+        },
+        orderBy: {
+            id: "desc",
+        },
+        include: {
+            Transaction: true,
+        },
+    });
+    const messagesFiltered = messages.filter(
+        (m) => parseJson(m.value).id === id,
+    );
+    if (messagesFiltered.length > 0) {
+        return messagesFiltered[0].Transaction.time.toUTCString();
+    } else {
+        return null;
+    }
+};

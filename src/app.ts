@@ -203,6 +203,19 @@ app.get(
 );
 
 app.get(
+    "/api/entity/lasttransferred/:id",
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const lastTransferred =
+                await EntityHandler.getEntityLastTransferredDate(req.params.id);
+            res.json({ lastTransferred });
+        } catch (error) {
+            next(error);
+        }
+    },
+);
+
+app.get(
     "/api/tokenclass/contractaddress/:contractAddress",
     async (req: Request, res: Response, next: NextFunction) => {
         try {
