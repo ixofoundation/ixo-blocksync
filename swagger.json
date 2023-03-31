@@ -436,6 +436,24 @@
                 }
             }
         },
+        "/api/token/fullmintauth/{grantee}": {
+            "get": {
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "grantee",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/api/token/retired/{name}/{id}": {
             "get": {
                 "description": "",

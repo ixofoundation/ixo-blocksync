@@ -29,6 +29,7 @@ import {
     getAccountTokens,
     getEntityOwner,
     getEntityTokens,
+    getFullMintAuthGrants,
     getMintAuthGrants,
 } from "./util/proto";
 
@@ -339,6 +340,18 @@ app.get(
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const grants = await getMintAuthGrants(req.params.grantee);
+            res.json(grants);
+        } catch (error) {
+            next(error);
+        }
+    },
+);
+
+app.get(
+    "/api/token/fullmintauth/:grantee",
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const grants = await getFullMintAuthGrants(req.params.grantee);
             res.json(grants);
         } catch (error) {
             next(error);
