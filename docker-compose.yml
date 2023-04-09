@@ -1,44 +1,44 @@
 version: "3.6"
 services:
-    block-sync:
-        container_name: block-sync
-        image: northroomza/ixo-blocksync:dev
-        env_file: .env
-        restart: always
-        ports:
-            - 8080:8080
-        links:
-            - block-sync-db
-        logging:
-            driver: "json-file"
-            options:
-                max-size: "1m"
-                max-file: "1"
-        depends_on:
-            - block-sync-db
+  block-sync:
+    container_name: block-sync
+    image: northroomza/ixo-blocksync:dev
+    env_file: .env
+    restart: always
+    ports:
+      - 8080:8080
+    links:
+      - block-sync-db
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1m"
+        max-file: "1"
+    depends_on:
+      - block-sync-db
 
-    block-sync-grest:
-        image: postgrest/postgrest:latest
-        container_name: block-sync-grest
-        ports:
-            - 3000:3000
-        environment:
-            PGRST_DB_URI: postgresql://postgres:postgrespw@block-sync-db:5432/Blocksync
-            PGRST_DB_SCHEMAS: public
-            PGRST_DB_ANON_ROLE: app_user #In production this role should not be the same as the one used for the connection
-            PGRST_OPENAPI_SERVER_PROXY_URI: http://0.0.0.0:3000
-        depends_on:
-            - block-sync-db
+  block-sync-grest:
+    image: postgrest/postgrest:latest
+    container_name: block-sync-grest
+    ports:
+      - 3000:3000
+    environment:
+      PGRST_DB_URI: postgresql://postgres:postgrespw@block-sync-db:5432/Blocksync
+      PGRST_DB_SCHEMAS: public
+      PGRST_DB_ANON_ROLE: app_user #In production this role should not be the same as the one used for the connection
+      PGRST_OPENAPI_SERVER_PROXY_URI: http://0.0.0.0:3000
+    depends_on:
+      - block-sync-db
 
-    block-sync-db:
-        container_name: block-sync-db
-        image: postgres:12.12
-        restart: always
-        environment:
-            - POSTGRES_DB=Blocksync
-            - POSTGRES_PASSWORD=postgrespw
-        ports:
-            - 5432:5432
-        volumes:
-            - ./data/db:/var/lib/postgresql/data
-            - ./src/prisma/migrations/20230314111809_init/:/docker-entrypoint-initdb.d/
+  block-sync-db:
+    container_name: block-sync-db
+    image: postgres:12.12
+    restart: always
+    environment:
+      - POSTGRES_DB=Blocksync
+      - POSTGRES_PASSWORD=postgrespw
+    ports:
+      - 5432:5432
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+      - ./src/prisma/migrations/20230314111809_init/:/docker-entrypoint-initdb.d/

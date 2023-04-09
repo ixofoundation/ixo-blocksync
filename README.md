@@ -8,9 +8,9 @@ Syncs all the public info from an ixo blockchain to an instance of PostgreSQL.
 
 ## Documentation
 
--   [Endpoints](/swagger.json)
--   [Typedoc](https://ixo-blocksync.docs.ixo.earth/)
--   The `/swagger` endpoint.
+- [Endpoints](/swagger.json)
+- [Typedoc](https://ixo-blocksync.docs.ixo.earth/)
+- The `/swagger` endpoint.
 
 ## Run
 
@@ -18,7 +18,7 @@ Syncs all the public info from an ixo blockchain to an instance of PostgreSQL.
 
 Requirements
 
--   [PostgreSQL](https://www.postgresql.org/download/)
+- [PostgreSQL](https://www.postgresql.org/download/)
 
 ```bash
 git clone https://github.com/ixofoundation/ixo-blocksync.git
@@ -27,7 +27,7 @@ cd ixo-blocksync/
 
 Copy `.env.example` to `.env` and configure. If this step is skipped, ixo-blocksync will use `.env.example` as the configuration by default.
 
--   Create a database called Blocksync
+- Create a database called Blocksync
 
 ```bash
 npm install
@@ -43,8 +43,8 @@ npm start
 
 Requirements
 
--   [Docker](https://docs.docker.com/engine/install/)
--   [Docker Compose](https://docs.docker.com/compose/install/)
+- [Docker](https://docs.docker.com/engine/install/)
+- [Docker Compose](https://docs.docker.com/compose/install/)
 
 ```bash
 git clone https://github.com/ixofoundation/ixo-blocksync.git
@@ -71,13 +71,13 @@ docker compose up -d
 
 ### Seeding the Database with Previous MongoDB Data
 
--   Export all collections as JSON from the block-sync MongoDB database
--   Place the resulting JSON files within the `src/seed/json_exports` directory
--   Configure `DATABASE_URL` in `.env` with the correct username, password and host
+- Export all collections as JSON from the block-sync MongoDB database
+- Place the resulting JSON files within the `src/seed/json_exports` directory
+- Configure `DATABASE_URL` in `.env` with the correct username, password and host
 
 Local PostgreSQL
 
--   Create a database called Blocksync
+- Create a database called Blocksync
 
 ```bash
 npx prisma migrate reset

@@ -13,8 +13,8 @@ import * as dotenv from "dotenv";
 export const PORT = Number(process.env.PORT) || 8080;
 export const ENVIRONMENT = process.env.NODE_ENV;
 export const SENTRYDSN = process.env.SENTRYDSN
-    ? process.env.SENTRYDSN
-    : undefined;
+  ? process.env.SENTRYDSN
+  : undefined;
 export const RPC = process.env.RPC || "http://localhost:26657";
 export const REST = process.env.REST || "http://localhost:1317";
 export const DATABASE_URL = process.env.DATABASE_URL;
