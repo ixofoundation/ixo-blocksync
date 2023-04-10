@@ -8,6 +8,7 @@ import * as BondSyncHandler from "../sync_handlers/bondsinfo_sync_handler";
 import * as BlockSyncHandler from "../sync_handlers/block_sync_handler";
 import { currentChain } from "./sync_chain";
 import { utils } from "@ixo/impactxclient-sdk";
+import { upperHexFromUint8Array } from "../util/helpers";
 
 let syncing: boolean;
 
@@ -31,9 +32,7 @@ export const startSync = async () => {
       if (!!block && !!txsEvent) {
         const blockHeight = Number(block.block!.header!.height.low);
         const timestamp = utils.proto.fromTimestamp(block.block!.header!.time!);
-        const blockHash = Buffer.from(block.blockId!.hash!)
-          .toString("hex")
-          .toUpperCase();
+        const blockHash = upperHexFromUint8Array(block.blockId!.hash!);
 
         const transactionResponses = txsEvent.txResponses || [];
         const events = transactionResponses.flatMap((txRes) => txRes.events);

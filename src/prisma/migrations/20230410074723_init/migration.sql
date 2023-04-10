@@ -1,16 +1,6 @@
 -- CreateTable
-CREATE TABLE "Storage" (
-    "cid" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
-    "ipfs" TEXT NOT NULL,
-
-    CONSTRAINT "Storage_pkey" PRIMARY KEY ("cid")
-);
-
--- CreateTable
 CREATE TABLE "IID" (
     "id" TEXT NOT NULL,
-    "publicKey" TEXT,
     "controller" TEXT[],
     "verificationMethod" JSONB,
     "authentication" TEXT[],
@@ -27,9 +17,9 @@ CREATE TABLE "IID" (
 -- CreateTable
 CREATE TABLE "Context" (
     "aid" SERIAL NOT NULL,
-    "iid" TEXT NOT NULL,
     "key" TEXT NOT NULL,
     "val" TEXT NOT NULL,
+    "iid" TEXT NOT NULL,
 
     CONSTRAINT "Context_pkey" PRIMARY KEY ("aid")
 );
@@ -131,23 +121,23 @@ CREATE TABLE "ClaimCollection" (
     "approved" INTEGER NOT NULL,
     "rejected" INTEGER NOT NULL,
     "disputed" INTEGER NOT NULL,
-    "state" TEXT NOT NULL,
+    "state" INTEGER NOT NULL,
     "payments" JSONB,
 
     CONSTRAINT "ClaimCollection_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "IClaim" (
+CREATE TABLE "Claim" (
     "claimId" TEXT NOT NULL,
-    "collectionId" TEXT NOT NULL,
     "agentDid" TEXT NOT NULL,
     "agentAddress" TEXT NOT NULL,
     "submissionDate" TIMESTAMP(3),
     "evaluation" JSONB,
     "paymentsStatus" JSONB,
+    "collectionId" TEXT NOT NULL,
 
-    CONSTRAINT "IClaim_pkey" PRIMARY KEY ("claimId")
+    CONSTRAINT "Claim_pkey" PRIMARY KEY ("claimId")
 );
 
 -- CreateTable
@@ -368,64 +358,6 @@ CREATE TABLE "Stats" (
 );
 
 -- CreateTable
-CREATE TABLE "Project" (
-    "projectDid" TEXT NOT NULL,
-    "txHash" TEXT NOT NULL,
-    "senderDid" TEXT NOT NULL,
-    "pubKey" TEXT NOT NULL,
-    "data" JSONB,
-    "projectAddress" TEXT NOT NULL,
-    "status" TEXT,
-    "entityType" TEXT,
-    "createdOn" TIMESTAMP(3) NOT NULL,
-    "createdBy" TEXT NOT NULL,
-    "successfulClaims" INTEGER NOT NULL,
-    "rejectedClaims" INTEGER NOT NULL,
-    "evaluators" INTEGER NOT NULL,
-    "evaluatorsPending" INTEGER NOT NULL,
-    "serviceProviders" INTEGER NOT NULL,
-    "serviceProvidersPending" INTEGER NOT NULL,
-    "investors" INTEGER NOT NULL,
-    "investorsPending" INTEGER NOT NULL,
-
-    CONSTRAINT "Project_pkey" PRIMARY KEY ("projectDid")
-);
-
--- CreateTable
-CREATE TABLE "Agent" (
-    "id" SERIAL NOT NULL,
-    "agentDid" TEXT NOT NULL,
-    "projectDid" TEXT NOT NULL,
-    "status" TEXT NOT NULL,
-    "role" TEXT NOT NULL,
-
-    CONSTRAINT "Agent_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "Claim" (
-    "claimId" TEXT NOT NULL,
-    "projectDid" TEXT NOT NULL,
-    "claimTemplateId" TEXT NOT NULL,
-    "status" TEXT NOT NULL,
-
-    CONSTRAINT "Claim_pkey" PRIMARY KEY ("claimId")
-);
-
--- CreateTable
-CREATE TABLE "FundWithdrawal" (
-    "id" SERIAL NOT NULL,
-    "projectDid" TEXT NOT NULL,
-    "senderDid" TEXT NOT NULL,
-    "senderAddress" TEXT NOT NULL,
-    "recipientDid" TEXT NOT NULL,
-    "amount" TEXT NOT NULL,
-    "isRefund" BOOLEAN,
-
-    CONSTRAINT "FundWithdrawal_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "Transaction" (
     "hash" TEXT NOT NULL,
     "height" INTEGER NOT NULL,
@@ -462,6 +394,9 @@ CREATE TABLE "Block" (
     CONSTRAINT "Block_pkey" PRIMARY KEY ("height")
 );
 
+-- CreateIndex
+CREATE UNIQUE INDEX "TokenClass_name_key" ON "TokenClass"("name");
+
 -- AddForeignKey
 ALTER TABLE "Context" ADD CONSTRAINT "Context_iid_fkey" FOREIGN KEY ("iid") REFERENCES "IID"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
@@ -482,6 +417,9 @@ ALTER TABLE "LinkedEntity" ADD CONSTRAINT "LinkedEntity_iid_fkey" FOREIGN KEY ("
 
 -- AddForeignKey
 ALTER TABLE "Entity" ADD CONSTRAINT "Entity_id_fkey" FOREIGN KEY ("id") REFERENCES "IID"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Claim" ADD CONSTRAINT "Claim_collectionId_fkey" FOREIGN KEY ("collectionId") REFERENCES "ClaimCollection"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "TokenData" ADD CONSTRAINT "TokenData_tokenId_fkey" FOREIGN KEY ("tokenId") REFERENCES "Token"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -509,15 +447,6 @@ ALTER TABLE "ReserveWithdrawal" ADD CONSTRAINT "ReserveWithdrawal_bondDid_fkey" 
 
 -- AddForeignKey
 ALTER TABLE "ShareWithdrawal" ADD CONSTRAINT "ShareWithdrawal_bondDid_fkey" FOREIGN KEY ("bondDid") REFERENCES "Bond"("bondDid") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Agent" ADD CONSTRAINT "Agent_projectDid_fkey" FOREIGN KEY ("projectDid") REFERENCES "Project"("projectDid") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Claim" ADD CONSTRAINT "Claim_projectDid_fkey" FOREIGN KEY ("projectDid") REFERENCES "Project"("projectDid") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "FundWithdrawal" ADD CONSTRAINT "FundWithdrawal_projectDid_fkey" FOREIGN KEY ("projectDid") REFERENCES "Project"("projectDid") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Message" ADD CONSTRAINT "Message_transactionHash_fkey" FOREIGN KEY ("transactionHash") REFERENCES "Transaction"("hash") ON DELETE RESTRICT ON UPDATE CASCADE;

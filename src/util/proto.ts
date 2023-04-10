@@ -1,27 +1,15 @@
 import { Event } from "@ixo/impactxclient-sdk/types/codegen/tendermint/abci/types";
+import { TxResponse } from "@ixo/impactxclient-sdk/types/codegen/cosmos/base/abci/v1beta1/abci";
 import { utils } from "@ixo/impactxclient-sdk";
-import {
-  rawEd25519PubkeyToRawAddress,
-  rawSecp256k1PubkeyToRawAddress,
-} from "@cosmjs/amino";
-import { Bech32 } from "@cosmjs/encoding";
-import base58 from "bs58";
 import Long from "long";
 import { prisma } from "../prisma/prisma_client";
 import { getTokensByEntityId } from "../handlers/token_handler";
 import { queryClient, registry } from "../sync/sync_chain";
-import { TxResponse } from "@ixo/impactxclient-sdk/types/codegen/cosmos/base/abci/v1beta1/abci";
+import { OrderBy } from "../types/Enums";
 
 export interface ConvertedEvent {
   type: string;
   attributes: any[];
-}
-
-enum OrderBy {
-  ORDER_BY_UNSPECIFIED = 0,
-  ORDER_BY_ASC = 1,
-  ORDER_BY_DESC = 2,
-  UNRECOGNIZED = -1,
 }
 
 export const getBlockbyHeight = async (height: number | string) => {
@@ -346,26 +334,6 @@ export const decodeTransaction = (tx: TxResponse) => {
 export const getTransaction = async (hash: string) => {
   try {
     return queryClient.cosmos.tx.v1beta1.getTx({ hash: hash });
-  } catch (error) {
-    console.error(error);
-    return;
-  }
-};
-
-export const getAddressFromDid = async (did: string, ed = false) => {
-  try {
-    const iid = await queryClient.ixo.iid.v1beta1.iidDocument({ id: did });
-    let publicKeyBase = ed
-      ? iid.iidDocument!.verificationMethod[0].publicKeyBase58!
-      : iid.iidDocument!.verificationMethod[0].publicKeyMultibase!;
-    for (const method of iid.iidDocument!.verificationMethod) {
-      if (method.publicKeyBase58) publicKeyBase = method.publicKeyBase58;
-    }
-    const key = ed
-      ? rawEd25519PubkeyToRawAddress(base58.decode(publicKeyBase))
-      : rawSecp256k1PubkeyToRawAddress(base58.decode(publicKeyBase));
-    const address = Bech32.encode("ixo", key);
-    return address;
   } catch (error) {
     console.error(error);
     return;

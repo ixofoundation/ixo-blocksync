@@ -4,18 +4,14 @@ import bodyParser from "body-parser";
 import compression from "compression";
 import * as Sentry from "@sentry/node";
 import postgraphile from "postgraphile";
-import * as StorageHandler from "./handlers/storage_handler";
-import * as ProjectHandler from "./handlers/project_handler";
 import * as IidHandler from "./handlers/iid_handler";
 import * as EntityHandler from "./handlers/entity_handler";
 import * as TokenHandler from "./handlers/token_handler";
 import * as StatHandler from "./handlers/stats_handler";
 import * as EventHandler from "./handlers/event_handler";
-import * as AuthHandler from "./handlers/auth_handler";
 import * as BondHandler from "./handlers/bond_handler";
 import * as TransactionHandler from "./handlers/transaction_handler";
 import * as BlockHandler from "./handlers/block_handler";
-import { sendTransaction } from "./util/connection";
 import { SENTRYDSN, DATABASE_URL } from "./util/secrets";
 import swaggerUi from "swagger-ui-express";
 import helmet from "helmet";
@@ -72,19 +68,9 @@ app.get("/", (req, res) => {
   res.send("API is Running");
 });
 
-app.post("/storage/store", async (req, res) => {
-  const file = await StorageHandler.store(
-    req.body.name,
-    req.body.contentType,
-    req.body.data
-  );
-  res.json(file);
-});
-
-app.get("/storage/retrieve/:cid", async (req, res) => {
-  const file = await StorageHandler.retrieve(req.params.cid);
-  res.json(file);
-});
+// =================================
+// Entity
+// =================================
 
 app.get("/api/entity/byId/:id", async (req, res, next) => {
   try {
@@ -184,6 +170,10 @@ app.get("/api/entity/lasttransferred/:id", async (req, res, next) => {
     next(error);
   }
 });
+
+// =================================
+// Token
+// =================================
 
 app.get(
   "/api/tokenclass/contractaddress/:contractAddress",
@@ -314,6 +304,10 @@ app.get("/api/token/cancelled/:name/:id", async (req, res, next) => {
     next(error);
   }
 });
+
+// =================================
+// Bonds
+// =================================
 
 app.get("/api/bonds/listBonds", async (req, res, next) => {
   try {
@@ -514,117 +508,9 @@ app.get(
   }
 );
 
-app.get("/api/project/listProjects", async (req, res, next) => {
-  try {
-    const projects = await ProjectHandler.listAllProjects(
-      req.query.page ? String(req.query.page) : undefined,
-      req.query.size ? String(req.query.size) : undefined
-    );
-    res.json(projects);
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.get("/api/project/listProjectsFiltered", async (req, res, next) => {
-  try {
-    const projects = await ProjectHandler.listAllProjectsFiltered(
-      req.body,
-      req.query.page ? String(req.query.page) : undefined,
-      req.query.size ? String(req.query.size) : undefined
-    );
-    res.json(projects);
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.get("/api/project/getByEntityType/:entityType", async (req, res, next) => {
-  try {
-    const projects = await ProjectHandler.listProjectByEntityType(
-      req.params.entityType,
-      req.query.page ? String(req.query.page) : undefined,
-      req.query.size ? String(req.query.size) : undefined
-    );
-    res.json(projects);
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.get("/api/project/getByProjectDid/:projectDid", async (req, res, next) => {
-  try {
-    const project = await ProjectHandler.listProjectByProjectDid(
-      req.params.projectDid
-    );
-    res.json(project);
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.get(
-  "/api/project/getProjectsByCreatedAndAgent/:did",
-  async (req, res, next) => {
-    try {
-      const project = await ProjectHandler.getProjectsByCreatedAndAgent(
-        req.params.did,
-        req.query.page ? String(req.query.page) : undefined,
-        req.query.size ? String(req.query.size) : undefined
-      );
-      res.json(project);
-    } catch (error) {
-      next(error);
-    }
-  }
-);
-
-app.get(
-  "/api/project/getByProjectSenderDid/:senderDid",
-  async (req, res, next) => {
-    try {
-      const project = await ProjectHandler.listProjectBySenderDid(
-        req.params.senderDid,
-        req.query.page ? String(req.query.page) : undefined,
-        req.query.size ? String(req.query.size) : undefined
-      );
-      res.json(project);
-    } catch (error) {
-      next(error);
-    }
-  }
-);
-
-app.get("/api/project/shields/status/:projectDid", async (req, res, next) => {
-  try {
-    const project = await ProjectHandler.listProjectByProjectDid(
-      req.params.projectDid
-    );
-    res.json({
-      schemaVersion: 1,
-      label: "status",
-      message: project?.status ? project?.status : "null",
-      color: "blue",
-      cacheSeconds: 300,
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.get(
-  "/api/project/getProjectAccounts/:projectDid",
-  async (req, res, next) => {
-    try {
-      const projectAccounts = await ProjectHandler.getProjectAccountsFromChain(
-        req.params.projectDid
-      );
-      res.json(projectAccounts);
-    } catch (error) {
-      next(error);
-    }
-  }
-);
+// =================================
+// Iid
+// =================================
 
 app.get("/api/iid/getByIid/:iid", async (req, res, next) => {
   try {
@@ -635,14 +521,9 @@ app.get("/api/iid/getByIid/:iid", async (req, res, next) => {
   }
 });
 
-app.get("/api/did/getByDid/:did", async (req, res, next) => {
-  try {
-    const iid = await IidHandler.getDidByDid(req.params.did);
-    res.json(iid);
-  } catch (error) {
-    next(error);
-  }
-});
+// =================================
+// General
+// =================================
 
 app.get("/api/event/getEventByType/:type", async (req, res, next) => {
   try {
@@ -714,27 +595,6 @@ app.get("/api/block/getLastSyncedBlock", async (req, res, next) => {
   try {
     const block = await BlockHandler.getLastSyncedBlock();
     res.json(block);
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.post("/api/blockchain/txs", async (req, res, next) => {
-  try {
-    const response = await sendTransaction(req.body);
-    res.json(response);
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.post("/api/sign_data", async (req, res, next) => {
-  try {
-    const response = await AuthHandler.getSignData(
-      req.body.msg,
-      req.body.pub_key
-    );
-    res.json(response);
   } catch (error) {
     next(error);
   }

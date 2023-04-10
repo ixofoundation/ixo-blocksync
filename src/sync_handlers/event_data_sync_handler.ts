@@ -12,12 +12,17 @@ import {
   CollectionSDKType,
   DisputeSDKType,
 } from "@ixo/impactxclient-sdk/types/codegen/ixo/claims/v1beta1/claims";
+import { CollectionState } from "../types/Enums";
+import { getDocFromAttributes } from "../util/helpers";
 
 export const syncEventData = async (event: ConvertedEvent) => {
   try {
     switch (event.type) {
       case EventTypes.createIid:
-        const createIid: IidDocument = JSON.parse(event.attributes[0].value);
+        const createIid: IidDocument = getDocFromAttributes(
+          event.attributes,
+          event.type
+        );
         await prisma.iID.create({
           data: {
             id: createIid.id,
@@ -29,61 +34,53 @@ export const syncEventData = async (event: ConvertedEvent) => {
             capabilityInvocation: createIid.capabilityInvocation,
             capabilityDelegation: createIid.capabilityDelegation,
             alsoKnownAs: createIid.alsoKnownAs,
-            metadata: JSON.stringify(createIid.metadata) || "",
+            metadata: JSON.stringify(createIid.metadata),
+            context: {
+              create: createIid.context,
+            },
+            service: {
+              create: createIid.service,
+            },
+            linkedResource: {
+              create: createIid.linkedResource,
+            },
+            linkedClaim: {
+              create: createIid.linkedClaim,
+            },
+            accordedRight: {
+              create: createIid.accordedRight,
+            },
+            linkedEntity: {
+              create: createIid.linkedEntity,
+            },
           },
         });
-        for (const c of createIid.context) {
-          await prisma.context.create({
-            data: {
-              iid: createIid.id,
-              key: c.key,
-              val: c.val,
-            },
-          });
-        }
-        for (const s of createIid.service) {
-          await prisma.service.create({
-            data: {
-              iid: createIid.id,
-              ...s,
-            },
-          });
-        }
-        for (const c of createIid.linkedClaim) {
-          await prisma.linkedClaim.create({
-            data: {
-              iid: createIid.id,
-              ...c,
-            },
-          });
-        }
-        for (const r of createIid.linkedResource) {
-          await prisma.linkedResource.create({
-            data: {
-              iid: createIid.id,
-              ...r,
-            },
-          });
-        }
-        for (const a of createIid.accordedRight) {
-          await prisma.accordedRight.create({
-            data: {
-              iid: createIid.id,
-              ...a,
-            },
-          });
-        }
-        for (const e of createIid.linkedEntity) {
-          await prisma.linkedEntity.create({
-            data: {
-              iid: createIid.id,
-              ...e,
-            },
-          });
-        }
         break;
       case EventTypes.updateIid:
-        const updateIid: IidDocument = JSON.parse(event.attributes[0].value);
+        const updateIid: IidDocument = getDocFromAttributes(
+          event.attributes,
+          event.type
+        );
+        await Promise.all([
+          prisma.context.deleteMany({
+            where: { iid: updateIid.id },
+          }),
+          prisma.service.deleteMany({
+            where: { iid: updateIid.id },
+          }),
+          prisma.linkedResource.deleteMany({
+            where: { iid: updateIid.id },
+          }),
+          prisma.linkedClaim.deleteMany({
+            where: { iid: updateIid.id },
+          }),
+          prisma.accordedRight.deleteMany({
+            where: { iid: updateIid.id },
+          }),
+          prisma.linkedEntity.deleteMany({
+            where: { iid: updateIid.id },
+          }),
+        ]);
         await prisma.iID.update({
           where: { id: updateIid.id },
           data: {
@@ -96,93 +93,39 @@ export const syncEventData = async (event: ConvertedEvent) => {
             capabilityInvocation: updateIid.capabilityInvocation,
             capabilityDelegation: updateIid.capabilityDelegation,
             alsoKnownAs: updateIid.alsoKnownAs,
-            metadata: JSON.stringify(updateIid.metadata) || "",
+            metadata: JSON.stringify(updateIid.metadata),
+            context: {
+              create: updateIid.context,
+            },
+            service: {
+              create: updateIid.service,
+            },
+            linkedResource: {
+              create: updateIid.linkedResource,
+            },
+            linkedClaim: {
+              create: updateIid.linkedClaim,
+            },
+            accordedRight: {
+              create: updateIid.accordedRight,
+            },
+            linkedEntity: {
+              create: updateIid.linkedEntity,
+            },
           },
         });
-        await prisma.context.deleteMany({
-          where: { iid: updateIid.id },
-        });
-        await prisma.service.deleteMany({
-          where: { iid: updateIid.id },
-        });
-        await prisma.linkedResource.deleteMany({
-          where: { iid: updateIid.id },
-        });
-        await prisma.linkedClaim.deleteMany({
-          where: { iid: updateIid.id },
-        });
-        await prisma.accordedRight.deleteMany({
-          where: { iid: updateIid.id },
-        });
-        await prisma.linkedEntity.deleteMany({
-          where: { iid: updateIid.id },
-        });
-        for (const c of updateIid.context) {
-          await prisma.context.create({
-            data: {
-              iid: updateIid.id,
-              key: c.key,
-              val: c.val,
-            },
-          });
-        }
-        for (const s of updateIid.service) {
-          await prisma.service.create({
-            data: {
-              iid: updateIid.id,
-              ...s,
-            },
-          });
-        }
-        for (const c of updateIid.linkedClaim) {
-          await prisma.linkedClaim.create({
-            data: {
-              iid: updateIid.id,
-              ...c,
-            },
-          });
-        }
-        for (const r of updateIid.linkedResource) {
-          await prisma.linkedResource.create({
-            data: {
-              iid: updateIid.id,
-              ...r,
-            },
-          });
-        }
-        for (const a of updateIid.accordedRight) {
-          await prisma.accordedRight.create({
-            data: {
-              iid: updateIid.id,
-              ...a,
-            },
-          });
-        }
-        for (const e of updateIid.linkedEntity) {
-          await prisma.linkedEntity.create({
-            data: {
-              iid: updateIid.id,
-              ...e,
-            },
-          });
-        }
         break;
       case EventTypes.createEntity:
-        const createEntity: EntitySDKType = JSON.parse(
-          event.attributes[0].value
+        const createEntity: EntitySDKType = getDocFromAttributes(
+          event.attributes,
+          event.type
         );
         await prisma.entity.create({
           data: {
             id: createEntity.id,
             type: createEntity.type,
-            startDate:
-              String(createEntity.start_date) === "null"
-                ? null
-                : String(createEntity.start_date),
-            endDate:
-              String(createEntity.end_date) === "null"
-                ? null
-                : String(createEntity.end_date),
+            startDate: createEntity.start_date as any,
+            endDate: createEntity.end_date as any,
             status: createEntity.status,
             relayerNode: createEntity.relayer_node,
             credentials: createEntity.credentials,
@@ -193,8 +136,9 @@ export const syncEventData = async (event: ConvertedEvent) => {
         });
         break;
       case EventTypes.updateEntity:
-        const updateEntity: EntitySDKType = JSON.parse(
-          event.attributes[0].value
+        const updateEntity: EntitySDKType = getDocFromAttributes(
+          event.attributes,
+          event.type
         );
         await prisma.entity.update({
           where: {
@@ -203,14 +147,8 @@ export const syncEventData = async (event: ConvertedEvent) => {
           data: {
             id: updateEntity.id,
             type: updateEntity.type,
-            startDate:
-              String(updateEntity.start_date) === "null"
-                ? null
-                : String(updateEntity.start_date),
-            endDate:
-              String(updateEntity.end_date) === "null"
-                ? null
-                : String(updateEntity.end_date),
+            startDate: updateEntity.start_date as any,
+            endDate: updateEntity.end_date as any,
             status: updateEntity.status,
             relayerNode: updateEntity.relayer_node,
             credentials: updateEntity.credentials,
@@ -221,8 +159,9 @@ export const syncEventData = async (event: ConvertedEvent) => {
         });
         break;
       case EventTypes.createCollection:
-        const createCollection: CollectionSDKType = JSON.parse(
-          event.attributes[0].value
+        const createCollection: CollectionSDKType = getDocFromAttributes(
+          event.attributes,
+          event.type
         );
         await prisma.claimCollection.create({
           data: {
@@ -230,22 +169,23 @@ export const syncEventData = async (event: ConvertedEvent) => {
             entity: createCollection.entity,
             admin: createCollection.admin,
             protocol: createCollection.protocol,
-            startDate: String(createCollection.start_date!),
-            endDate: String(createCollection.end_date!),
+            startDate: createCollection.start_date as any,
+            endDate: createCollection.end_date as any,
             quota: Number(createCollection.quota),
             count: Number(createCollection.count),
             evaluated: Number(createCollection.evaluated),
             approved: Number(createCollection.approved),
             rejected: Number(createCollection.rejected),
             disputed: Number(createCollection.disputed),
-            state: createCollection.state.toString(),
+            state: CollectionState[createCollection.state] as any,
             payments: JSON.stringify(createCollection.payments),
           },
         });
         break;
       case EventTypes.updateCollection:
-        const updateCollection: CollectionSDKType = JSON.parse(
-          event.attributes[0].value
+        const updateCollection: CollectionSDKType = getDocFromAttributes(
+          event.attributes,
+          event.type
         );
         await prisma.claimCollection.update({
           where: {
@@ -256,36 +196,42 @@ export const syncEventData = async (event: ConvertedEvent) => {
             entity: updateCollection.entity,
             admin: updateCollection.admin,
             protocol: updateCollection.protocol,
-            startDate: String(updateCollection.start_date!),
-            endDate: String(updateCollection.end_date!),
+            startDate: updateCollection.start_date as any,
+            endDate: updateCollection.end_date as any,
             quota: Number(updateCollection.quota),
             count: Number(updateCollection.count),
             evaluated: Number(updateCollection.evaluated),
             approved: Number(updateCollection.approved),
             rejected: Number(updateCollection.rejected),
             disputed: Number(updateCollection.disputed),
-            state: updateCollection.state.toString(),
+            state: CollectionState[updateCollection.state] as any,
             payments: JSON.stringify(updateCollection.payments),
           },
         });
         break;
       case EventTypes.submitClaim:
-        const submitClaim: ClaimSDKType = JSON.parse(event.attributes[0].value);
-        await prisma.iClaim.create({
+        const submitClaim: ClaimSDKType = getDocFromAttributes(
+          event.attributes,
+          event.type
+        );
+        await prisma.claim.create({
           data: {
             claimId: submitClaim.claim_id,
             collectionId: submitClaim.collection_id,
             agentDid: submitClaim.agent_did,
             agentAddress: submitClaim.agent_address,
-            submissionDate: String(submitClaim.submission_date!),
+            submissionDate: submitClaim.submission_date as any,
             evaluation: JSON.stringify(submitClaim.evaluation),
             paymentsStatus: JSON.stringify(submitClaim.payments_status),
           },
         });
         break;
       case EventTypes.updateClaim:
-        const updateClaim: ClaimSDKType = JSON.parse(event.attributes[0].value);
-        await prisma.iClaim.update({
+        const updateClaim: ClaimSDKType = getDocFromAttributes(
+          event.attributes,
+          event.type
+        );
+        await prisma.claim.update({
           where: {
             claimId: updateClaim.claim_id,
           },
@@ -294,15 +240,16 @@ export const syncEventData = async (event: ConvertedEvent) => {
             collectionId: updateClaim.collection_id,
             agentDid: updateClaim.agent_did,
             agentAddress: updateClaim.agent_address,
-            submissionDate: String(updateClaim.submission_date!),
+            submissionDate: updateClaim.submission_date as any,
             evaluation: JSON.stringify(updateClaim.evaluation),
             paymentsStatus: JSON.stringify(updateClaim.payments_status),
           },
         });
         break;
       case EventTypes.disputeClaim:
-        const disputeClaim: DisputeSDKType = JSON.parse(
-          event.attributes[0].value
+        const disputeClaim: DisputeSDKType = getDocFromAttributes(
+          event.attributes,
+          event.type
         );
         await prisma.dispute.create({
           data: {
@@ -314,8 +261,9 @@ export const syncEventData = async (event: ConvertedEvent) => {
         });
         break;
       case EventTypes.createToken:
-        const createTokenToken: TokenSDKType = JSON.parse(
-          event.attributes[0].value
+        const createTokenToken: TokenSDKType = getDocFromAttributes(
+          event.attributes,
+          event.type
         );
         await prisma.tokenClass.create({
           data: {
@@ -336,8 +284,9 @@ export const syncEventData = async (event: ConvertedEvent) => {
         });
         break;
       case EventTypes.updateToken:
-        const updateTokenToken: TokenSDKType = JSON.parse(
-          event.attributes[0].value
+        const updateTokenToken: TokenSDKType = getDocFromAttributes(
+          event.attributes,
+          event.type
         );
         await prisma.tokenClass.update({
           where: {
@@ -360,29 +309,19 @@ export const syncEventData = async (event: ConvertedEvent) => {
         });
         break;
       case EventTypes.mintToken:
-        const mintTokenTokenProperties: TokenPropertiesSDKType = JSON.parse(
-          event.attributes[4].value
-        );
+        const mintTokenTokenProperties: TokenPropertiesSDKType =
+          getDocFromAttributes(event.attributes, event.type);
         await prisma.token.create({
           data: {
             id: mintTokenTokenProperties.id,
             index: mintTokenTokenProperties.index,
             name: mintTokenTokenProperties.name,
             collection: mintTokenTokenProperties.collection,
+            tokenData: {
+              create: mintTokenTokenProperties.tokenData,
+            },
           },
         });
-        for (const tokenData of mintTokenTokenProperties.tokenData) {
-          await prisma.tokenData.create({
-            data: {
-              uri: tokenData.uri,
-              encrypted: tokenData.encrypted,
-              proof: tokenData.proof,
-              type: tokenData.type,
-              id: tokenData.id,
-              tokenId: mintTokenTokenProperties.id,
-            },
-          });
-        }
         break;
     }
   } catch (error) {

@@ -10,15 +10,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Storage {
-  cid  String @id
-  name String
-  ipfs String
-}
+// ========================================
+// Iid
+// ========================================
 
 model IID {
   id                   String           @id
-  publicKey            String?
   context              Context[]
   controller           String[]
   verificationMethod   Json?
@@ -34,15 +31,15 @@ model IID {
   linkedEntity         LinkedEntity[]
   alsoKnownAs          String
   metadata             Json?
-  Entity               Entity?
+  Entity               Entity[]
 }
 
 model Context {
   aid Int    @id @default(autoincrement())
-  IID IID    @relation(fields: [iid], references: [id])
-  iid String
   key String
   val String
+  IID IID    @relation(fields: [iid], references: [id])
+  iid String
 }
 
 model Service {
@@ -102,6 +99,33 @@ model LinkedEntity {
   iid          String
 }
 
+// model IidMetadata {
+//   aid         Int       @id @default(autoincrement())
+//   versionId   String
+//   created     DateTime?
+//   updated     DateTime?
+//   deactivated Boolean
+//   IID         IID       @relation(fields: [iid], references: [id])
+//   iid         String
+// }
+
+// model VerificationMethod {
+//   aid                 Int     @id @default(autoincrement())
+//   id                  String
+//   type                String
+//   controller          String
+//   blockchainAccountID String?
+//   publicKeyHex        String?
+//   publicKeyMultibase  String?
+//   publicKeyBase58     String?
+//   IID                 IID     @relation(fields: [iid], references: [id])
+//   iid                 String
+// }
+
+// ========================================
+// Entity
+// ========================================
+
 model Entity {
   IID            IID       @relation(fields: [id], references: [id])
   id             String    @id
@@ -116,6 +140,26 @@ model Entity {
   accounts       Json?
 }
 
+// model EntityMetadata {
+//   versionId String
+//   created   DateTime?
+//   updated   DateTime?
+//   Entity    Entity    @relation(fields: [id], references: [id])
+//   id        String    @unique
+// }
+
+// model EntityAccount {
+//   aid     Int    @id @default(autoincrement())
+//   name    String
+//   address String
+//   Entity  Entity @relation(fields: [id], references: [id])
+//   id      String
+// }
+
+// ========================================
+// Claims
+// ========================================
+
 model ClaimCollection {
   id        String    @id
   entity    String
@@ -129,18 +173,20 @@ model ClaimCollection {
   approved  Int
   rejected  Int
   disputed  Int
-  state     String
+  state     Int //maybe string?
   payments  Json?
+  Claim     Claim[]
 }
 
-model IClaim {
-  claimId        String    @id
-  collectionId   String
-  agentDid       String
-  agentAddress   String
-  submissionDate DateTime?
-  evaluation     Json?
-  paymentsStatus Json?
+model Claim {
+  claimId         String          @id
+  agentDid        String
+  agentAddress    String
+  submissionDate  DateTime?
+  evaluation      Json?
+  paymentsStatus  Json?
+  ClaimCollection ClaimCollection @relation(fields: [collectionId], references: [id])
+  collectionId    String
 }
 
 model Dispute {
@@ -150,11 +196,15 @@ model Dispute {
   data      Json?
 }
 
+// ========================================
+// Tokens
+// ========================================
+
 model TokenClass {
   contractAddress String  @id
   minter          String
   class           String
-  name            String
+  name            String  @unique
   description     String
   image           String
   type            String
@@ -184,6 +234,10 @@ model TokenData {
   Token     Token   @relation(fields: [tokenId], references: [id])
   tokenId   String
 }
+
+// ========================================
+// Bonds
+// ========================================
 
 model Bond {
   bondDid                  String              @id
@@ -303,6 +357,10 @@ model ShareWithdrawal {
   timestamp        String
 }
 
+// ========================================
+// General
+// ========================================
+
 model Chain {
   chainId     String @id
   blockHeight Int
@@ -328,58 +386,6 @@ model Stats {
   pendingClaims         Int
   rejectedClaims        Int
   claimLocations        String[]
-}
-
-model Project {
-  projectDid              String           @id
-  txHash                  String
-  senderDid               String
-  pubKey                  String
-  data                    Json?
-  projectAddress          String
-  status                  String?
-  entityType              String?
-  createdOn               DateTime
-  createdBy               String
-  successfulClaims        Int
-  rejectedClaims          Int
-  evaluators              Int
-  evaluatorsPending       Int
-  serviceProviders        Int
-  serviceProvidersPending Int
-  investors               Int
-  investorsPending        Int
-  Agent                   Agent[]
-  Claim                   Claim[]
-  FundWithdrawal          FundWithdrawal[]
-}
-
-model Agent {
-  id         Int     @id @default(autoincrement())
-  agentDid   String
-  project    Project @relation(fields: [projectDid], references: [projectDid])
-  projectDid String
-  status     String
-  role       String
-}
-
-model Claim {
-  claimId         String  @id
-  project         Project @relation(fields: [projectDid], references: [projectDid])
-  projectDid      String
-  claimTemplateId String
-  status          String
-}
-
-model FundWithdrawal {
-  id            Int      @id @default(autoincrement())
-  project       Project  @relation(fields: [projectDid], references: [projectDid])
-  projectDid    String
-  senderDid     String
-  senderAddress String
-  recipientDid  String
-  amount        String
-  isRefund      Boolean?
 }
 
 model Transaction {

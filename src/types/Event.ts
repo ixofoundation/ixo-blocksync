@@ -14,3 +14,18 @@ export enum EventTypes {
 }
 
 export const EventTypesArray = Object.values(EventTypes) as string[];
+
+export const EventTypesAttributeKey: { [key in EventTypes]: string } = {
+  [EventTypes.createIid]: "iidDocument",
+  [EventTypes.updateIid]: "iidDocument",
+  [EventTypes.createEntity]: "entity",
+  [EventTypes.updateEntity]: "entity",
+  [EventTypes.createCollection]: "collection",
+  [EventTypes.updateCollection]: "collection",
+  [EventTypes.submitClaim]: "claim",
+  [EventTypes.updateClaim]: "claim",
+  [EventTypes.disputeClaim]: "dispute",
+  [EventTypes.createToken]: "token",
+  [EventTypes.updateToken]: "token",
+  [EventTypes.mintToken]: "tokenProperties",
+};

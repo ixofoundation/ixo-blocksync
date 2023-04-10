@@ -1,8 +1,6 @@
 import { prisma } from "../prisma/prisma_client";
 import { Prisma } from "@prisma/client";
 
-const prefixes = ["did:x:", "did:ixo:", "did:sov:"];
-
 export const createBond = async (bondDoc: Prisma.BondCreateInput) => {
   try {
     const res = await prisma.bond.create({ data: bondDoc });
@@ -199,11 +197,7 @@ export const listAllBondsFiltered = async (
 export const listBondByBondDid = async (bondDid: string) => {
   return prisma.bond.findFirst({
     where: {
-      OR: [
-        { bondDid: prefixes[0] + bondDid },
-        { bondDid: prefixes[1] + bondDid },
-        { bondDid: prefixes[2] + bondDid },
-      ],
+      bondDid: bondDid,
     },
   });
 };
@@ -263,11 +257,7 @@ export const listBondByCreatorDid = async (
   if (page && size) {
     return prisma.bond.findMany({
       where: {
-        OR: [
-          { creatorDid: prefixes[0] + creatorDid },
-          { creatorDid: prefixes[1] + creatorDid },
-          { creatorDid: prefixes[2] + creatorDid },
-        ],
+        creatorDid: creatorDid,
       },
       skip: Number(size) * (Number(page) - 1),
       take: Number(size),
@@ -275,11 +265,7 @@ export const listBondByCreatorDid = async (
   } else {
     return prisma.bond.findMany({
       where: {
-        OR: [
-          { creatorDid: prefixes[0] + creatorDid },
-          { creatorDid: prefixes[1] + creatorDid },
-          { creatorDid: prefixes[2] + creatorDid },
-        ],
+        creatorDid: creatorDid,
       },
     });
   }
@@ -361,11 +347,7 @@ export const getTransactionHistoryBondBuyer = async (
   if (page && size) {
     return prisma.bondBuy.findMany({
       where: {
-        OR: [
-          { buyerDid: prefixes[0] + buyerDid },
-          { buyerDid: prefixes[1] + buyerDid },
-          { buyerDid: prefixes[2] + buyerDid },
-        ],
+        buyerDid: buyerDid,
       },
       skip: Number(size) * (Number(page) - 1),
       take: Number(size),
@@ -373,11 +355,7 @@ export const getTransactionHistoryBondBuyer = async (
   } else {
     return prisma.bondBuy.findMany({
       where: {
-        OR: [
-          { buyerDid: prefixes[0] + buyerDid },
-          { buyerDid: prefixes[1] + buyerDid },
-          { buyerDid: prefixes[2] + buyerDid },
-        ],
+        buyerDid: buyerDid,
       },
     });
   }
@@ -435,11 +413,7 @@ export const getWithdrawHistoryFromBondReserveByWithdrawerId = async (
   if (page && size) {
     return prisma.reserveWithdrawal.findMany({
       where: {
-        OR: [
-          { withdrawerDid: prefixes[0] + withdrawerdid },
-          { withdrawerDid: prefixes[1] + withdrawerdid },
-          { withdrawerDid: prefixes[2] + withdrawerdid },
-        ],
+        withdrawerDid: withdrawerdid,
       },
       skip: Number(size) * (Number(page) - 1),
       take: Number(size),
@@ -447,11 +421,7 @@ export const getWithdrawHistoryFromBondReserveByWithdrawerId = async (
   } else {
     return prisma.reserveWithdrawal.findMany({
       where: {
-        OR: [
-          { withdrawerDid: prefixes[0] + withdrawerdid },
-          { withdrawerDid: prefixes[1] + withdrawerdid },
-          { withdrawerDid: prefixes[2] + withdrawerdid },
-        ],
+        withdrawerDid: withdrawerdid,
       },
     });
   }
@@ -465,11 +435,7 @@ export const getWithdrawHistoryFromBondShareByRecipientDid = async (
   if (page && size) {
     return prisma.shareWithdrawal.findMany({
       where: {
-        OR: [
-          { recipientDid: prefixes[0] + recipientdid },
-          { recipientDid: prefixes[1] + recipientdid },
-          { recipientDid: prefixes[2] + recipientdid },
-        ],
+        recipientDid: recipientdid,
       },
       skip: Number(size) * (Number(page) - 1),
       take: Number(size),
@@ -477,11 +443,7 @@ export const getWithdrawHistoryFromBondShareByRecipientDid = async (
   } else {
     return prisma.shareWithdrawal.findMany({
       where: {
-        OR: [
-          { recipientDid: prefixes[0] + recipientdid },
-          { recipientDid: prefixes[1] + recipientdid },
-          { recipientDid: prefixes[2] + recipientdid },
-        ],
+        recipientDid: recipientdid,
       },
     });
   }
