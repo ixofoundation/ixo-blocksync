@@ -1,12 +1,12 @@
-FROM node:16.14.2
+FROM --platform=linux/amd64 node:16.14.2
 
 # Create app directory
 RUN mkdir /usr/src/app
 WORKDIR /usr/src/app
 
 # Install app dependencies
-COPY package*.json ./
-RUN yarn install
+COPY package.json yarn.lock ./
+RUN yarn --pure-lockfile
 
 # Copy rest of files
 COPY . .
