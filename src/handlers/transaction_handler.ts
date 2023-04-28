@@ -30,7 +30,7 @@ export const getLatestTransactions = async (address: string) => {
     orderBy: {
       id: "desc",
     },
-    take: 3,
+    take: 100,
     include: {
       Transaction: true,
     },

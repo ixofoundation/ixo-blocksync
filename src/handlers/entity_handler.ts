@@ -134,7 +134,7 @@ export const getEntityCollectionById = async (id: string) => {
     entityArr.push(await getEntityById(e.id));
   }
   res = {
-    collection: { ...collection },
+    collection: collection,
     entities: entityArr,
   };
   return res;

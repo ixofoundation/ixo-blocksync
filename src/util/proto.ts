@@ -107,6 +107,7 @@ export const getAccountEntities = async (address: string) => {
     const msg = {
       tokens: {
         owner: address,
+        limit: 99999999,
       },
     };
     const res = await queryClient.cosmwasm.wasm.v1.smartContractState({
@@ -128,6 +129,7 @@ export const getAccountTokens = async (address: string) => {
       const msg = {
         tokens: {
           owner: address,
+          limit: 99999999,
         },
       };
       const contractRes = await queryClient.cosmwasm.wasm.v1.smartContractState(

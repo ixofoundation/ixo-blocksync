@@ -812,24 +812,6 @@
         }
       }
     },
-    "/api/did/getByDid/{did}": {
-      "get": {
-        "description": "",
-        "parameters": [
-          {
-            "name": "did",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
     "/api/event/getEventByType/{type}": {
       "get": {
         "description": "",
