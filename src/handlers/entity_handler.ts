@@ -17,6 +17,8 @@ export const getEntityById = async (id: string) => {
     },
   });
 
+  if (!baseEntity) return null;
+
   const serviceIds = baseEntity!.IID.service.map((s) => s.id);
   const accordedRightIds = baseEntity!.IID.accordedRight.map((a) => a.id);
   const linkedResourceIds = baseEntity!.IID.linkedResource.map((r) => r.id);
