@@ -48,10 +48,6 @@ export const getTxsEvent = async (height: number) => {
     });
     return res;
   } catch (error) {
-    if (error.toString().includes("(18)")) {
-      console.log("Waiting for Blocks");
-      return;
-    }
     console.error(error);
     return;
   }

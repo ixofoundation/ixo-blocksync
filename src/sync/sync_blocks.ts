@@ -29,12 +29,24 @@ export const startSync = async () => {
         Proto.getBondsInfo(),
       ]);
 
-      if (!!block && !!txsEvent) {
+      // if block and events is not null, check if block has txs and then if events has
+      // no trx, means abci layer is behind tendermint layer, wait 3 seconds and try again
+      if (block && txsEvent) {
+        if (block.block?.data?.txs.length && !txsEvent.txs.length) {
+          console.log(
+            "ABCI Layer behind Tendermint Layer, waiting 3 seconds and trying again"
+          );
+          await sleep(3000);
+          continue;
+        }
+      }
+
+      if (block && txsEvent) {
         const blockHeight = Number(block.block!.header!.height.low);
         const timestamp = utils.proto.fromTimestamp(block.block!.header!.time!);
         const blockHash = upperHexFromUint8Array(block.blockId!.hash!);
 
-        const transactionResponses = txsEvent.txResponses || [];
+        const transactionResponses = txsEvent.txResponses;
         const events = transactionResponses.flatMap((txRes) => txRes.events);
 
         await Promise.all([
