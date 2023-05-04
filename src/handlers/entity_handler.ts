@@ -7,7 +7,7 @@ export const getEntityById = async (id: string) => {
     include: {
       IID: {
         include: {
-          context: { where: { key: "class" } },
+          context: true,
           accordedRight: true,
           linkedEntity: true,
           linkedResource: true,
@@ -16,8 +16,6 @@ export const getEntityById = async (id: string) => {
       },
     },
   });
-
-  if (!baseEntity) return null;
 
   const serviceIds = baseEntity!.IID.service.map((s) => s.id);
   const accordedRightIds = baseEntity!.IID.accordedRight.map((a) => a.id);
@@ -29,16 +27,15 @@ export const getEntityById = async (id: string) => {
   }
   delete baseEntity!.IID;
 
-  let classVal: string;
-  if (baseEntity!.context.length > 0) {
-    classVal = baseEntity!.context[0].val;
+  let classVal = baseEntity!.context.find((c) => c.key === "class")?.val;
+  if (classVal) {
     while (true) {
       let record = await prisma.entity.findFirst({
         where: { id: classVal },
         include: {
           IID: {
             include: {
-              context: { where: { key: "class" } },
+              context: true,
               accordedRight: true,
               linkedEntity: true,
               linkedResource: true,
@@ -47,8 +44,11 @@ export const getEntityById = async (id: string) => {
           },
         },
       });
-      if (!record?.IID.context[0]) break;
-      classVal = record!.IID.context[0].val;
+      const newClassVal = record?.IID.context.find(
+        (c) => c.key === "class"
+      )?.val;
+      if (!newClassVal) break;
+      classVal = newClassVal;
       for (const service of record!.IID.service) {
         if (!serviceIds.includes(service.id)) {
           baseEntity!.service.push(service);
@@ -84,11 +84,9 @@ export const getEntityById = async (id: string) => {
     (r) => r.type !== "Settings"
   );
   for (const setting of settingsArr) {
-    settings[`${setting.description}`] = {
-      ...setting,
-    };
+    settings[setting.description] = setting;
   }
-  baseEntity["settings"] = { ...settings };
+  baseEntity["settings"] = settings;
 
   baseEntity.verificationMethod = parseJson(baseEntity.verificationMethod);
   baseEntity.metadata = parseJson(baseEntity.metadata);
@@ -97,9 +95,29 @@ export const getEntityById = async (id: string) => {
 };
 
 export const getEntitiesByOwnerAddress = async (address: string) => {
-  const ids = await getAccountEntities(address);
+  const ids = (await getAccountEntities(address)) || [];
   const entities: any[] = [];
   for (const id of ids) {
+    const entity = await getEntityById(id);
+    entities.push(entity);
+  }
+  return entities;
+};
+
+export const getEntitiesByOwnerDid = async (did: string) => {
+  const ids =
+    (await prisma.entity.findMany({
+      select: { id: true },
+      where: {
+        IID: {
+          controller: {
+            has: did,
+          },
+        },
+      },
+    })) || [];
+  const entities: any[] = [];
+  for (const id of ids.map((id) => id.id)) {
     const entity = await getEntityById(id);
     entities.push(entity);
   }
@@ -144,10 +162,36 @@ export const getEntityCollectionById = async (id: string) => {
 
 export const getEntityCollectionsByOwnerAddress = async (address: string) => {
   const entities = await getEntitiesByOwnerAddress(address);
-  const collections = entities.filter((e) => e.type === "asset/collection");
+  const groups = {};
+  for (const entity of entities) {
+    const parent = entity.context.find((c) => c.key === "class")?.val;
+    if (!parent) continue;
+    if (groups[parent]) groups[parent].push(entity);
+    else groups[parent] = [entity];
+  }
   const res: any[] = [];
-  for (const collection of collections) {
-    res.push(await getEntityCollectionById(collection.id));
+  for (const [colId, ents] of Object.entries(groups)) {
+    const collection = await getEntityById(colId);
+    if (collection.type !== "asset/collection") continue;
+    res.push({ collection, entities: ents });
+  }
+  return res;
+};
+
+export const getEntityCollectionsByOwnerDid = async (did: string) => {
+  const entities = await getEntitiesByOwnerDid(did);
+  const groups = {};
+  for (const entity of entities) {
+    const parent = entity.context.find((c) => c.key === "class")?.val;
+    if (!parent) continue;
+    if (groups[parent]) groups[parent].push(entity);
+    else groups[parent] = [entity];
+  }
+  const res: any[] = [];
+  for (const [colId, ents] of Object.entries(groups)) {
+    const collection = await getEntityById(colId);
+    if (collection.type !== "asset/collection") continue;
+    res.push({ collection, entities: ents });
   }
   return res;
 };

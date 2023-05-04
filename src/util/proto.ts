@@ -98,19 +98,32 @@ export const getAccountBonds = async (address: string) => {
 
 export const getAccountEntities = async (address: string) => {
   try {
+    let ids: string[] = [];
+    let finish = false;
     const entityParams = await queryClient.ixo.entity.v1beta1.params();
     const contractAddress = entityParams.params!.nftContractAddress;
-    const msg = {
-      tokens: {
-        owner: address,
-        limit: 99999999,
-      },
-    };
-    const res = await queryClient.cosmwasm.wasm.v1.smartContractState({
-      address: contractAddress,
-      queryData: utils.conversions.JsonToArray(JSON.stringify(msg)),
-    });
-    return JSON.parse(utils.conversions.Uint8ArrayToJS(res.data)).tokens;
+
+    while (!finish) {
+      const msg = {
+        tokens: {
+          owner: address,
+          limit: 30,
+          startAfter: null,
+        },
+      };
+      const res = await queryClient.cosmwasm.wasm.v1.smartContractState({
+        address: contractAddress,
+        queryData: utils.conversions.JsonToArray(JSON.stringify(msg)),
+      });
+      // console.log("fetched");
+      const newIds = JSON.parse(
+        utils.conversions.Uint8ArrayToJS(res.data)
+      ).tokens;
+      ids = ids.concat(newIds);
+      // if (newIds.length < 30 || newIds.length === 0) finish = true;
+      finish = true;
+    }
+    return ids;
   } catch (error) {
     console.error(error);
     return;

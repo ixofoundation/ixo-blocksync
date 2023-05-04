@@ -110,6 +110,15 @@ app.get("/api/entity/byOwnerAddress/:address", async (req, res, next) => {
   }
 });
 
+app.get("/api/entity/byOwnerDid/:did", async (req, res, next) => {
+  try {
+    const entities = await EntityHandler.getEntitiesByOwnerDid(req.params.did);
+    res.json(entities);
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.get("/api/entity/collections", async (req, res, next) => {
   try {
     const entities = await EntityHandler.getEntityCollections();
@@ -141,6 +150,17 @@ app.get(
     }
   }
 );
+
+app.get("/api/entity/collectionsByOwnerDid/:did", async (req, res, next) => {
+  try {
+    const entities = await EntityHandler.getEntityCollectionsByOwnerDid(
+      req.params.did
+    );
+    res.json(entities);
+  } catch (error) {
+    next(error);
+  }
+});
 
 app.get("/api/entity/owner/:id", async (req, res, next) => {
   try {
