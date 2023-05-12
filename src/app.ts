@@ -6,6 +6,7 @@ import * as Sentry from "@sentry/node";
 import postgraphile from "postgraphile";
 import * as IidHandler from "./handlers/iid_handler";
 import * as EntityHandler from "./handlers/entity_handler";
+import * as IpfsHandler from "./handlers/ipfs_handler";
 import * as TokenHandler from "./handlers/token_handler";
 import * as StatHandler from "./handlers/stats_handler";
 import * as EventHandler from "./handlers/event_handler";
@@ -27,8 +28,8 @@ import {
 } from "./util/proto";
 
 const limiter = rateLimit({
-  windowMs: 5 * 60 * 1000, // 5 minutes
-  max: 100000, // Limit each IP to 100 requests per `window`
+  windowMs: 1 * 60 * 1000, // 1 minutes
+  max: 10000, // Limit each IP to 100 requests per `window`
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
   message: "Too many requests from this IP, please try again after 5 minutes",
@@ -69,13 +70,32 @@ app.get("/", (req, res) => {
 });
 
 // =================================
+// Ipfs
+// =================================
+
+app.get("/api/ipfs/:cid", async (req, res, next) => {
+  try {
+    const doc = await IpfsHandler.getIpfsDocument(req.params.cid);
+    if (!doc) throw new Error("Document not found");
+    const buf = Buffer.from(doc.data, "base64");
+    res.writeHead(200, {
+      "Content-Type": doc.contentType,
+      "Content-Length": buf.length,
+    });
+    res.end(buf);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// =================================
 // Entity
 // =================================
 
 app.get("/api/entity/byId/:id", async (req, res, next) => {
   try {
-    const entity = await EntityHandler.getEntityById(req.params.id);
-    res.json(entity);
+    const doc = await EntityHandler.getEntityById(req.params.id);
+    res.json(doc);
   } catch (error) {
     next(error);
   }

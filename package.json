@@ -40,6 +40,7 @@
     "socket.io": "4.6.0",
     "swagger-autogen": "2.23.0",
     "swagger-ui-express": "4.6.0",
+    "throttled-queue": "^2.1.4",
     "ts-node": "10.9.1",
     "typedoc": "0.23.24",
     "typescript": "4.9.5"

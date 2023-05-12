@@ -1,6 +1,8 @@
 import { parseJson, prisma } from "../prisma/prisma_client";
 import { getAccountEntities } from "../util/proto";
 
+const ipfsServiceMapping = process.env.IPFS_SERVICE_MAPPING || "";
+
 export const getEntityById = async (id: string) => {
   const baseEntity: any = await prisma.entity.findFirst({
     where: { id: id },
@@ -91,6 +93,14 @@ export const getEntityById = async (id: string) => {
   baseEntity.verificationMethod = parseJson(baseEntity.verificationMethod);
   baseEntity.metadata = parseJson(baseEntity.metadata);
   baseEntity.accounts = parseJson(baseEntity.accounts);
+
+  // Custom
+  if (ipfsServiceMapping) {
+    baseEntity.service = baseEntity.service.map((s) =>
+      s.id.includes("ipfs") ? { ...s, serviceEndpoint: ipfsServiceMapping } : s
+    );
+  }
+
   return baseEntity;
 };
 

@@ -394,6 +394,15 @@ CREATE TABLE "Block" (
     CONSTRAINT "Block_pkey" PRIMARY KEY ("height")
 );
 
+-- CreateTable
+CREATE TABLE "Ipfs" (
+    "cid" TEXT NOT NULL,
+    "contentType" TEXT NOT NULL,
+    "data" TEXT NOT NULL,
+
+    CONSTRAINT "Ipfs_pkey" PRIMARY KEY ("cid")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "TokenClass_name_key" ON "TokenClass"("name");
 

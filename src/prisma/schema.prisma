@@ -417,3 +417,12 @@ model Block {
   proposer_address String?
   timestamp        DateTime
 }
+
+// ========================================
+// IPFS
+// ========================================
+model Ipfs {
+  cid         String @id
+  contentType String
+  data        String
+}
