@@ -32,7 +32,7 @@ const limiter = rateLimit({
   max: 10000, // Limit each IP to 100 requests per `window`
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-  message: "Too many requests from this IP, please try again after 5 minutes",
+  message: "Too many requests from this IP, please try again after 1 minutes",
 });
 
 const swaggerFile = require(`${__dirname}/../../swagger.json`);
