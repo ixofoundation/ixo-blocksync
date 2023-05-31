@@ -293,8 +293,8 @@ export const getEntityByExternalId = async (externalid: string) => {
 
   const entities = await Promise.all(
     unknownEntities.map(async (e) => {
-      const deviceCredsUri = e.IID.linkedResource.find(
-        (lr) => lr.id.includes("device-credential") // lr.id.includes("deviceCredential")
+      const deviceCredsUri = e.IID.linkedResource.find((lr) =>
+        lr.id.includes("deviceCredential")
       )?.serviceEndpoint;
       // if not ipfs endpoint then return entity as is, only handling ipfs now
       if (!deviceCredsUri || !deviceCredsUri.includes("ipfs:")) return e;
