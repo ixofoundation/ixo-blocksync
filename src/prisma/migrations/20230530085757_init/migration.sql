@@ -103,6 +103,7 @@ CREATE TABLE "Entity" (
     "entityVerified" BOOLEAN NOT NULL,
     "metadata" JSONB,
     "accounts" JSONB,
+    "externalId" TEXT,
 
     CONSTRAINT "Entity_pkey" PRIMARY KEY ("id")
 );
@@ -133,11 +134,27 @@ CREATE TABLE "Claim" (
     "agentDid" TEXT NOT NULL,
     "agentAddress" TEXT NOT NULL,
     "submissionDate" TIMESTAMP(3),
-    "evaluation" JSONB,
     "paymentsStatus" JSONB,
     "collectionId" TEXT NOT NULL,
+    "schemaType" TEXT,
 
     CONSTRAINT "Claim_pkey" PRIMARY KEY ("claimId")
+);
+
+-- CreateTable
+CREATE TABLE "Evaluation" (
+    "claimId" TEXT NOT NULL,
+    "collectionId" TEXT NOT NULL,
+    "oracle" TEXT NOT NULL,
+    "agentDid" TEXT NOT NULL,
+    "agentAddress" TEXT NOT NULL,
+    "status" INTEGER NOT NULL,
+    "reason" INTEGER NOT NULL,
+    "verificationProof" TEXT,
+    "amount" JSONB NOT NULL,
+    "evaluationDate" TIMESTAMP(3),
+
+    CONSTRAINT "Evaluation_pkey" PRIMARY KEY ("claimId")
 );
 
 -- CreateTable
@@ -429,6 +446,9 @@ ALTER TABLE "Entity" ADD CONSTRAINT "Entity_id_fkey" FOREIGN KEY ("id") REFERENC
 
 -- AddForeignKey
 ALTER TABLE "Claim" ADD CONSTRAINT "Claim_collectionId_fkey" FOREIGN KEY ("collectionId") REFERENCES "ClaimCollection"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Evaluation" ADD CONSTRAINT "Evaluation_claimId_fkey" FOREIGN KEY ("claimId") REFERENCES "Claim"("claimId") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "TokenData" ADD CONSTRAINT "TokenData_tokenId_fkey" FOREIGN KEY ("tokenId") REFERENCES "Token"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
