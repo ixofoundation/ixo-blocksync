@@ -138,6 +138,7 @@ model Entity {
   entityVerified Boolean
   metadata       Json?
   accounts       Json?
+  externalId     String?
 }
 
 // model EntityMetadata {
@@ -183,10 +184,25 @@ model Claim {
   agentDid        String
   agentAddress    String
   submissionDate  DateTime?
-  evaluation      Json?
   paymentsStatus  Json?
   ClaimCollection ClaimCollection @relation(fields: [collectionId], references: [id])
   collectionId    String
+  schemaType      String?
+  evaluation      Evaluation?
+}
+
+model Evaluation {
+  claimId           String    @id
+  collectionId      String
+  oracle            String
+  agentDid          String
+  agentAddress      String
+  status            Int
+  reason            Int
+  verificationProof String?
+  amount            Json
+  evaluationDate    DateTime?
+  Claim             Claim     @relation(fields: [claimId], references: [claimId])
 }
 
 model Dispute {

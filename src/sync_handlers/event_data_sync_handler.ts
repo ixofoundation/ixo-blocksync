@@ -221,7 +221,6 @@ export const syncEventData = async (event: ConvertedEvent) => {
             agentDid: submitClaim.agent_did,
             agentAddress: submitClaim.agent_address,
             submissionDate: submitClaim.submission_date as any,
-            evaluation: JSON.stringify(submitClaim.evaluation),
             paymentsStatus: JSON.stringify(submitClaim.payments_status),
           },
         });
@@ -241,8 +240,20 @@ export const syncEventData = async (event: ConvertedEvent) => {
             agentDid: updateClaim.agent_did,
             agentAddress: updateClaim.agent_address,
             submissionDate: updateClaim.submission_date as any,
-            evaluation: JSON.stringify(updateClaim.evaluation),
             paymentsStatus: JSON.stringify(updateClaim.payments_status),
+            evaluation: {
+              create: {
+                collectionId: updateClaim.evaluation!.collection_id,
+                oracle: updateClaim.evaluation!.oracle,
+                agentDid: updateClaim.evaluation!.agent_did,
+                agentAddress: updateClaim.evaluation!.agent_address,
+                status: updateClaim.evaluation!.status,
+                reason: updateClaim.evaluation!.reason,
+                verificationProof: updateClaim.evaluation!.verification_proof,
+                evaluationDate: updateClaim.evaluation!.evaluation_date as any,
+                amount: JSON.stringify(updateClaim.evaluation!.amount),
+              },
+            },
           },
         });
         break;

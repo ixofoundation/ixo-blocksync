@@ -1,5 +1,7 @@
 import { parseJson, prisma } from "../prisma/prisma_client";
+import { base64ToJson } from "../util/helpers";
 import { getAccountEntities } from "../util/proto";
+import { getIpfsDocument } from "./ipfs_handler";
 
 const ipfsServiceMapping = process.env.IPFS_SERVICE_MAPPING || "";
 
@@ -185,6 +187,13 @@ export const getEntityCollectionsByOwnerAddress = async (address: string) => {
     if (collection.type !== "asset/collection") continue;
     res.push({ collection, entities: ents });
   }
+  // get all collections and add assets as empty array
+  const collections = await getEntitiesByType("asset/collection");
+  collections.forEach((c) =>
+    res.some((r) => r.collection.id === c.id)
+      ? null
+      : res.push({ collection: c, entities: [] })
+  );
   return res;
 };
 
@@ -203,6 +212,13 @@ export const getEntityCollectionsByOwnerDid = async (did: string) => {
     if (collection.type !== "asset/collection") continue;
     res.push({ collection, entities: ents });
   }
+  // get all collections and add assets as empty array
+  const collections = await getEntitiesByType("asset/collection");
+  collections.forEach((c) =>
+    res.some((r) => r.collection.id === c.id)
+      ? null
+      : res.push({ collection: c, entities: [] })
+  );
   return res;
 };
 
@@ -210,7 +226,9 @@ export const getEntitiesByType = async (type?: string) => {
   if (type) {
     const records = await prisma.entity.findMany({
       where: {
-        type: type,
+        type: {
+          contains: type,
+        },
       },
       select: {
         id: true,
@@ -251,4 +269,66 @@ export const getEntityLastTransferredDate = async (id: string) => {
   } else {
     return null;
   }
+};
+
+// Return entity with externalId if exists otherwise return null
+export const getEntityByExternalId = async (externalid: string) => {
+  const entity1: any = await prisma.entity.findFirst({
+    where: { externalId: externalid },
+    select: { id: true },
+  });
+  if (entity1) return await getEntityById(entity1.id);
+
+  const unknownEntities = await prisma.entity.findMany({
+    where: { AND: [{ externalId: null }, { type: "asset/device" }] },
+    include: {
+      IID: {
+        include: {
+          linkedResource: true,
+        },
+      },
+    },
+    take: 50000,
+  });
+
+  const entities = await Promise.all(
+    unknownEntities.map(async (e) => {
+      const deviceCredsUri = e.IID.linkedResource.find(
+        (lr) => lr.id.includes("device-credential") // lr.id.includes("deviceCredential")
+      )?.serviceEndpoint;
+      // if not ipfs endpoint then return entity as is, only handling ipfs now
+      if (!deviceCredsUri || !deviceCredsUri.includes("ipfs:")) return e;
+      const doc = await getIpfsDocument(deviceCredsUri.replace("ipfs:", ""));
+      if (!doc) return e;
+
+      try {
+        const json = base64ToJson(doc.data);
+        if (!json) return e;
+        let externalId: string;
+
+        // handling for cookstoves, can add more below if device credential looks different
+        const cookstoveCredentialId = json.credentialSubject?.id?.split("?id=");
+        if (!cookstoveCredentialId || cookstoveCredentialId.length < 2)
+          return e;
+        externalId = cookstoveCredentialId[1];
+
+        if (!externalId) return e;
+        return await prisma.entity.update({
+          where: {
+            id: e.id,
+          },
+          data: {
+            externalId: externalId,
+          },
+        });
+      } catch (error) {
+        return e;
+      }
+    })
+  );
+
+  const entity2 = entities.find((e) => e.externalId === externalid);
+  if (entity2) return await getEntityById(entity2.id);
+
+  return null;
 };

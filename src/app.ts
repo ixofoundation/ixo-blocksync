@@ -8,6 +8,7 @@ import * as IidHandler from "./handlers/iid_handler";
 import * as EntityHandler from "./handlers/entity_handler";
 import * as IpfsHandler from "./handlers/ipfs_handler";
 import * as TokenHandler from "./handlers/token_handler";
+import * as ClaimsHandler from "./handlers/claims_handler";
 import * as StatHandler from "./handlers/stats_handler";
 import * as EventHandler from "./handlers/event_handler";
 import * as BondHandler from "./handlers/bond_handler";
@@ -95,6 +96,15 @@ app.get("/api/ipfs/:cid", async (req, res, next) => {
 app.get("/api/entity/byId/:id", async (req, res, next) => {
   try {
     const doc = await EntityHandler.getEntityById(req.params.id);
+    res.json(doc);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/api/entity/byExternalId/:id", async (req, res, next) => {
+  try {
+    const doc = await EntityHandler.getEntityByExternalId(req.params.id);
     res.json(doc);
   } catch (error) {
     next(error);
@@ -206,6 +216,41 @@ app.get("/api/entity/lasttransferred/:id", async (req, res, next) => {
       req.params.id
     );
     res.json({ lastTransferred });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// =================================
+// Claims
+// =================================
+
+app.get("/api/claims/collection/:id", async (req, res, next) => {
+  try {
+    const collection = await ClaimsHandler.getCollectionById(req.params.id);
+    res.json(collection);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/api/claims/collection/:id/claims", async (req, res, next) => {
+  try {
+    const claims = await ClaimsHandler.getCollectionClaims(
+      req.params.id,
+      req.query.status as string,
+      req.query.type as string
+    );
+    res.json(claims);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/api/claims/claim/:id", async (req, res, next) => {
+  try {
+    const claim = await ClaimsHandler.getClaimById(req.params.id);
+    res.json(claim);
   } catch (error) {
     next(error);
   }

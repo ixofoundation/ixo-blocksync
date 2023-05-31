@@ -2,10 +2,11 @@ import axios from "axios";
 import { prisma } from "../prisma/prisma_client";
 import { createWeb3SRateLimiter } from "../util/rate-limiter";
 import { sleep } from "../util/sleep";
+import { Ipfs } from "@prisma/client";
 
 const web3SRateLimiter = createWeb3SRateLimiter();
 
-export const getIpfsDocument = async (cid: string) => {
+export const getIpfsDocument = async (cid: string): Promise<Ipfs> => {
   const doc = await prisma.ipfs.findFirst({
     where: {
       cid: cid,
