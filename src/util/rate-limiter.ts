@@ -1,12 +1,6 @@
-import throttledQueue from "throttled-queue";
+import { RateLimiter } from "limiter";
 
-const WEB3_RATE_LIMIT_REQUESTS = 200;
-const WEB3_RATE_LIMIT_PERIOD = 1000 * 60;
-
-export function createWeb3SRateLimiter() {
-  const throttle = throttledQueue(
-    WEB3_RATE_LIMIT_REQUESTS,
-    WEB3_RATE_LIMIT_PERIOD
-  );
-  return () => throttle(() => {});
-}
+export const web3StorageRateLimiter = new RateLimiter({
+  tokensPerInterval: 200,
+  interval: 1000 * 60,
+});

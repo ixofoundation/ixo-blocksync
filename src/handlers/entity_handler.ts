@@ -279,6 +279,15 @@ export const getEntityByExternalId = async (externalid: string) => {
   });
   if (entity1) return await getEntityById(entity1.id);
 
+  const entities = await getEntitiesExternalId(150);
+  const entity2 = entities.find((e) => e.externalId === externalid);
+  if (entity2) return await getEntityById(entity2.id);
+
+  return null;
+};
+
+// Helper function to fetch "asset/device" entities with null externalId and update them
+export const getEntitiesExternalId = async (amount: number) => {
   const unknownEntities = await prisma.entity.findMany({
     where: { AND: [{ externalId: null }, { type: "asset/device" }] },
     include: {
@@ -288,7 +297,7 @@ export const getEntityByExternalId = async (externalid: string) => {
         },
       },
     },
-    take: 50000,
+    take: amount,
   });
 
   const entities = await Promise.all(
@@ -298,10 +307,11 @@ export const getEntityByExternalId = async (externalid: string) => {
       )?.serviceEndpoint;
       // if not ipfs endpoint then return entity as is, only handling ipfs now
       if (!deviceCredsUri || !deviceCredsUri.includes("ipfs:")) return e;
-      const doc = await getIpfsDocument(deviceCredsUri.replace("ipfs:", ""));
-      if (!doc) return e;
 
       try {
+        const doc = await getIpfsDocument(deviceCredsUri.replace("ipfs:", ""));
+        if (!doc) return e;
+
         const json = base64ToJson(doc.data);
         if (!json) return e;
         let externalId: string;
@@ -322,13 +332,11 @@ export const getEntityByExternalId = async (externalid: string) => {
           },
         });
       } catch (error) {
+        console.error(error);
         return e;
       }
     })
   );
 
-  const entity2 = entities.find((e) => e.externalId === externalid);
-  if (entity2) return await getEntityById(entity2.id);
-
-  return null;
+  return entities;
 };

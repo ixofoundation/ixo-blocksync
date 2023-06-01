@@ -1,10 +1,8 @@
 import axios from "axios";
 import { prisma } from "../prisma/prisma_client";
-import { createWeb3SRateLimiter } from "../util/rate-limiter";
+import { web3StorageRateLimiter } from "../util/rate-limiter";
 import { sleep } from "../util/sleep";
 import { Ipfs } from "@prisma/client";
-
-const web3SRateLimiter = createWeb3SRateLimiter();
 
 export const getIpfsDocument = async (cid: string): Promise<Ipfs> => {
   const doc = await prisma.ipfs.findFirst({
@@ -14,7 +12,12 @@ export const getIpfsDocument = async (cid: string): Promise<Ipfs> => {
   });
   if (doc) return doc;
 
-  await web3SRateLimiter();
+  try {
+    await web3StorageRateLimiter.removeTokens(1);
+  } catch (error) {
+    await sleep(1000);
+    return await getIpfsDocument(cid);
+  }
   const res = await axios.get(`https://${cid}.ipfs.cf-ipfs.com`, {
     responseType: "arraybuffer",
   });
@@ -37,8 +40,13 @@ export const getIpfsDocument = async (cid: string): Promise<Ipfs> => {
 
   const buffer = Buffer.from(res.data);
 
-  return prisma.ipfs.create({
-    data: {
+  return prisma.ipfs.upsert({
+    where: { cid: cid },
+    update: {
+      contentType: type,
+      data: buffer.toString("base64"),
+    },
+    create: {
       cid: cid,
       contentType: type,
       data: buffer.toString("base64"),

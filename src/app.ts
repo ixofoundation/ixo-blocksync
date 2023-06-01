@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
 import compression from "compression";
+import { CronJob } from "cron";
 import * as Sentry from "@sentry/node";
 import postgraphile from "postgraphile";
 import * as IidHandler from "./handlers/iid_handler";
@@ -27,6 +28,7 @@ import {
   getFullMintAuthGrants,
   getMintAuthGrants,
 } from "./util/proto";
+import { web3StorageRateLimiter } from "./util/rate-limiter";
 
 const limiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minutes
@@ -684,3 +686,19 @@ app.get("/api/block/getLastSyncedBlock", async (req, res, next) => {
     next(error);
   }
 });
+
+// =================================
+// CRON Jobs
+// =================================
+// Get antity type "asset/device" with no externalId and check if it has a deviceCredential
+// Since ipfs rate limit is 200 per minute, we do 100 every 1 minutes to lesser strain
+new CronJob(
+  "1 */1 * * * *",
+  function () {
+    const tokens = web3StorageRateLimiter.getTokensRemaining();
+    if (tokens > 110) EntityHandler.getEntitiesExternalId(100);
+  },
+  null,
+  true,
+  "Etc/UTC"
+);
