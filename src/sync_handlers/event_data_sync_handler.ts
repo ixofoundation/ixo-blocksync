@@ -14,6 +14,7 @@ import {
 } from "@ixo/impactxclient-sdk/types/codegen/ixo/claims/v1beta1/claims";
 import { CollectionState } from "../types/Enums";
 import { getDocFromAttributes } from "../util/helpers";
+import { ixo } from "@ixo/impactxclient-sdk";
 
 export const syncEventData = async (event: ConvertedEvent) => {
   try {
@@ -247,7 +248,9 @@ export const syncEventData = async (event: ConvertedEvent) => {
                 oracle: updateClaim.evaluation!.oracle,
                 agentDid: updateClaim.evaluation!.agent_did,
                 agentAddress: updateClaim.evaluation!.agent_address,
-                status: updateClaim.evaluation!.status,
+                status: ixo.claims.v1beta1.evaluationStatusFromJSON(
+                  updateClaim.evaluation!.status
+                ),
                 reason: updateClaim.evaluation!.reason,
                 verificationProof: updateClaim.evaluation!.verification_proof,
                 evaluationDate: updateClaim.evaluation!.evaluation_date as any,
