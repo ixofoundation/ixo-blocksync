@@ -15,7 +15,7 @@ import * as EventHandler from "./handlers/event_handler";
 import * as BondHandler from "./handlers/bond_handler";
 import * as TransactionHandler from "./handlers/transaction_handler";
 import * as BlockHandler from "./handlers/block_handler";
-import { SENTRYDSN, DATABASE_URL } from "./util/secrets";
+import { SENTRYDSN, DATABASE_URL, TRUST_PROXY } from "./util/secrets";
 import swaggerUi from "swagger-ui-express";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
@@ -32,7 +32,7 @@ import { web3StorageRateLimiter } from "./util/rate-limiter";
 
 const limiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minutes
-  max: 10000, // Limit each IP to 100 requests per `window`
+  max: 50000, // Limit each IP to 100 requests per `window`
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
   message: "Too many requests from this IP, please try again after 1 minutes",
@@ -41,6 +41,7 @@ const limiter = rateLimit({
 const swaggerFile = require(`${__dirname}/../../swagger.json`);
 
 export const app = express();
+app.set("trust proxy", TRUST_PROXY);
 
 Sentry.init({ dsn: SENTRYDSN, tracesSampleRate: 1.0 });
 app.use(cors());
@@ -71,6 +72,15 @@ app.use(limiter);
 app.get("/", (req, res) => {
   res.send("API is Running");
 });
+
+// app.get("/ip", (request, response) =>
+//   response.send({
+//     ips: request.ips,
+//     ip: request.ip,
+//     protocol: request.protocol,
+//     headers: request.headers["x-forwarded-for"],
+//   })
+// );
 
 // =================================
 // Ipfs
