@@ -104,6 +104,7 @@ CREATE TABLE "Entity" (
     "metadata" JSONB,
     "accounts" JSONB,
     "externalId" TEXT,
+    "owner" TEXT,
 
     CONSTRAINT "Entity_pkey" PRIMARY KEY ("id")
 );
@@ -143,7 +144,7 @@ CREATE TABLE "Claim" (
 
 -- CreateTable
 CREATE TABLE "Evaluation" (
-    "claimId" TEXT NOT NULL,
+    "aid" SERIAL NOT NULL,
     "collectionId" TEXT NOT NULL,
     "oracle" TEXT NOT NULL,
     "agentDid" TEXT NOT NULL,
@@ -153,8 +154,9 @@ CREATE TABLE "Evaluation" (
     "verificationProof" TEXT,
     "amount" JSONB NOT NULL,
     "evaluationDate" TIMESTAMP(3),
+    "claimId" TEXT NOT NULL,
 
-    CONSTRAINT "Evaluation_pkey" PRIMARY KEY ("claimId")
+    CONSTRAINT "Evaluation_pkey" PRIMARY KEY ("aid")
 );
 
 -- CreateTable
@@ -180,8 +182,6 @@ CREATE TABLE "TokenClass" (
     "supply" TEXT NOT NULL,
     "paused" BOOLEAN NOT NULL,
     "stopped" BOOLEAN NOT NULL,
-    "retired" JSONB,
-    "cancelled" JSONB,
 
     CONSTRAINT "TokenClass_pkey" PRIMARY KEY ("contractAddress")
 );
@@ -207,6 +207,42 @@ CREATE TABLE "TokenData" (
     "tokenId" TEXT NOT NULL,
 
     CONSTRAINT "TokenData_pkey" PRIMARY KEY ("aid")
+);
+
+-- CreateTable
+CREATE TABLE "TokenRetired" (
+    "aid" SERIAL NOT NULL,
+    "id" TEXT NOT NULL,
+    "reason" TEXT NOT NULL,
+    "jurisdiction" TEXT NOT NULL,
+    "amount" JSONB NOT NULL,
+    "owner" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+
+    CONSTRAINT "TokenRetired_pkey" PRIMARY KEY ("aid")
+);
+
+-- CreateTable
+CREATE TABLE "TokenCancelled" (
+    "aid" SERIAL NOT NULL,
+    "id" TEXT NOT NULL,
+    "reason" TEXT NOT NULL,
+    "amount" JSONB NOT NULL,
+    "owner" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+
+    CONSTRAINT "TokenCancelled_pkey" PRIMARY KEY ("aid")
+);
+
+-- CreateTable
+CREATE TABLE "TokenTransaction" (
+    "id" SERIAL NOT NULL,
+    "from" TEXT NOT NULL,
+    "to" TEXT NOT NULL,
+    "amount" TEXT NOT NULL,
+    "tokenId" TEXT NOT NULL,
+
+    CONSTRAINT "TokenTransaction_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -395,6 +431,8 @@ CREATE TABLE "Message" (
     "value" JSONB,
     "from" TEXT,
     "to" TEXT,
+    "denoms" TEXT[],
+    "tokenNames" TEXT[],
 
     CONSTRAINT "Message_pkey" PRIMARY KEY ("id")
 );
@@ -419,6 +457,9 @@ CREATE TABLE "Ipfs" (
 
     CONSTRAINT "Ipfs_pkey" PRIMARY KEY ("cid")
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Evaluation_claimId_key" ON "Evaluation"("claimId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "TokenClass_name_key" ON "TokenClass"("name");
@@ -451,7 +492,19 @@ ALTER TABLE "Claim" ADD CONSTRAINT "Claim_collectionId_fkey" FOREIGN KEY ("colle
 ALTER TABLE "Evaluation" ADD CONSTRAINT "Evaluation_claimId_fkey" FOREIGN KEY ("claimId") REFERENCES "Claim"("claimId") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "Token" ADD CONSTRAINT "Token_name_fkey" FOREIGN KEY ("name") REFERENCES "TokenClass"("name") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "TokenData" ADD CONSTRAINT "TokenData_tokenId_fkey" FOREIGN KEY ("tokenId") REFERENCES "Token"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "TokenRetired" ADD CONSTRAINT "TokenRetired_name_fkey" FOREIGN KEY ("name") REFERENCES "TokenClass"("name") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "TokenCancelled" ADD CONSTRAINT "TokenCancelled_name_fkey" FOREIGN KEY ("name") REFERENCES "TokenClass"("name") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "TokenTransaction" ADD CONSTRAINT "TokenTransaction_tokenId_fkey" FOREIGN KEY ("tokenId") REFERENCES "Token"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "PriceEntry" ADD CONSTRAINT "PriceEntry_bondDid_fkey" FOREIGN KEY ("bondDid") REFERENCES "Bond"("bondDid") ON DELETE RESTRICT ON UPDATE CASCADE;

@@ -1,6 +1,5 @@
 import { parseJson, prisma } from "../prisma/prisma_client";
 import { base64ToJson } from "../util/helpers";
-import { getAccountEntities } from "../util/proto";
 import { getIpfsDocument } from "./ipfs_handler";
 
 const ipfsServiceMapping = process.env.IPFS_SERVICE_MAPPING || "";
@@ -107,10 +106,14 @@ export const getEntityById = async (id: string) => {
 };
 
 export const getEntitiesByOwnerAddress = async (address: string) => {
-  const ids = (await getAccountEntities(address)) || [];
+  const ids =
+    (await prisma.entity.findMany({
+      where: { owner: address },
+      select: { id: true },
+    })) || [];
   const entities: any[] = [];
   for (const id of ids) {
-    const entity = await getEntityById(id);
+    const entity = await getEntityById(id.id);
     entities.push(entity);
   }
   return entities;
@@ -284,6 +287,13 @@ export const getEntityByExternalId = async (externalid: string) => {
   if (entity2) return await getEntityById(entity2.id);
 
   return null;
+};
+
+export const getEntityOwner = async (id: string): Promise<string> => {
+  const entity = await prisma.entity.findFirst({
+    where: { id: id },
+  });
+  return entity?.owner || "";
 };
 
 // Helper function to fetch "asset/device" entities with null externalId and update them
