@@ -15,19 +15,11 @@ import * as EventHandler from "./handlers/event_handler";
 import * as BondHandler from "./handlers/bond_handler";
 import * as TransactionHandler from "./handlers/transaction_handler";
 import * as BlockHandler from "./handlers/block_handler";
+import * as ProtoHandler from "./util/proto";
 import { SENTRYDSN, DATABASE_URL, TRUST_PROXY } from "./util/secrets";
 import swaggerUi from "swagger-ui-express";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
-import {
-  getAccountBonds,
-  getAccountTokenBalances,
-  getAccountTokens,
-  getEntityOwner,
-  getEntityTokens,
-  getFullMintAuthGrants,
-  getMintAuthGrants,
-} from "./util/proto";
 import { web3StorageRateLimiter } from "./util/rate-limiter";
 
 const limiter = rateLimit({
@@ -206,21 +198,21 @@ app.get("/api/entity/collectionsByOwnerDid/:did", async (req, res, next) => {
 
 app.get("/api/entity/owner/:id", async (req, res, next) => {
   try {
-    const owner = await getEntityOwner(req.params.id);
+    const owner = await EntityHandler.getEntityOwner(req.params.id);
     res.json({ owner });
   } catch (error) {
     next(error);
   }
 });
 
-app.get("/api/entity/tokens/:id", async (req, res, next) => {
-  try {
-    const balances = await getEntityTokens(req.params.id);
-    res.json(balances);
-  } catch (error) {
-    next(error);
-  }
-});
+// app.get("/api/entity/tokens/:id", async (req, res, next) => {
+//   try {
+//     const balances = await getEntityTokens(req.params.id);
+//     res.json(balances);
+//   } catch (error) {
+//     next(error);
+//   }
+// });
 
 app.get("/api/entity/lasttransferred/:id", async (req, res, next) => {
   try {
@@ -306,18 +298,21 @@ app.get("/api/tokenclass/class/:id", async (req, res, next) => {
   }
 });
 
-app.get("/api/token/ids/:address", async (req, res, next) => {
+app.get("/api/token/byAddress/:address", async (req, res, next) => {
   try {
-    const tokens = await getAccountTokens(req.params.address);
+    const tokens = await TokenHandler.getAccountTokens(
+      req.params.address,
+      (req.query?.name || "") as string
+    );
     res.json(tokens);
   } catch (error) {
     next(error);
   }
 });
 
-app.get("/api/token/balances/:address", async (req, res, next) => {
+app.get("/api/token/retired/:address", async (req, res, next) => {
   try {
-    const tokens = await getAccountTokenBalances(req.params.address);
+    const tokens = await TokenHandler.getRetiredTokens(req.params.address);
     res.json(tokens);
   } catch (error) {
     next(error);
@@ -360,47 +355,17 @@ app.get("/api/token/collection/:id", async (req, res, next) => {
   }
 });
 
-app.get("/api/token/mintauth/:grantee", async (req, res, next) => {
-  try {
-    const grants = await getMintAuthGrants(req.params.grantee);
-    res.json(grants);
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.get("/api/token/fullmintauth/:grantee", async (req, res, next) => {
-  try {
-    const grants = await getFullMintAuthGrants(req.params.grantee);
-    res.json(grants);
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.get("/api/token/retired/:name/:id", async (req, res, next) => {
-  try {
-    const token = await TokenHandler.getTokenRetiredAmount(
-      req.params.name,
-      req.params.id
-    );
-    res.json(token);
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.get("/api/token/cancelled/:name/:id", async (req, res, next) => {
-  try {
-    const token = await TokenHandler.getTokenCancelledAmount(
-      req.params.name,
-      req.params.id
-    );
-    res.json(token);
-  } catch (error) {
-    next(error);
-  }
-});
+// app.get("/api/token/retired/:name/:id", async (req, res, next) => {
+//   try {
+//     const token = await TokenHandler.getTokenRetiredAmount(
+//       req.params.name,
+//       req.params.id
+//     );
+//     res.json(token);
+//   } catch (error) {
+//     next(error);
+//   }
+// });
 
 // =================================
 // Bonds
@@ -475,7 +440,7 @@ app.get(
 
 app.get("/api/bonds/getAccountBonds/:account", async (req, res, next) => {
   try {
-    const bonds = await getAccountBonds(req.params.account);
+    const bonds = await ProtoHandler.getAccountBonds(req.params.account);
     res.json(bonds);
   } catch (error) {
     next(error);
@@ -649,37 +614,12 @@ app.get(
   async (req, res, next) => {
     try {
       const transactions = await TransactionHandler.getLatestTransactions(
-        req.params.address
-      );
-      res.json(transactions);
-    } catch (error) {
-      next(error);
-    }
-  }
-);
-
-app.get(
-  "/api/transactions/getTokenTransactions/:address",
-  async (req, res, next) => {
-    try {
-      const transactions = await TransactionHandler.getTokenTransactions(
-        req.params.address
-      );
-      res.json(transactions);
-    } catch (error) {
-      next(error);
-    }
-  }
-);
-
-app.get(
-  "/api/transactions/listTransactionsByType/:type(*)",
-  async (req, res, next) => {
-    try {
-      const transactions = await TransactionHandler.listTransactionsByType(
-        req.params.type,
-        req.query.page ? String(req.query.page) : undefined,
-        req.query.size ? String(req.query.size) : undefined
+        req.params.address,
+        req.query.take as string,
+        req.query.cursor as string,
+        req.query.denom as string,
+        req.query.type as string,
+        req.query.tokenName as string
       );
       res.json(transactions);
     } catch (error) {

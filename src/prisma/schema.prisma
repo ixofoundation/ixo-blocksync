@@ -139,6 +139,7 @@ model Entity {
   metadata       Json?
   accounts       Json?
   externalId     String?
+  owner          String?
 }
 
 // model EntityMetadata {
@@ -192,7 +193,7 @@ model Claim {
 }
 
 model Evaluation {
-  claimId           String    @id
+  aid               Int       @id @default(autoincrement())
   collectionId      String
   oracle            String
   agentDid          String
@@ -203,6 +204,7 @@ model Evaluation {
   amount            Json
   evaluationDate    DateTime?
   Claim             Claim     @relation(fields: [claimId], references: [claimId])
+  claimId           String    @unique
 }
 
 model Dispute {
@@ -217,10 +219,10 @@ model Dispute {
 // ========================================
 
 model TokenClass {
-  contractAddress String  @id
+  contractAddress String           @id
   minter          String
   class           String
-  name            String  @unique
+  name            String           @unique
   description     String
   image           String
   type            String
@@ -228,16 +230,19 @@ model TokenClass {
   supply          String
   paused          Boolean
   stopped         Boolean
-  retired         Json?
-  cancelled       Json?
+  Token           Token[]
+  retired         TokenRetired[]
+  cancelled       TokenCancelled[]
 }
 
 model Token {
-  id         String      @id
-  index      String
-  name       String
-  collection String
-  tokenData  TokenData[]
+  id               String             @id
+  index            String
+  name             String
+  collection       String
+  tokenData        TokenData[]
+  tokenTransaction TokenTransaction[]
+  tokenClass       TokenClass         @relation(fields: [name], references: [name])
 }
 
 model TokenData {
@@ -249,6 +254,36 @@ model TokenData {
   id        String
   Token     Token   @relation(fields: [tokenId], references: [id])
   tokenId   String
+}
+
+model TokenRetired {
+  aid          Int        @id @default(autoincrement())
+  id           String
+  reason       String
+  jurisdiction String
+  amount       Json
+  owner        String
+  Token        TokenClass @relation(fields: [name], references: [name])
+  name         String
+}
+
+model TokenCancelled {
+  aid    Int        @id @default(autoincrement())
+  id     String
+  reason String
+  amount Json
+  owner  String
+  Token  TokenClass @relation(fields: [name], references: [name])
+  name   String
+}
+
+model TokenTransaction {
+  id      Int    @id @default(autoincrement())
+  from    String
+  to      String
+  amount  String
+  Token   Token  @relation(fields: [tokenId], references: [id])
+  tokenId String
 }
 
 // ========================================
@@ -423,6 +458,8 @@ model Message {
   value           Json?
   from            String?
   to              String?
+  denoms          String[]
+  tokenNames      String[]
 }
 
 model Block {

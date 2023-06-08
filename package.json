@@ -20,7 +20,7 @@
   "author": "Ixo Foundation",
   "license": "Apache 2",
   "dependencies": {
-    "@ixo/impactxclient-sdk": "1.0.1",
+    "@ixo/impactxclient-sdk": "1.1.6",
     "@prisma/client": "4.11.0",
     "@sentry/node": "7.36.0",
     "@sentry/tracing": "7.36.0",

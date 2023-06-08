@@ -9,6 +9,54 @@ export const syncTransactions = async (transactionResponses: TxResponse[]) => {
     try {
       const transaction = decodeTransaction(transactionResponse);
 
+      const messages = await Promise.all(
+        transaction.body.messages.map(async (message) => {
+          const value = decodeMessage(message);
+          let denoms = Array.isArray(value.amount)
+            ? value.amount.map((a) => a.denom)
+            : value.amount
+            ? [value.amount.denom]
+            : value.inputs
+            ? value.inputs.map((i) => i.coins.map((c) => c.denom)).flat()
+            : [];
+          denoms = [...new Set(denoms)];
+          let tokenNames = value.mintBatch
+            ? value.mintBatch.map((m) => m.name)
+            : value.tokens
+            ? await Promise.all(
+                value.tokens.map(async (t) => {
+                  const token = await prisma.token.findFirst({
+                    where: { id: t.id },
+                    select: { name: true },
+                  });
+                  return token?.name;
+                })
+              )
+            : [];
+          tokenNames = [...new Set(tokenNames.filter((t) => t))];
+
+          return {
+            typeUrl: message.typeUrl,
+            value: JSON.stringify(value),
+            from:
+              value.fromAddress ||
+              value.ownerAddress ||
+              value.owner ||
+              value.sender ||
+              value.proposer ||
+              value.ownerDid,
+            to:
+              value.toAddress ||
+              value.receiver ||
+              value.recipient ||
+              value.recipientAddress ||
+              value.recipientDid,
+            denoms,
+            tokenNames,
+          };
+        })
+      );
+
       await prisma.transaction.create({
         data: {
           hash: transactionResponse.txhash,
@@ -18,29 +66,7 @@ export const syncTransactions = async (transactionResponses: TxResponse[]) => {
           gasUsed: transactionResponse.gasUsed.toString(),
           gasWanted: transactionResponse.gasWanted.toString(),
           time: new Date(transactionResponse.timestamp),
-          messages: {
-            create: transaction.body.messages.map((message) => {
-              const value = decodeMessage(message);
-              // console.log({ value });
-              return {
-                typeUrl: message.typeUrl,
-                value: JSON.stringify(value),
-                from:
-                  value.fromAddress ||
-                  value.ownerAddress ||
-                  value.owner ||
-                  value.sender ||
-                  value.proposer ||
-                  value.ownerDid,
-                to:
-                  value.toAddress ||
-                  value.receiver ||
-                  value.recipient ||
-                  value.recipientAddress ||
-                  value.recipientDid,
-              };
-            }),
-          },
+          messages: { create: messages },
         },
       });
 

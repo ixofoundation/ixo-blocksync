@@ -12,7 +12,6 @@ import {
   CollectionSDKType,
   DisputeSDKType,
 } from "@ixo/impactxclient-sdk/types/codegen/ixo/claims/v1beta1/claims";
-import { CollectionState } from "../types/Enums";
 import { getDocFromAttributes } from "../util/helpers";
 import { ixo } from "@ixo/impactxclient-sdk";
 
@@ -36,24 +35,12 @@ export const syncEventData = async (event: ConvertedEvent) => {
             capabilityDelegation: createIid.capabilityDelegation,
             alsoKnownAs: createIid.alsoKnownAs,
             metadata: JSON.stringify(createIid.metadata),
-            context: {
-              create: createIid.context,
-            },
-            service: {
-              create: createIid.service,
-            },
-            linkedResource: {
-              create: createIid.linkedResource,
-            },
-            linkedClaim: {
-              create: createIid.linkedClaim,
-            },
-            accordedRight: {
-              create: createIid.accordedRight,
-            },
-            linkedEntity: {
-              create: createIid.linkedEntity,
-            },
+            context: { create: createIid.context },
+            service: { create: createIid.service },
+            linkedResource: { create: createIid.linkedResource },
+            linkedClaim: { create: createIid.linkedClaim },
+            accordedRight: { create: createIid.accordedRight },
+            linkedEntity: { create: createIid.linkedEntity },
           },
         });
         break;
@@ -62,26 +49,17 @@ export const syncEventData = async (event: ConvertedEvent) => {
           event.attributes,
           event.type
         );
-        await Promise.all([
-          prisma.context.deleteMany({
-            where: { iid: updateIid.id },
-          }),
-          prisma.service.deleteMany({
-            where: { iid: updateIid.id },
-          }),
-          prisma.linkedResource.deleteMany({
-            where: { iid: updateIid.id },
-          }),
-          prisma.linkedClaim.deleteMany({
-            where: { iid: updateIid.id },
-          }),
-          prisma.accordedRight.deleteMany({
-            where: { iid: updateIid.id },
-          }),
-          prisma.linkedEntity.deleteMany({
-            where: { iid: updateIid.id },
-          }),
-        ]);
+        await prisma.iID.update({
+          where: { id: updateIid.id },
+          data: {
+            context: { deleteMany: {} },
+            service: { deleteMany: {} },
+            linkedResource: { deleteMany: {} },
+            linkedClaim: { deleteMany: {} },
+            accordedRight: { deleteMany: {} },
+            linkedEntity: { deleteMany: {} },
+          },
+        });
         await prisma.iID.update({
           where: { id: updateIid.id },
           data: {
@@ -95,24 +73,12 @@ export const syncEventData = async (event: ConvertedEvent) => {
             capabilityDelegation: updateIid.capabilityDelegation,
             alsoKnownAs: updateIid.alsoKnownAs,
             metadata: JSON.stringify(updateIid.metadata),
-            context: {
-              create: updateIid.context,
-            },
-            service: {
-              create: updateIid.service,
-            },
-            linkedResource: {
-              create: updateIid.linkedResource,
-            },
-            linkedClaim: {
-              create: updateIid.linkedClaim,
-            },
-            accordedRight: {
-              create: updateIid.accordedRight,
-            },
-            linkedEntity: {
-              create: updateIid.linkedEntity,
-            },
+            context: { create: updateIid.context },
+            service: { create: updateIid.service },
+            linkedResource: { create: updateIid.linkedResource },
+            linkedClaim: { create: updateIid.linkedClaim },
+            accordedRight: { create: updateIid.accordedRight },
+            linkedEntity: { create: updateIid.linkedEntity },
           },
         });
         break;
@@ -178,7 +144,9 @@ export const syncEventData = async (event: ConvertedEvent) => {
             approved: Number(createCollection.approved),
             rejected: Number(createCollection.rejected),
             disputed: Number(createCollection.disputed),
-            state: CollectionState[createCollection.state] as any,
+            state: ixo.claims.v1beta1.collectionStateFromJSON(
+              createCollection.state
+            ),
             payments: JSON.stringify(createCollection.payments),
           },
         });
@@ -205,7 +173,9 @@ export const syncEventData = async (event: ConvertedEvent) => {
             approved: Number(updateCollection.approved),
             rejected: Number(updateCollection.rejected),
             disputed: Number(updateCollection.disputed),
-            state: CollectionState[updateCollection.state] as any,
+            state: ixo.claims.v1beta1.collectionStateFromJSON(
+              updateCollection.state
+            ),
             payments: JSON.stringify(updateCollection.payments),
           },
         });
@@ -231,10 +201,21 @@ export const syncEventData = async (event: ConvertedEvent) => {
           event.attributes,
           event.type
         );
+        const evaluation = {
+          collectionId: updateClaim.evaluation!.collection_id,
+          oracle: updateClaim.evaluation!.oracle,
+          agentDid: updateClaim.evaluation!.agent_did,
+          agentAddress: updateClaim.evaluation!.agent_address,
+          status: ixo.claims.v1beta1.evaluationStatusFromJSON(
+            updateClaim.evaluation!.status
+          ),
+          reason: updateClaim.evaluation!.reason,
+          verificationProof: updateClaim.evaluation!.verification_proof,
+          evaluationDate: updateClaim.evaluation!.evaluation_date as any,
+          amount: JSON.stringify(updateClaim.evaluation!.amount),
+        };
         await prisma.claim.update({
-          where: {
-            claimId: updateClaim.claim_id,
-          },
+          where: { claimId: updateClaim.claim_id },
           data: {
             claimId: updateClaim.claim_id,
             collectionId: updateClaim.collection_id,
@@ -243,18 +224,9 @@ export const syncEventData = async (event: ConvertedEvent) => {
             submissionDate: updateClaim.submission_date as any,
             paymentsStatus: JSON.stringify(updateClaim.payments_status),
             evaluation: {
-              create: {
-                collectionId: updateClaim.evaluation!.collection_id,
-                oracle: updateClaim.evaluation!.oracle,
-                agentDid: updateClaim.evaluation!.agent_did,
-                agentAddress: updateClaim.evaluation!.agent_address,
-                status: ixo.claims.v1beta1.evaluationStatusFromJSON(
-                  updateClaim.evaluation!.status
-                ),
-                reason: updateClaim.evaluation!.reason,
-                verificationProof: updateClaim.evaluation!.verification_proof,
-                evaluationDate: updateClaim.evaluation!.evaluation_date as any,
-                amount: JSON.stringify(updateClaim.evaluation!.amount),
+              upsert: {
+                create: evaluation,
+                update: evaluation,
               },
             },
           },
@@ -292,8 +264,8 @@ export const syncEventData = async (event: ConvertedEvent) => {
             supply: createTokenToken.supply,
             paused: createTokenToken.paused,
             stopped: createTokenToken.stopped,
-            retired: JSON.stringify(createTokenToken.retired),
-            cancelled: JSON.stringify(createTokenToken.cancelled),
+            retired: { create: createTokenToken.retired },
+            cancelled: { create: createTokenToken.cancelled },
           },
         });
         break;
@@ -303,9 +275,14 @@ export const syncEventData = async (event: ConvertedEvent) => {
           event.type
         );
         await prisma.tokenClass.update({
-          where: {
-            contractAddress: updateTokenToken.contract_address,
+          where: { contractAddress: updateTokenToken.contract_address },
+          data: {
+            retired: { deleteMany: {} },
+            cancelled: { deleteMany: {} },
           },
+        });
+        await prisma.tokenClass.update({
+          where: { contractAddress: updateTokenToken.contract_address },
           data: {
             minter: updateTokenToken.minter,
             class: updateTokenToken.class,
@@ -317,22 +294,26 @@ export const syncEventData = async (event: ConvertedEvent) => {
             supply: updateTokenToken.supply,
             paused: updateTokenToken.paused,
             stopped: updateTokenToken.stopped,
-            retired: JSON.stringify(updateTokenToken.retired),
-            cancelled: JSON.stringify(updateTokenToken.cancelled),
+            retired: { create: updateTokenToken.retired },
+            cancelled: { create: updateTokenToken.cancelled },
           },
         });
         break;
       case EventTypes.mintToken:
         const mintTokenTokenProperties: TokenPropertiesSDKType =
           getDocFromAttributes(event.attributes, event.type);
-        await prisma.token.create({
+        await prisma.tokenClass.update({
+          where: { name: mintTokenTokenProperties.name },
           data: {
-            id: mintTokenTokenProperties.id,
-            index: mintTokenTokenProperties.index,
-            name: mintTokenTokenProperties.name,
-            collection: mintTokenTokenProperties.collection,
-            tokenData: {
-              create: mintTokenTokenProperties.tokenData,
+            Token: {
+              create: {
+                id: mintTokenTokenProperties.id,
+                index: mintTokenTokenProperties.index,
+                collection: mintTokenTokenProperties.collection,
+                tokenData: {
+                  create: mintTokenTokenProperties.tokenData,
+                },
+              },
             },
           },
         });

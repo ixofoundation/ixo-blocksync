@@ -6,6 +6,7 @@ import * as TransactionSyncHandler from "../sync_handlers/transaction_sync_handl
 import * as EventSyncHandler from "../sync_handlers/event_sync_handler";
 import * as BondSyncHandler from "../sync_handlers/bondsinfo_sync_handler";
 import * as BlockSyncHandler from "../sync_handlers/block_sync_handler";
+import { Event } from "@cosmjs/tendermint-rpc/build/tendermint34/responses";
 import { currentChain } from "./sync_chain";
 import { utils } from "@ixo/impactxclient-sdk";
 import { upperHexFromUint8Array } from "../util/helpers";
@@ -21,17 +22,19 @@ export const startSync = async () => {
   // if already has synced, start from next block
   if (currentBlock !== 1) currentBlock++;
 
+  // console.time("sync");
   while (syncing) {
     try {
-      const [block, txsEvent, bondsInfo] = await Promise.all([
+      const [block, txsEvent, bondsInfo, blockTM] = await Promise.all([
         Proto.getBlockbyHeight(currentBlock),
         Proto.getTxsEvent(currentBlock),
         Proto.getBondsInfo(),
+        Proto.getTMBlockbyHeight(currentBlock),
       ]);
 
-      // if block and events is not null, check if block has txs and then if events has
-      // no trx, means abci layer is behind tendermint layer, wait 3 seconds and try again
-      if (block && txsEvent) {
+      if (block && txsEvent && blockTM) {
+        // if block and events is not null, check if block has txs and then if events has
+        // no trx, means abci layer is behind tendermint layer, wait 3 seconds and try again
         if (block.block?.data?.txs.length && !txsEvent.txs.length) {
           console.log(
             "ABCI Layer behind Tendermint Layer, waiting 3 seconds and trying again"
@@ -39,19 +42,23 @@ export const startSync = async () => {
           await sleep(3000);
           continue;
         }
-      }
 
-      if (block && txsEvent) {
         const blockHeight = Number(block.block!.header!.height.low);
         const timestamp = utils.proto.fromTimestamp(block.block!.header!.time!);
         const blockHash = upperHexFromUint8Array(block.blockId!.hash!);
-
         const transactionResponses = txsEvent.txResponses;
-        const events = transactionResponses.flatMap((txRes) => txRes.events);
 
         await Promise.all([
-          EventSyncHandler.syncEvents(events, blockHeight, timestamp!),
+          EventSyncHandler.syncEvents(
+            blockTM.beginBlockEvents as Event[],
+            transactionResponses.flatMap((txRes) => txRes.events),
+            blockTM.endBlockEvents as Event[],
+            blockHeight,
+            timestamp!
+          ),
           TransactionSyncHandler.syncTransactions(transactionResponses),
+
+          // TODO old bonds trx indexing, need to convert to events based indexing
           BlockSyncHandler.syncBlock(
             transactionResponses,
             String(blockHeight),
@@ -72,7 +79,10 @@ export const startSync = async () => {
           }),
         ]);
 
-        if (blockHeight % 100 === 0) console.log(`Synced Block ${blockHeight}`);
+        if (blockHeight % 100 === 0) {
+          console.log(`Synced Block ${blockHeight}`);
+          // console.timeLog("sync");
+        }
 
         currentBlock++;
       } else {
