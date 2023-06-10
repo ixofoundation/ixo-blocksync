@@ -3,6 +3,12 @@ import { prisma } from "../prisma/prisma_client";
 import { web3StorageRateLimiter } from "../util/rate-limiter";
 import { sleep } from "../util/sleep";
 import { Ipfs } from "@prisma/client";
+import axiosRetry from "axios-retry";
+
+axiosRetry(axios, {
+  retries: 3,
+  retryDelay: () => 500,
+});
 
 export const getIpfsDocument = async (cid: string): Promise<Ipfs> => {
   const doc = await prisma.ipfs.findFirst({
