@@ -346,6 +346,30 @@ app.get("/api/token/entity/:id", async (req, res, next) => {
   }
 });
 
+app.get("/api/token/totalByAddress/:address", async (req, res, next) => {
+  try {
+    const tokens = await TokenHandler.getTokensTotalByAddress(
+      req.params.address,
+      (req.query?.name || "") as string
+    );
+    res.json(tokens);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/api/token/totalForEntities/:address", async (req, res, next) => {
+  try {
+    const tokens = await TokenHandler.getTokensTotalForEntities(
+      req.params.address,
+      (req.query?.name || "") as string
+    );
+    res.json(tokens);
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.get("/api/token/collection/:id", async (req, res, next) => {
   try {
     const tokens = await TokenHandler.getTokensByCollection(req.params.id);

@@ -33,7 +33,7 @@ export const getCollectionClaims = async (
               OR: [{ schemaType: type }, { schemaType: null }],
             }
           : {},
-        !cleanStatus
+        cleanStatus === null
           ? {}
           : cleanStatus === 0
           ? { evaluation: null }
