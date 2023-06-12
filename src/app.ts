@@ -243,7 +243,8 @@ app.get("/api/claims/collection/:id/claims", async (req, res, next) => {
     const claims = await ClaimsHandler.getCollectionClaims(
       req.params.id,
       req.query.status as string,
-      req.query.type as string
+      req.query.type as string,
+      req.query.take as string
     );
     res.json(claims);
   } catch (error) {
@@ -665,7 +666,7 @@ app.get("/api/block/getLastSyncedBlock", async (req, res, next) => {
 // CRON Jobs
 // =================================
 // Get antity type "asset/device" with no externalId and check if it has a deviceCredential
-// Since ipfs rate limit is 200 per minute, we do 100 every 1 minutes to lesser strain
+// Since ipfs rate limit is 200 per minute, we do 100 every 1 minutes to lessen strain
 new CronJob(
   "1 */1 * * * *",
   function () {
