@@ -131,6 +131,7 @@ CREATE TABLE "ClaimCollection" (
 
 -- CreateTable
 CREATE TABLE "Claim" (
+    "aid" SERIAL NOT NULL,
     "claimId" TEXT NOT NULL,
     "agentDid" TEXT NOT NULL,
     "agentAddress" TEXT NOT NULL,
@@ -139,7 +140,7 @@ CREATE TABLE "Claim" (
     "collectionId" TEXT NOT NULL,
     "schemaType" TEXT,
 
-    CONSTRAINT "Claim_pkey" PRIMARY KEY ("claimId")
+    CONSTRAINT "Claim_pkey" PRIMARY KEY ("aid")
 );
 
 -- CreateTable
@@ -457,6 +458,9 @@ CREATE TABLE "Ipfs" (
 
     CONSTRAINT "Ipfs_pkey" PRIMARY KEY ("cid")
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Claim_claimId_key" ON "Claim"("claimId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Evaluation_claimId_key" ON "Evaluation"("claimId");

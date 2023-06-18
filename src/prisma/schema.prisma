@@ -181,7 +181,8 @@ model ClaimCollection {
 }
 
 model Claim {
-  claimId         String          @id
+  aid             Int             @id @default(autoincrement())
+  claimId         String          @unique
   agentDid        String
   agentAddress    String
   submissionDate  DateTime?

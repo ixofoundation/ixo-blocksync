@@ -244,7 +244,9 @@ app.get("/api/claims/collection/:id/claims", async (req, res, next) => {
       req.params.id,
       req.query.status as string,
       req.query.type as string,
-      req.query.take as string
+      req.query.take as string,
+      req.query.cursor as string,
+      req.query.orderBy as any
     );
     res.json(claims);
   } catch (error) {

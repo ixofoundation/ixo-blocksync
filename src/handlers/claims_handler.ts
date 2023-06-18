@@ -15,104 +15,96 @@ export const getCollectionById = async (id: string, includeClaims = false) => {
   return collection;
 };
 
+/**
+ * Will return empty list if not all claims schemaTypes have been fetched from cellnode
+ * if empty list, call getCollectionClaims again after 1 minute to avoid cellnode rate limit
+ */
 export const getCollectionClaims = async (
   id: string,
   status?: string,
   type?: string,
-  take?: string
+  take?: string,
+  cursor?: string,
+  orderBy: "asc" | "desc" = "asc"
 ) => {
-  const cleanTake = take ? parseInt(take) : 1000;
-  const cleanStatus = status ? parseInt(status) : null;
+  const cleanStatus = status ? parseInt(status) : undefined;
 
-  const query = async (take: number, includeTypeNull = false) =>
+  const query = async (
+    take?: string,
+    status?: number,
+    type?: string | null,
+    cursor?: string,
+    includeTypeNull = false
+  ) =>
     await prisma.claim.findMany({
       where: {
         AND: [
           {
             collectionId: id,
           },
-          type
-            ? {
+          type === undefined
+            ? {}
+            : {
                 OR: includeTypeNull
                   ? [{ schemaType: type }, { schemaType: null }]
                   : [{ schemaType: type }],
-              }
-            : {},
-          cleanStatus === null
+              },
+          status === null
             ? {}
-            : cleanStatus === 0
+            : status === 0
             ? { evaluation: null }
-            : { evaluation: { status: cleanStatus } },
+            : { evaluation: { status: status } },
         ],
       },
-      take: take,
+      take: take ? Number(take) : 1000,
+      ...(cursor && {
+        cursor: { aid: Number(cursor) },
+        skip: 1,
+      }),
       include: {
         evaluation: true,
       },
-      orderBy: { submissionDate: "asc" },
+      orderBy: { aid: orderBy },
     });
 
-  // if enought claims with types, return
-  let claims = await query(cleanTake);
-  if (claims.length == cleanTake || !type) return claims;
+  // get claims with schemaType null and fetch schemaType from cellnode
+  let claims = await query("8000", cleanStatus, null);
+  await getClaimTypesFromCellnode(id, claims);
 
-  // refetch claims with null types included to attempt fetch from cellnode
-  claims = await query(cleanTake, true);
-
-  // Get Collection Entity to get Collection Cellnode Service URI
-  const collection = await getCollectionById(id);
-  const entity = await prisma.entity.findFirst({
-    where: {
-      id: collection.entity,
-    },
-    include: {
-      IID: {
-        include: {
-          service: true,
-        },
+  // if any more claims with schemaType null, return empty list
+  claims = await query("1", cleanStatus, null);
+  if (claims.length && !!type) {
+    return {
+      data: [],
+      metaData: {
+        cursor: null,
+        hasNextPage: false,
+        schemaTypesLoaded: false,
       },
+    };
+  }
+
+  claims = await query(take, cleanStatus, type, cursor);
+  if (claims.length == 0) {
+    return {
+      data: [],
+      metaData: {
+        cursor: null,
+        hasNextPage: false,
+        schemaTypesLoaded: true,
+      },
+    };
+  }
+  const nextCursor: any = claims[claims.length - 1].aid;
+  const nextPage = await query("1", cleanStatus, type, nextCursor);
+  return {
+    data: claims,
+    metaData: {
+      cursor: nextCursor,
+      hasNextPage: nextPage.length > 0,
+      schemaTypesLoaded: true,
     },
-  });
-  const cellnodeUri = entity!.IID.service.find((s) =>
-    s.id.includes("cellnode")
-  );
-
-  if (!cellnodeUri) return [];
-
-  const correctClaims = claims.filter((c) => c.schemaType === type);
-  const promises = claims
-    .filter((c) => !c.schemaType)
-    .map(async (c) => {
-      try {
-        const res = await customQueries.cellnode.getPublicDoc(
-          c.claimId,
-          cellnodeUri!.serviceEndpoint
-        );
-        if (!res) return null;
-        const type: string =
-          (res.type || []).find((t) => t.includes("claim:")) ||
-          (res.type || []).find((t) => t.includes("ixo:")) ||
-          (res.type || []).find((t) => !!t);
-        if (!type) return null;
-        const typeSplit = type.split(":");
-        const claim = await prisma.claim.update({
-          where: {
-            claimId: c.claimId,
-          },
-          data: {
-            schemaType: typeSplit[typeSplit.length - 1],
-          },
-        });
-        return claim;
-      } catch (error) {
-        // fail silently if claim data not on cellnode
-        return null;
-      }
-    });
-  const res = await Promise.all(promises);
-  const correctClaims2 = res.filter((c) => c?.schemaType === type) as any[];
-
-  return correctClaims.concat(correctClaims2);
+  };
 };
 
 export const getClaimById = async (id: string) => {
@@ -127,4 +119,49 @@ export const getClaimById = async (id: string) => {
   if (!claim) throw new Error("Claim not found");
   claim!.paymentsStatus = parseJson(claim!.paymentsStatus);
   return claim;
+};
+
+export const getClaimTypesFromCellnode = async (
+  collectionID: string,
+  claims: any[]
+) => {
+  // Get Collection Entity to get Collection Cellnode Service URI
+  const collection = await getCollectionById(collectionID);
+  const entity = await prisma.entity.findFirst({
+    where: { id: collection.entity },
+    include: { IID: { include: { service: true } } },
+  });
+  const cellnodeUri = entity!.IID.service.find((s) =>
+    s.id.includes("cellnode")
+  );
+  if (!cellnodeUri) throw new Error("Cellnode service not found");
+
+  // fetch schemaType from cellnode
+  const promises = claims.map(async (c) => {
+    let type: string | null = null;
+    try {
+      const res = await customQueries.cellnode.getPublicDoc(
+        c.claimId,
+        cellnodeUri.serviceEndpoint
+      );
+      type =
+        (res.type || []).find((t) => t.includes("claim:")) ||
+        (res.type || []).find((t) => t.includes("ixo:")) ||
+        (res.type || []).find((t) => !!t);
+      if (!type) throw new Error("Claim type not found");
+      const typeSplit = type!.split(":");
+      type = typeSplit[typeSplit.length - 1];
+    } catch (error) {
+      // if error 404 then claim not on cellnode, type "unknown"
+      if (error.response?.status === 404) type = "unknown";
+      else console.error(error.message);
+    } finally {
+      if (type)
+        await prisma.claim.update({
+          where: { claimId: c.claimId },
+          data: { schemaType: type },
+        });
+    }
+  });
+  await Promise.all(promises);
 };
