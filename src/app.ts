@@ -243,7 +243,10 @@ app.get("/api/claims/collection/:id/claims", async (req, res, next) => {
     const claims = await ClaimsHandler.getCollectionClaims(
       req.params.id,
       req.query.status as string,
-      req.query.type as string
+      req.query.type as string,
+      req.query.take as string,
+      req.query.cursor as string,
+      req.query.orderBy as any
     );
     res.json(claims);
   } catch (error) {
@@ -340,6 +343,30 @@ app.get("/api/token/id/:id", async (req, res, next) => {
 app.get("/api/token/entity/:id", async (req, res, next) => {
   try {
     const tokens = await TokenHandler.getTokensByEntityId(req.params.id);
+    res.json(tokens);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/api/token/totalByAddress/:address", async (req, res, next) => {
+  try {
+    const tokens = await TokenHandler.getTokensTotalByAddress(
+      req.params.address,
+      (req.query?.name || "") as string
+    );
+    res.json(tokens);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/api/token/totalForEntities/:address", async (req, res, next) => {
+  try {
+    const tokens = await TokenHandler.getTokensTotalForEntities(
+      req.params.address,
+      (req.query?.name || "") as string
+    );
     res.json(tokens);
   } catch (error) {
     next(error);
@@ -641,7 +668,7 @@ app.get("/api/block/getLastSyncedBlock", async (req, res, next) => {
 // CRON Jobs
 // =================================
 // Get antity type "asset/device" with no externalId and check if it has a deviceCredential
-// Since ipfs rate limit is 200 per minute, we do 100 every 1 minutes to lesser strain
+// Since ipfs rate limit is 200 per minute, we do 100 every 1 minutes to lessen strain
 new CronJob(
   "1 */1 * * * *",
   function () {

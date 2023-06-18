@@ -19,7 +19,7 @@ export const syncWasmEventData = async (event: ConvertedEvent) => {
             where: { id: tokenId },
             data: { owner: getWasmAttr(event.attributes, "owner") },
           });
-        }, 150);
+        }, 500);
       } else if (action === "transfer_nft") {
         await prisma.entity.update({
           where: { id: tokenId },
@@ -52,7 +52,7 @@ export const syncWasmEventData = async (event: ConvertedEvent) => {
               },
             });
           },
-          getWasmAttr(message, "from") ? 0 : 200
+          getWasmAttr(message, "from") ? 0 : 500
         );
       }
     }

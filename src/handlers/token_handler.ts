@@ -1,4 +1,4 @@
-import { prisma } from "../prisma/prisma_client";
+import { parseJson, prisma } from "../prisma/prisma_client";
 
 export const getTokenClassByContractAddress = async (
   contractAddress: string
@@ -80,10 +80,59 @@ export const getRetiredTokens = async (id: string) => {
   });
 };
 
-export const getAccountTokens = async (address: string, name: string) => {
+export const getTokensTotalByAddress = async (
+  address: string,
+  name?: string
+) => {
+  const tokens = await getAccountTokens(address, name);
+  Object.keys(tokens).forEach((key) => {
+    const newTokens = {};
+    Object.values(tokens[key].tokens).forEach((t: any) => {
+      if (!newTokens[t.collection]) {
+        newTokens[t.collection] = {
+          amount: t.amount,
+          minted: t.minted,
+          retired: t.retired,
+        };
+      } else {
+        newTokens[t.collection].amount += t.amount;
+        newTokens[t.collection].minted += t.minted;
+        newTokens[t.collection].retired += t.retired;
+      }
+    });
+    tokens[key].tokens = newTokens;
+  });
+  return tokens;
+};
+
+export const getTokensTotalForEntities = async (
+  address: string,
+  name?: string
+) => {
+  const entities =
+    (await prisma.entity.findMany({
+      where: { owner: address, type: "asset/device" },
+      select: { id: true, accounts: true },
+    })) || [];
+
+  const tokens = entities.map(async (entity) => {
+    const entityTokens = await getTokensTotalByAddress(
+      parseJson(entity.accounts).find((a) => a.name === "admin")?.address,
+      name
+    );
+    return { entity: entity.id, tokens: entityTokens };
+  });
+
+  const tokensTotal = await Promise.all(tokens);
+
+  return tokensTotal.filter((t) => Object.keys(t.tokens).length > 0);
+};
+
+export const getAccountTokens = async (address: string, name?: string) => {
   const tokenTransactions = await prisma.tokenTransaction.findMany({
     where: {
       OR: [{ from: address }, { to: address }],
+      ...(name && { Token: { name: name } }),
     },
     include: {
       Token: {
@@ -117,7 +166,14 @@ export const getAccountTokens = async (address: string, name: string) => {
           collection: curr.Token.collection,
           amount: -Number(curr.amount),
           minted: 0,
+          retired: 0,
         };
+      }
+      // if no to it means was retired from this address
+      if (!curr.to) {
+        tokens[curr.Token.name].tokens[curr.tokenId].retired += Number(
+          curr.amount
+        );
       }
       // if to address is same it means it is an incoming transaction in relation to the address
     } else {
@@ -130,6 +186,7 @@ export const getAccountTokens = async (address: string, name: string) => {
           collection: curr.Token.collection,
           amount: Number(curr.amount),
           minted: 0,
+          retired: 0,
         };
       }
       // if no from it means was minted to address
