@@ -320,6 +320,6 @@ export const syncEventData = async (event: ConvertedEvent) => {
         break;
     }
   } catch (error) {
-    console.error(error);
+    console.error(error.message);
   }
 };

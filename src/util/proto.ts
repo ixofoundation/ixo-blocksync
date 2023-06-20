@@ -3,9 +3,7 @@ import { TxResponse } from "@ixo/impactxclient-sdk/types/codegen/cosmos/base/abc
 import { cosmos, utils } from "@ixo/impactxclient-sdk";
 import Long from "long";
 import { prisma } from "../prisma/prisma_client";
-import { getTokensByEntityId } from "../handlers/token_handler";
 import { queryClient, registry, tendermintClient } from "../sync/sync_chain";
-import { getEntityOwner } from "../handlers/entity_handler";
 
 export type Attribute = {
   key: string;
@@ -29,7 +27,7 @@ export const getBlockbyHeight = async (height: number | string) => {
       console.log("Waiting for Blocks");
       return;
     }
-    console.error(error);
+    console.error("getBlockbyHeight: ", error.message);
     return;
   }
 };
@@ -40,7 +38,7 @@ export const getLatestBlock = async () => {
       await queryClient.cosmos.base.tendermint.v1beta1.getLatestBlock();
     return res;
   } catch (error) {
-    console.error(error);
+    console.error("getLatestBlock: ", error.message);
     return;
   }
 };
@@ -53,7 +51,7 @@ export const getTxsEvent = async (height: number) => {
     });
     return res;
   } catch (error) {
-    console.error(error);
+    console.error("getTxsEvent: ", error.message);
     return;
   }
 };
@@ -64,7 +62,7 @@ export const getTMBlockbyHeight = async (height: number) => {
     return res;
   } catch (error) {
     if (!error.toString().includes('"code":-32603'))
-      console.error(error.toString());
+      console.error("getTMBlockbyHeight: ", error.message);
     return;
   }
 };
@@ -74,7 +72,7 @@ export const getBondsInfo = async () => {
     const res = await queryClient.ixo.bonds.v1beta1.bondsDetailed();
     return res;
   } catch (error) {
-    console.error(error);
+    console.error("getBondsInfo: ", error.message);
     return;
   }
 };
@@ -126,7 +124,7 @@ export const decodeMessage = (tx: any) => {
   try {
     return registry.decode(tx);
   } catch (error) {
-    console.error(error);
+    console.error(error.message);
     return;
   }
 };

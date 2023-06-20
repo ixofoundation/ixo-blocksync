@@ -57,6 +57,6 @@ export const syncWasmEventData = async (event: ConvertedEvent) => {
       }
     }
   } catch (error) {
-    console.error(error);
+    console.error(error.message);
   }
 };

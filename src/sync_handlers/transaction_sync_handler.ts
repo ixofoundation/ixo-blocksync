@@ -12,6 +12,16 @@ export const syncTransactions = async (transactionResponses: TxResponse[]) => {
       const messages = await Promise.all(
         transaction.body.messages.map(async (message) => {
           const value = decodeMessage(message);
+          if (!value) return;
+
+          // TODO handle decoded authz msgs into amount/from/to/denom/tokenNames
+          let authZExecMsgs = [];
+          if (message.typeUrl === "/cosmos.authz.v1beta1.MsgExec") {
+            authZExecMsgs = value.msgs.map((m) => decodeMessage(m));
+          }
+          // if (authZExecMsgs.length > 0)
+          //   console.dir(authZExecMsgs[0], { depth: null });
+
           let denoms = Array.isArray(value.amount)
             ? value.amount.map((a) => a.denom)
             : value.amount
@@ -72,7 +82,7 @@ export const syncTransactions = async (transactionResponses: TxResponse[]) => {
 
       // io.emit("Transaction Synced", data);
     } catch (error) {
-      console.error(error);
+      console.error(error.message);
     }
   }
 };
