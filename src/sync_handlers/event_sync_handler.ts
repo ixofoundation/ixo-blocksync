@@ -35,7 +35,7 @@ export const syncEvents = async (
         });
       }
     } catch (error) {
-      console.error(error);
+      console.error(error.message);
     }
   }
 
@@ -65,7 +65,7 @@ export const syncEvents = async (
         });
       }
     } catch (error) {
-      console.error(error);
+      console.error(error.message);
     }
   }
 
@@ -92,7 +92,7 @@ export const syncEvents = async (
         });
       }
     } catch (error) {
-      console.error(error);
+      console.error(error.message);
     }
   }
 };

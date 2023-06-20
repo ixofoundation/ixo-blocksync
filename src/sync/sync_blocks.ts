@@ -13,6 +13,10 @@ import { upperHexFromUint8Array } from "../util/helpers";
 
 let syncing: boolean;
 
+const logIndexTime = false;
+const logFetchTime = false;
+const logSync100Time = true;
+
 export const startSync = async () => {
   syncing = true;
 
@@ -22,17 +26,20 @@ export const startSync = async () => {
   // if already has synced, start from next block
   if (currentBlock !== 1) currentBlock++;
 
-  // console.time("sync");
+  if (logSync100Time) console.time("sync");
   while (syncing) {
     try {
+      if (logFetchTime) console.time("fetch");
       const [block, txsEvent, bondsInfo, blockTM] = await Promise.all([
         Proto.getBlockbyHeight(currentBlock),
         Proto.getTxsEvent(currentBlock),
         Proto.getBondsInfo(),
         Proto.getTMBlockbyHeight(currentBlock),
       ]);
+      if (logFetchTime) console.timeEnd("fetch");
 
       if (block && txsEvent && blockTM) {
+        if (logIndexTime) console.time("index");
         // if block and events is not null, check if block has txs and then if events has
         // no trx, means abci layer is behind tendermint layer, wait 3 seconds and try again
         if (block.block?.data?.txs.length && !txsEvent.txs.length) {
@@ -81,16 +88,17 @@ export const startSync = async () => {
 
         if (blockHeight % 100 === 0) {
           console.log(`Synced Block ${blockHeight}`);
-          // console.timeLog("sync");
+          if (logSync100Time) console.timeLog("sync");
         }
 
+        if (logIndexTime) console.timeEnd("index");
         currentBlock++;
       } else {
         console.log(`Next block: ${currentBlock}`);
         await sleep(3000);
       }
     } catch (error) {
-      console.error(`Error Adding Block ${currentBlock}`);
+      console.error(`Error Adding Block ${currentBlock}: ${error}`);
     }
   }
 };
