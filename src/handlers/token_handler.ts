@@ -208,6 +208,51 @@ export const getAccountTokens = async (address: string, name?: string) => {
   return tokens;
 };
 
+export const getTokensTotalAmountByAddress = async (
+  address: string,
+  name?: string
+) => {
+  const tokens = await getAccountTokens(address, name);
+  Object.keys(tokens).forEach((key) => {
+    let amount = Object.values(tokens[key].tokens).reduce(
+      (r: any, t: any) => r + (t.amount ?? 0),
+      0
+    );
+    tokens[key] = amount;
+  });
+  return tokens;
+};
+
+export const getTokensTotalMintedByAddress = async (
+  address: string,
+  name?: string
+) => {
+  const tokens = await getAccountTokens(address, name);
+  Object.keys(tokens).forEach((key) => {
+    let minted = Object.values(tokens[key].tokens).reduce(
+      (r: any, t: any) => r + (t.minted ?? 0),
+      0
+    );
+    tokens[key] = minted;
+  });
+  return tokens;
+};
+
+export const getTokensTotalRetiredByAddress = async (
+  address: string,
+  name?: string
+) => {
+  const tokens = await getAccountTokens(address, name);
+  Object.keys(tokens).forEach((key) => {
+    let retired = Object.values(tokens[key].tokens).reduce(
+      (r: any, t: any) => r + (t.retired ?? 0),
+      0
+    );
+    tokens[key] = retired;
+  });
+  return tokens;
+};
+
 // export const getTokenRetiredAmount = async (name: string, id: string) => {
 //   const tokenClass = await prisma.tokenClass.findFirst({
 //     where: { name: name },

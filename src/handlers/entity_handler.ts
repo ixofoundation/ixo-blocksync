@@ -351,3 +351,33 @@ export const getEntitiesExternalId = async (amount: number) => {
 
   return entities;
 };
+
+export const getEntityCollectionsAndEntityCountByOwnerAddress = async (
+  address: string
+) => {
+  const entities = await getEntitiesByOwnerAddress(address);
+  const groups = {};
+  for (const entity of entities) {
+    const parent = entity.context.find((c) => c.key === "class")?.val;
+    if (!parent) continue;
+    if (groups[parent]) groups[parent].push(entity);
+    else groups[parent] = [entity];
+  }
+  const res: any[] = [];
+  for (const [colId, ents] of Object.entries(groups)) {
+    const collection = await getEntityById(colId);
+    if (collection.type !== "asset/collection") continue;
+    res.push({
+      collection,
+      entities: Object.values((ents as any[]) ?? [])?.length ?? 0,
+    });
+  }
+  // get all collections and add assets as empty array
+  const collections = await getEntitiesByType("asset/collection");
+  collections.forEach((c) =>
+    res.some((r) => r.collection.id === c.id)
+      ? null
+      : res.push({ collection: c, entities: 0 })
+  );
+  return res;
+};
