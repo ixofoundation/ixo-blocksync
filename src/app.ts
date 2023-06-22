@@ -399,7 +399,7 @@ app.get("/api/token/collection/:id", async (req, res, next) => {
 
 app.get("/api/app/token/amountByAddress/:address", async (req, res, next) => {
   try {
-    const tokens = await TokenHandler.getTokensTotalRetiredByAddress(
+    const tokens = await TokenHandler.getTokensTotalAmountByAddress(
       req.params.address,
       (req.query?.name || "") as string
     );
@@ -411,7 +411,7 @@ app.get("/api/app/token/amountByAddress/:address", async (req, res, next) => {
 
 app.get("/api/app/token/mintedByAddress/:address", async (req, res, next) => {
   try {
-    const tokens = await TokenHandler.getTokensTotalRetiredByAddress(
+    const tokens = await TokenHandler.getTokensTotalMintedByAddress(
       req.params.address,
       (req.query?.name || "") as string
     );
