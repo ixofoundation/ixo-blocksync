@@ -22,7 +22,39 @@
         }
       }
     },
+    "/api/ipfs/{cid}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "cid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/api/entity/byId/{id}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/entity/byExternalId/{id}": {
       "get": {
         "description": "",
         "parameters": [
@@ -87,6 +119,24 @@
         }
       }
     },
+    "/api/entity/byOwnerDid/{did}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "did",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/entity/collections": {
       "get": {
         "description": "",
@@ -134,6 +184,24 @@
         }
       }
     },
+    "/api/entity/collectionsByOwnerDid/{did}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "did",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/entity/owner/{id}": {
       "get": {
         "description": "",
@@ -152,7 +220,7 @@
         }
       }
     },
-    "/api/entity/tokens/{id}": {
+    "/api/entity/lasttransferred/{id}": {
       "get": {
         "description": "",
         "parameters": [
@@ -170,7 +238,86 @@
         }
       }
     },
-    "/api/entity/lasttransferred/{id}": {
+    "/api/app/entity/collectionsAndEntityCountByOwnerAddress/{address}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/claims/collection/{id}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/claims/collection/{id}/claims": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "take",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "orderBy",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/claims/claim/{id}": {
       "get": {
         "description": "",
         "parameters": [
@@ -242,7 +389,7 @@
         }
       }
     },
-    "/api/token/ids/{address}": {
+    "/api/token/byAddress/{address}": {
       "get": {
         "description": "",
         "parameters": [
@@ -260,7 +407,7 @@
         }
       }
     },
-    "/api/token/balances/{address}": {
+    "/api/token/retired/{address}": {
       "get": {
         "description": "",
         "parameters": [
@@ -332,6 +479,42 @@
         }
       }
     },
+    "/api/token/totalByAddress/{address}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/token/totalForEntities/{address}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/token/collection/{id}": {
       "get": {
         "description": "",
@@ -350,12 +533,12 @@
         }
       }
     },
-    "/api/token/mintauth/{grantee}": {
+    "/api/app/token/amountByAddress/{address}": {
       "get": {
         "description": "",
         "parameters": [
           {
-            "name": "grantee",
+            "name": "address",
             "in": "path",
             "required": true,
             "type": "string"
@@ -368,12 +551,12 @@
         }
       }
     },
-    "/api/token/fullmintauth/{grantee}": {
+    "/api/app/token/mintedByAddress/{address}": {
       "get": {
         "description": "",
         "parameters": [
           {
-            "name": "grantee",
+            "name": "address",
             "in": "path",
             "required": true,
             "type": "string"
@@ -386,42 +569,12 @@
         }
       }
     },
-    "/api/token/retired/{name}/{id}": {
+    "/api/app/token/retiredByAddress/{address}": {
       "get": {
         "description": "",
         "parameters": [
           {
-            "name": "name",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/token/cancelled/{name}/{id}": {
-      "get": {
-        "description": "",
-        "parameters": [
-          {
-            "name": "name",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "id",
+            "name": "address",
             "in": "path",
             "required": true,
             "type": "string"
@@ -860,50 +1013,29 @@
             "in": "path",
             "required": true,
             "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/transactions/getTokenTransactions/{address}": {
-      "get": {
-        "description": "",
-        "parameters": [
-          {
-            "name": "address",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/transactions/listTransactionsByType/{type(*)}": {
-      "get": {
-        "description": "",
-        "parameters": [
-          {
-            "name": "type(*)",
-            "in": "path",
-            "required": true,
-            "type": "string"
           },
           {
-            "name": "page",
+            "name": "take",
             "in": "query",
             "type": "string"
           },
           {
-            "name": "size",
+            "name": "cursor",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "denom",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "tokenName",
             "in": "query",
             "type": "string"
           }
