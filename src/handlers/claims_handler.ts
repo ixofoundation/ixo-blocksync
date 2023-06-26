@@ -1,5 +1,6 @@
 import { parseJson, prisma } from "../prisma/prisma_client";
 import { customQueries } from "@ixo/impactxclient-sdk";
+import { chunkArray } from "../util/helpers";
 
 export const getCollectionById = async (id: string, includeClaims = false) => {
   const collection = await prisma.claimCollection.findFirst({
@@ -163,5 +164,7 @@ export const getClaimTypesFromCellnode = async (
         });
     }
   });
-  await Promise.all(promises);
+  for (let promisesChunk of chunkArray(promises, 5)) {
+    await Promise.all(promisesChunk);
+  }
 };

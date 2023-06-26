@@ -225,6 +225,21 @@ app.get("/api/entity/lasttransferred/:id", async (req, res, next) => {
   }
 });
 
+app.get(
+  "/api/app/entity/collectionsAndEntityCountByOwnerAddress/:address",
+  async (req, res, next) => {
+    try {
+      const entities =
+        await EntityHandler.getEntityCollectionsAndEntityCountByOwnerAddress(
+          req.params.address
+        );
+      res.json(entities);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 // =================================
 // Claims
 // =================================
@@ -376,6 +391,42 @@ app.get("/api/token/totalForEntities/:address", async (req, res, next) => {
 app.get("/api/token/collection/:id", async (req, res, next) => {
   try {
     const tokens = await TokenHandler.getTokensByCollection(req.params.id);
+    res.json(tokens);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/api/app/token/amountByAddress/:address", async (req, res, next) => {
+  try {
+    const tokens = await TokenHandler.getTokensTotalAmountByAddress(
+      req.params.address,
+      (req.query?.name || "") as string
+    );
+    res.json(tokens);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/api/app/token/mintedByAddress/:address", async (req, res, next) => {
+  try {
+    const tokens = await TokenHandler.getTokensTotalMintedByAddress(
+      req.params.address,
+      (req.query?.name || "") as string
+    );
+    res.json(tokens);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/api/app/token/retiredByAddress/:address", async (req, res, next) => {
+  try {
+    const tokens = await TokenHandler.getTokensTotalRetiredByAddress(
+      req.params.address,
+      (req.query?.name || "") as string
+    );
     res.json(tokens);
   } catch (error) {
     next(error);
