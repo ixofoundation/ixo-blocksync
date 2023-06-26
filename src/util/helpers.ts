@@ -38,3 +38,8 @@ export const splitAttributesByKeyValue = (
   if (currentGroup.length > 0) result.push(currentGroup);
   return result;
 };
+
+export const chunkArray = <T>(arr: T[], size: number): T[][] =>
+  [...Array(Math.ceil(arr.length / size))].map((_, i) =>
+    arr.slice(size * i, size + size * i)
+  );
