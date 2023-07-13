@@ -328,7 +328,12 @@ export const getEntitiesExternalId = async (amount: number) => {
         let externalId: string;
 
         // handling for cookstoves, can add more below if device credential looks different
-        const cookstoveCredentialId = json.credentialSubject?.id?.split("?id=");
+        let cookstoveCredentialId: string[];
+        cookstoveCredentialId = json.credentialSubject?.id?.split(
+          "emerging.eco/devices/"
+        );
+        if (!cookstoveCredentialId || cookstoveCredentialId.length < 2)
+          cookstoveCredentialId = json.credentialSubject?.id?.split("?id=");
         if (!cookstoveCredentialId || cookstoveCredentialId.length < 2)
           return e;
         externalId = cookstoveCredentialId[1];
