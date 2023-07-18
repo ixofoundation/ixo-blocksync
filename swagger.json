@@ -515,6 +515,42 @@
         }
       }
     },
+    "/api/token/totalForCollection/{did}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "did",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/token/totalForCollection/{did}/amounts": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "did",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/token/collection/{id}": {
       "get": {
         "description": "",
