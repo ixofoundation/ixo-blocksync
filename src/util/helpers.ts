@@ -43,3 +43,8 @@ export const chunkArray = <T>(arr: T[], size: number): T[][] =>
   [...Array(Math.ceil(arr.length / size))].map((_, i) =>
     arr.slice(size * i, size + size * i)
   );
+
+export const countTokensByType = (
+  tokens = {},
+  type: "amount" | "minted" | "retired"
+) => Object.values(tokens).reduce((r: any, t: any) => r + (t[type] ?? 0), 0);

@@ -13,6 +13,7 @@ export const getEntityById = async (id: string) => {
           accordedRight: true,
           linkedEntity: true,
           linkedResource: true,
+          linkedClaim: true,
           service: true,
         },
       },
@@ -23,6 +24,7 @@ export const getEntityById = async (id: string) => {
   const accordedRightIds = baseEntity!.IID.accordedRight.map((a) => a.id);
   const linkedResourceIds = baseEntity!.IID.linkedResource.map((r) => r.id);
   const linkedEntityIds = baseEntity!.IID.linkedEntity.map((e) => e.id);
+  const linkedClaimIds = baseEntity!.IID.linkedClaim.map((e) => e.id);
 
   for (const key of Object.keys(baseEntity!.IID)) {
     baseEntity[key] = baseEntity!.IID[key];
@@ -41,6 +43,7 @@ export const getEntityById = async (id: string) => {
               accordedRight: true,
               linkedEntity: true,
               linkedResource: true,
+              linkedClaim: true,
               service: true,
             },
           },
@@ -73,6 +76,12 @@ export const getEntityById = async (id: string) => {
         if (!linkedEntityIds.includes(linkedEntity.id)) {
           baseEntity!.linkedEntity.push(linkedEntity);
           linkedEntityIds.push(linkedEntity.id);
+        }
+      }
+      for (const linkedClaim of record!.IID.linkedClaim) {
+        if (!linkedClaimIds.includes(linkedClaim.id)) {
+          baseEntity!.linkedClaim.push(linkedClaim);
+          linkedClaimIds.push(linkedClaim.id);
         }
       }
     }
@@ -328,7 +337,12 @@ export const getEntitiesExternalId = async (amount: number) => {
         let externalId: string;
 
         // handling for cookstoves, can add more below if device credential looks different
-        const cookstoveCredentialId = json.credentialSubject?.id?.split("?id=");
+        let cookstoveCredentialId: string[];
+        cookstoveCredentialId = json.credentialSubject?.id?.split(
+          "emerging.eco/devices/"
+        );
+        if (!cookstoveCredentialId || cookstoveCredentialId.length < 2)
+          cookstoveCredentialId = json.credentialSubject?.id?.split("?id=");
         if (!cookstoveCredentialId || cookstoveCredentialId.length < 2)
           return e;
         externalId = cookstoveCredentialId[1];

@@ -1,4 +1,5 @@
 import { parseJson, prisma } from "../prisma/prisma_client";
+import { countTokensByType } from "../util/helpers";
 
 export const getTokenClassByContractAddress = async (
   contractAddress: string
@@ -214,11 +215,7 @@ export const getTokensTotalAmountByAddress = async (
 ) => {
   const tokens = await getAccountTokens(address, name);
   Object.keys(tokens).forEach((key) => {
-    let amount = Object.values(tokens[key].tokens).reduce(
-      (r: any, t: any) => r + (t.amount ?? 0),
-      0
-    );
-    tokens[key] = amount;
+    tokens[key] = countTokensByType(tokens[key].tokens, "amount");
   });
   return tokens;
 };
@@ -229,11 +226,7 @@ export const getTokensTotalMintedByAddress = async (
 ) => {
   const tokens = await getAccountTokens(address, name);
   Object.keys(tokens).forEach((key) => {
-    let minted = Object.values(tokens[key].tokens).reduce(
-      (r: any, t: any) => r + (t.minted ?? 0),
-      0
-    );
-    tokens[key] = minted;
+    tokens[key] = countTokensByType(tokens[key].tokens, "minted");
   });
   return tokens;
 };
@@ -244,36 +237,60 @@ export const getTokensTotalRetiredByAddress = async (
 ) => {
   const tokens = await getAccountTokens(address, name);
   Object.keys(tokens).forEach((key) => {
-    let retired = Object.values(tokens[key].tokens).reduce(
-      (r: any, t: any) => r + (t.retired ?? 0),
-      0
-    );
-    tokens[key] = retired;
+    tokens[key] = countTokensByType(tokens[key].tokens, "retired");
   });
   return tokens;
 };
 
-// export const getTokenRetiredAmount = async (name: string, id: string) => {
-//   const tokenClass = await prisma.tokenClass.findFirst({
-//     where: { name: name },
-//   });
-//   if (tokenClass) {
-//     const retired = parseJson(tokenClass.retired);
-//     if (retired.length > 0) {
-//       const tokens = retired.filter((r) => r.id === id);
-//       if (tokens.length > 0) {
-//         return {
-//           id: tokens[0].id,
-//           amount: tokens[0].amount,
-//           owner: tokens[0].owner,
-//         };
-//       } else {
-//         return {};
-//       }
-//     } else {
-//       return {};
-//     }
-//   } else {
-//     return {};
-//   }
-// };
+export const getTokensTotalForCollection = async (
+  did: string,
+  name?: string
+) => {
+  const entities = await prisma.entity.findMany({
+    where: {
+      IID: {
+        context: {
+          some: { key: "class", val: did },
+        },
+      },
+    },
+    select: { id: true, accounts: true },
+  });
+
+  const tokens = entities.map(async (entity) => {
+    const entityTokens = await getTokensTotalByAddress(
+      parseJson(entity.accounts).find((a) => a.name === "admin")?.address,
+      name
+    );
+    return { entity: entity.id, tokens: entityTokens };
+  });
+
+  const tokensTotal = await Promise.all(tokens);
+
+  return tokensTotal.filter((t) => Object.keys(t.tokens).length > 0);
+};
+
+export const getTokensTotalForCollectionAmounts = async (
+  did: string,
+  name?: string
+) => {
+  const tokens = await getTokensTotalForCollection(did, name);
+  let newTokens = {};
+  tokens.forEach((t) => {
+    Object.keys(t.tokens).forEach((key) => {
+      const amounts = {
+        amount: t.tokens[key].tokens[did].amount,
+        minted: t.tokens[key].tokens[did].minted,
+        retired: t.tokens[key].tokens[did].retired,
+      };
+      if (!newTokens[key]) {
+        newTokens[key] = amounts;
+      } else {
+        newTokens[key].amount += amounts.amount;
+        newTokens[key].retired += amounts.retired;
+        newTokens[key].minted += amounts.minted;
+      }
+    });
+  });
+  return newTokens;
+};
