@@ -1,85 +1,5 @@
-import { parseJson, prisma } from "../prisma/prisma_client";
+import { prisma } from "../prisma/prisma_client";
 import { countTokensByType } from "../util/helpers";
-
-export const getTokenClassByContractAddress = async (
-  contractAddress: string
-) => {
-  const tokenClass = await prisma.tokenClass.findFirst({
-    where: { contractAddress: contractAddress },
-    include: {
-      retired: true,
-      cancelled: true,
-    },
-  });
-  return tokenClass;
-};
-
-export const getTokenClassByName = async (name: string) => {
-  const tokenClass = await prisma.tokenClass.findFirst({
-    where: { name: name },
-    include: {
-      retired: true,
-      cancelled: true,
-    },
-  });
-  return tokenClass;
-};
-
-export const getTokenClassesByClass = async (id: string) => {
-  const tokenClasses = await prisma.tokenClass.findMany({
-    where: { class: id },
-    include: {
-      retired: true,
-      cancelled: true,
-    },
-  });
-  return tokenClasses;
-};
-
-export const getTokensByName = async (name: string) => {
-  return prisma.token.findMany({
-    where: { name: name },
-    include: { tokenData: true },
-  });
-};
-
-export const getTokenById = async (id: string) => {
-  return prisma.token.findFirst({
-    where: { id: id },
-    include: { tokenData: true },
-  });
-};
-
-export const getTokensByEntityId = async (id: string) => {
-  return prisma.token.findMany({
-    where: {
-      tokenData: {
-        some: { id: id },
-      },
-    },
-    include: {
-      tokenData: true,
-    },
-  });
-};
-
-export const getTokensByCollection = async (id: string) => {
-  return prisma.token.findMany({
-    where: { collection: id },
-    include: {
-      tokenData: true,
-    },
-  });
-};
-
-export const getRetiredTokens = async (id: string) => {
-  return prisma.token.findMany({
-    where: { collection: id },
-    include: {
-      tokenData: true,
-    },
-  });
-};
 
 export const getTokensTotalByAddress = async (
   address: string,
@@ -118,7 +38,7 @@ export const getTokensTotalForEntities = async (
 
   const tokens = entities.map(async (entity) => {
     const entityTokens = await getTokensTotalByAddress(
-      parseJson(entity.accounts).find((a) => a.name === "admin")?.address,
+      (entity.accounts as any).find((a) => a.name === "admin")?.address,
       name
     );
     return { entity: entity.id, tokens: entityTokens };
@@ -259,7 +179,7 @@ export const getTokensTotalForCollection = async (
 
   const tokens = entities.map(async (entity) => {
     const entityTokens = await getTokensTotalByAddress(
-      parseJson(entity.accounts).find((a) => a.name === "admin")?.address,
+      (entity.accounts as any).find((a) => a.name === "admin")?.address,
       name
     );
     return { entity: entity.id, tokens: entityTokens };

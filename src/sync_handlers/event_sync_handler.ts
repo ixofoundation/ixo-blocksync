@@ -12,77 +12,29 @@ export const syncEvents = async (
   blockHeight: number,
   timestamp: Date
 ) => {
-  // First index begin block events
-  for (const event of beginBlockEvents) {
+  let i = 0;
+  // First index begin block events, then tx events, then end block events
+  for (const event of beginBlockEvents.concat(txEvents, endBlockEvents)) {
     try {
-      const eventDoc = decodeEvent(event);
-
-      if (EventTypesArray.includes(eventDoc.type)) {
-        await syncEventData(eventDoc);
+      if (EventTypesArray.includes(event.type)) {
+        if (i === 0) {
+          console.log(`Syncing Events for Block ${blockHeight}`);
+          i++;
+        }
+        const eventDoc = decodeEvent(event);
+        await syncEventData(eventDoc, blockHeight, timestamp);
         await createEvent({
           type: eventDoc.type,
           attributes: eventDoc.attributes,
           blockHeight: blockHeight,
           timestamp: timestamp,
         });
-      } else if (eventDoc.type === "wasm") {
-        await syncWasmEventData(eventDoc);
-        await createEvent({
-          type: eventDoc.type,
-          attributes: eventDoc.attributes,
-          blockHeight: blockHeight,
-          timestamp: timestamp,
-        });
-      }
-    } catch (error) {
-      console.error(error.message);
-    }
-  }
-
-  // then index tx events
-  if (txEvents.length)
-    console.log(`Syncing tx Events for Block ${blockHeight}`);
-
-  for (const event of txEvents) {
-    try {
-      const eventDoc = decodeEvent(event);
-
-      if (EventTypesArray.includes(eventDoc.type)) {
-        await syncEventData(eventDoc);
-        await createEvent({
-          type: eventDoc.type,
-          attributes: eventDoc.attributes,
-          blockHeight: blockHeight,
-          timestamp: timestamp,
-        });
-      } else if (eventDoc.type === "wasm") {
-        await syncWasmEventData(eventDoc);
-        await createEvent({
-          type: eventDoc.type,
-          attributes: eventDoc.attributes,
-          blockHeight: blockHeight,
-          timestamp: timestamp,
-        });
-      }
-    } catch (error) {
-      console.error(error.message);
-    }
-  }
-
-  // lastly index end block events
-  for (const event of endBlockEvents) {
-    try {
-      const eventDoc = decodeEvent(event);
-
-      if (EventTypesArray.includes(eventDoc.type)) {
-        await syncEventData(eventDoc);
-        await createEvent({
-          type: eventDoc.type,
-          attributes: eventDoc.attributes,
-          blockHeight: blockHeight,
-          timestamp: timestamp,
-        });
-      } else if (eventDoc.type === "wasm") {
+      } else if (event.type === "wasm") {
+        if (i === 0) {
+          console.log(`Syncing Events for Block ${blockHeight}`);
+          i++;
+        }
+        const eventDoc = decodeEvent(event);
         await syncWasmEventData(eventDoc);
         await createEvent({
           type: eventDoc.type,

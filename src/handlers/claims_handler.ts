@@ -1,18 +1,12 @@
-import { parseJson, prisma } from "../prisma/prisma_client";
+import { prisma } from "../prisma/prisma_client";
 import { customQueries } from "@ixo/impactxclient-sdk";
 import { chunkArray } from "../util/helpers";
 
-export const getCollectionById = async (id: string, includeClaims = false) => {
+export const getCollectionById = async (id: string) => {
   const collection = await prisma.claimCollection.findFirst({
-    where: {
-      id: id,
-    },
-    include: {
-      Claim: includeClaims,
-    },
+    where: { id: id },
   });
   if (!collection) throw new Error("Collection not found");
-  collection!.payments = parseJson(collection!.payments);
   return collection;
 };
 
@@ -106,20 +100,6 @@ export const getCollectionClaims = async (
       schemaTypesLoaded: true,
     },
   };
-};
-
-export const getClaimById = async (id: string) => {
-  const claim = await prisma.claim.findFirst({
-    where: {
-      claimId: id,
-    },
-    include: {
-      evaluation: true,
-    },
-  });
-  if (!claim) throw new Error("Claim not found");
-  claim!.paymentsStatus = parseJson(claim!.paymentsStatus);
-  return claim;
 };
 
 export const getClaimTypesFromCellnode = async (

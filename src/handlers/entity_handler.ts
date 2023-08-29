@@ -1,4 +1,4 @@
-import { parseJson, prisma } from "../prisma/prisma_client";
+import { prisma } from "../prisma/prisma_client";
 import { base64ToJson } from "../util/helpers";
 import { IPFS_SERVICE_MAPPING } from "../util/secrets";
 import { getIpfsDocument } from "./ipfs_handler";
@@ -98,10 +98,6 @@ export const getEntityById = async (id: string) => {
     settings[setting.description] = setting;
   }
   baseEntity["settings"] = settings;
-
-  baseEntity.verificationMethod = parseJson(baseEntity.verificationMethod);
-  baseEntity.metadata = parseJson(baseEntity.metadata);
-  baseEntity.accounts = parseJson(baseEntity.accounts);
 
   // Custom
   if (IPFS_SERVICE_MAPPING) {
@@ -261,29 +257,6 @@ export const getEntitiesByType = async (type?: string) => {
   return res;
 };
 
-export const getEntityLastTransferredDate = async (id: string) => {
-  const messages = await prisma.message.findMany({
-    where: {
-      typeUrl: "/ixo.entity.v1beta1.MsgTransferEntity",
-      Transaction: {
-        code: 0,
-      },
-    },
-    orderBy: {
-      id: "desc",
-    },
-    include: {
-      Transaction: true,
-    },
-  });
-  const messagesFiltered = messages.filter((m) => parseJson(m.value).id === id);
-  if (messagesFiltered.length > 0) {
-    return messagesFiltered[0].Transaction.time.toUTCString();
-  } else {
-    return null;
-  }
-};
-
 // Return entity with externalId if exists otherwise return null
 export const getEntityByExternalId = async (externalid: string) => {
   const entity1: any = await prisma.entity.findFirst({
@@ -307,7 +280,7 @@ export const getEntityOwner = async (id: string): Promise<string> => {
 };
 
 // Helper function to fetch "asset/device" entities with null externalId and update them
-export const getEntitiesExternalId = async (amount: number) => {
+export const getEntitiesExternalId = async (amount: number, isCron = false) => {
   const unknownEntities = await prisma.entity.findMany({
     where: { AND: [{ externalId: null }, { type: "asset/device" }] },
     include: {
@@ -357,7 +330,8 @@ export const getEntitiesExternalId = async (amount: number) => {
           },
         });
       } catch (error) {
-        console.error(error);
+        // if isCron the fail silently
+        if (!isCron) console.error(error);
         return e;
       }
     })

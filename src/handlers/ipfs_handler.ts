@@ -24,10 +24,26 @@ export const getIpfsDocument = async (cid: string): Promise<Ipfs> => {
     await sleep(1000);
     return await getIpfsDocument(cid);
   }
-  const res = await axios.get(`https://${cid}.ipfs.cf-ipfs.com`, {
-    responseType: "arraybuffer",
-  });
-  // const res = await axios.get(`https://ipfs.io/ipfs/${cid}`);
+
+  let res;
+  try {
+    res = await axios.get(`https://${cid}.ipfs.cf-ipfs.com`, {
+      responseType: "arraybuffer",
+    });
+    //  res = await axios.get(`https://ipfs.io/ipfs/${cid}`);
+  } catch (error) {
+    if (error.response && error.response.status === 404) {
+      throw new Error(`failed to get ${cid} - [404] Not Found`);
+    }
+    if (error.response && error.response.status === 429) {
+      await sleep(1000);
+      return await getIpfsDocument(cid);
+    }
+    if (error.response && error.response.status === 500) {
+      throw new Error(`failed to get ${cid} - [500] Internal Server Error`);
+    }
+    throw new Error(`failed to get ${cid} - ${error}`);
+  }
 
   if (res.status !== 200) {
     if (res.status === 429) {

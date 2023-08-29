@@ -12,21 +12,3 @@ export const createEvent = async (
     return;
   }
 };
-
-export const getEventsByType = async (
-  type: string,
-  page?: string,
-  size?: string
-) => {
-  if (page && size) {
-    return prisma.event.findMany({
-      where: { type: type },
-      skip: Number(size) * (Number(page) - 1),
-      take: Number(size),
-    });
-  } else {
-    return prisma.event.findMany({
-      where: { type: type },
-    });
-  }
-};

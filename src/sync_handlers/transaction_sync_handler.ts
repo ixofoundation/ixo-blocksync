@@ -47,7 +47,7 @@ export const syncTransactions = async (transactionResponses: TxResponse[]) => {
 
           return {
             typeUrl: message.typeUrl,
-            value: JSON.stringify(value),
+            value: value,
             from:
               value.fromAddress ||
               value.ownerAddress ||
@@ -72,7 +72,7 @@ export const syncTransactions = async (transactionResponses: TxResponse[]) => {
           hash: transactionResponse.txhash,
           height: Number(transactionResponse.height),
           code: transactionResponse.code,
-          fee: JSON.stringify(transaction.authInfo.fee),
+          fee: transaction.authInfo.fee,
           gasUsed: transactionResponse.gasUsed.toString(),
           gasWanted: transactionResponse.gasWanted.toString(),
           time: new Date(transactionResponse.timestamp),

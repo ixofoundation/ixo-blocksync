@@ -4,12 +4,9 @@ import { sleep } from "../util/sleep";
 import * as BlockHandler from "../handlers/block_handler";
 import * as TransactionSyncHandler from "../sync_handlers/transaction_sync_handler";
 import * as EventSyncHandler from "../sync_handlers/event_sync_handler";
-import * as BondSyncHandler from "../sync_handlers/bondsinfo_sync_handler";
-import * as BlockSyncHandler from "../sync_handlers/block_sync_handler";
 import { Event } from "@cosmjs/tendermint-rpc/build/tendermint34/responses";
 import { currentChain } from "./sync_chain";
 import { utils } from "@ixo/impactxclient-sdk";
-import { upperHexFromUint8Array } from "../util/helpers";
 
 let syncing: boolean;
 
@@ -30,10 +27,9 @@ export const startSync = async () => {
   while (syncing) {
     try {
       if (logFetchTime) console.time("fetch");
-      const [block, txsEvent, bondsInfo, blockTM] = await Promise.all([
+      const [block, txsEvent, blockTM] = await Promise.all([
         Proto.getBlockbyHeight(currentBlock),
         Proto.getTxsEvent(currentBlock),
-        Proto.getBondsInfo(),
         Proto.getTMBlockbyHeight(currentBlock),
       ]);
       if (logFetchTime) console.timeEnd("fetch");
@@ -52,7 +48,6 @@ export const startSync = async () => {
 
         const blockHeight = Number(block.block!.header!.height.low);
         const timestamp = utils.proto.fromTimestamp(block.block!.header!.time!);
-        const blockHash = upperHexFromUint8Array(block.blockId!.hash!);
         const transactionResponses = txsEvent.txResponses;
 
         await Promise.all([
@@ -65,21 +60,7 @@ export const startSync = async () => {
           ),
           TransactionSyncHandler.syncTransactions(transactionResponses),
 
-          // TODO old bonds trx indexing, need to convert to events based indexing
-          BlockSyncHandler.syncBlock(
-            transactionResponses,
-            String(blockHeight),
-            String(timestamp)
-          ),
-          BondSyncHandler.syncBondsInfo(bondsInfo!, timestamp!),
-
-          BlockHandler.createBlock(
-            blockHeight,
-            timestamp!,
-            blockHash,
-            block,
-            txsEvent
-          ),
+          BlockHandler.createBlock(blockHeight, timestamp!, block, txsEvent),
           ChainHandler.updateChain({
             chainId: currentChain.chainId,
             blockHeight: blockHeight,

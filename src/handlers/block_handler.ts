@@ -6,25 +6,21 @@ import { upperHexFromUint8Array } from "../util/helpers";
 export const createBlock = async (
   blockHeight: number,
   timestamp: Date,
-  blockHash: string,
   block: GetBlockByHeightResponse,
   txsEvent: GetTxsEventResponse
 ) => {
   try {
-    let total_gas = 0;
-    for (const txRes of txsEvent.txResponses) {
-      total_gas += txRes.gasUsed.low;
-    }
-    const proposer_address = upperHexFromUint8Array(
-      block!.block!.header!.proposerAddress
-    );
-
     const blockDoc = {
       height: blockHeight,
-      hash: blockHash,
+      hash: upperHexFromUint8Array(block.blockId!.hash!),
       num_txs: txsEvent.txs.length,
-      total_gas: total_gas,
-      proposer_address: proposer_address,
+      total_gas: txsEvent.txResponses.reduce(
+        (acc, txRes) => acc + txRes.gasUsed.low,
+        0
+      ),
+      proposer_address: upperHexFromUint8Array(
+        block!.block!.header!.proposerAddress
+      ),
       timestamp: timestamp,
     };
     const res = await prisma.block.create({ data: blockDoc });
@@ -33,15 +29,6 @@ export const createBlock = async (
     console.error(error);
     return;
   }
-};
-
-export const getLastSyncedBlock = async () => {
-  return prisma.block.findFirst({
-    orderBy: {
-      height: "desc",
-    },
-    take: 1,
-  });
 };
 
 export const isBlockSynced = async (blockHeight: number) => {
