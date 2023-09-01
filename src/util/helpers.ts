@@ -1,14 +1,30 @@
-import { EventTypes, EventTypesAttributeKey } from "../types/Event";
-import { Attribute } from "./proto";
+import { Attribute, EventTypes, EventTypesAttributeKey } from "../types/Event";
 
 export const upperHexFromUint8Array = (uint8Array: Uint8Array): string => {
   return Buffer.from(uint8Array).toString("hex").toUpperCase();
 };
 
-export const getDocFromAttributes = (attributes: any[], key: EventTypes) => {
-  return JSON.parse(
-    attributes.find((attr) => attr.key === EventTypesAttributeKey[key]).value
-  );
+export const getDocFromAttributes = (
+  attributes: any[],
+  key: EventTypes,
+  parseJson = true
+) => {
+  return parseJson
+    ? JSON.parse(
+        attributes.find((attr) => attr.key === EventTypesAttributeKey[key])
+          .value
+      )
+    : attributes.find((attr) => attr.key === EventTypesAttributeKey[key]).value;
+};
+
+export const getValueFromAttributes = (
+  attributes: any[],
+  key: string,
+  parseJson = true
+) => {
+  return parseJson
+    ? JSON.parse(attributes.find((attr) => attr.key === key).value || "")
+    : attributes.find((attr) => attr.key === key).value || "";
 };
 
 export const getWasmAttr = (attributes: any[], key: string): string => {

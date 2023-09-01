@@ -1,144 +1,64 @@
-import { parseJson, prisma } from "../prisma/prisma_client";
+import { prisma } from "../prisma/prisma_client";
 import { customQueries } from "@ixo/impactxclient-sdk";
 import { chunkArray } from "../util/helpers";
 
-export const getCollectionById = async (id: string, includeClaims = false) => {
+let isFetchingClaimsSchemaTypes = false;
+
+export const getCollectionById = async (id: string) => {
   const collection = await prisma.claimCollection.findFirst({
-    where: {
-      id: id,
-    },
-    include: {
-      Claim: includeClaims,
+    where: { id: id },
+    select: {
+      entity: true,
+      Claim: {
+        where: { schemaType: null },
+        take: 10000,
+      },
     },
   });
-  if (!collection) throw new Error("Collection not found");
-  collection!.payments = parseJson(collection!.payments);
   return collection;
 };
 
-/**
- * Will return empty list if not all claims schemaTypes have been fetched from cellnode
- * if empty list, call getCollectionClaims again after 1 minute to avoid cellnode rate limit
- */
-export const getCollectionClaims = async (
-  id: string,
-  status?: string,
-  type?: string,
-  take?: string,
-  cursor?: string,
-  orderBy: "asc" | "desc" = "asc"
-) => {
-  const cleanStatus = status ? parseInt(status) : undefined;
-
-  const query = async (
-    take?: string,
-    status?: number,
-    type?: string | null,
-    cursor?: string,
-    includeTypeNull = false
-  ) =>
-    await prisma.claim.findMany({
-      where: {
-        AND: [
-          {
-            collectionId: id,
-          },
-          type === undefined
-            ? {}
-            : {
-                OR: includeTypeNull
-                  ? [{ schemaType: type }, { schemaType: null }]
-                  : [{ schemaType: type }],
-              },
-          status === null
-            ? {}
-            : status === 0
-            ? { evaluation: null }
-            : { evaluation: { status: status } },
-        ],
-      },
-      take: take ? Number(take) : 1000,
-      ...(cursor && {
-        cursor: { aid: Number(cursor) },
-        skip: 1,
-      }),
-      include: {
-        evaluation: true,
-      },
-      orderBy: { aid: orderBy },
-    });
-
-  // get claims with schemaType null and fetch schemaType from cellnode
-  let claims = await query("8000", cleanStatus, null);
-  await getClaimTypesFromCellnode(id, claims);
-
-  // if any more claims with schemaType null, return empty list
-  claims = await query("1", cleanStatus, null);
-  if (claims.length && !!type) {
-    return {
-      data: [],
-      metaData: {
-        cursor: null,
-        hasNextPage: false,
-        schemaTypesLoaded: false,
-      },
-    };
-  }
-
-  claims = await query(take, cleanStatus, type, cursor);
-  if (claims.length == 0) {
-    return {
-      data: [],
-      metaData: {
-        cursor: null,
-        hasNextPage: false,
-        schemaTypesLoaded: true,
-      },
-    };
-  }
-  const nextCursor: any = claims[claims.length - 1].aid;
-  const nextPage = await query("1", cleanStatus, type, nextCursor);
-  return {
-    data: claims,
-    metaData: {
-      cursor: nextCursor,
-      hasNextPage: nextPage.length > 0,
-      schemaTypesLoaded: true,
-    },
-  };
-};
-
-export const getClaimById = async (id: string) => {
-  const claim = await prisma.claim.findFirst({
+export const getAllCollectionClaimTypesNull = async () => {
+  return await prisma.claimCollection.findMany({
     where: {
-      claimId: id,
+      Claim: {
+        some: { schemaType: null },
+      },
     },
-    include: {
-      evaluation: true,
-    },
+    select: { id: true },
   });
-  if (!claim) throw new Error("Claim not found");
-  claim!.paymentsStatus = parseJson(claim!.paymentsStatus);
-  return claim;
 };
 
-export const getClaimTypesFromCellnode = async (
-  collectionID: string,
-  claims: any[]
-) => {
+// Helper  function to get all collections with claims that have no schemaType
+// and then get the schemaType from cellnode
+export const getAllClaimTypesFromCellnode = async () => {
+  if (isFetchingClaimsSchemaTypes) return;
+  isFetchingClaimsSchemaTypes = true;
+  try {
+    const collections = await getAllCollectionClaimTypesNull();
+    for (let collection of collections) {
+      await getClaimTypesFromCellnode(collection.id);
+    }
+  } catch (error) {
+    console.error("ERROR::getAllClaimTypesFromCellnode: ", error.message);
+  } finally {
+    isFetchingClaimsSchemaTypes = false;
+  }
+};
+
+export const getClaimTypesFromCellnode = async (collectionID: string) => {
   // Get Collection Entity to get Collection Cellnode Service URI
   const collection = await getCollectionById(collectionID);
-  const entity = await prisma.entity.findFirst({
+  if (!collection || collection.Claim.length < 1) return;
+  const entity: any = await prisma.entity.findFirst({
     where: { id: collection.entity },
-    include: { IID: { include: { service: true } } },
+    select: { IID: { select: { service: true } } },
   });
-  const cellnodeUri = entity!.IID.service.find((s) =>
-    s.id.includes("cellnode")
-  );
+  const cellnodeUri = entity.IID.service.find((s) => s.id.includes("cellnode"));
   if (!cellnodeUri) throw new Error("Cellnode service not found");
 
   // fetch schemaType from cellnode
-  const promises = claims.map(async (c) => {
+  const promises = collection.Claim.map(async (c) => {
     let type: string | null = null;
     try {
       const res = await customQueries.cellnode.getPublicDoc(

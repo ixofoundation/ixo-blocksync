@@ -16,7 +16,7 @@
 <a href="#ixo-blocksync" id="ixo-blocksync" style="color: inherit; text-decoration: none;">
   <h1>ixo-blocksync</h1>
 </a>
-<p><img src="https://img.shields.io/github/contributors/ixofoundation/ixo-blocksync" alt="GitHub contributors"> <img src="https://img.shields.io/github/repo-size/ixofoundation/ixo-blocksync" alt="GitHub repo size"> <img src="https://img.shields.io/tokei/lines/github/ixofoundation/ixo-blocksync?style=plastic" alt="Lines of code"> <img src="https://img.shields.io/docker/pulls/northroomza/ixo-blocksync" alt="Docker Pulls"> <img src="https://img.shields.io/twitter/follow/ixoworld?style=social" alt="Twitter Follow"> </p>
+<p><img src="https://img.shields.io/github/contributors/ixofoundation/ixo-blocksync" alt="GitHub contributors"> <img src="https://img.shields.io/github/repo-size/ixofoundation/ixo-blocksync" alt="GitHub repo size"> <img src="https://img.shields.io/tokei/lines/github/ixofoundation/ixo-blocksync?style=plastic" alt="Lines of code"> <img src="https://img.shields.io/docker/pulls/northroomza/ixo-blocksync" alt="Docker Pulls"> <img src="https://img.shields.io/twitter/follow/ixoworld?style=social" alt="Twitter Follow"></p>
 <p><img src="https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white" alt="Postgres"><img src="https://img.shields.io/badge/express.js-%23404d59.svg?style=for-the-badge&logo=express&logoColor=%2361DAFB" alt="Express.js"><img src="https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white" alt="NodeJS"><img src="https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript"><img src="https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white" alt="Prisma"><img src="https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white" alt="Docker"><img src="https://img.shields.io/badge/-GraphQL-E10098?style=for-the-badge&logo=graphql&logoColor=white" alt="GraphQL"></p>
 <p>Syncs all the public info from an ixo blockchain to an instance of PostgreSQL.</p>
 
@@ -24,14 +24,10 @@
   <h2>API Documentation</h2>
 </a>
 <p>Refer to <a href="src/schema/api.yml">src/schema/api.yml</a> or visit <a href="https://app.swaggerhub.com/apis-docs/drshaun/ixo/0.2.3">the online version</a>.</p>
-
-<a href="#notes-about-events" id="notes-about-events" style="color: inherit; text-decoration: none;">
-  <h2>Notes about Events</h2>
-</a>
 <ul>
-<li><strong>Warning</strong>: Setting blocksync to accept all events leads to a lot of events</li>
-<li>Note that setting <code>ONLY_EVENTS</code> means that <code>IGNORE_EVENTS</code> becomes irrelevant</li>
-<li>To ignore all events, one can set <code>ONLY_EVENTS</code> to some random string</li>
+<li><a href="/swagger.json">Endpoints</a></li>
+<li><a href="https://ixo-blocksync.docs.ixo.earth/">Typedoc</a></li>
+<li>The <code>/swagger</code> endpoint.</li>
 </ul>
 
 <a href="#run" id="run" style="color: inherit; text-decoration: none;">
@@ -44,15 +40,14 @@
 <p>Requirements</p>
 <ul>
 <li><a href="https://www.postgresql.org/download/">PostgreSQL</a></li>
-<li><a href="https://redis.io/download/">Redis</a></li>
 </ul>
-<pre><code class="language-bash"><span class="hl-0">git clone https://github.com/ixofoundation/ixo-blocksync.git</span><br/><span class="hl-1">cd</span><span class="hl-0"> ixo-blocksync/</span>
+<pre><code class="language-bash"><span class="hl-0">git </span><span class="hl-1">clone</span><span class="hl-0"> </span><span class="hl-1">https://github.com/ixofoundation/ixo-blocksync.git</span><br/><span class="hl-2">cd</span><span class="hl-0"> </span><span class="hl-1">ixo-blocksync/</span>
 </code></pre>
 <p>Copy <code>.env.example</code> to <code>.env</code> and configure. If this step is skipped, ixo-blocksync will use <code>.env.example</code> as the configuration by default.</p>
 <ul>
 <li>Create a database called Blocksync</li>
 </ul>
-<pre><code class="language-bash"><span class="hl-0">npm install</span><br/><span class="hl-0">npx prisma migrate reset</span><br/><span class="hl-0">npx prisma generate</span><br/><span class="hl-0">npm run build</span><br/><span class="hl-0">npm start</span>
+<pre><code class="language-bash"><span class="hl-0">npm </span><span class="hl-1">install</span><br/><span class="hl-0">npx </span><span class="hl-1">prisma</span><span class="hl-0"> </span><span class="hl-1">migrate</span><span class="hl-0"> </span><span class="hl-1">reset</span><br/><span class="hl-0">npx </span><span class="hl-1">prisma</span><span class="hl-0"> </span><span class="hl-1">generate</span><br/><span class="hl-0">npm </span><span class="hl-1">run</span><span class="hl-0"> </span><span class="hl-1">build</span><br/><span class="hl-0">npm </span><span class="hl-1">start</span>
 </code></pre>
 <hr>
 
@@ -64,15 +59,12 @@
 <li><a href="https://docs.docker.com/engine/install/">Docker</a></li>
 <li><a href="https://docs.docker.com/compose/install/">Docker Compose</a></li>
 </ul>
-<pre><code class="language-bash"><span class="hl-0">git clone https://github.com/ixofoundation/ixo-blocksync.git</span><br/><span class="hl-1">cd</span><span class="hl-0"> ixo-blocksync/</span>
+<pre><code class="language-bash"><span class="hl-0">git </span><span class="hl-1">clone</span><span class="hl-0"> </span><span class="hl-1">https://github.com/ixofoundation/ixo-blocksync.git</span><br/><span class="hl-2">cd</span><span class="hl-0"> </span><span class="hl-1">ixo-blocksync/</span>
 </code></pre>
 <p>Copy <code>.env.example</code> to <code>.env</code> and configure. If this step is skipped, ixo-blocksync will use <code>.env.example</code> as the configuration by default.
 Don&#39;t use quotations when asign env vars for docker<br>Delete the seed folder in src/seed/* if you do not plan to import data from json<br>Create a role(e.g. app_user) in the DB for postgress to work</p>
-<pre><code class="language-bash"><span class="hl-0">docker build -t ixofoundation/ixo-blocksync:latest </span><span class="hl-1">.</span><br/><span class="hl-0">docker compose up -d</span>
+<pre><code class="language-bash"><span class="hl-0">docker </span><span class="hl-1">build</span><span class="hl-0"> </span><span class="hl-1">-t</span><span class="hl-0"> </span><span class="hl-1">ixofoundation/ixo-blocksync:latest</span><span class="hl-0"> </span><span class="hl-1">.</span><br/><span class="hl-0">docker </span><span class="hl-1">compose</span><span class="hl-0"> </span><span class="hl-1">up</span><span class="hl-0"> </span><span class="hl-1">-d</span>
 </code></pre>
-<hr>
-<p>###Akash
-<a href="https://github.com/ixofoundation/ixo-blocksync/blob/master/akash.deploy.yaml"><img src="https://raw.githubusercontent.com/ixofoundation/ixo-blocksync/master/akash%20button.svg" alt="Akash"></a> </p>
 <hr>
 
 <a href="#seeding-the-database-with-previous-mongodb-data" id="seeding-the-database-with-previous-mongodb-data" style="color: inherit; text-decoration: none;">
@@ -87,10 +79,10 @@ Don&#39;t use quotations when asign env vars for docker<br>Delete the seed folde
 <ul>
 <li>Create a database called Blocksync</li>
 </ul>
-<pre><code class="language-bash"><span class="hl-0">npx prisma migrate reset</span><br/><span class="hl-0">npx prisma generate</span><br/><span class="hl-0">npx ts-node src/seed/seed.ts</span>
+<pre><code class="language-bash"><span class="hl-0">npx </span><span class="hl-1">prisma</span><span class="hl-0"> </span><span class="hl-1">migrate</span><span class="hl-0"> </span><span class="hl-1">reset</span><br/><span class="hl-0">npx </span><span class="hl-1">prisma</span><span class="hl-0"> </span><span class="hl-1">generate</span><br/><span class="hl-0">npx </span><span class="hl-1">ts-node</span><span class="hl-0"> </span><span class="hl-1">src/seed/seed.ts</span>
 </code></pre>
 <p>Docker PostgreSQL</p>
-<pre><code class="language-bash"><span class="hl-0">docker build </span><span class="hl-1">.</span><br/><span class="hl-0">docker compose up block-sync-db</span><br/><span class="hl-0">npx prisma generate</span><br/><span class="hl-0">npx ts-node src/seed/seed.ts</span>
+<pre><code class="language-bash"><span class="hl-0">docker </span><span class="hl-1">build</span><span class="hl-0"> </span><span class="hl-1">.</span><br/><span class="hl-0">docker </span><span class="hl-1">compose</span><span class="hl-0"> </span><span class="hl-1">up</span><span class="hl-0"> </span><span class="hl-1">block-sync-db</span><br/><span class="hl-0">npx </span><span class="hl-1">prisma</span><span class="hl-0"> </span><span class="hl-1">generate</span><br/><span class="hl-0">npx </span><span class="hl-1">ts-node</span><span class="hl-0"> </span><span class="hl-1">src/seed/seed.ts</span>
 </code></pre>
 </div></div>
 <div class="col-4 col-menu menu-sticky-wrap menu-highlight">
@@ -115,32 +107,31 @@ Don&#39;t use quotations when asign env vars for docker<br>Delete the seed folde
 <li class="current selected"><a href="modules.html">ixo-<wbr/>blocksync</a>
 <ul>
 <li class="tsd-kind-module"><a href="modules/app.html">app</a></li>
-<li class="tsd-kind-module"><a href="modules/handlers_auth_handler.html">handlers/auth_<wbr/>handler</a></li>
-<li class="tsd-kind-module"><a href="modules/handlers_block_handler.html">handlers/block_<wbr/>handler</a></li>
-<li class="tsd-kind-module"><a href="modules/handlers_bond_handler.html">handlers/bond_<wbr/>handler</a></li>
+<li class="tsd-kind-module"><a href="modules/graphql_claims.html">graphql/claims</a></li>
+<li class="tsd-kind-module"><a href="modules/graphql_entity.html">graphql/entity</a></li>
+<li class="tsd-kind-module"><a href="modules/graphql_example.html">graphql/example</a></li>
+<li class="tsd-kind-module"><a href="modules/graphql_token.html">graphql/token</a></li>
 <li class="tsd-kind-module"><a href="modules/handlers_chain_handler.html">handlers/chain_<wbr/>handler</a></li>
-<li class="tsd-kind-module"><a href="modules/handlers_event_handler.html">handlers/event_<wbr/>handler</a></li>
-<li class="tsd-kind-module"><a href="modules/handlers_iid_handler.html">handlers/iid_<wbr/>handler</a></li>
-<li class="tsd-kind-module"><a href="modules/handlers_payment_handler.html">handlers/payment_<wbr/>handler</a></li>
-<li class="tsd-kind-module"><a href="modules/handlers_project_handler.html">handlers/project_<wbr/>handler</a></li>
-<li class="tsd-kind-module"><a href="modules/handlers_stats_handler.html">handlers/stats_<wbr/>handler</a></li>
-<li class="tsd-kind-module"><a href="modules/handlers_transaction_handler.html">handlers/transaction_<wbr/>handler</a></li>
-<li class="tsd-kind-module"><a href="modules/handlers_wasm_handler.html">handlers/wasm_<wbr/>handler</a></li>
+<li class="tsd-kind-module"><a href="modules/handlers_claims_handler.html">handlers/claims_<wbr/>handler</a></li>
+<li class="tsd-kind-module"><a href="modules/handlers_entity_handler.html">handlers/entity_<wbr/>handler</a></li>
+<li class="tsd-kind-module"><a href="modules/handlers_ipfs_handler.html">handlers/ipfs_<wbr/>handler</a></li>
+<li class="tsd-kind-module"><a href="modules/handlers_token_handler.html">handlers/token_<wbr/>handler</a></li>
 <li class="tsd-kind-module"><a href="modules/index.html">index</a></li>
+<li class="tsd-kind-module"><a href="modules/postgraphile.html">postgraphile</a></li>
 <li class="tsd-kind-module"><a href="modules/prisma_prisma_client.html">prisma/prisma_<wbr/>client</a></li>
 <li class="tsd-kind-module"><a href="modules/swagger.html">swagger</a></li>
-<li class="tsd-kind-module"><a href="modules/sync_queue.html">sync/queue</a></li>
 <li class="tsd-kind-module"><a href="modules/sync_sync_blocks.html">sync/sync_<wbr/>blocks</a></li>
-<li class="tsd-kind-module"><a href="modules/sync_handlers_block_sync_handler.html">sync_<wbr/>handlers/block_<wbr/>sync_<wbr/>handler</a></li>
-<li class="tsd-kind-module"><a href="modules/sync_handlers_bondsinfo_sync_handler.html">sync_<wbr/>handlers/bondsinfo_<wbr/>sync_<wbr/>handler</a></li>
+<li class="tsd-kind-module"><a href="modules/sync_sync_chain.html">sync/sync_<wbr/>chain</a></li>
+<li class="tsd-kind-module"><a href="modules/sync_handlers_event_data_sync_handler.html">sync_<wbr/>handlers/event_<wbr/>data_<wbr/>sync_<wbr/>handler</a></li>
+<li class="tsd-kind-module"><a href="modules/sync_handlers_event_data_sync_wasm_handler.html">sync_<wbr/>handlers/event_<wbr/>data_<wbr/>sync_<wbr/>wasm_<wbr/>handler</a></li>
 <li class="tsd-kind-module"><a href="modules/sync_handlers_event_sync_handler.html">sync_<wbr/>handlers/event_<wbr/>sync_<wbr/>handler</a></li>
 <li class="tsd-kind-module"><a href="modules/sync_handlers_transaction_sync_handler.html">sync_<wbr/>handlers/transaction_<wbr/>sync_<wbr/>handler</a></li>
-<li class="tsd-kind-module"><a href="modules/types_IID.html">types/IID</a></li>
-<li class="tsd-kind-module"><a href="modules/types_Msg.html">types/<wbr/>Msg</a></li>
-<li class="tsd-kind-module"><a href="modules/types_Project.html">types/<wbr/>Project</a></li>
-<li class="tsd-kind-module"><a href="modules/util_connection.html">util/connection</a></li>
-<li class="tsd-kind-module"><a href="modules/util_logger.html">util/logger</a></li>
+<li class="tsd-kind-module"><a href="modules/types_Event.html">types/<wbr/>Event</a></li>
+<li class="tsd-kind-module"><a href="modules/types_General.html">types/<wbr/>General</a></li>
+<li class="tsd-kind-module"><a href="modules/types_getBlock.html">types/get<wbr/>Block</a></li>
+<li class="tsd-kind-module"><a href="modules/util_helpers.html">util/helpers</a></li>
 <li class="tsd-kind-module"><a href="modules/util_proto.html">util/proto</a></li>
+<li class="tsd-kind-module"><a href="modules/util_rate_limiter.html">util/rate-<wbr/>limiter</a></li>
 <li class="tsd-kind-module"><a href="modules/util_secrets.html">util/secrets</a></li>
 <li class="tsd-kind-module"><a href="modules/util_sleep.html">util/sleep</a></li></ul></li></ul></div></details></nav></div></div>
 <div class="container tsd-generator">

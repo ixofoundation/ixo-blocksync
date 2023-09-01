@@ -1,9 +1,9 @@
-import { ConvertedEvent } from "../util/proto";
 import { prisma } from "../prisma/prisma_client";
 import { getWasmAttr, splitAttributesByKeyValue } from "../util/helpers";
 import { ENTITY_MODULE_CONTRACT_ADDRESS } from "../util/secrets";
+import { GetEventType } from "../types/getBlock";
 
-export const syncWasmEventData = async (event: ConvertedEvent) => {
+export const syncWasmEventData = async (event: GetEventType) => {
   try {
     const contractAddress = getWasmAttr(event.attributes, "_contract_address");
     const action = getWasmAttr(event.attributes, "action");
@@ -35,7 +35,7 @@ export const syncWasmEventData = async (event: ConvertedEvent) => {
     });
     if (tokenClass) {
       // split attributes by action as cosmwasm joins all attributes into one array
-      const messages = splitAttributesByKeyValue(event.attributes);
+      const messages = splitAttributesByKeyValue(event.attributes as any);
       for (const message of messages) {
         setTimeout(
           async () => {

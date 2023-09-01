@@ -15,120 +15,32 @@ datasource db {
 // ========================================
 
 model IID {
-  id                   String           @id
-  context              Context[]
+  id                   String   @id
+  context              Json
   controller           String[]
-  verificationMethod   Json?
-  service              Service[]
+  verificationMethod   Json
+  service              Json
   authentication       String[]
   assertionMethod      String[]
   keyAgreement         String[]
   capabilityInvocation String[]
   capabilityDelegation String[]
-  linkedResource       LinkedResource[]
-  linkedClaim          LinkedClaim[]
-  accordedRight        AccordedRight[]
-  linkedEntity         LinkedEntity[]
+  linkedResource       Json
+  linkedClaim          Json
+  accordedRight        Json
+  linkedEntity         Json
   alsoKnownAs          String
-  metadata             Json?
+  metadata             Json
   Entity               Entity[]
 }
-
-model Context {
-  aid Int    @id @default(autoincrement())
-  key String
-  val String
-  IID IID    @relation(fields: [iid], references: [id])
-  iid String
-}
-
-model Service {
-  aid             Int    @id @default(autoincrement())
-  id              String
-  type            String
-  serviceEndpoint String
-  IID             IID    @relation(fields: [iid], references: [id])
-  iid             String
-}
-
-model LinkedResource {
-  aid             Int    @id @default(autoincrement())
-  type            String
-  id              String
-  description     String
-  mediaType       String
-  serviceEndpoint String
-  proof           String
-  encrypted       String
-  right           String
-  IID             IID    @relation(fields: [iid], references: [id])
-  iid             String
-}
-
-model LinkedClaim {
-  aid             Int    @id @default(autoincrement())
-  id              String
-  type            String
-  description     String
-  serviceEndpoint String
-  proof           String
-  encrypted       String
-  right           String
-  IID             IID    @relation(fields: [iid], references: [id])
-  iid             String
-}
-
-model AccordedRight {
-  aid       Int    @id @default(autoincrement())
-  type      String
-  id        String
-  mechanism String
-  message   String
-  service   String
-  IID       IID    @relation(fields: [iid], references: [id])
-  iid       String
-}
-
-model LinkedEntity {
-  aid          Int    @id @default(autoincrement())
-  type         String
-  id           String
-  relationship String
-  service      String
-  IID          IID    @relation(fields: [iid], references: [id])
-  iid          String
-}
-
-// model IidMetadata {
-//   aid         Int       @id @default(autoincrement())
-//   versionId   String
-//   created     DateTime?
-//   updated     DateTime?
-//   deactivated Boolean
-//   IID         IID       @relation(fields: [iid], references: [id])
-//   iid         String
-// }
-
-// model VerificationMethod {
-//   aid                 Int     @id @default(autoincrement())
-//   id                  String
-//   type                String
-//   controller          String
-//   blockchainAccountID String?
-//   publicKeyHex        String?
-//   publicKeyMultibase  String?
-//   publicKeyBase58     String?
-//   IID                 IID     @relation(fields: [iid], references: [id])
-//   iid                 String
-// }
 
 // ========================================
 // Entity
 // ========================================
 
 model Entity {
-  IID            IID       @relation(fields: [id], references: [id])
-  id             String    @id
+  IID            IID          @relation(fields: [id], references: [id])
+  id             String       @id
   type           String
   startDate      DateTime?
   endDate        DateTime?
@@ -136,27 +48,14 @@ model Entity {
   relayerNode    String
   credentials    String[]
   entityVerified Boolean
-  metadata       Json?
-  accounts       Json?
+  metadata       Json
+  accounts       Json
   externalId     String?
   owner          String?
+  // adding below foreign keys relationshipa to make it easier to query
+  Token          Token[]
+  TokenClass     TokenClass[]
 }
-
-// model EntityMetadata {
-//   versionId String
-//   created   DateTime?
-//   updated   DateTime?
-//   Entity    Entity    @relation(fields: [id], references: [id])
-//   id        String    @unique
-// }
-
-// model EntityAccount {
-//   aid     Int    @id @default(autoincrement())
-//   name    String
-//   address String
-//   Entity  Entity @relation(fields: [id], references: [id])
-//   id      String
-// }
 
 // ========================================
 // Claims
@@ -175,26 +74,24 @@ model ClaimCollection {
   approved  Int
   rejected  Int
   disputed  Int
-  state     Int //maybe string?
-  payments  Json?
+  state     Int
+  payments  Json
   Claim     Claim[]
 }
 
 model Claim {
-  aid             Int             @id @default(autoincrement())
-  claimId         String          @unique
+  claimId         String          @id
   agentDid        String
   agentAddress    String
-  submissionDate  DateTime?
-  paymentsStatus  Json?
-  ClaimCollection ClaimCollection @relation(fields: [collectionId], references: [id])
-  collectionId    String
+  submissionDate  DateTime
+  paymentsStatus  Json
   schemaType      String?
   evaluation      Evaluation?
+  ClaimCollection ClaimCollection @relation(fields: [collectionId], references: [id])
+  collectionId    String
 }
 
 model Evaluation {
-  aid               Int       @id @default(autoincrement())
   collectionId      String
   oracle            String
   agentDid          String
@@ -203,16 +100,16 @@ model Evaluation {
   reason            Int
   verificationProof String?
   amount            Json
-  evaluationDate    DateTime?
-  Claim             Claim     @relation(fields: [claimId], references: [claimId])
-  claimId           String    @unique
+  evaluationDate    DateTime
+  Claim             Claim    @relation(fields: [claimId], references: [claimId])
+  claimId           String   @id
 }
 
 model Dispute {
   proof     String @id
   subjectId String
   type      Int
-  data      Json?
+  data      Json
 }
 
 // ========================================
@@ -222,6 +119,7 @@ model Dispute {
 model TokenClass {
   contractAddress String           @id
   minter          String
+  Class           Entity           @relation(fields: [class], references: [id])
   class           String
   name            String           @unique
   description     String
@@ -240,6 +138,7 @@ model Token {
   id               String             @id
   index            String
   name             String
+  Collection       Entity             @relation(fields: [collection], references: [id])
   collection       String
   tokenData        TokenData[]
   tokenTransaction TokenTransaction[]
@@ -262,7 +161,7 @@ model TokenRetired {
   id           String
   reason       String
   jurisdiction String
-  amount       Json
+  amount       String
   owner        String
   Token        TokenClass @relation(fields: [name], references: [name])
   name         String
@@ -272,14 +171,14 @@ model TokenCancelled {
   aid    Int        @id @default(autoincrement())
   id     String
   reason String
-  amount Json
+  amount String
   owner  String
   Token  TokenClass @relation(fields: [name], references: [name])
   name   String
 }
 
 model TokenTransaction {
-  id      Int    @id @default(autoincrement())
+  aid     Int    @id @default(autoincrement())
   from    String
   to      String
   amount  String
@@ -292,122 +191,131 @@ model TokenTransaction {
 // ========================================
 
 model Bond {
-  bondDid                  String              @id
-  status                   String?
-  token                    String
-  name                     String
-  description              String
-  functionType             String
-  functionParamaters       Json?
-  creatorDid               String
-  controllerDid            String
-  reserveTokens            String[]
-  txFeePercentage          String
-  exitFeePercentage        String
-  feeAddress               String
-  reserveWithdrawalAddress String
-  maxSupply                Json?
-  orderQuantityLimits      Json?
-  sanityRate               String
-  sanityMarginPercentage   String
-  allowSells               Boolean?
-  allowReserveWithdrawals  Boolean?
-  alphaBond                Boolean?
-  batchBlocks              String
-  creatorAddress           String
-  editorDid                String?
-  editorAddress            String?
-  PriceEntry               PriceEntry[]
-  AlphaChange              Alpha[]
-  BondBuy                  BondBuy[]
-  ShareWithdrawal          ShareWithdrawal[]
-  ReserveWithdrawal        ReserveWithdrawal[]
-  OutcomePayment           OutcomePayment[]
-  BondSell                 BondSell[]
-  BondSwap                 BondSwap[]
-}
+  bondDid                      String   @id
+  state                        String
+  token                        String
+  name                         String
+  description                  String
+  functionType                 String
+  functionParameters           Json
+  creatorDid                   String
+  controllerDid                String
+  reserveTokens                String[]
+  txFeePercentage              String
+  exitFeePercentage            String
+  feeAddress                   String
+  reserveWithdrawalAddress     String
+  maxSupply                    Json?
+  orderQuantityLimits          Json
+  sanityRate                   String
+  sanityMarginPercentage       String
+  currentSupply                Json?
+  currentReserve               Json
+  availableReserve             Json
+  currentOutcomePaymentReserve Json
+  allowSells                   Boolean
+  allowReserveWithdrawals      Boolean
+  alphaBond                    Boolean
+  batchBlocks                  String
+  outcomePayment               String
+  oracleDid                    String
 
-model PriceEntry {
-  id      Int      @id @default(autoincrement())
-  bond    Bond     @relation(fields: [bondDid], references: [bondDid])
-  bondDid String
-  time    DateTime
-  denom   String
-  price   Decimal
+  BondBuy  BondBuy[]
+  BondSell BondSell[]
+  BondSwap BondSwap[]
+
+  ShareWithdrawal   ShareWithdrawal[]
+  ReserveWithdrawal ReserveWithdrawal[]
+  OutcomePayment    OutcomePayment[]
+  AlphaChange       BondAlpha[]
+
+  // PriceEntry PriceEntry[]
 }
 
 model BondBuy {
-  id           Int    @id @default(autoincrement())
-  bond         Bond   @relation(fields: [bondDid], references: [bondDid])
-  bondDid      String
-  buyerDid     String
-  buyerAddress String
-  amount       String
-  maxPrices    Json?
+  id         Int      @id @default(autoincrement())
+  bond       Bond     @relation(fields: [bondDid], references: [bondDid])
+  bondDid    String
+  accountDid String
+  amount     Json
+  maxPrices  Json
+  height     Int
+  timestamp  DateTime
 }
 
 model BondSell {
-  id            Int    @id @default(autoincrement())
-  bond          Bond   @relation(fields: [bondDid], references: [bondDid])
-  bondDid       String
-  sellerDid     String
-  sellerAddress String
-  amount        String
+  id         Int      @id @default(autoincrement())
+  bond       Bond     @relation(fields: [bondDid], references: [bondDid])
+  bondDid    String
+  accountDid String
+  amount     Json
+  height     Int
+  timestamp  DateTime
 }
 
 model BondSwap {
-  id             Int    @id @default(autoincrement())
-  bond           Bond   @relation(fields: [bondDid], references: [bondDid])
-  bondDid        String
-  swapperDid     String
-  swapperAddress String
-  from           Json?
-  toToken        String
-}
-
-model Alpha {
-  id            Int    @id @default(autoincrement())
-  bond          Bond   @relation(fields: [bondDid], references: [bondDid])
-  bondDid       String
-  alpha         String
-  delta         String
-  oracleDid     String
-  oracleAddress String
-  height        String
-  timestamp     String
-}
-
-model OutcomePayment {
-  id            Int    @id @default(autoincrement())
-  bond          Bond   @relation(fields: [bondDid], references: [bondDid])
-  bondDid       String
-  senderDid     String
-  senderAddress String
-  amount        String
-  height        String
-  timestamp     String
+  id         Int      @id @default(autoincrement())
+  bond       Bond     @relation(fields: [bondDid], references: [bondDid])
+  bondDid    String
+  accountDid String
+  amount     Json
+  toToken    String
+  height     Int
+  timestamp  DateTime
 }
 
 model ReserveWithdrawal {
-  id                Int    @id @default(autoincrement())
-  bond              Bond   @relation(fields: [bondDid], references: [bondDid])
-  bondDid           String
-  withdrawerDid     String
-  withdrawerAddress String
-  amount            Json?
-  height            String
-  timestamp         String
+  id                       Int      @id @default(autoincrement())
+  bond                     Bond     @relation(fields: [bondDid], references: [bondDid])
+  bondDid                  String
+  withdrawerDid            String
+  withdrawerAddress        String
+  amount                   Json
+  reserveWithdrawalAddress String
+  height                   Int
+  timestamp                DateTime
 }
 
 model ShareWithdrawal {
-  id               Int    @id @default(autoincrement())
-  bond             Bond   @relation(fields: [bondDid], references: [bondDid])
+  id               Int      @id @default(autoincrement())
+  bond             Bond     @relation(fields: [bondDid], references: [bondDid])
   bondDid          String
   recipientDid     String
   recipientAddress String
-  height           String
-  timestamp        String
+  amount           Json
+  height           Int
+  timestamp        DateTime
 }
+
+model OutcomePayment {
+  id            Int      @id @default(autoincrement())
+  bond          Bond     @relation(fields: [bondDid], references: [bondDid])
+  bondDid       String
+  senderDid     String
+  senderAddress String
+  amount        Json
+  height        Int
+  timestamp     DateTime
+}
+
+model BondAlpha {
+  id        Int      @id @default(autoincrement())
+  bond      Bond     @relation(fields: [bondDid], references: [bondDid])
+  bondDid   String
+  alpha     String
+  oracleDid String
+  height    Int
+  timestamp DateTime
+}
+
+// model PriceEntry {
+//   id      Int      @id @default(autoincrement())
+//   bond    Bond     @relation(fields: [bondDid], references: [bondDid])
+//   bondDid String
+//   time    DateTime
+//   denom   String
+//   price   Decimal
+// }
 
 // ========================================
 // General
@@ -418,33 +326,11 @@ model Chain {
   blockHeight Int
 }
 
-model Event {
-  id          Int      @id @default(autoincrement())
-  type        String
-  attributes  Json?
-  blockHeight Int
-  timestamp   DateTime
-}
-
-model Stats {
-  id                    Int      @id @default(autoincrement())
-  totalServiceProviders Int
-  totalProjects         Int
-  totalEvaluationAgents Int
-  totalInvestors        Int
-  totalClaims           Int
-  successfulClaims      Int
-  submittedClaims       Int
-  pendingClaims         Int
-  rejectedClaims        Int
-  claimLocations        String[]
-}
-
 model Transaction {
   hash      String    @id
   height    Int
   code      Int
-  fee       Json?
+  fee       Json
   gasUsed   String
   gasWanted String
   time      DateTime
@@ -453,23 +339,14 @@ model Transaction {
 
 model Message {
   id              Int         @id @default(autoincrement())
-  Transaction     Transaction @relation(fields: [transactionHash], references: [hash])
-  transactionHash String
   typeUrl         String
-  value           Json?
+  value           Json
   from            String?
   to              String?
   denoms          String[]
   tokenNames      String[]
-}
-
-model Block {
-  height           Int      @id
-  hash             String
-  num_txs          Int      @default(0)
-  total_gas        Int      @default(0)
-  proposer_address String?
-  timestamp        DateTime
+  Transaction     Transaction @relation(fields: [transactionHash], references: [hash])
+  transactionHash String
 }
 
 // ========================================

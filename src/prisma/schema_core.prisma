@@ -1,0 +1,60 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../node_modules/@db_core"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL_CORE")
+}
+
+// ========================================
+// General
+// ========================================
+
+model ChainCore {
+  chainId     String @id
+  blockHeight Int
+}
+
+model BlockCore {
+  height       Int               @id
+  hash         String            @unique
+  time         DateTime
+  transactions TransactionCore[]
+  events       EventCore[]
+}
+
+model TransactionCore {
+  hash        String        @id
+  code        Int
+  fee         Json
+  gasUsed     String
+  gasWanted   String
+  time        DateTime
+  messages    MessageCore[]
+  Block       BlockCore?    @relation(fields: [blockHeight], references: [height], onDelete: Cascade)
+  blockHeight Int
+}
+
+model MessageCore {
+  id              Int             @id @default(autoincrement())
+  typeUrl         String
+  value           Json
+  Transaction     TransactionCore @relation(fields: [transactionHash], references: [hash], onDelete: Cascade)
+  transactionHash String
+}
+
+model EventCore {
+  id              Int       @id @default(autoincrement())
+  type            String
+  attributes      Json[]
+  time            DateTime
+  beginBlockEvent Boolean   @default(false)
+  endBlockEvent   Boolean   @default(false)
+  Block           BlockCore @relation(fields: [blockHeight], references: [height], onDelete: Cascade)
+  blockHeight     Int
+}

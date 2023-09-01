@@ -1,7 +1,5 @@
-import { Prisma, PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
+import { PrismaClient as PrismaClientCore } from "@db_core";
 
 export const prisma = new PrismaClient();
-
-export const parseJson = (json: Prisma.JsonValue) => {
-  return JSON.parse(json as string);
-};
+export const prismaCore = new PrismaClientCore();

@@ -1,21 +1,15 @@
-import * as Proto from "../util/proto";
 import * as ChainHandler from "../handlers/chain_handler";
 import { sleep } from "../util/sleep";
-import * as BlockHandler from "../handlers/block_handler";
 import * as TransactionSyncHandler from "../sync_handlers/transaction_sync_handler";
 import * as EventSyncHandler from "../sync_handlers/event_sync_handler";
-import * as BondSyncHandler from "../sync_handlers/bondsinfo_sync_handler";
-import * as BlockSyncHandler from "../sync_handlers/block_sync_handler";
-import { Event } from "@cosmjs/tendermint-rpc/build/tendermint34/responses";
 import { currentChain } from "./sync_chain";
-import { utils } from "@ixo/impactxclient-sdk";
-import { upperHexFromUint8Array } from "../util/helpers";
+import { prismaCore } from "../prisma/prisma_client";
 
 let syncing: boolean;
 
 const logIndexTime = false;
 const logFetchTime = false;
-const logSync100Time = true;
+const logSync100Time = false;
 
 export const startSync = async () => {
   syncing = true;
@@ -30,64 +24,27 @@ export const startSync = async () => {
   while (syncing) {
     try {
       if (logFetchTime) console.time("fetch");
-      const [block, txsEvent, bondsInfo, blockTM] = await Promise.all([
-        Proto.getBlockbyHeight(currentBlock),
-        Proto.getTxsEvent(currentBlock),
-        Proto.getBondsInfo(),
-        Proto.getTMBlockbyHeight(currentBlock),
-      ]);
+      const block = await getBlock(currentBlock);
       if (logFetchTime) console.timeEnd("fetch");
 
-      if (block && txsEvent && blockTM) {
+      if (block) {
         if (logIndexTime) console.time("index");
-        // if block and events is not null, check if block has txs and then if events has
-        // no trx, means abci layer is behind tendermint layer, wait 3 seconds and try again
-        if (block.block?.data?.txs.length && !txsEvent.txs.length) {
-          console.log(
-            "ABCI Layer behind Tendermint Layer, waiting 3 seconds and trying again"
-          );
-          await sleep(3000);
-          continue;
-        }
-
-        const blockHeight = Number(block.block!.header!.height.low);
-        const timestamp = utils.proto.fromTimestamp(block.block!.header!.time!);
-        const blockHash = upperHexFromUint8Array(block.blockId!.hash!);
-        const transactionResponses = txsEvent.txResponses;
 
         await Promise.all([
-          EventSyncHandler.syncEvents(
-            blockTM.beginBlockEvents as Event[],
-            transactionResponses.flatMap((txRes) => txRes.events),
-            blockTM.endBlockEvents as Event[],
-            blockHeight,
-            timestamp!
-          ),
-          TransactionSyncHandler.syncTransactions(transactionResponses),
-
-          // TODO old bonds trx indexing, need to convert to events based indexing
-          BlockSyncHandler.syncBlock(
-            transactionResponses,
-            String(blockHeight),
-            String(timestamp)
-          ),
-          BondSyncHandler.syncBondsInfo(bondsInfo!, timestamp!),
-
-          BlockHandler.createBlock(
-            blockHeight,
-            timestamp!,
-            blockHash,
-            block,
-            txsEvent
+          EventSyncHandler.syncEvents(block.events, block.height, block.time),
+          TransactionSyncHandler.syncTransactions(
+            block.transactions,
+            block.height,
+            block.time
           ),
           ChainHandler.updateChain({
             chainId: currentChain.chainId,
-            blockHeight: blockHeight,
+            blockHeight: block.height,
           }),
         ]);
 
-        if (blockHeight % 100 === 0) {
-          console.log(`Synced Block ${blockHeight}`);
+        if (block.height % 100 === 0) {
+          console.log(`Synced Block ${block.height}`);
           if (logSync100Time) console.timeLog("sync");
         }
 
@@ -101,4 +58,34 @@ export const startSync = async () => {
       console.error(`Error Adding Block ${currentBlock}: ${error}`);
     }
   }
+};
+
+export const getBlock = async (blockHeight: number) => {
+  return await prismaCore.blockCore.findFirst({
+    where: { height: blockHeight },
+    select: {
+      height: true,
+      time: true,
+      transactions: {
+        select: {
+          hash: true,
+          code: true,
+          fee: true,
+          gasUsed: true,
+          gasWanted: true,
+          messages: { select: { typeUrl: true, value: true } },
+        },
+      },
+      events: {
+        // orderBy is required since blocksync-core saves beginBlock events first
+        // then tx events and lastly endBlock events
+        orderBy: { id: "asc" },
+        select: {
+          id: true,
+          type: true,
+          attributes: true,
+        },
+      },
+    },
+  });
 };

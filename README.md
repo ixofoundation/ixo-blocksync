@@ -1,18 +1,15 @@
 # ixo-blocksync
 
-![GitHub contributors](https://img.shields.io/github/contributors/ixofoundation/ixo-blocksync) ![GitHub repo size](https://img.shields.io/github/repo-size/ixofoundation/ixo-blocksync) ![Lines of code](https://img.shields.io/tokei/lines/github/ixofoundation/ixo-blocksync?style=plastic) ![Docker Pulls](https://img.shields.io/docker/pulls/northroomza/ixo-blocksync) ![Twitter Follow](https://img.shields.io/twitter/follow/ixoworld?style=social)
+[![ixo](https://img.shields.io/badge/ixo-project-blue)](https://ixo.foundation)
+[![GitHub](https://img.shields.io/github/stars/ixofoundation/jambo?style=social)](https://github.com/ixofoundation/ixo-blocksync)
+![GitHub repo size](https://img.shields.io/github/repo-size/ixofoundation/ixo-blocksync)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/ixofoundation/jambo/blob/main/LICENSE)
 
 ![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)![Express.js](https://img.shields.io/badge/express.js-%23404d59.svg?style=for-the-badge&logo=express&logoColor=%2361DAFB)![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white)![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)![GraphQL](https://img.shields.io/badge/-GraphQL-E10098?style=for-the-badge&logo=graphql&logoColor=white)
 
-Syncs all the public info from an ixo blockchain to an instance of PostgreSQL.
+Syncs all the public info from an ixo blockchain to an instance of PostgreSQL. It gets fed from a [ixo-blocksync-core](https://github.com/ixofoundation/ixo-blocksync-core) database in order to speed up indexing and put less strain on nodes, which means you need an ixo-blocksync-core database connection in order to run this.
 
-## API Documentation
-
-Refer to [src/schema/api.yml](src/schema/api.yml) or visit [the online version](https://app.swaggerhub.com/apis-docs/drshaun/ixo/0.2.3).
-
-- [Endpoints](/swagger.json)
-- [Typedoc](https://ixo-blocksync.docs.ixo.earth/)
-- The `/swagger` endpoint.
+> For now the only source for information is a ixo-blocksync-core database connection, but we plan on expanding that to different sources in the near future.
 
 ## Run
 
@@ -63,35 +60,13 @@ docker build -t ixofoundation/ixo-blocksync:latest .
 docker compose up -d
 ```
 
----
+## API interface
 
-### Akash
+The server exposes a Graphql api endpoint at `/graphql` which is set up using [Postgraphile](https://www.graphile.org/postgraphile/) along with some plugins:
 
-[![Akash](https://raw.githubusercontent.com/ixofoundation/ixo-blocksync/master/akash%20button.svg)](https://github.com/ixofoundation/ixo-blocksync/blob/master/akash.deploy.yaml)
+- [pg-simplify-inflector](https://github.com/graphile/pg-simplify-inflector)
+- [postgraphile-plugin-connection-filter](https://github.com/graphile-contrib/postgraphile-plugin-connection-filter)
 
----
+A graphiql playground gets exposed at the endpoint `/graphiql` where you can play around, test queries and see the schemas.
 
-### Seeding the Database with Previous MongoDB Data
-
-- Export all collections as JSON from the block-sync MongoDB database
-- Place the resulting JSON files within the `src/seed/json_exports` directory
-- Configure `DATABASE_URL` in `.env` with the correct username, password and host
-
-Local PostgreSQL
-
-- Create a database called Blocksync
-
-```bash
-npx prisma migrate reset
-npx prisma generate
-npx ts-node src/seed/seed.ts
-```
-
-Docker PostgreSQL
-
-```bash
-docker build .
-docker compose up block-sync-db
-npx prisma generate
-npx ts-node src/seed/seed.ts
-```
+We also generate and expose the full graphql schema file (schema.graphql) under the endpoint `/api/graphql_schema` if you need it to generate clients.
