@@ -1,7 +1,6 @@
 import { EntitySDKType } from "@ixo/impactxclient-sdk/types/codegen/ixo/entity/v1beta1/entity";
 import { IidDocumentSDKType } from "@ixo/impactxclient-sdk/types/codegen/ixo/iid/v1beta1/iid";
 import { EventTypes } from "../types/Event";
-import { ConvertedEvent } from "../util/proto";
 import { prisma } from "../prisma/prisma_client";
 import {
   TokenPropertiesSDKType,
@@ -20,9 +19,10 @@ import {
   SellOrderSDKType,
   SwapOrderSDKType,
 } from "@ixo/impactxclient-sdk/types/codegen/ixo/bonds/v1beta1/bonds";
+import { GetEventType } from "../types/getBlock";
 
 export const syncEventData = async (
-  event: ConvertedEvent,
+  event: GetEventType,
   blockHeight: number,
   timestamp: Date
 ) => {
@@ -40,20 +40,20 @@ export const syncEventData = async (
           data: {
             id: createIid.id,
             controller: createIid.controller,
-            verificationMethod: createIid.verificationMethod as any,
             authentication: createIid.authentication,
             assertionMethod: createIid.assertionMethod,
             keyAgreement: createIid.keyAgreement,
             capabilityInvocation: createIid.capabilityInvocation,
             capabilityDelegation: createIid.capabilityDelegation,
             alsoKnownAs: createIid.alsoKnownAs,
+            verificationMethod: createIid.verificationMethod as any,
             metadata: createIid.metadata as any,
-            context: { create: createIid.context },
-            service: { create: createIid.service },
-            linkedResource: { create: createIid.linkedResource },
-            linkedClaim: { create: createIid.linkedClaim },
-            accordedRight: { create: createIid.accordedRight },
-            linkedEntity: { create: createIid.linkedEntity },
+            context: createIid.context as any,
+            service: createIid.service as any,
+            linkedResource: createIid.linkedResource as any,
+            linkedClaim: createIid.linkedClaim as any,
+            accordedRight: createIid.accordedRight as any,
+            linkedEntity: createIid.linkedEntity as any,
           },
         });
         break;
@@ -62,17 +62,6 @@ export const syncEventData = async (
           event.attributes,
           event.type
         );
-        await prisma.iID.update({
-          where: { id: updateIid.id },
-          data: {
-            context: { deleteMany: {} },
-            service: { deleteMany: {} },
-            linkedResource: { deleteMany: {} },
-            linkedClaim: { deleteMany: {} },
-            accordedRight: { deleteMany: {} },
-            linkedEntity: { deleteMany: {} },
-          },
-        });
         await prisma.iID.update({
           where: { id: updateIid.id },
           data: {
@@ -86,12 +75,12 @@ export const syncEventData = async (
             capabilityDelegation: updateIid.capabilityDelegation,
             alsoKnownAs: updateIid.alsoKnownAs,
             metadata: updateIid.metadata as any,
-            context: { create: updateIid.context },
-            service: { create: updateIid.service },
-            linkedResource: { create: updateIid.linkedResource },
-            linkedClaim: { create: updateIid.linkedClaim },
-            accordedRight: { create: updateIid.accordedRight },
-            linkedEntity: { create: updateIid.linkedEntity },
+            context: updateIid.context as any,
+            service: updateIid.service as any,
+            linkedResource: updateIid.linkedResource as any,
+            linkedClaim: updateIid.linkedClaim as any,
+            accordedRight: updateIid.accordedRight as any,
+            linkedEntity: updateIid.linkedEntity as any,
           },
         });
         break;
@@ -125,9 +114,7 @@ export const syncEventData = async (
           event.type
         );
         await prisma.entity.update({
-          where: {
-            id: updateEntity.id,
-          },
+          where: { id: updateEntity.id },
           data: {
             id: updateEntity.id,
             type: updateEntity.type,
@@ -178,9 +165,7 @@ export const syncEventData = async (
           event.type
         );
         await prisma.claimCollection.update({
-          where: {
-            id: updateCollection.id,
-          },
+          where: { id: updateCollection.id },
           data: {
             id: updateCollection.id,
             entity: updateCollection.entity,
@@ -549,6 +534,6 @@ export const syncEventData = async (
         break;
     }
   } catch (error) {
-    console.error(error.message);
+    console.error("syncEventData: ", error.message);
   }
 };

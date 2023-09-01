@@ -3,14 +3,13 @@ import { base64ToJson } from "../util/helpers";
 import { IPFS_SERVICE_MAPPING } from "../util/secrets";
 import { getIpfsDocument } from "./ipfs_handler";
 
-export const getEntityById = async (id: string) => {
-  const baseEntity: any = await prisma.entity.findFirst({
+export const getParentEntityById = async (id: string) => {
+  return await prisma.entity.findFirst({
     where: { id: id },
-    include: {
+    select: {
       IID: {
-        include: {
+        select: {
           context: true,
-          accordedRight: true,
           linkedEntity: true,
           linkedResource: true,
           linkedClaim: true,
@@ -19,51 +18,39 @@ export const getEntityById = async (id: string) => {
       },
     },
   });
+};
+
+// Helper function to fetch an entity and all its parents and add it's parents service,
+// linkedResource, linkedEntity, linkedClaim to the entity as it inherits them.
+export const getFullEntityById = async (id: string, parentEntityLoader?) => {
+  const baseEntity: any = await prisma.entity.findFirst({
+    where: { id: id },
+    include: { IID: true },
+  });
 
   const serviceIds = baseEntity!.IID.service.map((s) => s.id);
-  const accordedRightIds = baseEntity!.IID.accordedRight.map((a) => a.id);
   const linkedResourceIds = baseEntity!.IID.linkedResource.map((r) => r.id);
   const linkedEntityIds = baseEntity!.IID.linkedEntity.map((e) => e.id);
   const linkedClaimIds = baseEntity!.IID.linkedClaim.map((e) => e.id);
 
   for (const key of Object.keys(baseEntity!.IID)) {
-    baseEntity[key] = baseEntity!.IID[key];
+    if (!baseEntity[key]) baseEntity[key] = baseEntity!.IID[key];
   }
   delete baseEntity!.IID;
 
   let classVal = baseEntity!.context.find((c) => c.key === "class")?.val;
   if (classVal) {
     while (true) {
-      let record = await prisma.entity.findFirst({
-        where: { id: classVal },
-        include: {
-          IID: {
-            include: {
-              context: true,
-              accordedRight: true,
-              linkedEntity: true,
-              linkedResource: true,
-              linkedClaim: true,
-              service: true,
-            },
-          },
-        },
-      });
+      let record: any = parentEntityLoader
+        ? await parentEntityLoader.load(classVal)
+        : await getParentEntityById(classVal);
       const newClassVal = record?.IID.context.find(
         (c) => c.key === "class"
       )?.val;
-      if (!newClassVal) break;
-      classVal = newClassVal;
       for (const service of record!.IID.service) {
         if (!serviceIds.includes(service.id)) {
           baseEntity!.service.push(service);
           serviceIds.push(service.id);
-        }
-      }
-      for (const accordedRight of record!.IID.accordedRight) {
-        if (!accordedRightIds.includes(accordedRight.id)) {
-          baseEntity!.accordedRight.push(accordedRight);
-          accordedRightIds.push(accordedRight.id);
         }
       }
       for (const linkedResource of record!.IID.linkedResource) {
@@ -84,6 +71,9 @@ export const getEntityById = async (id: string) => {
           linkedClaimIds.push(linkedClaim.id);
         }
       }
+      // if no more parents then break
+      if (!newClassVal) break;
+      classVal = newClassVal;
     }
   }
 
@@ -111,181 +101,22 @@ export const getEntityById = async (id: string) => {
   return baseEntity;
 };
 
-export const getEntitiesByOwnerAddress = async (address: string) => {
-  const ids =
-    (await prisma.entity.findMany({
-      where: { owner: address },
-      select: { id: true },
-    })) || [];
-  const entities: any[] = [];
-  for (const id of ids) {
-    const entity = await getEntityById(id.id);
-    entities.push(entity);
-  }
-  return entities;
-};
-
-export const getEntitiesByOwnerDid = async (did: string) => {
-  const ids =
-    (await prisma.entity.findMany({
-      select: { id: true },
-      where: {
-        IID: {
-          controller: {
-            has: did,
-          },
-        },
-      },
-    })) || [];
-  const entities: any[] = [];
-  for (const id of ids.map((id) => id.id)) {
-    const entity = await getEntityById(id);
-    entities.push(entity);
-  }
-  return entities;
-};
-
-export const getEntityCollections = async () => {
-  const collections = await prisma.entity.findMany({
-    where: {
-      type: "asset/collection",
-    },
-  });
-  const res: any[] = [];
-  for (const c of collections) {
-    res.push(await getEntityCollectionById(c.id));
-  }
-  return res;
-};
-
-export const getEntityCollectionById = async (id: string) => {
-  const collection = await getEntityById(id);
-  const entities = await prisma.entity.findMany({
-    where: {
-      IID: {
-        context: {
-          some: { key: "class", val: collection.id },
-        },
-      },
-    },
-  });
-  let res: any;
-  const entityArr: any[] = [];
-  for (const e of entities) {
-    entityArr.push(await getEntityById(e.id));
-  }
-  res = {
-    collection: collection,
-    entities: entityArr,
-  };
-  return res;
-};
-
-export const getEntityCollectionsByOwnerAddress = async (address: string) => {
-  const entities = await getEntitiesByOwnerAddress(address);
-  const groups = {};
-  for (const entity of entities) {
-    const parent = entity.context.find((c) => c.key === "class")?.val;
-    if (!parent) continue;
-    if (groups[parent]) groups[parent].push(entity);
-    else groups[parent] = [entity];
-  }
-  const res: any[] = [];
-  for (const [colId, ents] of Object.entries(groups)) {
-    const collection = await getEntityById(colId);
-    if (collection.type !== "asset/collection") continue;
-    res.push({ collection, entities: ents });
-  }
-  // get all collections and add assets as empty array
-  const collections = await getEntitiesByType("asset/collection");
-  collections.forEach((c) =>
-    res.some((r) => r.collection.id === c.id)
-      ? null
-      : res.push({ collection: c, entities: [] })
-  );
-  return res;
-};
-
-export const getEntityCollectionsByOwnerDid = async (did: string) => {
-  const entities = await getEntitiesByOwnerDid(did);
-  const groups = {};
-  for (const entity of entities) {
-    const parent = entity.context.find((c) => c.key === "class")?.val;
-    if (!parent) continue;
-    if (groups[parent]) groups[parent].push(entity);
-    else groups[parent] = [entity];
-  }
-  const res: any[] = [];
-  for (const [colId, ents] of Object.entries(groups)) {
-    const collection = await getEntityById(colId);
-    if (collection.type !== "asset/collection") continue;
-    res.push({ collection, entities: ents });
-  }
-  // get all collections and add assets as empty array
-  const collections = await getEntitiesByType("asset/collection");
-  collections.forEach((c) =>
-    res.some((r) => r.collection.id === c.id)
-      ? null
-      : res.push({ collection: c, entities: [] })
-  );
-  return res;
-};
-
-export const getEntitiesByType = async (type?: string) => {
-  if (type) {
-    const records = await prisma.entity.findMany({
-      where: {
-        type: {
-          contains: type,
-        },
-      },
-      select: {
-        id: true,
-      },
-    });
-    const res: any[] = [];
-    for (const record of records) {
-      res.push(await getEntityById(record.id));
-    }
-    return res;
-  }
-  const records = await prisma.entity.findMany({ select: { id: true } });
-  const res: any[] = [];
-  for (const record of records) {
-    res.push(await getEntityById(record.id));
-  }
-  return res;
-};
-
-// Return entity with externalId if exists otherwise return null
-export const getEntityByExternalId = async (externalid: string) => {
-  const entity1: any = await prisma.entity.findFirst({
-    where: { externalId: externalid },
+export const deviceExternalIdsLoaded = async () => {
+  const entity = await prisma.entity.findFirst({
+    where: { AND: [{ externalId: null }, { type: "asset/device" }] },
     select: { id: true },
   });
-  if (entity1) return await getEntityById(entity1.id);
-
-  const entities = await getEntitiesExternalId(150);
-  const entity2 = entities.find((e) => e.externalId === externalid);
-  if (entity2) return await getEntityById(entity2.id);
-
-  return null;
-};
-
-export const getEntityOwner = async (id: string): Promise<string> => {
-  const entity = await prisma.entity.findFirst({
-    where: { id: id },
-  });
-  return entity?.owner || "";
+  return !entity;
 };
 
 // Helper function to fetch "asset/device" entities with null externalId and update them
 export const getEntitiesExternalId = async (amount: number, isCron = false) => {
   const unknownEntities = await prisma.entity.findMany({
     where: { AND: [{ externalId: null }, { type: "asset/device" }] },
-    include: {
+    select: {
+      id: true,
       IID: {
-        include: {
+        select: {
           linkedResource: true,
         },
       },
@@ -294,7 +125,7 @@ export const getEntitiesExternalId = async (amount: number, isCron = false) => {
   });
 
   const entities = await Promise.all(
-    unknownEntities.map(async (e) => {
+    unknownEntities.map(async (e: any) => {
       const deviceCredsUri = e.IID.linkedResource.find((lr) =>
         lr.id.includes("deviceCredential")
       )?.serviceEndpoint;
@@ -322,9 +153,7 @@ export const getEntitiesExternalId = async (amount: number, isCron = false) => {
 
         if (!externalId) return e;
         return await prisma.entity.update({
-          where: {
-            id: e.id,
-          },
+          where: { id: e.id },
           data: {
             externalId: externalId,
           },
@@ -338,34 +167,4 @@ export const getEntitiesExternalId = async (amount: number, isCron = false) => {
   );
 
   return entities;
-};
-
-export const getEntityCollectionsAndEntityCountByOwnerAddress = async (
-  address: string
-) => {
-  const entities = await getEntitiesByOwnerAddress(address);
-  const groups = {};
-  for (const entity of entities) {
-    const parent = entity.context.find((c) => c.key === "class")?.val;
-    if (!parent) continue;
-    if (groups[parent]) groups[parent].push(entity);
-    else groups[parent] = [entity];
-  }
-  const res: any[] = [];
-  for (const [colId, ents] of Object.entries(groups)) {
-    const collection = await getEntityById(colId);
-    if (collection.type !== "asset/collection") continue;
-    res.push({
-      collection,
-      entities: Object.values((ents as any[]) ?? [])?.length ?? 0,
-    });
-  }
-  // get all collections and add assets as empty array
-  const collections = await getEntitiesByType("asset/collection");
-  collections.forEach((c) =>
-    res.some((r) => r.collection.id === c.id)
-      ? null
-      : res.push({ collection: c, entities: 0 })
-  );
-  return res;
 };

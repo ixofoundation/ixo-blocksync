@@ -1,18 +1,19 @@
 import { prisma } from "../prisma/prisma_client";
-import { TxResponse } from "@ixo/impactxclient-sdk/types/codegen/cosmos/base/abci/v1beta1/abci";
-import { decodeTransaction, decodeMessage } from "../util/proto";
+import { GetTransactionsType } from "../types/getBlock";
+import { decodeMessage } from "../util/proto";
 
-export const syncTransactions = async (transactionResponses: TxResponse[]) => {
-  if (transactionResponses.length === 0) return;
+export const syncTransactions = async (
+  transactions: GetTransactionsType,
+  blockHeight: number,
+  timestamp: Date
+) => {
+  if (transactions.length === 0) return;
 
-  for (const transactionResponse of transactionResponses) {
+  for (const transaction of transactions) {
     try {
-      const transaction = decodeTransaction(transactionResponse);
-
       const messages = await Promise.all(
-        transaction.body.messages.map(async (message) => {
-          const value = decodeMessage(message);
-          if (!value) return;
+        transaction.messages.map(async (message) => {
+          const value = message.value as any;
 
           // TODO handle decoded authz msgs into amount/from/to/denom/tokenNames
           let authZExecMsgs = [];
@@ -69,20 +70,18 @@ export const syncTransactions = async (transactionResponses: TxResponse[]) => {
 
       await prisma.transaction.create({
         data: {
-          hash: transactionResponse.txhash,
-          height: Number(transactionResponse.height),
-          code: transactionResponse.code,
-          fee: transaction.authInfo.fee,
-          gasUsed: transactionResponse.gasUsed.toString(),
-          gasWanted: transactionResponse.gasWanted.toString(),
-          time: new Date(transactionResponse.timestamp),
+          hash: transaction.hash,
+          height: blockHeight,
+          code: transaction.code,
+          fee: transaction.fee as any,
+          gasUsed: transaction.gasUsed,
+          gasWanted: transaction.gasWanted,
+          time: timestamp,
           messages: { create: messages },
         },
       });
-
-      // io.emit("Transaction Synced", data);
     } catch (error) {
-      console.error(error.message);
+      console.error("syncTransaction: ", error.message);
     }
   }
 };

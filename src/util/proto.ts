@@ -1,35 +1,4 @@
-import { Event } from "@cosmjs/tendermint-rpc/build/tendermint34/responses";
-import { TxResponse } from "@ixo/impactxclient-sdk/types/codegen/cosmos/base/abci/v1beta1/abci";
-import { cosmos, utils } from "@ixo/impactxclient-sdk";
-import Long from "long";
-import { queryClient, registry, tendermintClient } from "../sync/sync_chain";
-
-export type Attribute = {
-  key: string;
-  value: string;
-};
-
-export type ConvertedEvent = {
-  type: string;
-  attributes: Attribute[];
-};
-
-export const getBlockbyHeight = async (height: number | string) => {
-  try {
-    const res =
-      await queryClient.cosmos.base.tendermint.v1beta1.getBlockByHeight({
-        height: Long.fromNumber(Number(height)),
-      });
-    return res;
-  } catch (error) {
-    if (error.toString().includes("(18)")) {
-      console.log("Waiting for Blocks");
-      return;
-    }
-    console.error("getBlockbyHeight: ", error.message);
-    return;
-  }
-};
+import { queryClient, registry } from "../sync/sync_chain";
 
 export const getLatestBlock = async () => {
   try {
@@ -42,26 +11,11 @@ export const getLatestBlock = async () => {
   }
 };
 
-export const getTxsEvent = async (height: number) => {
+export const decodeMessage = (tx: any) => {
   try {
-    const res = await queryClient.cosmos.tx.v1beta1.getTxsEvent({
-      events: [`tx.height=${height}`],
-      orderBy: cosmos.tx.v1beta1.OrderBy.ORDER_BY_ASC,
-    });
-    return res;
+    return registry.decode(tx);
   } catch (error) {
-    console.error("getTxsEvent: ", error.message);
-    return;
-  }
-};
-
-export const getTMBlockbyHeight = async (height: number) => {
-  try {
-    const res = await tendermintClient.blockResults(height);
-    return res;
-  } catch (error) {
-    if (!error.toString().includes('"code":-32603'))
-      console.error("getTMBlockbyHeight: ", error.message);
+    console.error(error.message);
     return;
   }
 };
@@ -98,53 +52,3 @@ export const getTMBlockbyHeight = async (height: number) => {
 //     return;
 //   }
 // };
-
-export const getIid = async (did: string) => {
-  try {
-    const iid = await queryClient.ixo.iid.v1beta1.iidDocument({ id: did });
-    return iid.iidDocument;
-  } catch (error) {
-    console.error(error);
-    return;
-  }
-};
-
-export const decodeMessage = (tx: any) => {
-  try {
-    return registry.decode(tx);
-  } catch (error) {
-    console.error(error.message);
-    return;
-  }
-};
-
-export const decodeEvent = (event: Event) => {
-  const attributes = event.attributes.map((attr) => ({
-    key: utils.conversions.Uint8ArrayToJS(attr.key),
-    value: utils.conversions.Uint8ArrayToJS(attr.value),
-  }));
-
-  return {
-    type: event.type,
-    attributes: attributes,
-  };
-};
-
-export const decodeTransaction = (tx: TxResponse) => {
-  try {
-    const res = registry.decode(tx.tx!);
-    return res;
-  } catch (error) {
-    console.error(error);
-    return;
-  }
-};
-
-export const getTransaction = async (hash: string) => {
-  try {
-    return queryClient.cosmos.tx.v1beta1.getTx({ hash: hash });
-  } catch (error) {
-    console.error(error);
-    return;
-  }
-};

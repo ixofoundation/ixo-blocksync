@@ -52,3 +52,8 @@ export const EventTypesAttributeKey: { [key in EventTypes]: string } = {
   [EventTypes.shareWithdrawalBond]: "shareWithdrawalBond",
   [EventTypes.reserveWithdrawalBond]: "reserveWithdrawalBond",
 };
+
+export type Attribute = {
+  key: string;
+  value: string;
+};

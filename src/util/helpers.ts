@@ -1,5 +1,4 @@
-import { EventTypes, EventTypesAttributeKey } from "../types/Event";
-import { Attribute } from "./proto";
+import { Attribute, EventTypes, EventTypesAttributeKey } from "../types/Event";
 
 export const upperHexFromUint8Array = (uint8Array: Uint8Array): string => {
   return Buffer.from(uint8Array).toString("hex").toUpperCase();

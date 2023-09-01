@@ -15,111 +15,32 @@ datasource db {
 // ========================================
 
 model IID {
-  id                   String           @id
-  context              Context[]
+  id                   String   @id
+  context              Json
   controller           String[]
   verificationMethod   Json
-  service              Service[]
+  service              Json
   authentication       String[]
   assertionMethod      String[]
   keyAgreement         String[]
   capabilityInvocation String[]
   capabilityDelegation String[]
-  linkedResource       LinkedResource[]
-  linkedClaim          LinkedClaim[]
-  accordedRight        AccordedRight[]
-  linkedEntity         LinkedEntity[]
+  linkedResource       Json
+  linkedClaim          Json
+  accordedRight        Json
+  linkedEntity         Json
   alsoKnownAs          String
   metadata             Json
   Entity               Entity[]
-  // VerificationMethod   VerificationMethod[]
 }
-
-model Context {
-  aid Int    @id @default(autoincrement())
-  key String
-  val String
-  IID IID    @relation(fields: [iid], references: [id])
-  iid String
-}
-
-model Service {
-  aid             Int    @id @default(autoincrement())
-  id              String
-  type            String
-  serviceEndpoint String
-  IID             IID    @relation(fields: [iid], references: [id])
-  iid             String
-}
-
-model LinkedResource {
-  aid             Int    @id @default(autoincrement())
-  type            String
-  id              String
-  description     String
-  mediaType       String
-  serviceEndpoint String
-  proof           String
-  encrypted       String
-  right           String
-  IID             IID    @relation(fields: [iid], references: [id])
-  iid             String
-}
-
-model LinkedClaim {
-  aid             Int    @id @default(autoincrement())
-  id              String
-  type            String
-  description     String
-  serviceEndpoint String
-  proof           String
-  encrypted       String
-  right           String
-  IID             IID    @relation(fields: [iid], references: [id])
-  iid             String
-}
-
-model AccordedRight {
-  aid       Int    @id @default(autoincrement())
-  type      String
-  id        String
-  mechanism String
-  message   String
-  service   String
-  IID       IID    @relation(fields: [iid], references: [id])
-  iid       String
-}
-
-model LinkedEntity {
-  aid          Int    @id @default(autoincrement())
-  type         String
-  id           String
-  relationship String
-  service      String
-  IID          IID    @relation(fields: [iid], references: [id])
-  iid          String
-}
-
-// model VerificationMethod {
-//   aid                 Int     @id @default(autoincrement())
-//   id                  String
-//   type                String
-//   controller          String
-//   blockchainAccountID String?
-//   publicKeyHex        String?
-//   publicKeyMultibase  String?
-//   publicKeyBase58     String?
-//   IID                 IID     @relation(fields: [iid], references: [id])
-//   iid                 String
-// }
 
 // ========================================
 // Entity
 // ========================================
 
 model Entity {
-  IID            IID       @relation(fields: [id], references: [id])
-  id             String    @id
+  IID            IID          @relation(fields: [id], references: [id])
+  id             String       @id
   type           String
   startDate      DateTime?
   endDate        DateTime?
@@ -128,26 +49,13 @@ model Entity {
   credentials    String[]
   entityVerified Boolean
   metadata       Json
-  accounts       Json[]
+  accounts       Json
   externalId     String?
   owner          String?
+  // adding below foreign keys relationshipa to make it easier to query
+  Token          Token[]
+  TokenClass     TokenClass[]
 }
-
-// model EntityMetadata {
-//   versionId String
-//   created   DateTime?
-//   updated   DateTime?
-//   Entity    Entity    @relation(fields: [id], references: [id])
-//   id        String    @unique
-// }
-
-// model EntityAccount {
-//   aid     Int    @id @default(autoincrement())
-//   name    String
-//   address String
-//   Entity  Entity @relation(fields: [id], references: [id])
-//   id      String
-// }
 
 // ========================================
 // Claims
@@ -172,20 +80,18 @@ model ClaimCollection {
 }
 
 model Claim {
-  aid             Int             @id @default(autoincrement())
-  claimId         String          @unique
+  claimId         String          @id
   agentDid        String
   agentAddress    String
-  submissionDate  DateTime?
+  submissionDate  DateTime
   paymentsStatus  Json
-  ClaimCollection ClaimCollection @relation(fields: [collectionId], references: [id])
-  collectionId    String
   schemaType      String?
   evaluation      Evaluation?
+  ClaimCollection ClaimCollection @relation(fields: [collectionId], references: [id])
+  collectionId    String
 }
 
 model Evaluation {
-  aid               Int       @id @default(autoincrement())
   collectionId      String
   oracle            String
   agentDid          String
@@ -193,10 +99,10 @@ model Evaluation {
   status            Int
   reason            Int
   verificationProof String?
-  amount            Json[]
-  evaluationDate    DateTime?
-  Claim             Claim     @relation(fields: [claimId], references: [claimId])
-  claimId           String    @unique
+  amount            Json
+  evaluationDate    DateTime
+  Claim             Claim    @relation(fields: [claimId], references: [claimId])
+  claimId           String   @id
 }
 
 model Dispute {
@@ -213,6 +119,7 @@ model Dispute {
 model TokenClass {
   contractAddress String           @id
   minter          String
+  Class           Entity           @relation(fields: [class], references: [id])
   class           String
   name            String           @unique
   description     String
@@ -231,6 +138,7 @@ model Token {
   id               String             @id
   index            String
   name             String
+  Collection       Entity             @relation(fields: [collection], references: [id])
   collection       String
   tokenData        TokenData[]
   tokenTransaction TokenTransaction[]
@@ -270,7 +178,7 @@ model TokenCancelled {
 }
 
 model TokenTransaction {
-  id      Int    @id @default(autoincrement())
+  aid     Int    @id @default(autoincrement())
   from    String
   to      String
   amount  String
@@ -289,7 +197,7 @@ model Bond {
   name                         String
   description                  String
   functionType                 String
-  functionParameters           Json[]
+  functionParameters           Json
   creatorDid                   String
   controllerDid                String
   reserveTokens                String[]
@@ -298,13 +206,13 @@ model Bond {
   feeAddress                   String
   reserveWithdrawalAddress     String
   maxSupply                    Json?
-  orderQuantityLimits          Json[]
+  orderQuantityLimits          Json
   sanityRate                   String
   sanityMarginPercentage       String
   currentSupply                Json?
-  currentReserve               Json[]
-  availableReserve             Json[]
-  currentOutcomePaymentReserve Json[]
+  currentReserve               Json
+  availableReserve             Json
+  currentOutcomePaymentReserve Json
   allowSells                   Boolean
   allowReserveWithdrawals      Boolean
   alphaBond                    Boolean
@@ -330,7 +238,7 @@ model BondBuy {
   bondDid    String
   accountDid String
   amount     Json
-  maxPrices  Json[]
+  maxPrices  Json
   height     Int
   timestamp  DateTime
 }
@@ -362,7 +270,7 @@ model ReserveWithdrawal {
   bondDid                  String
   withdrawerDid            String
   withdrawerAddress        String
-  amount                   Json[]
+  amount                   Json
   reserveWithdrawalAddress String
   height                   Int
   timestamp                DateTime
@@ -374,7 +282,7 @@ model ShareWithdrawal {
   bondDid          String
   recipientDid     String
   recipientAddress String
-  amount           Json[]
+  amount           Json
   height           Int
   timestamp        DateTime
 }
@@ -385,7 +293,7 @@ model OutcomePayment {
   bondDid       String
   senderDid     String
   senderAddress String
-  amount        Json[]
+  amount        Json
   height        Int
   timestamp     DateTime
 }
@@ -418,14 +326,6 @@ model Chain {
   blockHeight Int
 }
 
-model Event {
-  id          Int      @id @default(autoincrement())
-  type        String
-  attributes  Json[]
-  blockHeight Int
-  timestamp   DateTime
-}
-
 model Transaction {
   hash      String    @id
   height    Int
@@ -439,23 +339,14 @@ model Transaction {
 
 model Message {
   id              Int         @id @default(autoincrement())
-  Transaction     Transaction @relation(fields: [transactionHash], references: [hash])
-  transactionHash String
   typeUrl         String
   value           Json
   from            String?
   to              String?
   denoms          String[]
   tokenNames      String[]
-}
-
-model Block {
-  height           Int      @id
-  hash             String
-  num_txs          Int      @default(0)
-  total_gas        Int      @default(0)
-  proposer_address String
-  timestamp        DateTime
+  Transaction     Transaction @relation(fields: [transactionHash], references: [hash])
+  transactionHash String
 }
 
 // ========================================

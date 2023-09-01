@@ -1,11 +1,18 @@
 import { prisma } from "../prisma/prisma_client";
-import { countTokensByType } from "../util/helpers";
+
+export const createGetAccountTransactionsKey = (
+  id: string,
+  name?: string | null | undefined
+): string => {
+  return `${id}-${name || "NULL"}`;
+};
 
 export const getTokensTotalByAddress = async (
   address: string,
-  name?: string
+  name?: string,
+  transactionsLoader?
 ) => {
-  const tokens = await getAccountTokens(address, name);
+  const tokens = await getAccountTokens(address, name, transactionsLoader);
   Object.keys(tokens).forEach((key) => {
     const newTokens = {};
     Object.values(tokens[key].tokens).forEach((t: any) => {
@@ -28,18 +35,19 @@ export const getTokensTotalByAddress = async (
 
 export const getTokensTotalForEntities = async (
   address: string,
-  name?: string
+  name?: string,
+  transactionsLoader?
 ) => {
-  const entities =
-    (await prisma.entity.findMany({
-      where: { owner: address, type: "asset/device" },
-      select: { id: true, accounts: true },
-    })) || [];
+  const entities = await prisma.entity.findMany({
+    where: { owner: address, type: "asset/device" },
+    select: { id: true, accounts: true },
+  });
 
-  const tokens = entities.map(async (entity) => {
+  const tokens = entities.map(async (entity: any) => {
     const entityTokens = await getTokensTotalByAddress(
-      (entity.accounts as any).find((a) => a.name === "admin")?.address,
-      name
+      entity.accounts.find((a) => a.name === "admin")?.address,
+      name,
+      transactionsLoader
     );
     return { entity: entity.id, tokens: entityTokens };
   });
@@ -49,18 +57,70 @@ export const getTokensTotalForEntities = async (
   return tokensTotal.filter((t) => Object.keys(t.tokens).length > 0);
 };
 
-export const getAccountTokens = async (address: string, name?: string) => {
-  const tokenTransactions = await prisma.tokenTransaction.findMany({
-    where: {
-      OR: [{ from: address }, { to: address }],
-      ...(name && { Token: { name: name } }),
-    },
-    include: {
-      Token: {
-        select: { name: true, collection: true },
+export const getAccountTransactions = async (
+  address: string,
+  name?: string
+) => {
+  if (!address) return [];
+
+  const PAGE_SIZE = 30000; // Fetch 10,000 records at a time. Adjust as per your needs.
+  let tokenTransactions: any[] = [];
+  let skip = 0;
+
+  while (true) {
+    const tokens = await prisma.tokenTransaction.findMany({
+      where: {
+        OR: [{ from: address }, { to: address }],
+        ...(name && { Token: { name: name } }),
       },
-    },
-  });
+      select: {
+        from: true,
+        to: true,
+        amount: true,
+        tokenId: true,
+        Token: {
+          select: { name: true, collection: true },
+        },
+      },
+      skip: skip,
+      take: PAGE_SIZE,
+    });
+
+    // Exit the loop if no more records are found.
+    if (tokens.length === 0) break;
+
+    tokenTransactions.push(...tokens);
+    skip += PAGE_SIZE;
+  }
+  return tokenTransactions;
+};
+
+// Get all the tokens for an account and returns them in a format that is easy to work with:
+// {
+//   [NAME]: {
+//     contractAddress: "",
+//     description: "",
+//     image: "",
+//     tokens: {
+//       [ID]: {
+//         collection: "",
+//         amount: 0,
+//         minted: 0,
+//         retired: 0,
+//       },
+//     },
+//   }
+// }
+export const getAccountTokens = async (
+  address: string,
+  name?: string,
+  transactionLoader?
+) => {
+  let tokenTransactions: any[] = transactionLoader
+    ? await transactionLoader.load(
+        createGetAccountTransactionsKey(address, name)
+      )
+    : await getAccountTransactions(address, name);
 
   const tokens = {};
   for (const curr of tokenTransactions) {
@@ -129,48 +189,16 @@ export const getAccountTokens = async (address: string, name?: string) => {
   return tokens;
 };
 
-export const getTokensTotalAmountByAddress = async (
-  address: string,
-  name?: string
-) => {
-  const tokens = await getAccountTokens(address, name);
-  Object.keys(tokens).forEach((key) => {
-    tokens[key] = countTokensByType(tokens[key].tokens, "amount");
-  });
-  return tokens;
-};
-
-export const getTokensTotalMintedByAddress = async (
-  address: string,
-  name?: string
-) => {
-  const tokens = await getAccountTokens(address, name);
-  Object.keys(tokens).forEach((key) => {
-    tokens[key] = countTokensByType(tokens[key].tokens, "minted");
-  });
-  return tokens;
-};
-
-export const getTokensTotalRetiredByAddress = async (
-  address: string,
-  name?: string
-) => {
-  const tokens = await getAccountTokens(address, name);
-  Object.keys(tokens).forEach((key) => {
-    tokens[key] = countTokensByType(tokens[key].tokens, "retired");
-  });
-  return tokens;
-};
-
 export const getTokensTotalForCollection = async (
   did: string,
-  name?: string
+  name?: string,
+  transactionLoader?
 ) => {
   const entities = await prisma.entity.findMany({
     where: {
       IID: {
         context: {
-          some: { key: "class", val: did },
+          array_contains: [{ val: did }],
         },
       },
     },
@@ -180,7 +208,8 @@ export const getTokensTotalForCollection = async (
   const tokens = entities.map(async (entity) => {
     const entityTokens = await getTokensTotalByAddress(
       (entity.accounts as any).find((a) => a.name === "admin")?.address,
-      name
+      name,
+      transactionLoader
     );
     return { entity: entity.id, tokens: entityTokens };
   });
@@ -192,9 +221,14 @@ export const getTokensTotalForCollection = async (
 
 export const getTokensTotalForCollectionAmounts = async (
   did: string,
-  name?: string
+  name?: string,
+  transactionLoader?
 ) => {
-  const tokens = await getTokensTotalForCollection(did, name);
+  const tokens = await getTokensTotalForCollection(
+    did,
+    name,
+    transactionLoader
+  );
   let newTokens = {};
   tokens.forEach((t) => {
     Object.keys(t.tokens).forEach((key) => {

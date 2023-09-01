@@ -2,7 +2,16 @@ import postgraphile from "postgraphile";
 import PgSimplifyInflectorPlugin from "@graphile-contrib/pg-simplify-inflector";
 import ConnectionFilterPlugin from "postgraphile-plugin-connection-filter";
 import { DATABASE_URL } from "./util/secrets";
-import { IidPlugin } from "./handlers/iid_handler";
+import {
+  EntityPlugin,
+  createFullEntityLoader,
+  createParentEntityLoader,
+} from "./graphql/entity";
+import { ClaimsPlugin } from "./graphql/claims";
+import {
+  TokenPlugin,
+  createGetAccountTransactionsLoader,
+} from "./graphql/token";
 
 const isProd = process.env.NODE_ENV === "production";
 
@@ -33,12 +42,25 @@ export const Postgraphile = postgraphile(DATABASE_URL, "public", {
   setofFunctionsContainNulls: false,
   ignoreRBAC: false,
   disableDefaultMutations: true,
+  additionalGraphQLContextFromRequest: async (req, res) => {
+    const parentEntityLoader = createParentEntityLoader();
+    return {
+      entityLoader: createFullEntityLoader(parentEntityLoader),
+      getAccountTransactionsLoader: createGetAccountTransactionsLoader(),
+    };
+  },
   subscriptions: true,
   pgSettings: {
     // place a timeout on the database operations, this will halt any query that takes longer than the specified number of milliseconds to execute.
-    statement_timeout: "2000",
+    statement_timeout: "1500",
   },
-  appendPlugins: [IidPlugin, PgSimplifyInflectorPlugin, ConnectionFilterPlugin],
+  appendPlugins: [
+    TokenPlugin,
+    ClaimsPlugin,
+    EntityPlugin,
+    PgSimplifyInflectorPlugin,
+    ConnectionFilterPlugin,
+  ],
   // Optional customisation
   graphileBuildOptions: {
     // --------------------------------------------

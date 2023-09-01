@@ -17,74 +17,6 @@ type Query implements Node {
     nodeId: ID!
   ): Node
 
-  """Reads and enables pagination through a set of `AccordedRight`."""
-  accordedRights(
-    """Only read the first `n` values of the set."""
-    first: Int
-
-    """Only read the last `n` values of the set."""
-    last: Int
-
-    """
-    Skip the first `n` values from our `after` cursor, an alternative to cursor
-    based pagination. May not be used with `last`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """The method to use when ordering `AccordedRight`."""
-    orderBy: [AccordedRightsOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: AccordedRightCondition
-
-    """
-    A filter to be used in determining which values should be returned by the collection.
-    """
-    filter: AccordedRightFilter
-  ): AccordedRightsConnection
-
-  """Reads and enables pagination through a set of `Block`."""
-  blocks(
-    """Only read the first `n` values of the set."""
-    first: Int
-
-    """Only read the last `n` values of the set."""
-    last: Int
-
-    """
-    Skip the first `n` values from our `after` cursor, an alternative to cursor
-    based pagination. May not be used with `last`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """The method to use when ordering `Block`."""
-    orderBy: [BlocksOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: BlockCondition
-
-    """
-    A filter to be used in determining which values should be returned by the collection.
-    """
-    filter: BlockFilter
-  ): BlocksConnection
-
   """Reads and enables pagination through a set of `Bond`."""
   bonds(
     """Only read the first `n` values of the set."""
@@ -357,40 +289,6 @@ type Query implements Node {
     filter: ClaimCollectionFilter
   ): ClaimCollectionsConnection
 
-  """Reads and enables pagination through a set of `Context`."""
-  contexts(
-    """Only read the first `n` values of the set."""
-    first: Int
-
-    """Only read the last `n` values of the set."""
-    last: Int
-
-    """
-    Skip the first `n` values from our `after` cursor, an alternative to cursor
-    based pagination. May not be used with `last`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """The method to use when ordering `Context`."""
-    orderBy: [ContextsOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: ContextCondition
-
-    """
-    A filter to be used in determining which values should be returned by the collection.
-    """
-    filter: ContextFilter
-  ): ContextsConnection
-
   """Reads and enables pagination through a set of `Dispute`."""
   disputes(
     """Only read the first `n` values of the set."""
@@ -493,40 +391,6 @@ type Query implements Node {
     filter: EvaluationFilter
   ): EvaluationsConnection
 
-  """Reads and enables pagination through a set of `Event`."""
-  events(
-    """Only read the first `n` values of the set."""
-    first: Int
-
-    """Only read the last `n` values of the set."""
-    last: Int
-
-    """
-    Skip the first `n` values from our `after` cursor, an alternative to cursor
-    based pagination. May not be used with `last`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """The method to use when ordering `Event`."""
-    orderBy: [EventsOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: EventCondition
-
-    """
-    A filter to be used in determining which values should be returned by the collection.
-    """
-    filter: EventFilter
-  ): EventsConnection
-
   """Reads and enables pagination through a set of `Iid`."""
   iids(
     """Only read the first `n` values of the set."""
@@ -594,108 +458,6 @@ type Query implements Node {
     """
     filter: IpfFilter
   ): IpfsConnection
-
-  """Reads and enables pagination through a set of `LinkedClaim`."""
-  linkedClaims(
-    """Only read the first `n` values of the set."""
-    first: Int
-
-    """Only read the last `n` values of the set."""
-    last: Int
-
-    """
-    Skip the first `n` values from our `after` cursor, an alternative to cursor
-    based pagination. May not be used with `last`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """The method to use when ordering `LinkedClaim`."""
-    orderBy: [LinkedClaimsOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: LinkedClaimCondition
-
-    """
-    A filter to be used in determining which values should be returned by the collection.
-    """
-    filter: LinkedClaimFilter
-  ): LinkedClaimsConnection
-
-  """Reads and enables pagination through a set of `LinkedEntity`."""
-  linkedEntities(
-    """Only read the first `n` values of the set."""
-    first: Int
-
-    """Only read the last `n` values of the set."""
-    last: Int
-
-    """
-    Skip the first `n` values from our `after` cursor, an alternative to cursor
-    based pagination. May not be used with `last`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """The method to use when ordering `LinkedEntity`."""
-    orderBy: [LinkedEntitiesOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: LinkedEntityCondition
-
-    """
-    A filter to be used in determining which values should be returned by the collection.
-    """
-    filter: LinkedEntityFilter
-  ): LinkedEntitiesConnection
-
-  """Reads and enables pagination through a set of `LinkedResource`."""
-  linkedResources(
-    """Only read the first `n` values of the set."""
-    first: Int
-
-    """Only read the last `n` values of the set."""
-    last: Int
-
-    """
-    Skip the first `n` values from our `after` cursor, an alternative to cursor
-    based pagination. May not be used with `last`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """The method to use when ordering `LinkedResource`."""
-    orderBy: [LinkedResourcesOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: LinkedResourceCondition
-
-    """
-    A filter to be used in determining which values should be returned by the collection.
-    """
-    filter: LinkedResourceFilter
-  ): LinkedResourcesConnection
 
   """Reads and enables pagination through a set of `Message`."""
   messages(
@@ -798,40 +560,6 @@ type Query implements Node {
     """
     filter: ReserveWithdrawalFilter
   ): ReserveWithdrawalsConnection
-
-  """Reads and enables pagination through a set of `Service`."""
-  services(
-    """Only read the first `n` values of the set."""
-    first: Int
-
-    """Only read the last `n` values of the set."""
-    last: Int
-
-    """
-    Skip the first `n` values from our `after` cursor, an alternative to cursor
-    based pagination. May not be used with `last`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """The method to use when ordering `Service`."""
-    orderBy: [ServicesOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: ServiceCondition
-
-    """
-    A filter to be used in determining which values should be returned by the collection.
-    """
-    filter: ServiceFilter
-  ): ServicesConnection
 
   """Reads and enables pagination through a set of `ShareWithdrawal`."""
   shareWithdrawals(
@@ -1138,53 +866,31 @@ type Query implements Node {
     """
     filter: _PrismaMigrationFilter
   ): _PrismaMigrationsConnection
-  accordedRight(aid: Int!): AccordedRight
-  block(height: Int!): Block
   bond(bondDid: String!): Bond
   bondAlpha(id: Int!): BondAlpha
   bondBuy(id: Int!): BondBuy
   bondSell(id: Int!): BondSell
   bondSwap(id: Int!): BondSwap
   chain(chainId: String!): Chain
-  claim(aid: Int!): Claim
+  claim(claimId: String!): Claim
   claimCollection(id: String!): ClaimCollection
-  context(aid: Int!): Context
   dispute(proof: String!): Dispute
   entity(id: String!): Entity
-  evaluation(aid: Int!): Evaluation
-  event(id: Int!): Event
+  evaluation(claimId: String!): Evaluation
   iid(id: String!): Iid
   ipf(cid: String!): Ipf
-  linkedClaim(aid: Int!): LinkedClaim
-  linkedEntity(aid: Int!): LinkedEntity
-  linkedResource(aid: Int!): LinkedResource
   message(id: Int!): Message
   outcomePayment(id: Int!): OutcomePayment
   reserveWithdrawal(id: Int!): ReserveWithdrawal
-  service(aid: Int!): Service
   shareWithdrawal(id: Int!): ShareWithdrawal
   token(id: String!): Token
   tokenCancelled(aid: Int!): TokenCancelled
   tokenClass(contractAddress: String!): TokenClass
   tokenDatum(aid: Int!): TokenDatum
   tokenRetired(aid: Int!): TokenRetired
-  tokenTransaction(id: Int!): TokenTransaction
+  tokenTransaction(aid: Int!): TokenTransaction
   transaction(hash: String!): Transaction
   _prismaMigration(id: String!): _PrismaMigration
-
-  """Reads a single `AccordedRight` using its globally unique `ID`."""
-  accordedRightByNodeId(
-    """
-    The globally unique `ID` to be used in selecting a single `AccordedRight`.
-    """
-    nodeId: ID!
-  ): AccordedRight
-
-  """Reads a single `Block` using its globally unique `ID`."""
-  blockByNodeId(
-    """The globally unique `ID` to be used in selecting a single `Block`."""
-    nodeId: ID!
-  ): Block
 
   """Reads a single `Bond` using its globally unique `ID`."""
   bondByNodeId(
@@ -1236,12 +942,6 @@ type Query implements Node {
     nodeId: ID!
   ): ClaimCollection
 
-  """Reads a single `Context` using its globally unique `ID`."""
-  contextByNodeId(
-    """The globally unique `ID` to be used in selecting a single `Context`."""
-    nodeId: ID!
-  ): Context
-
   """Reads a single `Dispute` using its globally unique `ID`."""
   disputeByNodeId(
     """The globally unique `ID` to be used in selecting a single `Dispute`."""
@@ -1262,12 +962,6 @@ type Query implements Node {
     nodeId: ID!
   ): Evaluation
 
-  """Reads a single `Event` using its globally unique `ID`."""
-  eventByNodeId(
-    """The globally unique `ID` to be used in selecting a single `Event`."""
-    nodeId: ID!
-  ): Event
-
   """Reads a single `Iid` using its globally unique `ID`."""
   iidByNodeId(
     """The globally unique `ID` to be used in selecting a single `Iid`."""
@@ -1279,30 +973,6 @@ type Query implements Node {
     """The globally unique `ID` to be used in selecting a single `Ipf`."""
     nodeId: ID!
   ): Ipf
-
-  """Reads a single `LinkedClaim` using its globally unique `ID`."""
-  linkedClaimByNodeId(
-    """
-    The globally unique `ID` to be used in selecting a single `LinkedClaim`.
-    """
-    nodeId: ID!
-  ): LinkedClaim
-
-  """Reads a single `LinkedEntity` using its globally unique `ID`."""
-  linkedEntityByNodeId(
-    """
-    The globally unique `ID` to be used in selecting a single `LinkedEntity`.
-    """
-    nodeId: ID!
-  ): LinkedEntity
-
-  """Reads a single `LinkedResource` using its globally unique `ID`."""
-  linkedResourceByNodeId(
-    """
-    The globally unique `ID` to be used in selecting a single `LinkedResource`.
-    """
-    nodeId: ID!
-  ): LinkedResource
 
   """Reads a single `Message` using its globally unique `ID`."""
   messageByNodeId(
@@ -1325,12 +995,6 @@ type Query implements Node {
     """
     nodeId: ID!
   ): ReserveWithdrawal
-
-  """Reads a single `Service` using its globally unique `ID`."""
-  serviceByNodeId(
-    """The globally unique `ID` to be used in selecting a single `Service`."""
-    nodeId: ID!
-  ): Service
 
   """Reads a single `ShareWithdrawal` using its globally unique `ID`."""
   shareWithdrawalByNodeId(
@@ -1401,7 +1065,11 @@ type Query implements Node {
     """
     nodeId: ID!
   ): _PrismaMigration
-  getIidByIid(id: String!): Iid
+  getAccountTokens(address: String!, name: String): JSON!
+  getTokensTotalByAddress(address: String!, name: String): JSON!
+  getTokensTotalForEntities(address: String!, name: String): JSON!
+  getTokensTotalForCollection(did: String!, name: String): JSON!
+  getTokensTotalForCollectionAmounts(did: String!, name: String): JSON!
 }
 
 """An object with a globally unique `ID`."""
@@ -1410,1857 +1078,6 @@ interface Node {
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
   """
   nodeId: ID!
-}
-
-"""A connection to a list of `AccordedRight` values."""
-type AccordedRightsConnection {
-  """A list of `AccordedRight` objects."""
-  nodes: [AccordedRight!]!
-
-  """
-  A list of edges which contains the `AccordedRight` and cursor to aid in pagination.
-  """
-  edges: [AccordedRightsEdge!]!
-
-  """Information to aid in pagination."""
-  pageInfo: PageInfo!
-
-  """The count of *all* `AccordedRight` you could get from the connection."""
-  totalCount: Int!
-}
-
-type AccordedRight implements Node {
-  """
-  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
-  """
-  nodeId: ID!
-  aid: Int!
-  type: String!
-  id: String!
-  mechanism: String!
-  message: String!
-  service: String!
-  iid: String!
-
-  """Reads a single `Iid` that is related to this `AccordedRight`."""
-  iidByIid: Iid
-}
-
-type Iid implements Node {
-  """
-  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
-  """
-  nodeId: ID!
-  id: String!
-  controller: [String]
-  verificationMethod: JSON!
-  authentication: [String]
-  assertionMethod: [String]
-  keyAgreement: [String]
-  capabilityInvocation: [String]
-  capabilityDelegation: [String]
-  alsoKnownAs: String!
-  metadata: JSON!
-
-  """Reads and enables pagination through a set of `Context`."""
-  contextsByIid(
-    """Only read the first `n` values of the set."""
-    first: Int
-
-    """Only read the last `n` values of the set."""
-    last: Int
-
-    """
-    Skip the first `n` values from our `after` cursor, an alternative to cursor
-    based pagination. May not be used with `last`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """The method to use when ordering `Context`."""
-    orderBy: [ContextsOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: ContextCondition
-
-    """
-    A filter to be used in determining which values should be returned by the collection.
-    """
-    filter: ContextFilter
-  ): ContextsConnection!
-
-  """Reads and enables pagination through a set of `Service`."""
-  servicesByIid(
-    """Only read the first `n` values of the set."""
-    first: Int
-
-    """Only read the last `n` values of the set."""
-    last: Int
-
-    """
-    Skip the first `n` values from our `after` cursor, an alternative to cursor
-    based pagination. May not be used with `last`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """The method to use when ordering `Service`."""
-    orderBy: [ServicesOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: ServiceCondition
-
-    """
-    A filter to be used in determining which values should be returned by the collection.
-    """
-    filter: ServiceFilter
-  ): ServicesConnection!
-
-  """Reads and enables pagination through a set of `LinkedResource`."""
-  linkedResourcesByIid(
-    """Only read the first `n` values of the set."""
-    first: Int
-
-    """Only read the last `n` values of the set."""
-    last: Int
-
-    """
-    Skip the first `n` values from our `after` cursor, an alternative to cursor
-    based pagination. May not be used with `last`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """The method to use when ordering `LinkedResource`."""
-    orderBy: [LinkedResourcesOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: LinkedResourceCondition
-
-    """
-    A filter to be used in determining which values should be returned by the collection.
-    """
-    filter: LinkedResourceFilter
-  ): LinkedResourcesConnection!
-
-  """Reads and enables pagination through a set of `LinkedClaim`."""
-  linkedClaimsByIid(
-    """Only read the first `n` values of the set."""
-    first: Int
-
-    """Only read the last `n` values of the set."""
-    last: Int
-
-    """
-    Skip the first `n` values from our `after` cursor, an alternative to cursor
-    based pagination. May not be used with `last`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """The method to use when ordering `LinkedClaim`."""
-    orderBy: [LinkedClaimsOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: LinkedClaimCondition
-
-    """
-    A filter to be used in determining which values should be returned by the collection.
-    """
-    filter: LinkedClaimFilter
-  ): LinkedClaimsConnection!
-
-  """Reads and enables pagination through a set of `AccordedRight`."""
-  accordedRightsByIid(
-    """Only read the first `n` values of the set."""
-    first: Int
-
-    """Only read the last `n` values of the set."""
-    last: Int
-
-    """
-    Skip the first `n` values from our `after` cursor, an alternative to cursor
-    based pagination. May not be used with `last`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """The method to use when ordering `AccordedRight`."""
-    orderBy: [AccordedRightsOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: AccordedRightCondition
-
-    """
-    A filter to be used in determining which values should be returned by the collection.
-    """
-    filter: AccordedRightFilter
-  ): AccordedRightsConnection!
-
-  """Reads and enables pagination through a set of `LinkedEntity`."""
-  linkedEntitiesByIid(
-    """Only read the first `n` values of the set."""
-    first: Int
-
-    """Only read the last `n` values of the set."""
-    last: Int
-
-    """
-    Skip the first `n` values from our `after` cursor, an alternative to cursor
-    based pagination. May not be used with `last`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """The method to use when ordering `LinkedEntity`."""
-    orderBy: [LinkedEntitiesOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: LinkedEntityCondition
-
-    """
-    A filter to be used in determining which values should be returned by the collection.
-    """
-    filter: LinkedEntityFilter
-  ): LinkedEntitiesConnection!
-
-  """Reads a single `Entity` that is related to this `Iid`."""
-  entityById: Entity
-}
-
-"""
-The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
-"""
-scalar JSON
-
-"""A connection to a list of `Context` values."""
-type ContextsConnection {
-  """A list of `Context` objects."""
-  nodes: [Context!]!
-
-  """
-  A list of edges which contains the `Context` and cursor to aid in pagination.
-  """
-  edges: [ContextsEdge!]!
-
-  """Information to aid in pagination."""
-  pageInfo: PageInfo!
-
-  """The count of *all* `Context` you could get from the connection."""
-  totalCount: Int!
-}
-
-type Context implements Node {
-  """
-  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
-  """
-  nodeId: ID!
-  aid: Int!
-  key: String!
-  val: String!
-  iid: String!
-
-  """Reads a single `Iid` that is related to this `Context`."""
-  iidByIid: Iid
-}
-
-"""A `Context` edge in the connection."""
-type ContextsEdge {
-  """A cursor for use in pagination."""
-  cursor: Cursor
-
-  """The `Context` at the end of the edge."""
-  node: Context!
-}
-
-"""A location in a connection that can be used for resuming pagination."""
-scalar Cursor
-
-"""Information about pagination in a connection."""
-type PageInfo {
-  """When paginating forwards, are there more items?"""
-  hasNextPage: Boolean!
-
-  """When paginating backwards, are there more items?"""
-  hasPreviousPage: Boolean!
-
-  """When paginating backwards, the cursor to continue."""
-  startCursor: Cursor
-
-  """When paginating forwards, the cursor to continue."""
-  endCursor: Cursor
-}
-
-"""Methods to use when ordering `Context`."""
-enum ContextsOrderBy {
-  NATURAL
-  AID_ASC
-  AID_DESC
-  KEY_ASC
-  KEY_DESC
-  VAL_ASC
-  VAL_DESC
-  IID_ASC
-  IID_DESC
-  PRIMARY_KEY_ASC
-  PRIMARY_KEY_DESC
-}
-
-"""
-A condition to be used against `Context` object types. All fields are tested for equality and combined with a logical ‘and.’
-"""
-input ContextCondition {
-  """Checks for equality with the object’s `aid` field."""
-  aid: Int
-
-  """Checks for equality with the object’s `key` field."""
-  key: String
-
-  """Checks for equality with the object’s `val` field."""
-  val: String
-
-  """Checks for equality with the object’s `iid` field."""
-  iid: String
-}
-
-"""
-A filter to be used against `Context` object types. All fields are combined with a logical ‘and.’
-"""
-input ContextFilter {
-  """Filter by the object’s `aid` field."""
-  aid: IntFilter
-
-  """Filter by the object’s `key` field."""
-  key: StringFilter
-
-  """Filter by the object’s `val` field."""
-  val: StringFilter
-
-  """Filter by the object’s `iid` field."""
-  iid: StringFilter
-
-  """Filter by the object’s `iidByIid` relation."""
-  iidByIid: IidFilter
-
-  """Checks for all expressions in this list."""
-  and: [ContextFilter!]
-
-  """Checks for any expressions in this list."""
-  or: [ContextFilter!]
-
-  """Negates the expression."""
-  not: ContextFilter
-}
-
-"""
-A filter to be used against Int fields. All fields are combined with a logical ‘and.’
-"""
-input IntFilter {
-  """
-  Is null (if `true` is specified) or is not null (if `false` is specified).
-  """
-  isNull: Boolean
-
-  """Equal to the specified value."""
-  equalTo: Int
-
-  """Not equal to the specified value."""
-  notEqualTo: Int
-
-  """
-  Not equal to the specified value, treating null like an ordinary value.
-  """
-  distinctFrom: Int
-
-  """Equal to the specified value, treating null like an ordinary value."""
-  notDistinctFrom: Int
-
-  """Included in the specified list."""
-  in: [Int!]
-
-  """Not included in the specified list."""
-  notIn: [Int!]
-
-  """Less than the specified value."""
-  lessThan: Int
-
-  """Less than or equal to the specified value."""
-  lessThanOrEqualTo: Int
-
-  """Greater than the specified value."""
-  greaterThan: Int
-
-  """Greater than or equal to the specified value."""
-  greaterThanOrEqualTo: Int
-}
-
-"""
-A filter to be used against String fields. All fields are combined with a logical ‘and.’
-"""
-input StringFilter {
-  """
-  Is null (if `true` is specified) or is not null (if `false` is specified).
-  """
-  isNull: Boolean
-
-  """Equal to the specified value."""
-  equalTo: String
-
-  """Not equal to the specified value."""
-  notEqualTo: String
-
-  """
-  Not equal to the specified value, treating null like an ordinary value.
-  """
-  distinctFrom: String
-
-  """Equal to the specified value, treating null like an ordinary value."""
-  notDistinctFrom: String
-
-  """Included in the specified list."""
-  in: [String!]
-
-  """Not included in the specified list."""
-  notIn: [String!]
-
-  """Less than the specified value."""
-  lessThan: String
-
-  """Less than or equal to the specified value."""
-  lessThanOrEqualTo: String
-
-  """Greater than the specified value."""
-  greaterThan: String
-
-  """Greater than or equal to the specified value."""
-  greaterThanOrEqualTo: String
-
-  """Contains the specified string (case-sensitive)."""
-  includes: String
-
-  """Does not contain the specified string (case-sensitive)."""
-  notIncludes: String
-
-  """Contains the specified string (case-insensitive)."""
-  includesInsensitive: String
-
-  """Does not contain the specified string (case-insensitive)."""
-  notIncludesInsensitive: String
-
-  """Starts with the specified string (case-sensitive)."""
-  startsWith: String
-
-  """Does not start with the specified string (case-sensitive)."""
-  notStartsWith: String
-
-  """Starts with the specified string (case-insensitive)."""
-  startsWithInsensitive: String
-
-  """Does not start with the specified string (case-insensitive)."""
-  notStartsWithInsensitive: String
-
-  """Ends with the specified string (case-sensitive)."""
-  endsWith: String
-
-  """Does not end with the specified string (case-sensitive)."""
-  notEndsWith: String
-
-  """Ends with the specified string (case-insensitive)."""
-  endsWithInsensitive: String
-
-  """Does not end with the specified string (case-insensitive)."""
-  notEndsWithInsensitive: String
-
-  """
-  Matches the specified pattern (case-sensitive). An underscore (_) matches any single character; a percent sign (%) matches any sequence of zero or more characters.
-  """
-  like: String
-
-  """
-  Does not match the specified pattern (case-sensitive). An underscore (_) matches any single character; a percent sign (%) matches any sequence of zero or more characters.
-  """
-  notLike: String
-
-  """
-  Matches the specified pattern (case-insensitive). An underscore (_) matches any single character; a percent sign (%) matches any sequence of zero or more characters.
-  """
-  likeInsensitive: String
-
-  """
-  Does not match the specified pattern (case-insensitive). An underscore (_) matches any single character; a percent sign (%) matches any sequence of zero or more characters.
-  """
-  notLikeInsensitive: String
-
-  """Equal to the specified value (case-insensitive)."""
-  equalToInsensitive: String
-
-  """Not equal to the specified value (case-insensitive)."""
-  notEqualToInsensitive: String
-
-  """
-  Not equal to the specified value, treating null like an ordinary value (case-insensitive).
-  """
-  distinctFromInsensitive: String
-
-  """
-  Equal to the specified value, treating null like an ordinary value (case-insensitive).
-  """
-  notDistinctFromInsensitive: String
-
-  """Included in the specified list (case-insensitive)."""
-  inInsensitive: [String!]
-
-  """Not included in the specified list (case-insensitive)."""
-  notInInsensitive: [String!]
-
-  """Less than the specified value (case-insensitive)."""
-  lessThanInsensitive: String
-
-  """Less than or equal to the specified value (case-insensitive)."""
-  lessThanOrEqualToInsensitive: String
-
-  """Greater than the specified value (case-insensitive)."""
-  greaterThanInsensitive: String
-
-  """Greater than or equal to the specified value (case-insensitive)."""
-  greaterThanOrEqualToInsensitive: String
-}
-
-"""
-A filter to be used against `Iid` object types. All fields are combined with a logical ‘and.’
-"""
-input IidFilter {
-  """Filter by the object’s `id` field."""
-  id: StringFilter
-
-  """Filter by the object’s `controller` field."""
-  controller: StringListFilter
-
-  """Filter by the object’s `verificationMethod` field."""
-  verificationMethod: JSONFilter
-
-  """Filter by the object’s `authentication` field."""
-  authentication: StringListFilter
-
-  """Filter by the object’s `assertionMethod` field."""
-  assertionMethod: StringListFilter
-
-  """Filter by the object’s `keyAgreement` field."""
-  keyAgreement: StringListFilter
-
-  """Filter by the object’s `capabilityInvocation` field."""
-  capabilityInvocation: StringListFilter
-
-  """Filter by the object’s `capabilityDelegation` field."""
-  capabilityDelegation: StringListFilter
-
-  """Filter by the object’s `alsoKnownAs` field."""
-  alsoKnownAs: StringFilter
-
-  """Filter by the object’s `metadata` field."""
-  metadata: JSONFilter
-
-  """Filter by the object’s `contextsByIid` relation."""
-  contextsByIid: IidToManyContextFilter
-
-  """Some related `contextsByIid` exist."""
-  contextsByIidExist: Boolean
-
-  """Filter by the object’s `servicesByIid` relation."""
-  servicesByIid: IidToManyServiceFilter
-
-  """Some related `servicesByIid` exist."""
-  servicesByIidExist: Boolean
-
-  """Filter by the object’s `linkedResourcesByIid` relation."""
-  linkedResourcesByIid: IidToManyLinkedResourceFilter
-
-  """Some related `linkedResourcesByIid` exist."""
-  linkedResourcesByIidExist: Boolean
-
-  """Filter by the object’s `linkedClaimsByIid` relation."""
-  linkedClaimsByIid: IidToManyLinkedClaimFilter
-
-  """Some related `linkedClaimsByIid` exist."""
-  linkedClaimsByIidExist: Boolean
-
-  """Filter by the object’s `accordedRightsByIid` relation."""
-  accordedRightsByIid: IidToManyAccordedRightFilter
-
-  """Some related `accordedRightsByIid` exist."""
-  accordedRightsByIidExist: Boolean
-
-  """Filter by the object’s `linkedEntitiesByIid` relation."""
-  linkedEntitiesByIid: IidToManyLinkedEntityFilter
-
-  """Some related `linkedEntitiesByIid` exist."""
-  linkedEntitiesByIidExist: Boolean
-
-  """Filter by the object’s `entityById` relation."""
-  entityById: EntityFilter
-
-  """A related `entityById` exists."""
-  entityByIdExists: Boolean
-
-  """Checks for all expressions in this list."""
-  and: [IidFilter!]
-
-  """Checks for any expressions in this list."""
-  or: [IidFilter!]
-
-  """Negates the expression."""
-  not: IidFilter
-}
-
-"""
-A filter to be used against String List fields. All fields are combined with a logical ‘and.’
-"""
-input StringListFilter {
-  """
-  Is null (if `true` is specified) or is not null (if `false` is specified).
-  """
-  isNull: Boolean
-
-  """Equal to the specified value."""
-  equalTo: [String]
-
-  """Not equal to the specified value."""
-  notEqualTo: [String]
-
-  """
-  Not equal to the specified value, treating null like an ordinary value.
-  """
-  distinctFrom: [String]
-
-  """Equal to the specified value, treating null like an ordinary value."""
-  notDistinctFrom: [String]
-
-  """Less than the specified value."""
-  lessThan: [String]
-
-  """Less than or equal to the specified value."""
-  lessThanOrEqualTo: [String]
-
-  """Greater than the specified value."""
-  greaterThan: [String]
-
-  """Greater than or equal to the specified value."""
-  greaterThanOrEqualTo: [String]
-
-  """Contains the specified list of values."""
-  contains: [String]
-
-  """Contained by the specified list of values."""
-  containedBy: [String]
-
-  """Overlaps the specified list of values."""
-  overlaps: [String]
-
-  """Any array item is equal to the specified value."""
-  anyEqualTo: String
-
-  """Any array item is not equal to the specified value."""
-  anyNotEqualTo: String
-
-  """Any array item is less than the specified value."""
-  anyLessThan: String
-
-  """Any array item is less than or equal to the specified value."""
-  anyLessThanOrEqualTo: String
-
-  """Any array item is greater than the specified value."""
-  anyGreaterThan: String
-
-  """Any array item is greater than or equal to the specified value."""
-  anyGreaterThanOrEqualTo: String
-}
-
-"""
-A filter to be used against JSON fields. All fields are combined with a logical ‘and.’
-"""
-input JSONFilter {
-  """
-  Is null (if `true` is specified) or is not null (if `false` is specified).
-  """
-  isNull: Boolean
-
-  """Equal to the specified value."""
-  equalTo: JSON
-
-  """Not equal to the specified value."""
-  notEqualTo: JSON
-
-  """
-  Not equal to the specified value, treating null like an ordinary value.
-  """
-  distinctFrom: JSON
-
-  """Equal to the specified value, treating null like an ordinary value."""
-  notDistinctFrom: JSON
-
-  """Included in the specified list."""
-  in: [JSON!]
-
-  """Not included in the specified list."""
-  notIn: [JSON!]
-
-  """Less than the specified value."""
-  lessThan: JSON
-
-  """Less than or equal to the specified value."""
-  lessThanOrEqualTo: JSON
-
-  """Greater than the specified value."""
-  greaterThan: JSON
-
-  """Greater than or equal to the specified value."""
-  greaterThanOrEqualTo: JSON
-
-  """Contains the specified JSON."""
-  contains: JSON
-
-  """Contains the specified key."""
-  containsKey: String
-
-  """Contains all of the specified keys."""
-  containsAllKeys: [String!]
-
-  """Contains any of the specified keys."""
-  containsAnyKeys: [String!]
-
-  """Contained by the specified JSON."""
-  containedBy: JSON
-}
-
-"""
-A filter to be used against many `Context` object types. All fields are combined with a logical ‘and.’
-"""
-input IidToManyContextFilter {
-  """
-  Every related `Context` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  every: ContextFilter
-
-  """
-  Some related `Context` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  some: ContextFilter
-
-  """
-  No related `Context` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  none: ContextFilter
-}
-
-"""
-A filter to be used against many `Service` object types. All fields are combined with a logical ‘and.’
-"""
-input IidToManyServiceFilter {
-  """
-  Every related `Service` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  every: ServiceFilter
-
-  """
-  Some related `Service` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  some: ServiceFilter
-
-  """
-  No related `Service` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  none: ServiceFilter
-}
-
-"""
-A filter to be used against `Service` object types. All fields are combined with a logical ‘and.’
-"""
-input ServiceFilter {
-  """Filter by the object’s `aid` field."""
-  aid: IntFilter
-
-  """Filter by the object’s `id` field."""
-  id: StringFilter
-
-  """Filter by the object’s `type` field."""
-  type: StringFilter
-
-  """Filter by the object’s `serviceEndpoint` field."""
-  serviceEndpoint: StringFilter
-
-  """Filter by the object’s `iid` field."""
-  iid: StringFilter
-
-  """Filter by the object’s `iidByIid` relation."""
-  iidByIid: IidFilter
-
-  """Checks for all expressions in this list."""
-  and: [ServiceFilter!]
-
-  """Checks for any expressions in this list."""
-  or: [ServiceFilter!]
-
-  """Negates the expression."""
-  not: ServiceFilter
-}
-
-"""
-A filter to be used against many `LinkedResource` object types. All fields are combined with a logical ‘and.’
-"""
-input IidToManyLinkedResourceFilter {
-  """
-  Every related `LinkedResource` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  every: LinkedResourceFilter
-
-  """
-  Some related `LinkedResource` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  some: LinkedResourceFilter
-
-  """
-  No related `LinkedResource` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  none: LinkedResourceFilter
-}
-
-"""
-A filter to be used against `LinkedResource` object types. All fields are combined with a logical ‘and.’
-"""
-input LinkedResourceFilter {
-  """Filter by the object’s `aid` field."""
-  aid: IntFilter
-
-  """Filter by the object’s `type` field."""
-  type: StringFilter
-
-  """Filter by the object’s `id` field."""
-  id: StringFilter
-
-  """Filter by the object’s `description` field."""
-  description: StringFilter
-
-  """Filter by the object’s `mediaType` field."""
-  mediaType: StringFilter
-
-  """Filter by the object’s `serviceEndpoint` field."""
-  serviceEndpoint: StringFilter
-
-  """Filter by the object’s `proof` field."""
-  proof: StringFilter
-
-  """Filter by the object’s `encrypted` field."""
-  encrypted: StringFilter
-
-  """Filter by the object’s `right` field."""
-  right: StringFilter
-
-  """Filter by the object’s `iid` field."""
-  iid: StringFilter
-
-  """Filter by the object’s `iidByIid` relation."""
-  iidByIid: IidFilter
-
-  """Checks for all expressions in this list."""
-  and: [LinkedResourceFilter!]
-
-  """Checks for any expressions in this list."""
-  or: [LinkedResourceFilter!]
-
-  """Negates the expression."""
-  not: LinkedResourceFilter
-}
-
-"""
-A filter to be used against many `LinkedClaim` object types. All fields are combined with a logical ‘and.’
-"""
-input IidToManyLinkedClaimFilter {
-  """
-  Every related `LinkedClaim` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  every: LinkedClaimFilter
-
-  """
-  Some related `LinkedClaim` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  some: LinkedClaimFilter
-
-  """
-  No related `LinkedClaim` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  none: LinkedClaimFilter
-}
-
-"""
-A filter to be used against `LinkedClaim` object types. All fields are combined with a logical ‘and.’
-"""
-input LinkedClaimFilter {
-  """Filter by the object’s `aid` field."""
-  aid: IntFilter
-
-  """Filter by the object’s `id` field."""
-  id: StringFilter
-
-  """Filter by the object’s `type` field."""
-  type: StringFilter
-
-  """Filter by the object’s `description` field."""
-  description: StringFilter
-
-  """Filter by the object’s `serviceEndpoint` field."""
-  serviceEndpoint: StringFilter
-
-  """Filter by the object’s `proof` field."""
-  proof: StringFilter
-
-  """Filter by the object’s `encrypted` field."""
-  encrypted: StringFilter
-
-  """Filter by the object’s `right` field."""
-  right: StringFilter
-
-  """Filter by the object’s `iid` field."""
-  iid: StringFilter
-
-  """Filter by the object’s `iidByIid` relation."""
-  iidByIid: IidFilter
-
-  """Checks for all expressions in this list."""
-  and: [LinkedClaimFilter!]
-
-  """Checks for any expressions in this list."""
-  or: [LinkedClaimFilter!]
-
-  """Negates the expression."""
-  not: LinkedClaimFilter
-}
-
-"""
-A filter to be used against many `AccordedRight` object types. All fields are combined with a logical ‘and.’
-"""
-input IidToManyAccordedRightFilter {
-  """
-  Every related `AccordedRight` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  every: AccordedRightFilter
-
-  """
-  Some related `AccordedRight` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  some: AccordedRightFilter
-
-  """
-  No related `AccordedRight` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  none: AccordedRightFilter
-}
-
-"""
-A filter to be used against `AccordedRight` object types. All fields are combined with a logical ‘and.’
-"""
-input AccordedRightFilter {
-  """Filter by the object’s `aid` field."""
-  aid: IntFilter
-
-  """Filter by the object’s `type` field."""
-  type: StringFilter
-
-  """Filter by the object’s `id` field."""
-  id: StringFilter
-
-  """Filter by the object’s `mechanism` field."""
-  mechanism: StringFilter
-
-  """Filter by the object’s `message` field."""
-  message: StringFilter
-
-  """Filter by the object’s `service` field."""
-  service: StringFilter
-
-  """Filter by the object’s `iid` field."""
-  iid: StringFilter
-
-  """Filter by the object’s `iidByIid` relation."""
-  iidByIid: IidFilter
-
-  """Checks for all expressions in this list."""
-  and: [AccordedRightFilter!]
-
-  """Checks for any expressions in this list."""
-  or: [AccordedRightFilter!]
-
-  """Negates the expression."""
-  not: AccordedRightFilter
-}
-
-"""
-A filter to be used against many `LinkedEntity` object types. All fields are combined with a logical ‘and.’
-"""
-input IidToManyLinkedEntityFilter {
-  """
-  Every related `LinkedEntity` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  every: LinkedEntityFilter
-
-  """
-  Some related `LinkedEntity` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  some: LinkedEntityFilter
-
-  """
-  No related `LinkedEntity` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  none: LinkedEntityFilter
-}
-
-"""
-A filter to be used against `LinkedEntity` object types. All fields are combined with a logical ‘and.’
-"""
-input LinkedEntityFilter {
-  """Filter by the object’s `aid` field."""
-  aid: IntFilter
-
-  """Filter by the object’s `type` field."""
-  type: StringFilter
-
-  """Filter by the object’s `id` field."""
-  id: StringFilter
-
-  """Filter by the object’s `relationship` field."""
-  relationship: StringFilter
-
-  """Filter by the object’s `service` field."""
-  service: StringFilter
-
-  """Filter by the object’s `iid` field."""
-  iid: StringFilter
-
-  """Filter by the object’s `iidByIid` relation."""
-  iidByIid: IidFilter
-
-  """Checks for all expressions in this list."""
-  and: [LinkedEntityFilter!]
-
-  """Checks for any expressions in this list."""
-  or: [LinkedEntityFilter!]
-
-  """Negates the expression."""
-  not: LinkedEntityFilter
-}
-
-"""
-A filter to be used against `Entity` object types. All fields are combined with a logical ‘and.’
-"""
-input EntityFilter {
-  """Filter by the object’s `id` field."""
-  id: StringFilter
-
-  """Filter by the object’s `type` field."""
-  type: StringFilter
-
-  """Filter by the object’s `startDate` field."""
-  startDate: DatetimeFilter
-
-  """Filter by the object’s `endDate` field."""
-  endDate: DatetimeFilter
-
-  """Filter by the object’s `status` field."""
-  status: IntFilter
-
-  """Filter by the object’s `relayerNode` field."""
-  relayerNode: StringFilter
-
-  """Filter by the object’s `credentials` field."""
-  credentials: StringListFilter
-
-  """Filter by the object’s `entityVerified` field."""
-  entityVerified: BooleanFilter
-
-  """Filter by the object’s `metadata` field."""
-  metadata: JSONFilter
-
-  """Filter by the object’s `accounts` field."""
-  accounts: JSONListFilter
-
-  """Filter by the object’s `externalId` field."""
-  externalId: StringFilter
-
-  """Filter by the object’s `owner` field."""
-  owner: StringFilter
-
-  """Filter by the object’s `iidById` relation."""
-  iidById: IidFilter
-
-  """Checks for all expressions in this list."""
-  and: [EntityFilter!]
-
-  """Checks for any expressions in this list."""
-  or: [EntityFilter!]
-
-  """Negates the expression."""
-  not: EntityFilter
-}
-
-"""
-A filter to be used against Datetime fields. All fields are combined with a logical ‘and.’
-"""
-input DatetimeFilter {
-  """
-  Is null (if `true` is specified) or is not null (if `false` is specified).
-  """
-  isNull: Boolean
-
-  """Equal to the specified value."""
-  equalTo: Datetime
-
-  """Not equal to the specified value."""
-  notEqualTo: Datetime
-
-  """
-  Not equal to the specified value, treating null like an ordinary value.
-  """
-  distinctFrom: Datetime
-
-  """Equal to the specified value, treating null like an ordinary value."""
-  notDistinctFrom: Datetime
-
-  """Included in the specified list."""
-  in: [Datetime!]
-
-  """Not included in the specified list."""
-  notIn: [Datetime!]
-
-  """Less than the specified value."""
-  lessThan: Datetime
-
-  """Less than or equal to the specified value."""
-  lessThanOrEqualTo: Datetime
-
-  """Greater than the specified value."""
-  greaterThan: Datetime
-
-  """Greater than or equal to the specified value."""
-  greaterThanOrEqualTo: Datetime
-}
-
-"""
-A point in time as described by the [ISO
-8601](https://en.wikipedia.org/wiki/ISO_8601) standard. May or may not include a timezone.
-"""
-scalar Datetime
-
-"""
-A filter to be used against Boolean fields. All fields are combined with a logical ‘and.’
-"""
-input BooleanFilter {
-  """
-  Is null (if `true` is specified) or is not null (if `false` is specified).
-  """
-  isNull: Boolean
-
-  """Equal to the specified value."""
-  equalTo: Boolean
-
-  """Not equal to the specified value."""
-  notEqualTo: Boolean
-
-  """
-  Not equal to the specified value, treating null like an ordinary value.
-  """
-  distinctFrom: Boolean
-
-  """Equal to the specified value, treating null like an ordinary value."""
-  notDistinctFrom: Boolean
-
-  """Included in the specified list."""
-  in: [Boolean!]
-
-  """Not included in the specified list."""
-  notIn: [Boolean!]
-
-  """Less than the specified value."""
-  lessThan: Boolean
-
-  """Less than or equal to the specified value."""
-  lessThanOrEqualTo: Boolean
-
-  """Greater than the specified value."""
-  greaterThan: Boolean
-
-  """Greater than or equal to the specified value."""
-  greaterThanOrEqualTo: Boolean
-}
-
-"""
-A filter to be used against JSON List fields. All fields are combined with a logical ‘and.’
-"""
-input JSONListFilter {
-  """
-  Is null (if `true` is specified) or is not null (if `false` is specified).
-  """
-  isNull: Boolean
-
-  """Equal to the specified value."""
-  equalTo: [JSON]
-
-  """Not equal to the specified value."""
-  notEqualTo: [JSON]
-
-  """
-  Not equal to the specified value, treating null like an ordinary value.
-  """
-  distinctFrom: [JSON]
-
-  """Equal to the specified value, treating null like an ordinary value."""
-  notDistinctFrom: [JSON]
-
-  """Less than the specified value."""
-  lessThan: [JSON]
-
-  """Less than or equal to the specified value."""
-  lessThanOrEqualTo: [JSON]
-
-  """Greater than the specified value."""
-  greaterThan: [JSON]
-
-  """Greater than or equal to the specified value."""
-  greaterThanOrEqualTo: [JSON]
-
-  """Contains the specified list of values."""
-  contains: [JSON]
-
-  """Contained by the specified list of values."""
-  containedBy: [JSON]
-
-  """Overlaps the specified list of values."""
-  overlaps: [JSON]
-
-  """Any array item is equal to the specified value."""
-  anyEqualTo: JSON
-
-  """Any array item is not equal to the specified value."""
-  anyNotEqualTo: JSON
-
-  """Any array item is less than the specified value."""
-  anyLessThan: JSON
-
-  """Any array item is less than or equal to the specified value."""
-  anyLessThanOrEqualTo: JSON
-
-  """Any array item is greater than the specified value."""
-  anyGreaterThan: JSON
-
-  """Any array item is greater than or equal to the specified value."""
-  anyGreaterThanOrEqualTo: JSON
-}
-
-"""A connection to a list of `Service` values."""
-type ServicesConnection {
-  """A list of `Service` objects."""
-  nodes: [Service!]!
-
-  """
-  A list of edges which contains the `Service` and cursor to aid in pagination.
-  """
-  edges: [ServicesEdge!]!
-
-  """Information to aid in pagination."""
-  pageInfo: PageInfo!
-
-  """The count of *all* `Service` you could get from the connection."""
-  totalCount: Int!
-}
-
-type Service implements Node {
-  """
-  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
-  """
-  nodeId: ID!
-  aid: Int!
-  id: String!
-  type: String!
-  serviceEndpoint: String!
-  iid: String!
-
-  """Reads a single `Iid` that is related to this `Service`."""
-  iidByIid: Iid
-}
-
-"""A `Service` edge in the connection."""
-type ServicesEdge {
-  """A cursor for use in pagination."""
-  cursor: Cursor
-
-  """The `Service` at the end of the edge."""
-  node: Service!
-}
-
-"""Methods to use when ordering `Service`."""
-enum ServicesOrderBy {
-  NATURAL
-  AID_ASC
-  AID_DESC
-  ID_ASC
-  ID_DESC
-  TYPE_ASC
-  TYPE_DESC
-  SERVICE_ENDPOINT_ASC
-  SERVICE_ENDPOINT_DESC
-  IID_ASC
-  IID_DESC
-  PRIMARY_KEY_ASC
-  PRIMARY_KEY_DESC
-}
-
-"""
-A condition to be used against `Service` object types. All fields are tested for equality and combined with a logical ‘and.’
-"""
-input ServiceCondition {
-  """Checks for equality with the object’s `aid` field."""
-  aid: Int
-
-  """Checks for equality with the object’s `id` field."""
-  id: String
-
-  """Checks for equality with the object’s `type` field."""
-  type: String
-
-  """Checks for equality with the object’s `serviceEndpoint` field."""
-  serviceEndpoint: String
-
-  """Checks for equality with the object’s `iid` field."""
-  iid: String
-}
-
-"""A connection to a list of `LinkedResource` values."""
-type LinkedResourcesConnection {
-  """A list of `LinkedResource` objects."""
-  nodes: [LinkedResource!]!
-
-  """
-  A list of edges which contains the `LinkedResource` and cursor to aid in pagination.
-  """
-  edges: [LinkedResourcesEdge!]!
-
-  """Information to aid in pagination."""
-  pageInfo: PageInfo!
-
-  """The count of *all* `LinkedResource` you could get from the connection."""
-  totalCount: Int!
-}
-
-type LinkedResource implements Node {
-  """
-  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
-  """
-  nodeId: ID!
-  aid: Int!
-  type: String!
-  id: String!
-  description: String!
-  mediaType: String!
-  serviceEndpoint: String!
-  proof: String!
-  encrypted: String!
-  right: String!
-  iid: String!
-
-  """Reads a single `Iid` that is related to this `LinkedResource`."""
-  iidByIid: Iid
-}
-
-"""A `LinkedResource` edge in the connection."""
-type LinkedResourcesEdge {
-  """A cursor for use in pagination."""
-  cursor: Cursor
-
-  """The `LinkedResource` at the end of the edge."""
-  node: LinkedResource!
-}
-
-"""Methods to use when ordering `LinkedResource`."""
-enum LinkedResourcesOrderBy {
-  NATURAL
-  AID_ASC
-  AID_DESC
-  TYPE_ASC
-  TYPE_DESC
-  ID_ASC
-  ID_DESC
-  DESCRIPTION_ASC
-  DESCRIPTION_DESC
-  MEDIA_TYPE_ASC
-  MEDIA_TYPE_DESC
-  SERVICE_ENDPOINT_ASC
-  SERVICE_ENDPOINT_DESC
-  PROOF_ASC
-  PROOF_DESC
-  ENCRYPTED_ASC
-  ENCRYPTED_DESC
-  RIGHT_ASC
-  RIGHT_DESC
-  IID_ASC
-  IID_DESC
-  PRIMARY_KEY_ASC
-  PRIMARY_KEY_DESC
-}
-
-"""
-A condition to be used against `LinkedResource` object types. All fields are
-tested for equality and combined with a logical ‘and.’
-"""
-input LinkedResourceCondition {
-  """Checks for equality with the object’s `aid` field."""
-  aid: Int
-
-  """Checks for equality with the object’s `type` field."""
-  type: String
-
-  """Checks for equality with the object’s `id` field."""
-  id: String
-
-  """Checks for equality with the object’s `description` field."""
-  description: String
-
-  """Checks for equality with the object’s `mediaType` field."""
-  mediaType: String
-
-  """Checks for equality with the object’s `serviceEndpoint` field."""
-  serviceEndpoint: String
-
-  """Checks for equality with the object’s `proof` field."""
-  proof: String
-
-  """Checks for equality with the object’s `encrypted` field."""
-  encrypted: String
-
-  """Checks for equality with the object’s `right` field."""
-  right: String
-
-  """Checks for equality with the object’s `iid` field."""
-  iid: String
-}
-
-"""A connection to a list of `LinkedClaim` values."""
-type LinkedClaimsConnection {
-  """A list of `LinkedClaim` objects."""
-  nodes: [LinkedClaim!]!
-
-  """
-  A list of edges which contains the `LinkedClaim` and cursor to aid in pagination.
-  """
-  edges: [LinkedClaimsEdge!]!
-
-  """Information to aid in pagination."""
-  pageInfo: PageInfo!
-
-  """The count of *all* `LinkedClaim` you could get from the connection."""
-  totalCount: Int!
-}
-
-type LinkedClaim implements Node {
-  """
-  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
-  """
-  nodeId: ID!
-  aid: Int!
-  id: String!
-  type: String!
-  description: String!
-  serviceEndpoint: String!
-  proof: String!
-  encrypted: String!
-  right: String!
-  iid: String!
-
-  """Reads a single `Iid` that is related to this `LinkedClaim`."""
-  iidByIid: Iid
-}
-
-"""A `LinkedClaim` edge in the connection."""
-type LinkedClaimsEdge {
-  """A cursor for use in pagination."""
-  cursor: Cursor
-
-  """The `LinkedClaim` at the end of the edge."""
-  node: LinkedClaim!
-}
-
-"""Methods to use when ordering `LinkedClaim`."""
-enum LinkedClaimsOrderBy {
-  NATURAL
-  AID_ASC
-  AID_DESC
-  ID_ASC
-  ID_DESC
-  TYPE_ASC
-  TYPE_DESC
-  DESCRIPTION_ASC
-  DESCRIPTION_DESC
-  SERVICE_ENDPOINT_ASC
-  SERVICE_ENDPOINT_DESC
-  PROOF_ASC
-  PROOF_DESC
-  ENCRYPTED_ASC
-  ENCRYPTED_DESC
-  RIGHT_ASC
-  RIGHT_DESC
-  IID_ASC
-  IID_DESC
-  PRIMARY_KEY_ASC
-  PRIMARY_KEY_DESC
-}
-
-"""
-A condition to be used against `LinkedClaim` object types. All fields are tested
-for equality and combined with a logical ‘and.’
-"""
-input LinkedClaimCondition {
-  """Checks for equality with the object’s `aid` field."""
-  aid: Int
-
-  """Checks for equality with the object’s `id` field."""
-  id: String
-
-  """Checks for equality with the object’s `type` field."""
-  type: String
-
-  """Checks for equality with the object’s `description` field."""
-  description: String
-
-  """Checks for equality with the object’s `serviceEndpoint` field."""
-  serviceEndpoint: String
-
-  """Checks for equality with the object’s `proof` field."""
-  proof: String
-
-  """Checks for equality with the object’s `encrypted` field."""
-  encrypted: String
-
-  """Checks for equality with the object’s `right` field."""
-  right: String
-
-  """Checks for equality with the object’s `iid` field."""
-  iid: String
-}
-
-"""Methods to use when ordering `AccordedRight`."""
-enum AccordedRightsOrderBy {
-  NATURAL
-  AID_ASC
-  AID_DESC
-  TYPE_ASC
-  TYPE_DESC
-  ID_ASC
-  ID_DESC
-  MECHANISM_ASC
-  MECHANISM_DESC
-  MESSAGE_ASC
-  MESSAGE_DESC
-  SERVICE_ASC
-  SERVICE_DESC
-  IID_ASC
-  IID_DESC
-  PRIMARY_KEY_ASC
-  PRIMARY_KEY_DESC
-}
-
-"""
-A condition to be used against `AccordedRight` object types. All fields are
-tested for equality and combined with a logical ‘and.’
-"""
-input AccordedRightCondition {
-  """Checks for equality with the object’s `aid` field."""
-  aid: Int
-
-  """Checks for equality with the object’s `type` field."""
-  type: String
-
-  """Checks for equality with the object’s `id` field."""
-  id: String
-
-  """Checks for equality with the object’s `mechanism` field."""
-  mechanism: String
-
-  """Checks for equality with the object’s `message` field."""
-  message: String
-
-  """Checks for equality with the object’s `service` field."""
-  service: String
-
-  """Checks for equality with the object’s `iid` field."""
-  iid: String
-}
-
-"""A connection to a list of `LinkedEntity` values."""
-type LinkedEntitiesConnection {
-  """A list of `LinkedEntity` objects."""
-  nodes: [LinkedEntity!]!
-
-  """
-  A list of edges which contains the `LinkedEntity` and cursor to aid in pagination.
-  """
-  edges: [LinkedEntitiesEdge!]!
-
-  """Information to aid in pagination."""
-  pageInfo: PageInfo!
-
-  """The count of *all* `LinkedEntity` you could get from the connection."""
-  totalCount: Int!
-}
-
-type LinkedEntity implements Node {
-  """
-  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
-  """
-  nodeId: ID!
-  aid: Int!
-  type: String!
-  id: String!
-  relationship: String!
-  service: String!
-  iid: String!
-
-  """Reads a single `Iid` that is related to this `LinkedEntity`."""
-  iidByIid: Iid
-}
-
-"""A `LinkedEntity` edge in the connection."""
-type LinkedEntitiesEdge {
-  """A cursor for use in pagination."""
-  cursor: Cursor
-
-  """The `LinkedEntity` at the end of the edge."""
-  node: LinkedEntity!
-}
-
-"""Methods to use when ordering `LinkedEntity`."""
-enum LinkedEntitiesOrderBy {
-  NATURAL
-  AID_ASC
-  AID_DESC
-  TYPE_ASC
-  TYPE_DESC
-  ID_ASC
-  ID_DESC
-  RELATIONSHIP_ASC
-  RELATIONSHIP_DESC
-  SERVICE_ASC
-  SERVICE_DESC
-  IID_ASC
-  IID_DESC
-  PRIMARY_KEY_ASC
-  PRIMARY_KEY_DESC
-}
-
-"""
-A condition to be used against `LinkedEntity` object types. All fields are
-tested for equality and combined with a logical ‘and.’
-"""
-input LinkedEntityCondition {
-  """Checks for equality with the object’s `aid` field."""
-  aid: Int
-
-  """Checks for equality with the object’s `type` field."""
-  type: String
-
-  """Checks for equality with the object’s `id` field."""
-  id: String
-
-  """Checks for equality with the object’s `relationship` field."""
-  relationship: String
-
-  """Checks for equality with the object’s `service` field."""
-  service: String
-
-  """Checks for equality with the object’s `iid` field."""
-  iid: String
-}
-
-type Entity implements Node {
-  """
-  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
-  """
-  nodeId: ID!
-  id: String!
-  type: String!
-  startDate: Datetime
-  endDate: Datetime
-  status: Int!
-  relayerNode: String!
-  credentials: [String]
-  entityVerified: Boolean!
-  metadata: JSON!
-  accounts: [JSON]
-  externalId: String
-  owner: String
-
-  """Reads a single `Iid` that is related to this `Entity`."""
-  iidById: Iid
-}
-
-"""A `AccordedRight` edge in the connection."""
-type AccordedRightsEdge {
-  """A cursor for use in pagination."""
-  cursor: Cursor
-
-  """The `AccordedRight` at the end of the edge."""
-  node: AccordedRight!
-}
-
-"""A connection to a list of `Block` values."""
-type BlocksConnection {
-  """A list of `Block` objects."""
-  nodes: [Block!]!
-
-  """
-  A list of edges which contains the `Block` and cursor to aid in pagination.
-  """
-  edges: [BlocksEdge!]!
-
-  """Information to aid in pagination."""
-  pageInfo: PageInfo!
-
-  """The count of *all* `Block` you could get from the connection."""
-  totalCount: Int!
-}
-
-type Block implements Node {
-  """
-  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
-  """
-  nodeId: ID!
-  height: Int!
-  hash: String!
-  numTxs: Int!
-  totalGas: Int!
-  proposerAddress: String!
-  timestamp: Datetime!
-}
-
-"""A `Block` edge in the connection."""
-type BlocksEdge {
-  """A cursor for use in pagination."""
-  cursor: Cursor
-
-  """The `Block` at the end of the edge."""
-  node: Block!
-}
-
-"""Methods to use when ordering `Block`."""
-enum BlocksOrderBy {
-  NATURAL
-  HEIGHT_ASC
-  HEIGHT_DESC
-  HASH_ASC
-  HASH_DESC
-  NUM_TXS_ASC
-  NUM_TXS_DESC
-  TOTAL_GAS_ASC
-  TOTAL_GAS_DESC
-  PROPOSER_ADDRESS_ASC
-  PROPOSER_ADDRESS_DESC
-  TIMESTAMP_ASC
-  TIMESTAMP_DESC
-  PRIMARY_KEY_ASC
-  PRIMARY_KEY_DESC
-}
-
-"""
-A condition to be used against `Block` object types. All fields are tested for equality and combined with a logical ‘and.’
-"""
-input BlockCondition {
-  """Checks for equality with the object’s `height` field."""
-  height: Int
-
-  """Checks for equality with the object’s `hash` field."""
-  hash: String
-
-  """Checks for equality with the object’s `numTxs` field."""
-  numTxs: Int
-
-  """Checks for equality with the object’s `totalGas` field."""
-  totalGas: Int
-
-  """Checks for equality with the object’s `proposerAddress` field."""
-  proposerAddress: String
-
-  """Checks for equality with the object’s `timestamp` field."""
-  timestamp: Datetime
-}
-
-"""
-A filter to be used against `Block` object types. All fields are combined with a logical ‘and.’
-"""
-input BlockFilter {
-  """Filter by the object’s `height` field."""
-  height: IntFilter
-
-  """Filter by the object’s `hash` field."""
-  hash: StringFilter
-
-  """Filter by the object’s `numTxs` field."""
-  numTxs: IntFilter
-
-  """Filter by the object’s `totalGas` field."""
-  totalGas: IntFilter
-
-  """Filter by the object’s `proposerAddress` field."""
-  proposerAddress: StringFilter
-
-  """Filter by the object’s `timestamp` field."""
-  timestamp: DatetimeFilter
-
-  """Checks for all expressions in this list."""
-  and: [BlockFilter!]
-
-  """Checks for any expressions in this list."""
-  or: [BlockFilter!]
-
-  """Negates the expression."""
-  not: BlockFilter
 }
 
 """A connection to a list of `Bond` values."""
@@ -3553,6 +1370,11 @@ type Bond implements Node {
   ): BondAlphasConnection!
 }
 
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON
+
 """A connection to a list of `BondBuy` values."""
 type BondBuysConnection {
   """A list of `BondBuy` objects."""
@@ -3587,6 +1409,12 @@ type BondBuy implements Node {
   bondByBondDid: Bond
 }
 
+"""
+A point in time as described by the [ISO
+8601](https://en.wikipedia.org/wiki/ISO_8601) standard. May or may not include a timezone.
+"""
+scalar Datetime
+
 """A `BondBuy` edge in the connection."""
 type BondBuysEdge {
   """A cursor for use in pagination."""
@@ -3594,6 +1422,24 @@ type BondBuysEdge {
 
   """The `BondBuy` at the end of the edge."""
   node: BondBuy!
+}
+
+"""A location in a connection that can be used for resuming pagination."""
+scalar Cursor
+
+"""Information about pagination in a connection."""
+type PageInfo {
+  """When paginating forwards, are there more items?"""
+  hasNextPage: Boolean!
+
+  """When paginating backwards, are there more items?"""
+  hasPreviousPage: Boolean!
+
+  """When paginating backwards, the cursor to continue."""
+  startCursor: Cursor
+
+  """When paginating forwards, the cursor to continue."""
+  endCursor: Cursor
 }
 
 """Methods to use when ordering `BondBuy`."""
@@ -3679,6 +1525,342 @@ input BondBuyFilter {
 
   """Negates the expression."""
   not: BondBuyFilter
+}
+
+"""
+A filter to be used against Int fields. All fields are combined with a logical ‘and.’
+"""
+input IntFilter {
+  """
+  Is null (if `true` is specified) or is not null (if `false` is specified).
+  """
+  isNull: Boolean
+
+  """Equal to the specified value."""
+  equalTo: Int
+
+  """Not equal to the specified value."""
+  notEqualTo: Int
+
+  """
+  Not equal to the specified value, treating null like an ordinary value.
+  """
+  distinctFrom: Int
+
+  """Equal to the specified value, treating null like an ordinary value."""
+  notDistinctFrom: Int
+
+  """Included in the specified list."""
+  in: [Int!]
+
+  """Not included in the specified list."""
+  notIn: [Int!]
+
+  """Less than the specified value."""
+  lessThan: Int
+
+  """Less than or equal to the specified value."""
+  lessThanOrEqualTo: Int
+
+  """Greater than the specified value."""
+  greaterThan: Int
+
+  """Greater than or equal to the specified value."""
+  greaterThanOrEqualTo: Int
+}
+
+"""
+A filter to be used against String fields. All fields are combined with a logical ‘and.’
+"""
+input StringFilter {
+  """
+  Is null (if `true` is specified) or is not null (if `false` is specified).
+  """
+  isNull: Boolean
+
+  """Equal to the specified value."""
+  equalTo: String
+
+  """Not equal to the specified value."""
+  notEqualTo: String
+
+  """
+  Not equal to the specified value, treating null like an ordinary value.
+  """
+  distinctFrom: String
+
+  """Equal to the specified value, treating null like an ordinary value."""
+  notDistinctFrom: String
+
+  """Included in the specified list."""
+  in: [String!]
+
+  """Not included in the specified list."""
+  notIn: [String!]
+
+  """Less than the specified value."""
+  lessThan: String
+
+  """Less than or equal to the specified value."""
+  lessThanOrEqualTo: String
+
+  """Greater than the specified value."""
+  greaterThan: String
+
+  """Greater than or equal to the specified value."""
+  greaterThanOrEqualTo: String
+
+  """Contains the specified string (case-sensitive)."""
+  includes: String
+
+  """Does not contain the specified string (case-sensitive)."""
+  notIncludes: String
+
+  """Contains the specified string (case-insensitive)."""
+  includesInsensitive: String
+
+  """Does not contain the specified string (case-insensitive)."""
+  notIncludesInsensitive: String
+
+  """Starts with the specified string (case-sensitive)."""
+  startsWith: String
+
+  """Does not start with the specified string (case-sensitive)."""
+  notStartsWith: String
+
+  """Starts with the specified string (case-insensitive)."""
+  startsWithInsensitive: String
+
+  """Does not start with the specified string (case-insensitive)."""
+  notStartsWithInsensitive: String
+
+  """Ends with the specified string (case-sensitive)."""
+  endsWith: String
+
+  """Does not end with the specified string (case-sensitive)."""
+  notEndsWith: String
+
+  """Ends with the specified string (case-insensitive)."""
+  endsWithInsensitive: String
+
+  """Does not end with the specified string (case-insensitive)."""
+  notEndsWithInsensitive: String
+
+  """
+  Matches the specified pattern (case-sensitive). An underscore (_) matches any single character; a percent sign (%) matches any sequence of zero or more characters.
+  """
+  like: String
+
+  """
+  Does not match the specified pattern (case-sensitive). An underscore (_) matches any single character; a percent sign (%) matches any sequence of zero or more characters.
+  """
+  notLike: String
+
+  """
+  Matches the specified pattern (case-insensitive). An underscore (_) matches any single character; a percent sign (%) matches any sequence of zero or more characters.
+  """
+  likeInsensitive: String
+
+  """
+  Does not match the specified pattern (case-insensitive). An underscore (_) matches any single character; a percent sign (%) matches any sequence of zero or more characters.
+  """
+  notLikeInsensitive: String
+
+  """Equal to the specified value (case-insensitive)."""
+  equalToInsensitive: String
+
+  """Not equal to the specified value (case-insensitive)."""
+  notEqualToInsensitive: String
+
+  """
+  Not equal to the specified value, treating null like an ordinary value (case-insensitive).
+  """
+  distinctFromInsensitive: String
+
+  """
+  Equal to the specified value, treating null like an ordinary value (case-insensitive).
+  """
+  notDistinctFromInsensitive: String
+
+  """Included in the specified list (case-insensitive)."""
+  inInsensitive: [String!]
+
+  """Not included in the specified list (case-insensitive)."""
+  notInInsensitive: [String!]
+
+  """Less than the specified value (case-insensitive)."""
+  lessThanInsensitive: String
+
+  """Less than or equal to the specified value (case-insensitive)."""
+  lessThanOrEqualToInsensitive: String
+
+  """Greater than the specified value (case-insensitive)."""
+  greaterThanInsensitive: String
+
+  """Greater than or equal to the specified value (case-insensitive)."""
+  greaterThanOrEqualToInsensitive: String
+}
+
+"""
+A filter to be used against JSON fields. All fields are combined with a logical ‘and.’
+"""
+input JSONFilter {
+  """
+  Is null (if `true` is specified) or is not null (if `false` is specified).
+  """
+  isNull: Boolean
+
+  """Equal to the specified value."""
+  equalTo: JSON
+
+  """Not equal to the specified value."""
+  notEqualTo: JSON
+
+  """
+  Not equal to the specified value, treating null like an ordinary value.
+  """
+  distinctFrom: JSON
+
+  """Equal to the specified value, treating null like an ordinary value."""
+  notDistinctFrom: JSON
+
+  """Included in the specified list."""
+  in: [JSON!]
+
+  """Not included in the specified list."""
+  notIn: [JSON!]
+
+  """Less than the specified value."""
+  lessThan: JSON
+
+  """Less than or equal to the specified value."""
+  lessThanOrEqualTo: JSON
+
+  """Greater than the specified value."""
+  greaterThan: JSON
+
+  """Greater than or equal to the specified value."""
+  greaterThanOrEqualTo: JSON
+
+  """Contains the specified JSON."""
+  contains: JSON
+
+  """Contains the specified key."""
+  containsKey: String
+
+  """Contains all of the specified keys."""
+  containsAllKeys: [String!]
+
+  """Contains any of the specified keys."""
+  containsAnyKeys: [String!]
+
+  """Contained by the specified JSON."""
+  containedBy: JSON
+}
+
+"""
+A filter to be used against JSON List fields. All fields are combined with a logical ‘and.’
+"""
+input JSONListFilter {
+  """
+  Is null (if `true` is specified) or is not null (if `false` is specified).
+  """
+  isNull: Boolean
+
+  """Equal to the specified value."""
+  equalTo: [JSON]
+
+  """Not equal to the specified value."""
+  notEqualTo: [JSON]
+
+  """
+  Not equal to the specified value, treating null like an ordinary value.
+  """
+  distinctFrom: [JSON]
+
+  """Equal to the specified value, treating null like an ordinary value."""
+  notDistinctFrom: [JSON]
+
+  """Less than the specified value."""
+  lessThan: [JSON]
+
+  """Less than or equal to the specified value."""
+  lessThanOrEqualTo: [JSON]
+
+  """Greater than the specified value."""
+  greaterThan: [JSON]
+
+  """Greater than or equal to the specified value."""
+  greaterThanOrEqualTo: [JSON]
+
+  """Contains the specified list of values."""
+  contains: [JSON]
+
+  """Contained by the specified list of values."""
+  containedBy: [JSON]
+
+  """Overlaps the specified list of values."""
+  overlaps: [JSON]
+
+  """Any array item is equal to the specified value."""
+  anyEqualTo: JSON
+
+  """Any array item is not equal to the specified value."""
+  anyNotEqualTo: JSON
+
+  """Any array item is less than the specified value."""
+  anyLessThan: JSON
+
+  """Any array item is less than or equal to the specified value."""
+  anyLessThanOrEqualTo: JSON
+
+  """Any array item is greater than the specified value."""
+  anyGreaterThan: JSON
+
+  """Any array item is greater than or equal to the specified value."""
+  anyGreaterThanOrEqualTo: JSON
+}
+
+"""
+A filter to be used against Datetime fields. All fields are combined with a logical ‘and.’
+"""
+input DatetimeFilter {
+  """
+  Is null (if `true` is specified) or is not null (if `false` is specified).
+  """
+  isNull: Boolean
+
+  """Equal to the specified value."""
+  equalTo: Datetime
+
+  """Not equal to the specified value."""
+  notEqualTo: Datetime
+
+  """
+  Not equal to the specified value, treating null like an ordinary value.
+  """
+  distinctFrom: Datetime
+
+  """Equal to the specified value, treating null like an ordinary value."""
+  notDistinctFrom: Datetime
+
+  """Included in the specified list."""
+  in: [Datetime!]
+
+  """Not included in the specified list."""
+  notIn: [Datetime!]
+
+  """Less than the specified value."""
+  lessThan: Datetime
+
+  """Less than or equal to the specified value."""
+  lessThanOrEqualTo: Datetime
+
+  """Greater than the specified value."""
+  greaterThan: Datetime
+
+  """Greater than or equal to the specified value."""
+  greaterThanOrEqualTo: Datetime
 }
 
 """
@@ -3819,6 +2001,111 @@ input BondFilter {
 
   """Negates the expression."""
   not: BondFilter
+}
+
+"""
+A filter to be used against String List fields. All fields are combined with a logical ‘and.’
+"""
+input StringListFilter {
+  """
+  Is null (if `true` is specified) or is not null (if `false` is specified).
+  """
+  isNull: Boolean
+
+  """Equal to the specified value."""
+  equalTo: [String]
+
+  """Not equal to the specified value."""
+  notEqualTo: [String]
+
+  """
+  Not equal to the specified value, treating null like an ordinary value.
+  """
+  distinctFrom: [String]
+
+  """Equal to the specified value, treating null like an ordinary value."""
+  notDistinctFrom: [String]
+
+  """Less than the specified value."""
+  lessThan: [String]
+
+  """Less than or equal to the specified value."""
+  lessThanOrEqualTo: [String]
+
+  """Greater than the specified value."""
+  greaterThan: [String]
+
+  """Greater than or equal to the specified value."""
+  greaterThanOrEqualTo: [String]
+
+  """Contains the specified list of values."""
+  contains: [String]
+
+  """Contained by the specified list of values."""
+  containedBy: [String]
+
+  """Overlaps the specified list of values."""
+  overlaps: [String]
+
+  """Any array item is equal to the specified value."""
+  anyEqualTo: String
+
+  """Any array item is not equal to the specified value."""
+  anyNotEqualTo: String
+
+  """Any array item is less than the specified value."""
+  anyLessThan: String
+
+  """Any array item is less than or equal to the specified value."""
+  anyLessThanOrEqualTo: String
+
+  """Any array item is greater than the specified value."""
+  anyGreaterThan: String
+
+  """Any array item is greater than or equal to the specified value."""
+  anyGreaterThanOrEqualTo: String
+}
+
+"""
+A filter to be used against Boolean fields. All fields are combined with a logical ‘and.’
+"""
+input BooleanFilter {
+  """
+  Is null (if `true` is specified) or is not null (if `false` is specified).
+  """
+  isNull: Boolean
+
+  """Equal to the specified value."""
+  equalTo: Boolean
+
+  """Not equal to the specified value."""
+  notEqualTo: Boolean
+
+  """
+  Not equal to the specified value, treating null like an ordinary value.
+  """
+  distinctFrom: Boolean
+
+  """Equal to the specified value, treating null like an ordinary value."""
+  notDistinctFrom: Boolean
+
+  """Included in the specified list."""
+  in: [Boolean!]
+
+  """Not included in the specified list."""
+  notIn: [Boolean!]
+
+  """Less than the specified value."""
+  lessThan: Boolean
+
+  """Less than or equal to the specified value."""
+  lessThanOrEqualTo: Boolean
+
+  """Greater than the specified value."""
+  greaterThan: Boolean
+
+  """Greater than or equal to the specified value."""
+  greaterThanOrEqualTo: Boolean
 }
 
 """
@@ -4989,6 +3276,9 @@ type ClaimsConnection {
 
   """The count of *all* `Claim` you could get from the connection."""
   totalCount: Int!
+
+  """# Checks if there are any claims with null schemaType"""
+  claimSchemaTypesLoaded: Boolean!
 }
 
 type Claim implements Node {
@@ -4996,51 +3286,19 @@ type Claim implements Node {
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
   """
   nodeId: ID!
-  aid: Int!
   claimId: String!
   agentDid: String!
   agentAddress: String!
-  submissionDate: Datetime
+  submissionDate: Datetime!
   paymentsStatus: JSON!
-  collectionId: String!
   schemaType: String
+  collectionId: String!
 
   """Reads a single `ClaimCollection` that is related to this `Claim`."""
   collection: ClaimCollection
 
-  """Reads and enables pagination through a set of `Evaluation`."""
-  evaluationsByClaimId(
-    """Only read the first `n` values of the set."""
-    first: Int
-
-    """Only read the last `n` values of the set."""
-    last: Int
-
-    """
-    Skip the first `n` values from our `after` cursor, an alternative to cursor
-    based pagination. May not be used with `last`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """The method to use when ordering `Evaluation`."""
-    orderBy: [EvaluationsOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: EvaluationCondition
-
-    """
-    A filter to be used in determining which values should be returned by the collection.
-    """
-    filter: EvaluationFilter
-  ): EvaluationsConnection!
+  """Reads a single `Evaluation` that is related to this `Claim`."""
+  evaluationByClaimId: Evaluation
 }
 
 type ClaimCollection implements Node {
@@ -5101,8 +3359,6 @@ type ClaimCollection implements Node {
 """Methods to use when ordering `Claim`."""
 enum ClaimsOrderBy {
   NATURAL
-  AID_ASC
-  AID_DESC
   CLAIM_ID_ASC
   CLAIM_ID_DESC
   AGENT_DID_ASC
@@ -5113,10 +3369,10 @@ enum ClaimsOrderBy {
   SUBMISSION_DATE_DESC
   PAYMENTS_STATUS_ASC
   PAYMENTS_STATUS_DESC
-  COLLECTION_ID_ASC
-  COLLECTION_ID_DESC
   SCHEMA_TYPE_ASC
   SCHEMA_TYPE_DESC
+  COLLECTION_ID_ASC
+  COLLECTION_ID_DESC
   PRIMARY_KEY_ASC
   PRIMARY_KEY_DESC
 }
@@ -5125,9 +3381,6 @@ enum ClaimsOrderBy {
 A condition to be used against `Claim` object types. All fields are tested for equality and combined with a logical ‘and.’
 """
 input ClaimCondition {
-  """Checks for equality with the object’s `aid` field."""
-  aid: Int
-
   """Checks for equality with the object’s `claimId` field."""
   claimId: String
 
@@ -5143,20 +3396,17 @@ input ClaimCondition {
   """Checks for equality with the object’s `paymentsStatus` field."""
   paymentsStatus: JSON
 
-  """Checks for equality with the object’s `collectionId` field."""
-  collectionId: String
-
   """Checks for equality with the object’s `schemaType` field."""
   schemaType: String
+
+  """Checks for equality with the object’s `collectionId` field."""
+  collectionId: String
 }
 
 """
 A filter to be used against `Claim` object types. All fields are combined with a logical ‘and.’
 """
 input ClaimFilter {
-  """Filter by the object’s `aid` field."""
-  aid: IntFilter
-
   """Filter by the object’s `claimId` field."""
   claimId: StringFilter
 
@@ -5172,17 +3422,17 @@ input ClaimFilter {
   """Filter by the object’s `paymentsStatus` field."""
   paymentsStatus: JSONFilter
 
-  """Filter by the object’s `collectionId` field."""
-  collectionId: StringFilter
-
   """Filter by the object’s `schemaType` field."""
   schemaType: StringFilter
 
-  """Filter by the object’s `evaluationsByClaimId` relation."""
-  evaluationsByClaimId: ClaimToManyEvaluationFilter
+  """Filter by the object’s `collectionId` field."""
+  collectionId: StringFilter
 
-  """Some related `evaluationsByClaimId` exist."""
-  evaluationsByClaimIdExist: Boolean
+  """Filter by the object’s `evaluationByClaimId` relation."""
+  evaluationByClaimId: EvaluationFilter
+
+  """A related `evaluationByClaimId` exists."""
+  evaluationByClaimIdExists: Boolean
 
   """Filter by the object’s `collection` relation."""
   collection: ClaimCollectionFilter
@@ -5198,32 +3448,9 @@ input ClaimFilter {
 }
 
 """
-A filter to be used against many `Evaluation` object types. All fields are combined with a logical ‘and.’
-"""
-input ClaimToManyEvaluationFilter {
-  """
-  Every related `Evaluation` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  every: EvaluationFilter
-
-  """
-  Some related `Evaluation` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  some: EvaluationFilter
-
-  """
-  No related `Evaluation` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  none: EvaluationFilter
-}
-
-"""
 A filter to be used against `Evaluation` object types. All fields are combined with a logical ‘and.’
 """
 input EvaluationFilter {
-  """Filter by the object’s `aid` field."""
-  aid: IntFilter
-
   """Filter by the object’s `collectionId` field."""
   collectionId: StringFilter
 
@@ -5246,7 +3473,7 @@ input EvaluationFilter {
   verificationProof: StringFilter
 
   """Filter by the object’s `amount` field."""
-  amount: JSONListFilter
+  amount: JSONFilter
 
   """Filter by the object’s `evaluationDate` field."""
   evaluationDate: DatetimeFilter
@@ -5349,29 +3576,11 @@ input ClaimCollectionToManyClaimFilter {
   none: ClaimFilter
 }
 
-"""A connection to a list of `Evaluation` values."""
-type EvaluationsConnection {
-  """A list of `Evaluation` objects."""
-  nodes: [Evaluation!]!
-
-  """
-  A list of edges which contains the `Evaluation` and cursor to aid in pagination.
-  """
-  edges: [EvaluationsEdge!]!
-
-  """Information to aid in pagination."""
-  pageInfo: PageInfo!
-
-  """The count of *all* `Evaluation` you could get from the connection."""
-  totalCount: Int!
-}
-
 type Evaluation implements Node {
   """
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
   """
   nodeId: ID!
-  aid: Int!
   collectionId: String!
   oracle: String!
   agentDid: String!
@@ -5379,89 +3588,12 @@ type Evaluation implements Node {
   status: Int!
   reason: Int!
   verificationProof: String
-  amount: [JSON]
-  evaluationDate: Datetime
+  amount: JSON!
+  evaluationDate: Datetime!
   claimId: String!
 
   """Reads a single `Claim` that is related to this `Evaluation`."""
   claim: Claim
-}
-
-"""A `Evaluation` edge in the connection."""
-type EvaluationsEdge {
-  """A cursor for use in pagination."""
-  cursor: Cursor
-
-  """The `Evaluation` at the end of the edge."""
-  node: Evaluation!
-}
-
-"""Methods to use when ordering `Evaluation`."""
-enum EvaluationsOrderBy {
-  NATURAL
-  AID_ASC
-  AID_DESC
-  COLLECTION_ID_ASC
-  COLLECTION_ID_DESC
-  ORACLE_ASC
-  ORACLE_DESC
-  AGENT_DID_ASC
-  AGENT_DID_DESC
-  AGENT_ADDRESS_ASC
-  AGENT_ADDRESS_DESC
-  STATUS_ASC
-  STATUS_DESC
-  REASON_ASC
-  REASON_DESC
-  VERIFICATION_PROOF_ASC
-  VERIFICATION_PROOF_DESC
-  AMOUNT_ASC
-  AMOUNT_DESC
-  EVALUATION_DATE_ASC
-  EVALUATION_DATE_DESC
-  CLAIM_ID_ASC
-  CLAIM_ID_DESC
-  PRIMARY_KEY_ASC
-  PRIMARY_KEY_DESC
-}
-
-"""
-A condition to be used against `Evaluation` object types. All fields are tested
-for equality and combined with a logical ‘and.’
-"""
-input EvaluationCondition {
-  """Checks for equality with the object’s `aid` field."""
-  aid: Int
-
-  """Checks for equality with the object’s `collectionId` field."""
-  collectionId: String
-
-  """Checks for equality with the object’s `oracle` field."""
-  oracle: String
-
-  """Checks for equality with the object’s `agentDid` field."""
-  agentDid: String
-
-  """Checks for equality with the object’s `agentAddress` field."""
-  agentAddress: String
-
-  """Checks for equality with the object’s `status` field."""
-  status: Int
-
-  """Checks for equality with the object’s `reason` field."""
-  reason: Int
-
-  """Checks for equality with the object’s `verificationProof` field."""
-  verificationProof: String
-
-  """Checks for equality with the object’s `amount` field."""
-  amount: [JSON]
-
-  """Checks for equality with the object’s `evaluationDate` field."""
-  evaluationDate: Datetime
-
-  """Checks for equality with the object’s `claimId` field."""
-  claimId: String
 }
 
 """A `Claim` edge in the connection."""
@@ -5694,645 +3826,34 @@ type EntitiesConnection {
 
   """The count of *all* `Entity` you could get from the connection."""
   totalCount: Int!
+
+  """Checks if there are any asset/device entities with null externalId"""
+  deviceExternalIdsLoaded: Boolean!
 }
 
-"""A `Entity` edge in the connection."""
-type EntitiesEdge {
-  """A cursor for use in pagination."""
-  cursor: Cursor
-
-  """The `Entity` at the end of the edge."""
-  node: Entity!
-}
-
-"""Methods to use when ordering `Entity`."""
-enum EntitiesOrderBy {
-  NATURAL
-  ID_ASC
-  ID_DESC
-  TYPE_ASC
-  TYPE_DESC
-  START_DATE_ASC
-  START_DATE_DESC
-  END_DATE_ASC
-  END_DATE_DESC
-  STATUS_ASC
-  STATUS_DESC
-  RELAYER_NODE_ASC
-  RELAYER_NODE_DESC
-  CREDENTIALS_ASC
-  CREDENTIALS_DESC
-  ENTITY_VERIFIED_ASC
-  ENTITY_VERIFIED_DESC
-  METADATA_ASC
-  METADATA_DESC
-  ACCOUNTS_ASC
-  ACCOUNTS_DESC
-  EXTERNAL_ID_ASC
-  EXTERNAL_ID_DESC
-  OWNER_ASC
-  OWNER_DESC
-  PRIMARY_KEY_ASC
-  PRIMARY_KEY_DESC
-}
-
-"""
-A condition to be used against `Entity` object types. All fields are tested for equality and combined with a logical ‘and.’
-"""
-input EntityCondition {
-  """Checks for equality with the object’s `id` field."""
-  id: String
-
-  """Checks for equality with the object’s `type` field."""
-  type: String
-
-  """Checks for equality with the object’s `startDate` field."""
-  startDate: Datetime
-
-  """Checks for equality with the object’s `endDate` field."""
-  endDate: Datetime
-
-  """Checks for equality with the object’s `status` field."""
-  status: Int
-
-  """Checks for equality with the object’s `relayerNode` field."""
-  relayerNode: String
-
-  """Checks for equality with the object’s `credentials` field."""
-  credentials: [String]
-
-  """Checks for equality with the object’s `entityVerified` field."""
-  entityVerified: Boolean
-
-  """Checks for equality with the object’s `metadata` field."""
-  metadata: JSON
-
-  """Checks for equality with the object’s `accounts` field."""
-  accounts: [JSON]
-
-  """Checks for equality with the object’s `externalId` field."""
-  externalId: String
-
-  """Checks for equality with the object’s `owner` field."""
-  owner: String
-}
-
-"""A connection to a list of `Event` values."""
-type EventsConnection {
-  """A list of `Event` objects."""
-  nodes: [Event!]!
-
-  """
-  A list of edges which contains the `Event` and cursor to aid in pagination.
-  """
-  edges: [EventsEdge!]!
-
-  """Information to aid in pagination."""
-  pageInfo: PageInfo!
-
-  """The count of *all* `Event` you could get from the connection."""
-  totalCount: Int!
-}
-
-type Event implements Node {
-  """
-  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
-  """
-  nodeId: ID!
-  id: Int!
-  type: String!
-  attributes: [JSON]
-  blockHeight: Int!
-  timestamp: Datetime!
-}
-
-"""A `Event` edge in the connection."""
-type EventsEdge {
-  """A cursor for use in pagination."""
-  cursor: Cursor
-
-  """The `Event` at the end of the edge."""
-  node: Event!
-}
-
-"""Methods to use when ordering `Event`."""
-enum EventsOrderBy {
-  NATURAL
-  ID_ASC
-  ID_DESC
-  TYPE_ASC
-  TYPE_DESC
-  ATTRIBUTES_ASC
-  ATTRIBUTES_DESC
-  BLOCK_HEIGHT_ASC
-  BLOCK_HEIGHT_DESC
-  TIMESTAMP_ASC
-  TIMESTAMP_DESC
-  PRIMARY_KEY_ASC
-  PRIMARY_KEY_DESC
-}
-
-"""
-A condition to be used against `Event` object types. All fields are tested for equality and combined with a logical ‘and.’
-"""
-input EventCondition {
-  """Checks for equality with the object’s `id` field."""
-  id: Int
-
-  """Checks for equality with the object’s `type` field."""
-  type: String
-
-  """Checks for equality with the object’s `attributes` field."""
-  attributes: [JSON]
-
-  """Checks for equality with the object’s `blockHeight` field."""
-  blockHeight: Int
-
-  """Checks for equality with the object’s `timestamp` field."""
-  timestamp: Datetime
-}
-
-"""
-A filter to be used against `Event` object types. All fields are combined with a logical ‘and.’
-"""
-input EventFilter {
-  """Filter by the object’s `id` field."""
-  id: IntFilter
-
-  """Filter by the object’s `type` field."""
-  type: StringFilter
-
-  """Filter by the object’s `attributes` field."""
-  attributes: JSONListFilter
-
-  """Filter by the object’s `blockHeight` field."""
-  blockHeight: IntFilter
-
-  """Filter by the object’s `timestamp` field."""
-  timestamp: DatetimeFilter
-
-  """Checks for all expressions in this list."""
-  and: [EventFilter!]
-
-  """Checks for any expressions in this list."""
-  or: [EventFilter!]
-
-  """Negates the expression."""
-  not: EventFilter
-}
-
-"""A connection to a list of `Iid` values."""
-type IidsConnection {
-  """A list of `Iid` objects."""
-  nodes: [Iid!]!
-
-  """
-  A list of edges which contains the `Iid` and cursor to aid in pagination.
-  """
-  edges: [IidsEdge!]!
-
-  """Information to aid in pagination."""
-  pageInfo: PageInfo!
-
-  """The count of *all* `Iid` you could get from the connection."""
-  totalCount: Int!
-}
-
-"""A `Iid` edge in the connection."""
-type IidsEdge {
-  """A cursor for use in pagination."""
-  cursor: Cursor
-
-  """The `Iid` at the end of the edge."""
-  node: Iid!
-}
-
-"""Methods to use when ordering `Iid`."""
-enum IidsOrderBy {
-  NATURAL
-  ID_ASC
-  ID_DESC
-  CONTROLLER_ASC
-  CONTROLLER_DESC
-  VERIFICATION_METHOD_ASC
-  VERIFICATION_METHOD_DESC
-  AUTHENTICATION_ASC
-  AUTHENTICATION_DESC
-  ASSERTION_METHOD_ASC
-  ASSERTION_METHOD_DESC
-  KEY_AGREEMENT_ASC
-  KEY_AGREEMENT_DESC
-  CAPABILITY_INVOCATION_ASC
-  CAPABILITY_INVOCATION_DESC
-  CAPABILITY_DELEGATION_ASC
-  CAPABILITY_DELEGATION_DESC
-  ALSO_KNOWN_AS_ASC
-  ALSO_KNOWN_AS_DESC
-  METADATA_ASC
-  METADATA_DESC
-  PRIMARY_KEY_ASC
-  PRIMARY_KEY_DESC
-}
-
-"""
-A condition to be used against `Iid` object types. All fields are tested for equality and combined with a logical ‘and.’
-"""
-input IidCondition {
-  """Checks for equality with the object’s `id` field."""
-  id: String
-
-  """Checks for equality with the object’s `controller` field."""
-  controller: [String]
-
-  """Checks for equality with the object’s `verificationMethod` field."""
-  verificationMethod: JSON
-
-  """Checks for equality with the object’s `authentication` field."""
-  authentication: [String]
-
-  """Checks for equality with the object’s `assertionMethod` field."""
-  assertionMethod: [String]
-
-  """Checks for equality with the object’s `keyAgreement` field."""
-  keyAgreement: [String]
-
-  """Checks for equality with the object’s `capabilityInvocation` field."""
-  capabilityInvocation: [String]
-
-  """Checks for equality with the object’s `capabilityDelegation` field."""
-  capabilityDelegation: [String]
-
-  """Checks for equality with the object’s `alsoKnownAs` field."""
-  alsoKnownAs: String
-
-  """Checks for equality with the object’s `metadata` field."""
-  metadata: JSON
-}
-
-"""A connection to a list of `Ipf` values."""
-type IpfsConnection {
-  """A list of `Ipf` objects."""
-  nodes: [Ipf!]!
-
-  """
-  A list of edges which contains the `Ipf` and cursor to aid in pagination.
-  """
-  edges: [IpfsEdge!]!
-
-  """Information to aid in pagination."""
-  pageInfo: PageInfo!
-
-  """The count of *all* `Ipf` you could get from the connection."""
-  totalCount: Int!
-}
-
-type Ipf implements Node {
-  """
-  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
-  """
-  nodeId: ID!
-  cid: String!
-  contentType: String!
-  data: String!
-}
-
-"""A `Ipf` edge in the connection."""
-type IpfsEdge {
-  """A cursor for use in pagination."""
-  cursor: Cursor
-
-  """The `Ipf` at the end of the edge."""
-  node: Ipf!
-}
-
-"""Methods to use when ordering `Ipf`."""
-enum IpfsOrderBy {
-  NATURAL
-  CID_ASC
-  CID_DESC
-  CONTENT_TYPE_ASC
-  CONTENT_TYPE_DESC
-  DATA_ASC
-  DATA_DESC
-  PRIMARY_KEY_ASC
-  PRIMARY_KEY_DESC
-}
-
-"""
-A condition to be used against `Ipf` object types. All fields are tested for equality and combined with a logical ‘and.’
-"""
-input IpfCondition {
-  """Checks for equality with the object’s `cid` field."""
-  cid: String
-
-  """Checks for equality with the object’s `contentType` field."""
-  contentType: String
-
-  """Checks for equality with the object’s `data` field."""
-  data: String
-}
-
-"""
-A filter to be used against `Ipf` object types. All fields are combined with a logical ‘and.’
-"""
-input IpfFilter {
-  """Filter by the object’s `cid` field."""
-  cid: StringFilter
-
-  """Filter by the object’s `contentType` field."""
-  contentType: StringFilter
-
-  """Filter by the object’s `data` field."""
-  data: StringFilter
-
-  """Checks for all expressions in this list."""
-  and: [IpfFilter!]
-
-  """Checks for any expressions in this list."""
-  or: [IpfFilter!]
-
-  """Negates the expression."""
-  not: IpfFilter
-}
-
-"""A connection to a list of `Message` values."""
-type MessagesConnection {
-  """A list of `Message` objects."""
-  nodes: [Message!]!
-
-  """
-  A list of edges which contains the `Message` and cursor to aid in pagination.
-  """
-  edges: [MessagesEdge!]!
-
-  """Information to aid in pagination."""
-  pageInfo: PageInfo!
-
-  """The count of *all* `Message` you could get from the connection."""
-  totalCount: Int!
-}
-
-type Message implements Node {
-  """
-  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
-  """
-  nodeId: ID!
-  id: Int!
-  transactionHash: String!
-  typeUrl: String!
-  value: JSON!
-  from: String
-  to: String
-  denoms: [String]
-  tokenNames: [String]
-
-  """Reads a single `Transaction` that is related to this `Message`."""
-  transactionByTransactionHash: Transaction
-}
-
-type Transaction implements Node {
-  """
-  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
-  """
-  nodeId: ID!
-  hash: String!
-  height: Int!
-  code: Int!
-  fee: JSON!
-  gasUsed: String!
-  gasWanted: String!
-  time: Datetime!
-
-  """Reads and enables pagination through a set of `Message`."""
-  messagesByTransactionHash(
-    """Only read the first `n` values of the set."""
-    first: Int
-
-    """Only read the last `n` values of the set."""
-    last: Int
-
-    """
-    Skip the first `n` values from our `after` cursor, an alternative to cursor
-    based pagination. May not be used with `last`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """The method to use when ordering `Message`."""
-    orderBy: [MessagesOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: MessageCondition
-
-    """
-    A filter to be used in determining which values should be returned by the collection.
-    """
-    filter: MessageFilter
-  ): MessagesConnection!
-}
-
-"""Methods to use when ordering `Message`."""
-enum MessagesOrderBy {
-  NATURAL
-  ID_ASC
-  ID_DESC
-  TRANSACTION_HASH_ASC
-  TRANSACTION_HASH_DESC
-  TYPE_URL_ASC
-  TYPE_URL_DESC
-  VALUE_ASC
-  VALUE_DESC
-  FROM_ASC
-  FROM_DESC
-  TO_ASC
-  TO_DESC
-  DENOMS_ASC
-  DENOMS_DESC
-  TOKEN_NAMES_ASC
-  TOKEN_NAMES_DESC
-  PRIMARY_KEY_ASC
-  PRIMARY_KEY_DESC
-}
-
-"""
-A condition to be used against `Message` object types. All fields are tested for equality and combined with a logical ‘and.’
-"""
-input MessageCondition {
-  """Checks for equality with the object’s `id` field."""
-  id: Int
-
-  """Checks for equality with the object’s `transactionHash` field."""
-  transactionHash: String
-
-  """Checks for equality with the object’s `typeUrl` field."""
-  typeUrl: String
-
-  """Checks for equality with the object’s `value` field."""
-  value: JSON
-
-  """Checks for equality with the object’s `from` field."""
-  from: String
-
-  """Checks for equality with the object’s `to` field."""
-  to: String
-
-  """Checks for equality with the object’s `denoms` field."""
-  denoms: [String]
-
-  """Checks for equality with the object’s `tokenNames` field."""
-  tokenNames: [String]
-}
-
-"""
-A filter to be used against `Message` object types. All fields are combined with a logical ‘and.’
-"""
-input MessageFilter {
-  """Filter by the object’s `id` field."""
-  id: IntFilter
-
-  """Filter by the object’s `transactionHash` field."""
-  transactionHash: StringFilter
-
-  """Filter by the object’s `typeUrl` field."""
-  typeUrl: StringFilter
-
-  """Filter by the object’s `value` field."""
-  value: JSONFilter
-
-  """Filter by the object’s `from` field."""
-  from: StringFilter
-
-  """Filter by the object’s `to` field."""
-  to: StringFilter
-
-  """Filter by the object’s `denoms` field."""
-  denoms: StringListFilter
-
-  """Filter by the object’s `tokenNames` field."""
-  tokenNames: StringListFilter
-
-  """Filter by the object’s `transactionByTransactionHash` relation."""
-  transactionByTransactionHash: TransactionFilter
-
-  """Checks for all expressions in this list."""
-  and: [MessageFilter!]
-
-  """Checks for any expressions in this list."""
-  or: [MessageFilter!]
-
-  """Negates the expression."""
-  not: MessageFilter
-}
-
-"""
-A filter to be used against `Transaction` object types. All fields are combined with a logical ‘and.’
-"""
-input TransactionFilter {
-  """Filter by the object’s `hash` field."""
-  hash: StringFilter
-
-  """Filter by the object’s `height` field."""
-  height: IntFilter
-
-  """Filter by the object’s `code` field."""
-  code: IntFilter
-
-  """Filter by the object’s `fee` field."""
-  fee: JSONFilter
-
-  """Filter by the object’s `gasUsed` field."""
-  gasUsed: StringFilter
-
-  """Filter by the object’s `gasWanted` field."""
-  gasWanted: StringFilter
-
-  """Filter by the object’s `time` field."""
-  time: DatetimeFilter
-
-  """Filter by the object’s `messagesByTransactionHash` relation."""
-  messagesByTransactionHash: TransactionToManyMessageFilter
-
-  """Some related `messagesByTransactionHash` exist."""
-  messagesByTransactionHashExist: Boolean
-
-  """Checks for all expressions in this list."""
-  and: [TransactionFilter!]
-
-  """Checks for any expressions in this list."""
-  or: [TransactionFilter!]
-
-  """Negates the expression."""
-  not: TransactionFilter
-}
-
-"""
-A filter to be used against many `Message` object types. All fields are combined with a logical ‘and.’
-"""
-input TransactionToManyMessageFilter {
-  """
-  Every related `Message` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  every: MessageFilter
-
-  """
-  Some related `Message` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  some: MessageFilter
-
-  """
-  No related `Message` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  none: MessageFilter
-}
-
-"""A `Message` edge in the connection."""
-type MessagesEdge {
-  """A cursor for use in pagination."""
-  cursor: Cursor
-
-  """The `Message` at the end of the edge."""
-  node: Message!
-}
-
-"""A connection to a list of `Token` values."""
-type TokensConnection {
-  """A list of `Token` objects."""
-  nodes: [Token!]!
-
-  """
-  A list of edges which contains the `Token` and cursor to aid in pagination.
-  """
-  edges: [TokensEdge!]!
-
-  """Information to aid in pagination."""
-  pageInfo: PageInfo!
-
-  """The count of *all* `Token` you could get from the connection."""
-  totalCount: Int!
-}
-
-type Token implements Node {
+type Entity implements Node {
   """
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
   """
   nodeId: ID!
   id: String!
-  index: String!
-  name: String!
-  collection: String!
+  type: String!
+  startDate: Datetime
+  endDate: Datetime
+  status: Int!
+  relayerNode: String!
+  credentials: [String]
+  entityVerified: Boolean!
+  metadata: JSON!
+  accounts: JSON!
+  externalId: String
+  owner: String
 
-  """Reads a single `TokenClass` that is related to this `Token`."""
-  tokenClassByName: TokenClass
+  """Reads a single `Iid` that is related to this `Entity`."""
+  iidById: Iid
 
-  """Reads and enables pagination through a set of `TokenDatum`."""
-  tokenDataByTokenId(
+  """Reads and enables pagination through a set of `TokenClass`."""
+  tokenClassesByClass(
     """Only read the first `n` values of the set."""
     first: Int
 
@@ -6351,22 +3872,22 @@ type Token implements Node {
     """Read all values in the set after (below) this cursor."""
     after: Cursor
 
-    """The method to use when ordering `TokenDatum`."""
-    orderBy: [TokenDataOrderBy!] = [PRIMARY_KEY_ASC]
+    """The method to use when ordering `TokenClass`."""
+    orderBy: [TokenClassesOrderBy!] = [PRIMARY_KEY_ASC]
 
     """
     A condition to be used in determining which values should be returned by the collection.
     """
-    condition: TokenDatumCondition
+    condition: TokenClassCondition
 
     """
     A filter to be used in determining which values should be returned by the collection.
     """
-    filter: TokenDatumFilter
-  ): TokenDataConnection!
+    filter: TokenClassFilter
+  ): TokenClassesConnection!
 
-  """Reads and enables pagination through a set of `TokenTransaction`."""
-  tokenTransactionsByTokenId(
+  """Reads and enables pagination through a set of `Token`."""
+  tokensByCollection(
     """Only read the first `n` values of the set."""
     first: Int
 
@@ -6385,19 +3906,77 @@ type Token implements Node {
     """Read all values in the set after (below) this cursor."""
     after: Cursor
 
-    """The method to use when ordering `TokenTransaction`."""
-    orderBy: [TokenTransactionsOrderBy!] = [PRIMARY_KEY_ASC]
+    """The method to use when ordering `Token`."""
+    orderBy: [TokensOrderBy!] = [PRIMARY_KEY_ASC]
 
     """
     A condition to be used in determining which values should be returned by the collection.
     """
-    condition: TokenTransactionCondition
+    condition: TokenCondition
 
     """
     A filter to be used in determining which values should be returned by the collection.
     """
-    filter: TokenTransactionFilter
-  ): TokenTransactionsConnection!
+    filter: TokenFilter
+  ): TokensConnection!
+  context: JSON!
+  controller: [String!]!
+  verificationMethod: JSON!
+  service: JSON!
+  authentication: [String!]!
+  assertionMethod: [String!]!
+  keyAgreement: [String!]!
+  capabilityInvocation: [String!]!
+  capabilityDelegation: [String!]!
+  linkedResource: JSON!
+  linkedClaim: JSON!
+  accordedRight: JSON!
+  linkedEntity: JSON!
+  alsoKnownAs: String!
+  settings: JSON!
+}
+
+type Iid implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: String!
+  context: JSON!
+  controller: [String]
+  verificationMethod: JSON!
+  service: JSON!
+  authentication: [String]
+  assertionMethod: [String]
+  keyAgreement: [String]
+  capabilityInvocation: [String]
+  capabilityDelegation: [String]
+  linkedResource: JSON!
+  linkedClaim: JSON!
+  accordedRight: JSON!
+  linkedEntity: JSON!
+  alsoKnownAs: String!
+  metadata: JSON!
+
+  """Reads a single `Entity` that is related to this `Iid`."""
+  entityById: Entity
+}
+
+"""A connection to a list of `TokenClass` values."""
+type TokenClassesConnection {
+  """A list of `TokenClass` objects."""
+  nodes: [TokenClass!]!
+
+  """
+  A list of edges which contains the `TokenClass` and cursor to aid in pagination.
+  """
+  edges: [TokenClassesEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `TokenClass` you could get from the connection."""
+  totalCount: Int!
 }
 
 type TokenClass implements Node {
@@ -6416,6 +3995,9 @@ type TokenClass implements Node {
   supply: String!
   paused: Boolean!
   stopped: Boolean!
+
+  """Reads a single `Entity` that is related to this `TokenClass`."""
+  entityByClass: Entity
 
   """Reads and enables pagination through a set of `Token`."""
   tokensByName(
@@ -6520,97 +4102,197 @@ type TokenClass implements Node {
   ): TokenCancelledsConnection!
 }
 
-"""Methods to use when ordering `Token`."""
-enum TokensOrderBy {
+"""A connection to a list of `Token` values."""
+type TokensConnection {
+  """A list of `Token` objects."""
+  nodes: [Token!]!
+
+  """
+  A list of edges which contains the `Token` and cursor to aid in pagination.
+  """
+  edges: [TokensEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `Token` you could get from the connection."""
+  totalCount: Int!
+}
+
+type Token implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: String!
+  index: String!
+  name: String!
+  collection: String!
+
+  """Reads a single `TokenClass` that is related to this `Token`."""
+  tokenClassByName: TokenClass
+
+  """Reads a single `Entity` that is related to this `Token`."""
+  entityByCollection: Entity
+
+  """Reads and enables pagination through a set of `TokenDatum`."""
+  tokenDataByTokenId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `TokenDatum`."""
+    orderBy: [TokenDataOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: TokenDatumCondition
+
+    """
+    A filter to be used in determining which values should be returned by the collection.
+    """
+    filter: TokenDatumFilter
+  ): TokenDataConnection!
+
+  """Reads and enables pagination through a set of `TokenTransaction`."""
+  tokenTransactionsByTokenId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `TokenTransaction`."""
+    orderBy: [TokenTransactionsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: TokenTransactionCondition
+
+    """
+    A filter to be used in determining which values should be returned by the collection.
+    """
+    filter: TokenTransactionFilter
+  ): TokenTransactionsConnection!
+}
+
+"""A connection to a list of `TokenDatum` values."""
+type TokenDataConnection {
+  """A list of `TokenDatum` objects."""
+  nodes: [TokenDatum!]!
+
+  """
+  A list of edges which contains the `TokenDatum` and cursor to aid in pagination.
+  """
+  edges: [TokenDataEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `TokenDatum` you could get from the connection."""
+  totalCount: Int!
+}
+
+type TokenDatum implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  aid: Int!
+  uri: String!
+  encrypted: Boolean!
+  proof: String!
+  type: String!
+  id: String!
+  tokenId: String!
+
+  """Reads a single `Token` that is related to this `TokenDatum`."""
+  token: Token
+}
+
+"""A `TokenDatum` edge in the connection."""
+type TokenDataEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `TokenDatum` at the end of the edge."""
+  node: TokenDatum!
+}
+
+"""Methods to use when ordering `TokenDatum`."""
+enum TokenDataOrderBy {
   NATURAL
+  AID_ASC
+  AID_DESC
+  URI_ASC
+  URI_DESC
+  ENCRYPTED_ASC
+  ENCRYPTED_DESC
+  PROOF_ASC
+  PROOF_DESC
+  TYPE_ASC
+  TYPE_DESC
   ID_ASC
   ID_DESC
-  INDEX_ASC
-  INDEX_DESC
-  NAME_ASC
-  NAME_DESC
-  COLLECTION_ASC
-  COLLECTION_DESC
+  TOKEN_ID_ASC
+  TOKEN_ID_DESC
   PRIMARY_KEY_ASC
   PRIMARY_KEY_DESC
 }
 
 """
-A condition to be used against `Token` object types. All fields are tested for equality and combined with a logical ‘and.’
+A condition to be used against `TokenDatum` object types. All fields are tested
+for equality and combined with a logical ‘and.’
 """
-input TokenCondition {
+input TokenDatumCondition {
+  """Checks for equality with the object’s `aid` field."""
+  aid: Int
+
+  """Checks for equality with the object’s `uri` field."""
+  uri: String
+
+  """Checks for equality with the object’s `encrypted` field."""
+  encrypted: Boolean
+
+  """Checks for equality with the object’s `proof` field."""
+  proof: String
+
+  """Checks for equality with the object’s `type` field."""
+  type: String
+
   """Checks for equality with the object’s `id` field."""
   id: String
 
-  """Checks for equality with the object’s `index` field."""
-  index: String
-
-  """Checks for equality with the object’s `name` field."""
-  name: String
-
-  """Checks for equality with the object’s `collection` field."""
-  collection: String
-}
-
-"""
-A filter to be used against `Token` object types. All fields are combined with a logical ‘and.’
-"""
-input TokenFilter {
-  """Filter by the object’s `id` field."""
-  id: StringFilter
-
-  """Filter by the object’s `index` field."""
-  index: StringFilter
-
-  """Filter by the object’s `name` field."""
-  name: StringFilter
-
-  """Filter by the object’s `collection` field."""
-  collection: StringFilter
-
-  """Filter by the object’s `tokenDataByTokenId` relation."""
-  tokenDataByTokenId: TokenToManyTokenDatumFilter
-
-  """Some related `tokenDataByTokenId` exist."""
-  tokenDataByTokenIdExist: Boolean
-
-  """Filter by the object’s `tokenTransactionsByTokenId` relation."""
-  tokenTransactionsByTokenId: TokenToManyTokenTransactionFilter
-
-  """Some related `tokenTransactionsByTokenId` exist."""
-  tokenTransactionsByTokenIdExist: Boolean
-
-  """Filter by the object’s `tokenClassByName` relation."""
-  tokenClassByName: TokenClassFilter
-
-  """Checks for all expressions in this list."""
-  and: [TokenFilter!]
-
-  """Checks for any expressions in this list."""
-  or: [TokenFilter!]
-
-  """Negates the expression."""
-  not: TokenFilter
-}
-
-"""
-A filter to be used against many `TokenDatum` object types. All fields are combined with a logical ‘and.’
-"""
-input TokenToManyTokenDatumFilter {
-  """
-  Every related `TokenDatum` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  every: TokenDatumFilter
-
-  """
-  Some related `TokenDatum` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  some: TokenDatumFilter
-
-  """
-  No related `TokenDatum` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  none: TokenDatumFilter
+  """Checks for equality with the object’s `tokenId` field."""
+  tokenId: String
 }
 
 """
@@ -6652,6 +4334,70 @@ input TokenDatumFilter {
 }
 
 """
+A filter to be used against `Token` object types. All fields are combined with a logical ‘and.’
+"""
+input TokenFilter {
+  """Filter by the object’s `id` field."""
+  id: StringFilter
+
+  """Filter by the object’s `index` field."""
+  index: StringFilter
+
+  """Filter by the object’s `name` field."""
+  name: StringFilter
+
+  """Filter by the object’s `collection` field."""
+  collection: StringFilter
+
+  """Filter by the object’s `tokenDataByTokenId` relation."""
+  tokenDataByTokenId: TokenToManyTokenDatumFilter
+
+  """Some related `tokenDataByTokenId` exist."""
+  tokenDataByTokenIdExist: Boolean
+
+  """Filter by the object’s `tokenTransactionsByTokenId` relation."""
+  tokenTransactionsByTokenId: TokenToManyTokenTransactionFilter
+
+  """Some related `tokenTransactionsByTokenId` exist."""
+  tokenTransactionsByTokenIdExist: Boolean
+
+  """Filter by the object’s `tokenClassByName` relation."""
+  tokenClassByName: TokenClassFilter
+
+  """Filter by the object’s `entityByCollection` relation."""
+  entityByCollection: EntityFilter
+
+  """Checks for all expressions in this list."""
+  and: [TokenFilter!]
+
+  """Checks for any expressions in this list."""
+  or: [TokenFilter!]
+
+  """Negates the expression."""
+  not: TokenFilter
+}
+
+"""
+A filter to be used against many `TokenDatum` object types. All fields are combined with a logical ‘and.’
+"""
+input TokenToManyTokenDatumFilter {
+  """
+  Every related `TokenDatum` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  every: TokenDatumFilter
+
+  """
+  Some related `TokenDatum` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  some: TokenDatumFilter
+
+  """
+  No related `TokenDatum` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  none: TokenDatumFilter
+}
+
+"""
 A filter to be used against many `TokenTransaction` object types. All fields are combined with a logical ‘and.’
 """
 input TokenToManyTokenTransactionFilter {
@@ -6675,8 +4421,8 @@ input TokenToManyTokenTransactionFilter {
 A filter to be used against `TokenTransaction` object types. All fields are combined with a logical ‘and.’
 """
 input TokenTransactionFilter {
-  """Filter by the object’s `id` field."""
-  id: IntFilter
+  """Filter by the object’s `aid` field."""
+  aid: IntFilter
 
   """Filter by the object’s `from` field."""
   from: StringFilter
@@ -6757,6 +4503,9 @@ input TokenClassFilter {
 
   """Some related `tokenCancelledsByName` exist."""
   tokenCancelledsByNameExist: Boolean
+
+  """Filter by the object’s `entityByClass` relation."""
+  entityByClass: EntityFilter
 
   """Checks for all expressions in this list."""
   and: [TokenClassFilter!]
@@ -6899,6 +4648,301 @@ input TokenCancelledFilter {
 
   """Negates the expression."""
   not: TokenCancelledFilter
+}
+
+"""
+A filter to be used against `Entity` object types. All fields are combined with a logical ‘and.’
+"""
+input EntityFilter {
+  """Filter by the object’s `id` field."""
+  id: StringFilter
+
+  """Filter by the object’s `type` field."""
+  type: StringFilter
+
+  """Filter by the object’s `startDate` field."""
+  startDate: DatetimeFilter
+
+  """Filter by the object’s `endDate` field."""
+  endDate: DatetimeFilter
+
+  """Filter by the object’s `status` field."""
+  status: IntFilter
+
+  """Filter by the object’s `relayerNode` field."""
+  relayerNode: StringFilter
+
+  """Filter by the object’s `credentials` field."""
+  credentials: StringListFilter
+
+  """Filter by the object’s `entityVerified` field."""
+  entityVerified: BooleanFilter
+
+  """Filter by the object’s `metadata` field."""
+  metadata: JSONFilter
+
+  """Filter by the object’s `accounts` field."""
+  accounts: JSONFilter
+
+  """Filter by the object’s `externalId` field."""
+  externalId: StringFilter
+
+  """Filter by the object’s `owner` field."""
+  owner: StringFilter
+
+  """Filter by the object’s `tokenClassesByClass` relation."""
+  tokenClassesByClass: EntityToManyTokenClassFilter
+
+  """Some related `tokenClassesByClass` exist."""
+  tokenClassesByClassExist: Boolean
+
+  """Filter by the object’s `tokensByCollection` relation."""
+  tokensByCollection: EntityToManyTokenFilter
+
+  """Some related `tokensByCollection` exist."""
+  tokensByCollectionExist: Boolean
+
+  """Filter by the object’s `iidById` relation."""
+  iidById: IidFilter
+
+  """Checks for all expressions in this list."""
+  and: [EntityFilter!]
+
+  """Checks for any expressions in this list."""
+  or: [EntityFilter!]
+
+  """Negates the expression."""
+  not: EntityFilter
+}
+
+"""
+A filter to be used against many `TokenClass` object types. All fields are combined with a logical ‘and.’
+"""
+input EntityToManyTokenClassFilter {
+  """
+  Every related `TokenClass` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  every: TokenClassFilter
+
+  """
+  Some related `TokenClass` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  some: TokenClassFilter
+
+  """
+  No related `TokenClass` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  none: TokenClassFilter
+}
+
+"""
+A filter to be used against many `Token` object types. All fields are combined with a logical ‘and.’
+"""
+input EntityToManyTokenFilter {
+  """
+  Every related `Token` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  every: TokenFilter
+
+  """
+  Some related `Token` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  some: TokenFilter
+
+  """
+  No related `Token` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  none: TokenFilter
+}
+
+"""
+A filter to be used against `Iid` object types. All fields are combined with a logical ‘and.’
+"""
+input IidFilter {
+  """Filter by the object’s `id` field."""
+  id: StringFilter
+
+  """Filter by the object’s `context` field."""
+  context: JSONFilter
+
+  """Filter by the object’s `controller` field."""
+  controller: StringListFilter
+
+  """Filter by the object’s `verificationMethod` field."""
+  verificationMethod: JSONFilter
+
+  """Filter by the object’s `service` field."""
+  service: JSONFilter
+
+  """Filter by the object’s `authentication` field."""
+  authentication: StringListFilter
+
+  """Filter by the object’s `assertionMethod` field."""
+  assertionMethod: StringListFilter
+
+  """Filter by the object’s `keyAgreement` field."""
+  keyAgreement: StringListFilter
+
+  """Filter by the object’s `capabilityInvocation` field."""
+  capabilityInvocation: StringListFilter
+
+  """Filter by the object’s `capabilityDelegation` field."""
+  capabilityDelegation: StringListFilter
+
+  """Filter by the object’s `linkedResource` field."""
+  linkedResource: JSONFilter
+
+  """Filter by the object’s `linkedClaim` field."""
+  linkedClaim: JSONFilter
+
+  """Filter by the object’s `accordedRight` field."""
+  accordedRight: JSONFilter
+
+  """Filter by the object’s `linkedEntity` field."""
+  linkedEntity: JSONFilter
+
+  """Filter by the object’s `alsoKnownAs` field."""
+  alsoKnownAs: StringFilter
+
+  """Filter by the object’s `metadata` field."""
+  metadata: JSONFilter
+
+  """Filter by the object’s `entityById` relation."""
+  entityById: EntityFilter
+
+  """A related `entityById` exists."""
+  entityByIdExists: Boolean
+
+  """Checks for all expressions in this list."""
+  and: [IidFilter!]
+
+  """Checks for any expressions in this list."""
+  or: [IidFilter!]
+
+  """Negates the expression."""
+  not: IidFilter
+}
+
+"""A connection to a list of `TokenTransaction` values."""
+type TokenTransactionsConnection {
+  """A list of `TokenTransaction` objects."""
+  nodes: [TokenTransaction!]!
+
+  """
+  A list of edges which contains the `TokenTransaction` and cursor to aid in pagination.
+  """
+  edges: [TokenTransactionsEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  The count of *all* `TokenTransaction` you could get from the connection.
+  """
+  totalCount: Int!
+}
+
+type TokenTransaction implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  aid: Int!
+  from: String!
+  to: String!
+  amount: String!
+  tokenId: String!
+
+  """Reads a single `Token` that is related to this `TokenTransaction`."""
+  token: Token
+}
+
+"""A `TokenTransaction` edge in the connection."""
+type TokenTransactionsEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `TokenTransaction` at the end of the edge."""
+  node: TokenTransaction!
+}
+
+"""Methods to use when ordering `TokenTransaction`."""
+enum TokenTransactionsOrderBy {
+  NATURAL
+  AID_ASC
+  AID_DESC
+  FROM_ASC
+  FROM_DESC
+  TO_ASC
+  TO_DESC
+  AMOUNT_ASC
+  AMOUNT_DESC
+  TOKEN_ID_ASC
+  TOKEN_ID_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `TokenTransaction` object types. All fields are
+tested for equality and combined with a logical ‘and.’
+"""
+input TokenTransactionCondition {
+  """Checks for equality with the object’s `aid` field."""
+  aid: Int
+
+  """Checks for equality with the object’s `from` field."""
+  from: String
+
+  """Checks for equality with the object’s `to` field."""
+  to: String
+
+  """Checks for equality with the object’s `amount` field."""
+  amount: String
+
+  """Checks for equality with the object’s `tokenId` field."""
+  tokenId: String
+}
+
+"""A `Token` edge in the connection."""
+type TokensEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `Token` at the end of the edge."""
+  node: Token!
+}
+
+"""Methods to use when ordering `Token`."""
+enum TokensOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  INDEX_ASC
+  INDEX_DESC
+  NAME_ASC
+  NAME_DESC
+  COLLECTION_ASC
+  COLLECTION_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `Token` object types. All fields are tested for equality and combined with a logical ‘and.’
+"""
+input TokenCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: String
+
+  """Checks for equality with the object’s `index` field."""
+  index: String
+
+  """Checks for equality with the object’s `name` field."""
+  name: String
+
+  """Checks for equality with the object’s `collection` field."""
+  collection: String
 }
 
 """A connection to a list of `TokenRetired` values."""
@@ -7077,204 +5121,6 @@ input TokenCancelledCondition {
   name: String
 }
 
-"""A connection to a list of `TokenDatum` values."""
-type TokenDataConnection {
-  """A list of `TokenDatum` objects."""
-  nodes: [TokenDatum!]!
-
-  """
-  A list of edges which contains the `TokenDatum` and cursor to aid in pagination.
-  """
-  edges: [TokenDataEdge!]!
-
-  """Information to aid in pagination."""
-  pageInfo: PageInfo!
-
-  """The count of *all* `TokenDatum` you could get from the connection."""
-  totalCount: Int!
-}
-
-type TokenDatum implements Node {
-  """
-  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
-  """
-  nodeId: ID!
-  aid: Int!
-  uri: String!
-  encrypted: Boolean!
-  proof: String!
-  type: String!
-  id: String!
-  tokenId: String!
-
-  """Reads a single `Token` that is related to this `TokenDatum`."""
-  token: Token
-}
-
-"""A `TokenDatum` edge in the connection."""
-type TokenDataEdge {
-  """A cursor for use in pagination."""
-  cursor: Cursor
-
-  """The `TokenDatum` at the end of the edge."""
-  node: TokenDatum!
-}
-
-"""Methods to use when ordering `TokenDatum`."""
-enum TokenDataOrderBy {
-  NATURAL
-  AID_ASC
-  AID_DESC
-  URI_ASC
-  URI_DESC
-  ENCRYPTED_ASC
-  ENCRYPTED_DESC
-  PROOF_ASC
-  PROOF_DESC
-  TYPE_ASC
-  TYPE_DESC
-  ID_ASC
-  ID_DESC
-  TOKEN_ID_ASC
-  TOKEN_ID_DESC
-  PRIMARY_KEY_ASC
-  PRIMARY_KEY_DESC
-}
-
-"""
-A condition to be used against `TokenDatum` object types. All fields are tested
-for equality and combined with a logical ‘and.’
-"""
-input TokenDatumCondition {
-  """Checks for equality with the object’s `aid` field."""
-  aid: Int
-
-  """Checks for equality with the object’s `uri` field."""
-  uri: String
-
-  """Checks for equality with the object’s `encrypted` field."""
-  encrypted: Boolean
-
-  """Checks for equality with the object’s `proof` field."""
-  proof: String
-
-  """Checks for equality with the object’s `type` field."""
-  type: String
-
-  """Checks for equality with the object’s `id` field."""
-  id: String
-
-  """Checks for equality with the object’s `tokenId` field."""
-  tokenId: String
-}
-
-"""A connection to a list of `TokenTransaction` values."""
-type TokenTransactionsConnection {
-  """A list of `TokenTransaction` objects."""
-  nodes: [TokenTransaction!]!
-
-  """
-  A list of edges which contains the `TokenTransaction` and cursor to aid in pagination.
-  """
-  edges: [TokenTransactionsEdge!]!
-
-  """Information to aid in pagination."""
-  pageInfo: PageInfo!
-
-  """
-  The count of *all* `TokenTransaction` you could get from the connection.
-  """
-  totalCount: Int!
-}
-
-type TokenTransaction implements Node {
-  """
-  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
-  """
-  nodeId: ID!
-  id: Int!
-  from: String!
-  to: String!
-  amount: String!
-  tokenId: String!
-
-  """Reads a single `Token` that is related to this `TokenTransaction`."""
-  token: Token
-}
-
-"""A `TokenTransaction` edge in the connection."""
-type TokenTransactionsEdge {
-  """A cursor for use in pagination."""
-  cursor: Cursor
-
-  """The `TokenTransaction` at the end of the edge."""
-  node: TokenTransaction!
-}
-
-"""Methods to use when ordering `TokenTransaction`."""
-enum TokenTransactionsOrderBy {
-  NATURAL
-  ID_ASC
-  ID_DESC
-  FROM_ASC
-  FROM_DESC
-  TO_ASC
-  TO_DESC
-  AMOUNT_ASC
-  AMOUNT_DESC
-  TOKEN_ID_ASC
-  TOKEN_ID_DESC
-  PRIMARY_KEY_ASC
-  PRIMARY_KEY_DESC
-}
-
-"""
-A condition to be used against `TokenTransaction` object types. All fields are
-tested for equality and combined with a logical ‘and.’
-"""
-input TokenTransactionCondition {
-  """Checks for equality with the object’s `id` field."""
-  id: Int
-
-  """Checks for equality with the object’s `from` field."""
-  from: String
-
-  """Checks for equality with the object’s `to` field."""
-  to: String
-
-  """Checks for equality with the object’s `amount` field."""
-  amount: String
-
-  """Checks for equality with the object’s `tokenId` field."""
-  tokenId: String
-}
-
-"""A `Token` edge in the connection."""
-type TokensEdge {
-  """A cursor for use in pagination."""
-  cursor: Cursor
-
-  """The `Token` at the end of the edge."""
-  node: Token!
-}
-
-"""A connection to a list of `TokenClass` values."""
-type TokenClassesConnection {
-  """A list of `TokenClass` objects."""
-  nodes: [TokenClass!]!
-
-  """
-  A list of edges which contains the `TokenClass` and cursor to aid in pagination.
-  """
-  edges: [TokenClassesEdge!]!
-
-  """Information to aid in pagination."""
-  pageInfo: PageInfo!
-
-  """The count of *all* `TokenClass` you could get from the connection."""
-  totalCount: Int!
-}
-
 """A `TokenClass` edge in the connection."""
 type TokenClassesEdge {
   """A cursor for use in pagination."""
@@ -7350,6 +5196,626 @@ input TokenClassCondition {
 
   """Checks for equality with the object’s `stopped` field."""
   stopped: Boolean
+}
+
+"""A `Entity` edge in the connection."""
+type EntitiesEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `Entity` at the end of the edge."""
+  node: Entity!
+}
+
+"""Methods to use when ordering `Entity`."""
+enum EntitiesOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  TYPE_ASC
+  TYPE_DESC
+  START_DATE_ASC
+  START_DATE_DESC
+  END_DATE_ASC
+  END_DATE_DESC
+  STATUS_ASC
+  STATUS_DESC
+  RELAYER_NODE_ASC
+  RELAYER_NODE_DESC
+  CREDENTIALS_ASC
+  CREDENTIALS_DESC
+  ENTITY_VERIFIED_ASC
+  ENTITY_VERIFIED_DESC
+  METADATA_ASC
+  METADATA_DESC
+  ACCOUNTS_ASC
+  ACCOUNTS_DESC
+  EXTERNAL_ID_ASC
+  EXTERNAL_ID_DESC
+  OWNER_ASC
+  OWNER_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `Entity` object types. All fields are tested for equality and combined with a logical ‘and.’
+"""
+input EntityCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: String
+
+  """Checks for equality with the object’s `type` field."""
+  type: String
+
+  """Checks for equality with the object’s `startDate` field."""
+  startDate: Datetime
+
+  """Checks for equality with the object’s `endDate` field."""
+  endDate: Datetime
+
+  """Checks for equality with the object’s `status` field."""
+  status: Int
+
+  """Checks for equality with the object’s `relayerNode` field."""
+  relayerNode: String
+
+  """Checks for equality with the object’s `credentials` field."""
+  credentials: [String]
+
+  """Checks for equality with the object’s `entityVerified` field."""
+  entityVerified: Boolean
+
+  """Checks for equality with the object’s `metadata` field."""
+  metadata: JSON
+
+  """Checks for equality with the object’s `accounts` field."""
+  accounts: JSON
+
+  """Checks for equality with the object’s `externalId` field."""
+  externalId: String
+
+  """Checks for equality with the object’s `owner` field."""
+  owner: String
+}
+
+"""A connection to a list of `Evaluation` values."""
+type EvaluationsConnection {
+  """A list of `Evaluation` objects."""
+  nodes: [Evaluation!]!
+
+  """
+  A list of edges which contains the `Evaluation` and cursor to aid in pagination.
+  """
+  edges: [EvaluationsEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `Evaluation` you could get from the connection."""
+  totalCount: Int!
+}
+
+"""A `Evaluation` edge in the connection."""
+type EvaluationsEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `Evaluation` at the end of the edge."""
+  node: Evaluation!
+}
+
+"""Methods to use when ordering `Evaluation`."""
+enum EvaluationsOrderBy {
+  NATURAL
+  COLLECTION_ID_ASC
+  COLLECTION_ID_DESC
+  ORACLE_ASC
+  ORACLE_DESC
+  AGENT_DID_ASC
+  AGENT_DID_DESC
+  AGENT_ADDRESS_ASC
+  AGENT_ADDRESS_DESC
+  STATUS_ASC
+  STATUS_DESC
+  REASON_ASC
+  REASON_DESC
+  VERIFICATION_PROOF_ASC
+  VERIFICATION_PROOF_DESC
+  AMOUNT_ASC
+  AMOUNT_DESC
+  EVALUATION_DATE_ASC
+  EVALUATION_DATE_DESC
+  CLAIM_ID_ASC
+  CLAIM_ID_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `Evaluation` object types. All fields are tested
+for equality and combined with a logical ‘and.’
+"""
+input EvaluationCondition {
+  """Checks for equality with the object’s `collectionId` field."""
+  collectionId: String
+
+  """Checks for equality with the object’s `oracle` field."""
+  oracle: String
+
+  """Checks for equality with the object’s `agentDid` field."""
+  agentDid: String
+
+  """Checks for equality with the object’s `agentAddress` field."""
+  agentAddress: String
+
+  """Checks for equality with the object’s `status` field."""
+  status: Int
+
+  """Checks for equality with the object’s `reason` field."""
+  reason: Int
+
+  """Checks for equality with the object’s `verificationProof` field."""
+  verificationProof: String
+
+  """Checks for equality with the object’s `amount` field."""
+  amount: JSON
+
+  """Checks for equality with the object’s `evaluationDate` field."""
+  evaluationDate: Datetime
+
+  """Checks for equality with the object’s `claimId` field."""
+  claimId: String
+}
+
+"""A connection to a list of `Iid` values."""
+type IidsConnection {
+  """A list of `Iid` objects."""
+  nodes: [Iid!]!
+
+  """
+  A list of edges which contains the `Iid` and cursor to aid in pagination.
+  """
+  edges: [IidsEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `Iid` you could get from the connection."""
+  totalCount: Int!
+}
+
+"""A `Iid` edge in the connection."""
+type IidsEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `Iid` at the end of the edge."""
+  node: Iid!
+}
+
+"""Methods to use when ordering `Iid`."""
+enum IidsOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  CONTEXT_ASC
+  CONTEXT_DESC
+  CONTROLLER_ASC
+  CONTROLLER_DESC
+  VERIFICATION_METHOD_ASC
+  VERIFICATION_METHOD_DESC
+  SERVICE_ASC
+  SERVICE_DESC
+  AUTHENTICATION_ASC
+  AUTHENTICATION_DESC
+  ASSERTION_METHOD_ASC
+  ASSERTION_METHOD_DESC
+  KEY_AGREEMENT_ASC
+  KEY_AGREEMENT_DESC
+  CAPABILITY_INVOCATION_ASC
+  CAPABILITY_INVOCATION_DESC
+  CAPABILITY_DELEGATION_ASC
+  CAPABILITY_DELEGATION_DESC
+  LINKED_RESOURCE_ASC
+  LINKED_RESOURCE_DESC
+  LINKED_CLAIM_ASC
+  LINKED_CLAIM_DESC
+  ACCORDED_RIGHT_ASC
+  ACCORDED_RIGHT_DESC
+  LINKED_ENTITY_ASC
+  LINKED_ENTITY_DESC
+  ALSO_KNOWN_AS_ASC
+  ALSO_KNOWN_AS_DESC
+  METADATA_ASC
+  METADATA_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `Iid` object types. All fields are tested for equality and combined with a logical ‘and.’
+"""
+input IidCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: String
+
+  """Checks for equality with the object’s `context` field."""
+  context: JSON
+
+  """Checks for equality with the object’s `controller` field."""
+  controller: [String]
+
+  """Checks for equality with the object’s `verificationMethod` field."""
+  verificationMethod: JSON
+
+  """Checks for equality with the object’s `service` field."""
+  service: JSON
+
+  """Checks for equality with the object’s `authentication` field."""
+  authentication: [String]
+
+  """Checks for equality with the object’s `assertionMethod` field."""
+  assertionMethod: [String]
+
+  """Checks for equality with the object’s `keyAgreement` field."""
+  keyAgreement: [String]
+
+  """Checks for equality with the object’s `capabilityInvocation` field."""
+  capabilityInvocation: [String]
+
+  """Checks for equality with the object’s `capabilityDelegation` field."""
+  capabilityDelegation: [String]
+
+  """Checks for equality with the object’s `linkedResource` field."""
+  linkedResource: JSON
+
+  """Checks for equality with the object’s `linkedClaim` field."""
+  linkedClaim: JSON
+
+  """Checks for equality with the object’s `accordedRight` field."""
+  accordedRight: JSON
+
+  """Checks for equality with the object’s `linkedEntity` field."""
+  linkedEntity: JSON
+
+  """Checks for equality with the object’s `alsoKnownAs` field."""
+  alsoKnownAs: String
+
+  """Checks for equality with the object’s `metadata` field."""
+  metadata: JSON
+}
+
+"""A connection to a list of `Ipf` values."""
+type IpfsConnection {
+  """A list of `Ipf` objects."""
+  nodes: [Ipf!]!
+
+  """
+  A list of edges which contains the `Ipf` and cursor to aid in pagination.
+  """
+  edges: [IpfsEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `Ipf` you could get from the connection."""
+  totalCount: Int!
+}
+
+type Ipf implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  cid: String!
+  contentType: String!
+  data: String!
+}
+
+"""A `Ipf` edge in the connection."""
+type IpfsEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `Ipf` at the end of the edge."""
+  node: Ipf!
+}
+
+"""Methods to use when ordering `Ipf`."""
+enum IpfsOrderBy {
+  NATURAL
+  CID_ASC
+  CID_DESC
+  CONTENT_TYPE_ASC
+  CONTENT_TYPE_DESC
+  DATA_ASC
+  DATA_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `Ipf` object types. All fields are tested for equality and combined with a logical ‘and.’
+"""
+input IpfCondition {
+  """Checks for equality with the object’s `cid` field."""
+  cid: String
+
+  """Checks for equality with the object’s `contentType` field."""
+  contentType: String
+
+  """Checks for equality with the object’s `data` field."""
+  data: String
+}
+
+"""
+A filter to be used against `Ipf` object types. All fields are combined with a logical ‘and.’
+"""
+input IpfFilter {
+  """Filter by the object’s `cid` field."""
+  cid: StringFilter
+
+  """Filter by the object’s `contentType` field."""
+  contentType: StringFilter
+
+  """Filter by the object’s `data` field."""
+  data: StringFilter
+
+  """Checks for all expressions in this list."""
+  and: [IpfFilter!]
+
+  """Checks for any expressions in this list."""
+  or: [IpfFilter!]
+
+  """Negates the expression."""
+  not: IpfFilter
+}
+
+"""A connection to a list of `Message` values."""
+type MessagesConnection {
+  """A list of `Message` objects."""
+  nodes: [Message!]!
+
+  """
+  A list of edges which contains the `Message` and cursor to aid in pagination.
+  """
+  edges: [MessagesEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `Message` you could get from the connection."""
+  totalCount: Int!
+}
+
+type Message implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: Int!
+  typeUrl: String!
+  value: JSON!
+  from: String
+  to: String
+  denoms: [String]
+  tokenNames: [String]
+  transactionHash: String!
+
+  """Reads a single `Transaction` that is related to this `Message`."""
+  transactionByTransactionHash: Transaction
+}
+
+type Transaction implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  hash: String!
+  height: Int!
+  code: Int!
+  fee: JSON!
+  gasUsed: String!
+  gasWanted: String!
+  time: Datetime!
+
+  """Reads and enables pagination through a set of `Message`."""
+  messagesByTransactionHash(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `Message`."""
+    orderBy: [MessagesOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: MessageCondition
+
+    """
+    A filter to be used in determining which values should be returned by the collection.
+    """
+    filter: MessageFilter
+  ): MessagesConnection!
+}
+
+"""Methods to use when ordering `Message`."""
+enum MessagesOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  TYPE_URL_ASC
+  TYPE_URL_DESC
+  VALUE_ASC
+  VALUE_DESC
+  FROM_ASC
+  FROM_DESC
+  TO_ASC
+  TO_DESC
+  DENOMS_ASC
+  DENOMS_DESC
+  TOKEN_NAMES_ASC
+  TOKEN_NAMES_DESC
+  TRANSACTION_HASH_ASC
+  TRANSACTION_HASH_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `Message` object types. All fields are tested for equality and combined with a logical ‘and.’
+"""
+input MessageCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: Int
+
+  """Checks for equality with the object’s `typeUrl` field."""
+  typeUrl: String
+
+  """Checks for equality with the object’s `value` field."""
+  value: JSON
+
+  """Checks for equality with the object’s `from` field."""
+  from: String
+
+  """Checks for equality with the object’s `to` field."""
+  to: String
+
+  """Checks for equality with the object’s `denoms` field."""
+  denoms: [String]
+
+  """Checks for equality with the object’s `tokenNames` field."""
+  tokenNames: [String]
+
+  """Checks for equality with the object’s `transactionHash` field."""
+  transactionHash: String
+}
+
+"""
+A filter to be used against `Message` object types. All fields are combined with a logical ‘and.’
+"""
+input MessageFilter {
+  """Filter by the object’s `id` field."""
+  id: IntFilter
+
+  """Filter by the object’s `typeUrl` field."""
+  typeUrl: StringFilter
+
+  """Filter by the object’s `value` field."""
+  value: JSONFilter
+
+  """Filter by the object’s `from` field."""
+  from: StringFilter
+
+  """Filter by the object’s `to` field."""
+  to: StringFilter
+
+  """Filter by the object’s `denoms` field."""
+  denoms: StringListFilter
+
+  """Filter by the object’s `tokenNames` field."""
+  tokenNames: StringListFilter
+
+  """Filter by the object’s `transactionHash` field."""
+  transactionHash: StringFilter
+
+  """Filter by the object’s `transactionByTransactionHash` relation."""
+  transactionByTransactionHash: TransactionFilter
+
+  """Checks for all expressions in this list."""
+  and: [MessageFilter!]
+
+  """Checks for any expressions in this list."""
+  or: [MessageFilter!]
+
+  """Negates the expression."""
+  not: MessageFilter
+}
+
+"""
+A filter to be used against `Transaction` object types. All fields are combined with a logical ‘and.’
+"""
+input TransactionFilter {
+  """Filter by the object’s `hash` field."""
+  hash: StringFilter
+
+  """Filter by the object’s `height` field."""
+  height: IntFilter
+
+  """Filter by the object’s `code` field."""
+  code: IntFilter
+
+  """Filter by the object’s `fee` field."""
+  fee: JSONFilter
+
+  """Filter by the object’s `gasUsed` field."""
+  gasUsed: StringFilter
+
+  """Filter by the object’s `gasWanted` field."""
+  gasWanted: StringFilter
+
+  """Filter by the object’s `time` field."""
+  time: DatetimeFilter
+
+  """Filter by the object’s `messagesByTransactionHash` relation."""
+  messagesByTransactionHash: TransactionToManyMessageFilter
+
+  """Some related `messagesByTransactionHash` exist."""
+  messagesByTransactionHashExist: Boolean
+
+  """Checks for all expressions in this list."""
+  and: [TransactionFilter!]
+
+  """Checks for any expressions in this list."""
+  or: [TransactionFilter!]
+
+  """Negates the expression."""
+  not: TransactionFilter
+}
+
+"""
+A filter to be used against many `Message` object types. All fields are combined with a logical ‘and.’
+"""
+input TransactionToManyMessageFilter {
+  """
+  Every related `Message` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  every: MessageFilter
+
+  """
+  Some related `Message` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  some: MessageFilter
+
+  """
+  No related `Message` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  none: MessageFilter
+}
+
+"""A `Message` edge in the connection."""
+type MessagesEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `Message` at the end of the edge."""
+  node: Message!
 }
 
 """A connection to a list of `Transaction` values."""
