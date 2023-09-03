@@ -4,6 +4,8 @@ import { createQueryClient, createRegistry } from "@ixo/impactxclient-sdk";
 import * as Proto from "../util/proto";
 import { RPC } from "../util/secrets";
 import { prismaCore } from "../prisma/prisma_client";
+import { timeout } from "cron";
+import { sleep } from "../util/sleep";
 
 export let currentChain: Chain;
 export let queryClient: Awaited<ReturnType<typeof createQueryClient>>;
@@ -18,9 +20,18 @@ export const syncChain = async () => {
     const chainId = res?.block?.header?.chainId || "";
     if (!chainId) throw new Error("No Chain Found on RPC Endpoint");
 
-    const coreChain = await prismaCore.chainCore.findFirst({
-      where: { chainId },
-    });
+    let coreChain;
+    while (true) {
+      try {
+        coreChain = await prismaCore.chainCore.findFirst({
+          where: { chainId },
+        });
+        break;
+      } catch (error) {
+        console.log("Waiting for Blocksync-core to start...");
+        await sleep(10000);
+      }
+    }
     if (!coreChain)
       throw new Error(
         "No Chain Found on Blocksync-core DB for this RPC Endpoint"

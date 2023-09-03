@@ -9,7 +9,7 @@ let syncing: boolean;
 
 const logIndexTime = false;
 const logFetchTime = false;
-const logSync100Time = false;
+const logSync100Time = true;
 
 export const startSync = async () => {
   syncing = true;

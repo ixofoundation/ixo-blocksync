@@ -12,7 +12,7 @@ RUN yarn --pure-lockfile --production && yarn cache clean
 COPY . .
 
 # Generate Prisma client
-RUN npx prisma generate
+RUN yarn prisma:generate
 
 EXPOSE 8080
 
