@@ -76,4 +76,4 @@ blockRes.json
 blockTx.json
 bondsInfo.json
 
-DS_Store
+*.DS_Store
