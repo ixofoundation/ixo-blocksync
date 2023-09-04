@@ -16,19 +16,15 @@
 <a href="#ixo-blocksync" id="ixo-blocksync" style="color: inherit; text-decoration: none;">
   <h1>ixo-blocksync</h1>
 </a>
-<p><img src="https://img.shields.io/github/contributors/ixofoundation/ixo-blocksync" alt="GitHub contributors"> <img src="https://img.shields.io/github/repo-size/ixofoundation/ixo-blocksync" alt="GitHub repo size"> <img src="https://img.shields.io/tokei/lines/github/ixofoundation/ixo-blocksync?style=plastic" alt="Lines of code"> <img src="https://img.shields.io/docker/pulls/northroomza/ixo-blocksync" alt="Docker Pulls"> <img src="https://img.shields.io/twitter/follow/ixoworld?style=social" alt="Twitter Follow"></p>
+<p><a href="https://ixo.foundation"><img src="https://img.shields.io/badge/ixo-project-blue" alt="ixo"></a>
+<a href="https://github.com/ixofoundation/ixo-blocksync"><img src="https://img.shields.io/github/stars/ixofoundation/jambo?style=social" alt="GitHub"></a>
+<img src="https://img.shields.io/github/repo-size/ixofoundation/ixo-blocksync" alt="GitHub repo size">
+<a href="https://github.com/ixofoundation/jambo/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="License: Apache 2.0"></a></p>
 <p><img src="https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white" alt="Postgres"><img src="https://img.shields.io/badge/express.js-%23404d59.svg?style=for-the-badge&logo=express&logoColor=%2361DAFB" alt="Express.js"><img src="https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white" alt="NodeJS"><img src="https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript"><img src="https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white" alt="Prisma"><img src="https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white" alt="Docker"><img src="https://img.shields.io/badge/-GraphQL-E10098?style=for-the-badge&logo=graphql&logoColor=white" alt="GraphQL"></p>
-<p>Syncs all the public info from an ixo blockchain to an instance of PostgreSQL.</p>
-
-<a href="#api-documentation" id="api-documentation" style="color: inherit; text-decoration: none;">
-  <h2>API Documentation</h2>
-</a>
-<p>Refer to <a href="src/schema/api.yml">src/schema/api.yml</a> or visit <a href="https://app.swaggerhub.com/apis-docs/drshaun/ixo/0.2.3">the online version</a>.</p>
-<ul>
-<li><a href="/swagger.json">Endpoints</a></li>
-<li><a href="https://ixo-blocksync.docs.ixo.earth/">Typedoc</a></li>
-<li>The <code>/swagger</code> endpoint.</li>
-</ul>
+<p>Syncs all the public info from an ixo blockchain to an instance of PostgreSQL. It gets fed from a <a href="https://github.com/ixofoundation/ixo-blocksync-core">ixo-blocksync-core</a> database in order to speed up indexing and put less strain on nodes, which means you need an ixo-blocksync-core database connection in order to run this.</p>
+<blockquote>
+<p>For now the only source for information is a ixo-blocksync-core database connection, but we plan on expanding that to different sources in the near future.</p>
+</blockquote>
 
 <a href="#run" id="run" style="color: inherit; text-decoration: none;">
   <h2>Run</h2>
@@ -65,25 +61,17 @@
 Don&#39;t use quotations when asign env vars for docker<br>Delete the seed folder in src/seed/* if you do not plan to import data from json<br>Create a role(e.g. app_user) in the DB for postgress to work</p>
 <pre><code class="language-bash"><span class="hl-0">docker </span><span class="hl-1">build</span><span class="hl-0"> </span><span class="hl-1">-t</span><span class="hl-0"> </span><span class="hl-1">ixofoundation/ixo-blocksync:latest</span><span class="hl-0"> </span><span class="hl-1">.</span><br/><span class="hl-0">docker </span><span class="hl-1">compose</span><span class="hl-0"> </span><span class="hl-1">up</span><span class="hl-0"> </span><span class="hl-1">-d</span>
 </code></pre>
-<hr>
 
-<a href="#seeding-the-database-with-previous-mongodb-data" id="seeding-the-database-with-previous-mongodb-data" style="color: inherit; text-decoration: none;">
-  <h3>Seeding the Database with Previous MongoDB Data</h3>
+<a href="#api-interface" id="api-interface" style="color: inherit; text-decoration: none;">
+  <h2>API interface</h2>
 </a>
+<p>The server exposes a Graphql api endpoint at <code>/graphql</code> which is set up using <a href="https://www.graphile.org/postgraphile/">Postgraphile</a> along with some plugins:</p>
 <ul>
-<li>Export all collections as JSON from the block-sync MongoDB database</li>
-<li>Place the resulting JSON files within the <code>src/seed/json_exports</code> directory</li>
-<li>Configure <code>DATABASE_URL</code> in <code>.env</code> with the correct username, password and host</li>
+<li><a href="https://github.com/graphile/pg-simplify-inflector">pg-simplify-inflector</a></li>
+<li><a href="https://github.com/graphile-contrib/postgraphile-plugin-connection-filter">postgraphile-plugin-connection-filter</a></li>
 </ul>
-<p>Local PostgreSQL</p>
-<ul>
-<li>Create a database called Blocksync</li>
-</ul>
-<pre><code class="language-bash"><span class="hl-0">npx </span><span class="hl-1">prisma</span><span class="hl-0"> </span><span class="hl-1">migrate</span><span class="hl-0"> </span><span class="hl-1">reset</span><br/><span class="hl-0">npx </span><span class="hl-1">prisma</span><span class="hl-0"> </span><span class="hl-1">generate</span><br/><span class="hl-0">npx </span><span class="hl-1">ts-node</span><span class="hl-0"> </span><span class="hl-1">src/seed/seed.ts</span>
-</code></pre>
-<p>Docker PostgreSQL</p>
-<pre><code class="language-bash"><span class="hl-0">docker </span><span class="hl-1">build</span><span class="hl-0"> </span><span class="hl-1">.</span><br/><span class="hl-0">docker </span><span class="hl-1">compose</span><span class="hl-0"> </span><span class="hl-1">up</span><span class="hl-0"> </span><span class="hl-1">block-sync-db</span><br/><span class="hl-0">npx </span><span class="hl-1">prisma</span><span class="hl-0"> </span><span class="hl-1">generate</span><br/><span class="hl-0">npx </span><span class="hl-1">ts-node</span><span class="hl-0"> </span><span class="hl-1">src/seed/seed.ts</span>
-</code></pre>
+<p>A graphiql playground gets exposed at the endpoint <code>/graphiql</code> where you can play around, test queries and see the schemas.</p>
+<p>We also generate and expose the full graphql schema file (schema.graphql) under the endpoint <code>/api/graphql_schema</code> if you need it to generate clients.</p>
 </div></div>
 <div class="col-4 col-menu menu-sticky-wrap menu-highlight">
 <div class="tsd-navigation settings">
