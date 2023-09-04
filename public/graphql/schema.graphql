@@ -1108,7 +1108,7 @@ type Bond implements Node {
   name: String!
   description: String!
   functionType: String!
-  functionParameters: [JSON]
+  functionParameters: JSON!
   creatorDid: String!
   controllerDid: String!
   reserveTokens: [String]
@@ -1117,13 +1117,13 @@ type Bond implements Node {
   feeAddress: String!
   reserveWithdrawalAddress: String!
   maxSupply: JSON
-  orderQuantityLimits: [JSON]
+  orderQuantityLimits: JSON!
   sanityRate: String!
   sanityMarginPercentage: String!
   currentSupply: JSON
-  currentReserve: [JSON]
-  availableReserve: [JSON]
-  currentOutcomePaymentReserve: [JSON]
+  currentReserve: JSON!
+  availableReserve: JSON!
+  currentOutcomePaymentReserve: JSON!
   allowSells: Boolean!
   allowReserveWithdrawals: Boolean!
   alphaBond: Boolean!
@@ -1401,7 +1401,7 @@ type BondBuy implements Node {
   bondDid: String!
   accountDid: String!
   amount: JSON!
-  maxPrices: [JSON]
+  maxPrices: JSON!
   height: Int!
   timestamp: Datetime!
 
@@ -1480,7 +1480,7 @@ input BondBuyCondition {
   amount: JSON
 
   """Checks for equality with the object’s `maxPrices` field."""
-  maxPrices: [JSON]
+  maxPrices: JSON
 
   """Checks for equality with the object’s `height` field."""
   height: Int
@@ -1506,7 +1506,7 @@ input BondBuyFilter {
   amount: JSONFilter
 
   """Filter by the object’s `maxPrices` field."""
-  maxPrices: JSONListFilter
+  maxPrices: JSONFilter
 
   """Filter by the object’s `height` field."""
   height: IntFilter
@@ -1759,69 +1759,6 @@ input JSONFilter {
 }
 
 """
-A filter to be used against JSON List fields. All fields are combined with a logical ‘and.’
-"""
-input JSONListFilter {
-  """
-  Is null (if `true` is specified) or is not null (if `false` is specified).
-  """
-  isNull: Boolean
-
-  """Equal to the specified value."""
-  equalTo: [JSON]
-
-  """Not equal to the specified value."""
-  notEqualTo: [JSON]
-
-  """
-  Not equal to the specified value, treating null like an ordinary value.
-  """
-  distinctFrom: [JSON]
-
-  """Equal to the specified value, treating null like an ordinary value."""
-  notDistinctFrom: [JSON]
-
-  """Less than the specified value."""
-  lessThan: [JSON]
-
-  """Less than or equal to the specified value."""
-  lessThanOrEqualTo: [JSON]
-
-  """Greater than the specified value."""
-  greaterThan: [JSON]
-
-  """Greater than or equal to the specified value."""
-  greaterThanOrEqualTo: [JSON]
-
-  """Contains the specified list of values."""
-  contains: [JSON]
-
-  """Contained by the specified list of values."""
-  containedBy: [JSON]
-
-  """Overlaps the specified list of values."""
-  overlaps: [JSON]
-
-  """Any array item is equal to the specified value."""
-  anyEqualTo: JSON
-
-  """Any array item is not equal to the specified value."""
-  anyNotEqualTo: JSON
-
-  """Any array item is less than the specified value."""
-  anyLessThan: JSON
-
-  """Any array item is less than or equal to the specified value."""
-  anyLessThanOrEqualTo: JSON
-
-  """Any array item is greater than the specified value."""
-  anyGreaterThan: JSON
-
-  """Any array item is greater than or equal to the specified value."""
-  anyGreaterThanOrEqualTo: JSON
-}
-
-"""
 A filter to be used against Datetime fields. All fields are combined with a logical ‘and.’
 """
 input DatetimeFilter {
@@ -1886,7 +1823,7 @@ input BondFilter {
   functionType: StringFilter
 
   """Filter by the object’s `functionParameters` field."""
-  functionParameters: JSONListFilter
+  functionParameters: JSONFilter
 
   """Filter by the object’s `creatorDid` field."""
   creatorDid: StringFilter
@@ -1913,7 +1850,7 @@ input BondFilter {
   maxSupply: JSONFilter
 
   """Filter by the object’s `orderQuantityLimits` field."""
-  orderQuantityLimits: JSONListFilter
+  orderQuantityLimits: JSONFilter
 
   """Filter by the object’s `sanityRate` field."""
   sanityRate: StringFilter
@@ -1925,13 +1862,13 @@ input BondFilter {
   currentSupply: JSONFilter
 
   """Filter by the object’s `currentReserve` field."""
-  currentReserve: JSONListFilter
+  currentReserve: JSONFilter
 
   """Filter by the object’s `availableReserve` field."""
-  availableReserve: JSONListFilter
+  availableReserve: JSONFilter
 
   """Filter by the object’s `currentOutcomePaymentReserve` field."""
-  currentOutcomePaymentReserve: JSONListFilter
+  currentOutcomePaymentReserve: JSONFilter
 
   """Filter by the object’s `allowSells` field."""
   allowSells: BooleanFilter
@@ -2278,7 +2215,7 @@ input ReserveWithdrawalFilter {
   withdrawerAddress: StringFilter
 
   """Filter by the object’s `amount` field."""
-  amount: JSONListFilter
+  amount: JSONFilter
 
   """Filter by the object’s `reserveWithdrawalAddress` field."""
   reserveWithdrawalAddress: StringFilter
@@ -2339,7 +2276,7 @@ input ShareWithdrawalFilter {
   recipientAddress: StringFilter
 
   """Filter by the object’s `amount` field."""
-  amount: JSONListFilter
+  amount: JSONFilter
 
   """Filter by the object’s `height` field."""
   height: IntFilter
@@ -2397,7 +2334,7 @@ input OutcomePaymentFilter {
   senderAddress: StringFilter
 
   """Filter by the object’s `amount` field."""
-  amount: JSONListFilter
+  amount: JSONFilter
 
   """Filter by the object’s `height` field."""
   height: IntFilter
@@ -2677,7 +2614,7 @@ type ReserveWithdrawal implements Node {
   bondDid: String!
   withdrawerDid: String!
   withdrawerAddress: String!
-  amount: [JSON]
+  amount: JSON!
   reserveWithdrawalAddress: String!
   height: Int!
   timestamp: Datetime!
@@ -2736,7 +2673,7 @@ input ReserveWithdrawalCondition {
   withdrawerAddress: String
 
   """Checks for equality with the object’s `amount` field."""
-  amount: [JSON]
+  amount: JSON
 
   """
   Checks for equality with the object’s `reserveWithdrawalAddress` field.
@@ -2778,7 +2715,7 @@ type ShareWithdrawal implements Node {
   bondDid: String!
   recipientDid: String!
   recipientAddress: String!
-  amount: [JSON]
+  amount: JSON!
   height: Int!
   timestamp: Datetime!
 
@@ -2834,7 +2771,7 @@ input ShareWithdrawalCondition {
   recipientAddress: String
 
   """Checks for equality with the object’s `amount` field."""
-  amount: [JSON]
+  amount: JSON
 
   """Checks for equality with the object’s `height` field."""
   height: Int
@@ -2869,7 +2806,7 @@ type OutcomePayment implements Node {
   bondDid: String!
   senderDid: String!
   senderAddress: String!
-  amount: [JSON]
+  amount: JSON!
   height: Int!
   timestamp: Datetime!
 
@@ -2925,7 +2862,7 @@ input OutcomePaymentCondition {
   senderAddress: String
 
   """Checks for equality with the object’s `amount` field."""
-  amount: [JSON]
+  amount: JSON
 
   """Checks for equality with the object’s `height` field."""
   height: Int
@@ -3114,7 +3051,7 @@ input BondCondition {
   functionType: String
 
   """Checks for equality with the object’s `functionParameters` field."""
-  functionParameters: [JSON]
+  functionParameters: JSON
 
   """Checks for equality with the object’s `creatorDid` field."""
   creatorDid: String
@@ -3143,7 +3080,7 @@ input BondCondition {
   maxSupply: JSON
 
   """Checks for equality with the object’s `orderQuantityLimits` field."""
-  orderQuantityLimits: [JSON]
+  orderQuantityLimits: JSON
 
   """Checks for equality with the object’s `sanityRate` field."""
   sanityRate: String
@@ -3155,15 +3092,15 @@ input BondCondition {
   currentSupply: JSON
 
   """Checks for equality with the object’s `currentReserve` field."""
-  currentReserve: [JSON]
+  currentReserve: JSON
 
   """Checks for equality with the object’s `availableReserve` field."""
-  availableReserve: [JSON]
+  availableReserve: JSON
 
   """
   Checks for equality with the object’s `currentOutcomePaymentReserve` field.
   """
-  currentOutcomePaymentReserve: [JSON]
+  currentOutcomePaymentReserve: JSON
 
   """Checks for equality with the object’s `allowSells` field."""
   allowSells: Boolean
