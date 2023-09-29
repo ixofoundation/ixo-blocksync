@@ -29,11 +29,11 @@ Copy `.env.example` to `.env` and configure. If this step is skipped, ixo-blocks
 - Create a database called Blocksync
 
 ```bash
-npm install
+yarn
 npx prisma migrate reset
 npx prisma generate
-npm run build
-npm start
+yarn build
+yarn start
 ```
 
 ---
