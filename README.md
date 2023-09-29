@@ -31,7 +31,7 @@ Copy `.env.example` to `.env` and configure. If this step is skipped, ixo-blocks
 ```bash
 yarn
 npx prisma migrate reset
-npx prisma generate
+yarn prisma:generate
 yarn build
 yarn start
 ```
