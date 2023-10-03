@@ -11,9 +11,10 @@ export const getLatestBlock = async () => {
   }
 };
 
-export const decodeMessage = (tx: any) => {
+export const decodeMessage = ({ typeUrl, value }) => {
   try {
-    return registry.decode(tx);
+    const res = registry.decode({ typeUrl, value });
+    return res;
   } catch (error) {
     console.error(error.message);
     return;

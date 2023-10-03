@@ -342,7 +342,34 @@ CREATE TABLE "Ipfs" (
 );
 
 -- CreateIndex
+CREATE INDEX "Entity_owner_type_idx" ON "Entity"("owner", "type");
+
+-- CreateIndex
+CREATE INDEX "Claim_collectionId_idx" ON "Claim"("collectionId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "TokenClass_name_key" ON "TokenClass"("name");
+
+-- CreateIndex
+CREATE INDEX "Token_name_idx" ON "Token"("name");
+
+-- CreateIndex
+CREATE INDEX "TokenData_tokenId_idx" ON "TokenData"("tokenId");
+
+-- CreateIndex
+CREATE INDEX "TokenRetired_name_owner_idx" ON "TokenRetired"("name", "owner");
+
+-- CreateIndex
+CREATE INDEX "TokenCancelled_name_idx" ON "TokenCancelled"("name");
+
+-- CreateIndex
+CREATE INDEX "TokenTransaction_from_to_idx" ON "TokenTransaction"("from", "to");
+
+-- CreateIndex
+CREATE INDEX "Transaction_height_idx" ON "Transaction"("height");
+
+-- CreateIndex
+CREATE INDEX "Message_transactionHash_from_to_idx" ON "Message"("transactionHash", "from", "to");
 
 -- AddForeignKey
 ALTER TABLE "Entity" ADD CONSTRAINT "Entity_id_fkey" FOREIGN KEY ("id") REFERENCES "IID"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

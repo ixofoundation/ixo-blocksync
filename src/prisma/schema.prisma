@@ -55,6 +55,8 @@ model Entity {
   // adding below foreign keys relationshipa to make it easier to query
   Token          Token[]
   TokenClass     TokenClass[]
+
+  @@index([owner, type])
 }
 
 // ========================================
@@ -89,6 +91,8 @@ model Claim {
   evaluation      Evaluation?
   ClaimCollection ClaimCollection @relation(fields: [collectionId], references: [id])
   collectionId    String
+
+  @@index([collectionId])
 }
 
 model Evaluation {
@@ -143,6 +147,8 @@ model Token {
   tokenData        TokenData[]
   tokenTransaction TokenTransaction[]
   tokenClass       TokenClass         @relation(fields: [name], references: [name])
+
+  @@index([name])
 }
 
 model TokenData {
@@ -154,6 +160,8 @@ model TokenData {
   id        String
   Token     Token   @relation(fields: [tokenId], references: [id])
   tokenId   String
+
+  @@index([tokenId])
 }
 
 model TokenRetired {
@@ -165,6 +173,8 @@ model TokenRetired {
   owner        String
   Token        TokenClass @relation(fields: [name], references: [name])
   name         String
+
+  @@index([name, owner])
 }
 
 model TokenCancelled {
@@ -175,6 +185,8 @@ model TokenCancelled {
   owner  String
   Token  TokenClass @relation(fields: [name], references: [name])
   name   String
+
+  @@index([name])
 }
 
 model TokenTransaction {
@@ -184,6 +196,8 @@ model TokenTransaction {
   amount  String
   Token   Token  @relation(fields: [tokenId], references: [id])
   tokenId String
+
+  @@index([from, to])
 }
 
 // ========================================
@@ -335,6 +349,8 @@ model Transaction {
   gasWanted String
   time      DateTime
   messages  Message[]
+
+  @@index([height])
 }
 
 model Message {
@@ -347,6 +363,8 @@ model Message {
   tokenNames      String[]
   Transaction     Transaction @relation(fields: [transactionHash], references: [hash])
   transactionHash String
+
+  @@index([transactionHash, from, to])
 }
 
 // ========================================
