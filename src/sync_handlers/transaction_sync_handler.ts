@@ -15,53 +15,36 @@ export const syncTransactions = async (
         transaction.messages.map(async (message) => {
           const value = message.value as any;
 
-          // TODO handle decoded authz msgs into amount/from/to/denom/tokenNames
-          let authZExecMsgs = [];
+          let authZExecMsgs: any[] = [];
           if (message.typeUrl === "/cosmos.authz.v1beta1.MsgExec") {
-            authZExecMsgs = value.msgs.map((m) => decodeMessage(m));
+            authZExecMsgs = value.msgs.map((m) => ({
+              typeUrl: m.typeUrl,
+              value: decodeMessage({
+                typeUrl: m.typeUrl,
+                value: Object.values(m.value),
+              }),
+            }));
+            // console.log(authZExecMsgs);
           }
-          // if (authZExecMsgs.length > 0)
-          //   console.dir(authZExecMsgs[0], { depth: null });
+          // At moment only doing for first message if it is Authz Execution, need to improve this.
+          const authzValue = authZExecMsgs.length
+            ? authZExecMsgs[0].value
+            : null;
 
-          let denoms = Array.isArray(value.amount)
-            ? value.amount.map((a) => a.denom)
-            : value.amount
-            ? [value.amount.denom]
-            : value.inputs
-            ? value.inputs.map((i) => i.coins.map((c) => c.denom)).flat()
-            : [];
-          denoms = [...new Set(denoms)];
-          let tokenNames = value.mintBatch
-            ? value.mintBatch.map((m) => m.name)
-            : value.tokens
-            ? await Promise.all(
-                value.tokens.map(async (t) => {
-                  const token = await prisma.token.findFirst({
-                    where: { id: t.id },
-                    select: { name: true },
-                  });
-                  return token?.name;
-                })
-              )
-            : [];
-          tokenNames = [...new Set(tokenNames.filter((t) => t))];
+          const denoms = [
+            ...new Set(getDenoms(authzValue ?? value).filter((d) => d)),
+          ] as string[];
+          const tokenNames = [
+            ...new Set(
+              (await getTokenNames(authzValue ?? value)).filter((t) => t)
+            ),
+          ] as string[];
 
           return {
             typeUrl: message.typeUrl,
-            value: value,
-            from:
-              value.fromAddress ||
-              value.ownerAddress ||
-              value.owner ||
-              value.sender ||
-              value.proposer ||
-              value.ownerDid,
-            to:
-              value.toAddress ||
-              value.receiver ||
-              value.recipient ||
-              value.recipientAddress ||
-              value.recipientDid,
+            value: authZExecMsgs.length ? authZExecMsgs : value,
+            from: getFrom(authzValue ?? value),
+            to: getTo(authzValue ?? value),
             denoms,
             tokenNames,
           };
@@ -84,4 +67,52 @@ export const syncTransactions = async (
       console.error("syncTransaction: ", error.message);
     }
   }
+};
+
+// Below functions do the custom indexing.
+const getTo = (value: any) => {
+  return (
+    value.toAddress ||
+    value.receiver ||
+    value.recipient ||
+    value.recipientAddress ||
+    value.recipientDid
+  );
+};
+
+const getFrom = (value: any) => {
+  return (
+    value.fromAddress ||
+    value.ownerAddress ||
+    value.owner ||
+    value.sender ||
+    value.proposer ||
+    value.ownerDid
+  );
+};
+
+const getDenoms = (value: any) => {
+  return Array.isArray(value.amount)
+    ? value.amount.map((a) => a.denom)
+    : value.amount
+    ? [value.amount.denom]
+    : value.inputs
+    ? value.inputs.map((i) => i.coins.map((c) => c.denom)).flat()
+    : [];
+};
+
+const getTokenNames = async (value: any) => {
+  return value.mintBatch
+    ? value.mintBatch.map((m) => m.name)
+    : value.tokens
+    ? await Promise.all(
+        value.tokens.map(async (t) => {
+          const token = await prisma.token.findFirst({
+            where: { id: t.id },
+            select: { name: true },
+          });
+          return token?.name;
+        })
+      )
+    : [];
 };
