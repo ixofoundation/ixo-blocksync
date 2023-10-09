@@ -314,6 +314,7 @@ CREATE TABLE "Transaction" (
     "gasUsed" TEXT NOT NULL,
     "gasWanted" TEXT NOT NULL,
     "time" TIMESTAMP(3) NOT NULL,
+    "memo" TEXT NOT NULL DEFAULT '',
 
     CONSTRAINT "Transaction_pkey" PRIMARY KEY ("hash")
 );

@@ -348,6 +348,7 @@ model Transaction {
   gasUsed   String
   gasWanted String
   time      DateTime
+  memo      String    @default("")
   messages  Message[]
 
   @@index([height])

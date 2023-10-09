@@ -57,6 +57,7 @@ export const syncTransactions = async (
           height: blockHeight,
           code: transaction.code,
           fee: transaction.fee as any,
+          memo: transaction.memo,
           gasUsed: transaction.gasUsed,
           gasWanted: transaction.gasWanted,
           time: timestamp,

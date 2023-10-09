@@ -73,6 +73,7 @@ export const getBlock = async (blockHeight: number) => {
           fee: true,
           gasUsed: true,
           gasWanted: true,
+          memo: true,
           messages: { select: { typeUrl: true, value: true } },
         },
       },
