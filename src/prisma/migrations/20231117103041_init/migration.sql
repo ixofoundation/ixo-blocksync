@@ -314,6 +314,7 @@ CREATE TABLE "Transaction" (
     "gasUsed" TEXT NOT NULL,
     "gasWanted" TEXT NOT NULL,
     "time" TIMESTAMP(3) NOT NULL,
+    "memo" TEXT NOT NULL DEFAULT '',
 
     CONSTRAINT "Transaction_pkey" PRIMARY KEY ("hash")
 );
@@ -357,7 +358,7 @@ CREATE INDEX "Token_name_idx" ON "Token"("name");
 CREATE INDEX "TokenData_tokenId_idx" ON "TokenData"("tokenId");
 
 -- CreateIndex
-CREATE INDEX "TokenRetired_name_owner_idx" ON "TokenRetired"("name", "owner");
+CREATE INDEX "TokenRetired_name_owner_id_idx" ON "TokenRetired"("name", "owner", "id");
 
 -- CreateIndex
 CREATE INDEX "TokenCancelled_name_idx" ON "TokenCancelled"("name");
@@ -394,6 +395,9 @@ ALTER TABLE "TokenData" ADD CONSTRAINT "TokenData_tokenId_fkey" FOREIGN KEY ("to
 
 -- AddForeignKey
 ALTER TABLE "TokenRetired" ADD CONSTRAINT "TokenRetired_name_fkey" FOREIGN KEY ("name") REFERENCES "TokenClass"("name") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "TokenRetired" ADD CONSTRAINT "TokenRetired_id_fkey" FOREIGN KEY ("id") REFERENCES "Token"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "TokenCancelled" ADD CONSTRAINT "TokenCancelled_name_fkey" FOREIGN KEY ("name") REFERENCES "TokenClass"("name") ON DELETE RESTRICT ON UPDATE CASCADE;

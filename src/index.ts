@@ -6,6 +6,7 @@ import http from "http";
 import * as SyncBlocks from "./sync/sync_blocks";
 import { PORT } from "./util/secrets";
 import * as SyncChain from "./sync/sync_chain";
+import * as SyncBlocksCustom from "./sync/sync_custom";
 
 SyncChain.syncChain().then(() => SyncBlocks.startSync());
 

@@ -38,6 +38,7 @@ model TransactionCore {
   messages    MessageCore[]
   Block       BlockCore?    @relation(fields: [blockHeight], references: [height], onDelete: Cascade)
   blockHeight Int
+  memo        String        @default("")
 
   @@index([blockHeight])
 }
