@@ -147,6 +147,7 @@ model Token {
   tokenData        TokenData[]
   tokenTransaction TokenTransaction[]
   tokenClass       TokenClass         @relation(fields: [name], references: [name])
+  TokenRetired     TokenRetired[]
 
   @@index([name])
 }
@@ -172,9 +173,11 @@ model TokenRetired {
   amount       String
   owner        String
   Token        TokenClass @relation(fields: [name], references: [name])
+  // Token to TokenClass already existed so making TokenAsset to Token to prevent breaking clients
+  TokenAsset   Token      @relation(fields: [id], references: [id])
   name         String
 
-  @@index([name, owner])
+  @@index([name, owner, id])
 }
 
 model TokenCancelled {

@@ -18,11 +18,31 @@ export const TokenPlugin = makeExtendSchemaPlugin((build) => {
   return {
     typeDefs: gql`
       extend type Query {
-        getAccountTokens(address: String!, name: String): JSON!
-        getTokensTotalByAddress(address: String!, name: String): JSON!
-        getTokensTotalForEntities(address: String!, name: String): JSON!
-        getTokensTotalForCollection(did: String!, name: String): JSON!
-        getTokensTotalForCollectionAmounts(did: String!, name: String): JSON!
+        getAccountTokens(
+          address: String!
+          name: String
+          allEntityRetired: Boolean
+        ): JSON!
+        getTokensTotalByAddress(
+          address: String!
+          name: String
+          allEntityRetired: Boolean
+        ): JSON!
+        getTokensTotalForEntities(
+          address: String!
+          name: String
+          allEntityRetired: Boolean
+        ): JSON!
+        getTokensTotalForCollection(
+          did: String!
+          name: String
+          allEntityRetired: Boolean
+        ): JSON!
+        getTokensTotalForCollectionAmounts(
+          did: String!
+          name: String
+          allEntityRetired: Boolean
+        ): JSON!
       }
     `,
     resolvers: {
@@ -31,35 +51,40 @@ export const TokenPlugin = makeExtendSchemaPlugin((build) => {
           return await TokenHandler.getAccountTokens(
             args.address,
             args.name,
-            ctx.getAccountTransactionsLoader
+            ctx.getAccountTransactionsLoader,
+            args.allEntityRetired
           );
         },
         getTokensTotalByAddress: async (c, args, ctx, rInfo) => {
           return await TokenHandler.getTokensTotalByAddress(
             args.address,
             args.name,
-            ctx.getAccountTransactionsLoader
+            ctx.getAccountTransactionsLoader,
+            args.allEntityRetired
           );
         },
         getTokensTotalForEntities: async (c, args, ctx, rInfo) => {
           return await TokenHandler.getTokensTotalForEntities(
             args.address,
             args.name,
-            ctx.getAccountTransactionsLoader
+            ctx.getAccountTransactionsLoader,
+            args.allEntityRetired
           );
         },
         getTokensTotalForCollection: async (c, args, ctx, rInfo) => {
           return await TokenHandler.getTokensTotalForCollection(
             args.did,
             args.name,
-            ctx.getAccountTransactionsLoader
+            ctx.getAccountTransactionsLoader,
+            args.allEntityRetired
           );
         },
         getTokensTotalForCollectionAmounts: async (c, args, ctx, rInfo) => {
           return await TokenHandler.getTokensTotalForCollectionAmounts(
             args.did,
             args.name,
-            ctx.getAccountTransactionsLoader
+            ctx.getAccountTransactionsLoader,
+            args.allEntityRetired
           );
         },
       },

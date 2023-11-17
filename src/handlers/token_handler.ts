@@ -10,9 +10,15 @@ export const createGetAccountTransactionsKey = (
 export const getTokensTotalByAddress = async (
   address: string,
   name?: string,
-  transactionsLoader?
+  transactionsLoader?: any,
+  allEntityRetired?: boolean
 ) => {
-  const tokens = await getAccountTokens(address, name, transactionsLoader);
+  const tokens = await getAccountTokens(
+    address,
+    name,
+    transactionsLoader,
+    allEntityRetired
+  );
   Object.keys(tokens).forEach((key) => {
     const newTokens = {};
     Object.values(tokens[key].tokens).forEach((t: any) => {
@@ -36,7 +42,8 @@ export const getTokensTotalByAddress = async (
 export const getTokensTotalForEntities = async (
   address: string,
   name?: string,
-  transactionsLoader?
+  transactionsLoader?: any,
+  allEntityRetired?: boolean
 ) => {
   const entities = await prisma.entity.findMany({
     where: { owner: address, type: "asset/device" },
@@ -47,7 +54,8 @@ export const getTokensTotalForEntities = async (
     const entityTokens = await getTokensTotalByAddress(
       entity.accounts.find((a) => a.name === "admin")?.address,
       name,
-      transactionsLoader
+      transactionsLoader,
+      allEntityRetired
     );
     return { entity: entity.id, tokens: entityTokens };
   });
@@ -114,7 +122,8 @@ export const getAccountTransactions = async (
 export const getAccountTokens = async (
   address: string,
   name?: string,
-  transactionLoader?
+  transactionLoader?: any,
+  allEntityRetired?: boolean
 ) => {
   let tokenTransactions: any[] = transactionLoader
     ? await transactionLoader.load(
@@ -179,10 +188,43 @@ export const getAccountTokens = async (
     }
   }
 
+  // if allEntityRetired is true then for retired values get all retired ever from
+  // any address for the tokens minted to this address
+  if (allEntityRetired) {
+    for (const [key, value] of Object.entries(tokens)) {
+      const ids = Object.entries((value as any).tokens)
+        .map(([key2, value2]: any[]) => {
+          tokens[key].tokens[key2].retired = 0;
+          // if token minted it means it is the address(entity's) token and all retired must be counted
+          if (value2.minted !== 0) return key2;
+          return null;
+        })
+        .filter((t) => t !== null);
+      const retiredTokens = await prisma.token.findMany({
+        where: { id: { in: ids } },
+        select: {
+          id: true,
+          TokenRetired: {
+            select: { amount: true },
+          },
+        },
+      });
+      retiredTokens.forEach((t) => {
+        tokens[key].tokens[t.id].retired = t.TokenRetired.reduce(
+          (a, b) => a + Number(b.amount),
+          0
+        );
+      });
+    }
+  }
+
   Object.entries(tokens).forEach(([key, value]: any[]) => {
     Object.entries(value.tokens).forEach(([key2, value2]: any[]) => {
-      if (value2.amount === 0 && value2.minted === 0) delete tokens[key][key2];
+      // if all 3 values is 0 then remove token id from list of tokens
+      if (value2.amount === 0 && value2.minted === 0 && value2.retired === 0)
+        delete tokens[key].tokens[key2];
     });
+    // if list of tokens for the NAME is empty then remove the NAME
     if (Object.keys(tokens[key].tokens).length === 0) delete tokens[key];
   });
 
@@ -192,7 +234,8 @@ export const getAccountTokens = async (
 export const getTokensTotalForCollection = async (
   did: string,
   name?: string,
-  transactionLoader?
+  transactionLoader?: any,
+  allEntityRetired?: boolean
 ) => {
   const entities = await prisma.entity.findMany({
     where: {
@@ -209,7 +252,8 @@ export const getTokensTotalForCollection = async (
     const entityTokens = await getTokensTotalByAddress(
       (entity.accounts as any).find((a) => a.name === "admin")?.address,
       name,
-      transactionLoader
+      transactionLoader,
+      allEntityRetired
     );
     return { entity: entity.id, tokens: entityTokens };
   });
@@ -222,12 +266,14 @@ export const getTokensTotalForCollection = async (
 export const getTokensTotalForCollectionAmounts = async (
   did: string,
   name?: string,
-  transactionLoader?
+  transactionLoader?: any,
+  allEntityRetired?: boolean
 ) => {
   const tokens = await getTokensTotalForCollection(
     did,
     name,
-    transactionLoader
+    transactionLoader,
+    allEntityRetired
   );
   let newTokens = {};
   tokens.forEach((t) => {
