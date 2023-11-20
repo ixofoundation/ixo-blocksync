@@ -52,7 +52,7 @@ export const Postgraphile = postgraphile(DATABASE_URL, "public", {
   subscriptions: true,
   pgSettings: {
     // place a timeout on the database operations, this will halt any query that takes longer than the specified number of milliseconds to execute.
-    statement_timeout: "1500",
+    statement_timeout: "4000",
   },
   appendPlugins: [
     TokenPlugin,
