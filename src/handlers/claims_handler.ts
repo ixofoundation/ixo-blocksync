@@ -2,7 +2,101 @@ import { prisma } from "../prisma/prisma_client";
 import { customQueries } from "@ixo/impactxclient-sdk";
 import { chunkArray } from "../util/helpers";
 
-let isFetchingClaimsSchemaTypes = false;
+/**
+ * Will return empty list if not all claims schemaTypes have been fetched from cellnode
+ * if empty list, call getCollectionClaims again after 1 minute to avoid cellnode rate limit
+ */
+export const getCollectionClaims = async (
+  id: string,
+  status?: string,
+  type?: string,
+  take?: string,
+  cursor?: string,
+  orderBy: "asc" | "desc" = "asc"
+) => {
+  const cleanStatus = status ? parseInt(status) : undefined;
+
+  const query = async (
+    take?: string,
+    status?: number,
+    type?: string | null,
+    cursor?: string,
+    includeTypeNull = false
+  ) =>
+    await prisma.claim.findMany({
+      where: {
+        AND: [
+          {
+            collectionId: id,
+          },
+          type === undefined
+            ? {}
+            : {
+                OR: includeTypeNull
+                  ? [{ schemaType: type }, { schemaType: null }]
+                  : [{ schemaType: type }],
+              },
+          status === null
+            ? {}
+            : status === 0
+            ? { evaluation: null }
+            : { evaluation: { status: status } },
+        ],
+      },
+      take: take ? Number(take) : 1000,
+      ...(cursor && {
+        cursor: { claimId: cursor },
+        skip: 1,
+      }),
+      include: {
+        evaluation: true,
+      },
+      orderBy: { submissionDate: orderBy },
+    });
+
+  // get claims with schemaType null and fetch schemaType from cellnode
+  let claims = await query("1", cleanStatus, null);
+  if (claims.length && !!type) await getClaimTypesFromCellnode(id);
+
+  // if any more claims with schemaType null, return empty list
+  claims = await query("1", cleanStatus, null);
+  if (claims.length && !!type) {
+    return {
+      data: [],
+      metaData: {
+        cursor: null,
+        hasNextPage: false,
+        schemaTypesLoaded: false,
+        message:
+          "Schema types for claims not loaded yet, please try again after 1 minute",
+      },
+    };
+  }
+
+  claims = await query(take, cleanStatus, type, cursor);
+  if (claims.length == 0) {
+    return {
+      data: [],
+      metaData: {
+        cursor: null,
+        hasNextPage: false,
+        schemaTypesLoaded: true,
+        message: "No claims found",
+      },
+    };
+  }
+  const nextCursor = claims[claims.length - 1].claimId;
+  const nextPage = await query("1", cleanStatus, type, nextCursor);
+  return {
+    data: claims,
+    metaData: {
+      cursor: nextCursor,
+      hasNextPage: nextPage.length > 0,
+      schemaTypesLoaded: true,
+      message: "",
+    },
+  };
+};
 
 export const getCollectionById = async (id: string) => {
   const collection = await prisma.claimCollection.findFirst({
@@ -29,6 +123,7 @@ export const getAllCollectionClaimTypesNull = async () => {
   });
 };
 
+let isFetchingClaimsSchemaTypes = false;
 // Helper  function to get all collections with claims that have no schemaType
 // and then get the schemaType from cellnode
 export const getAllClaimTypesFromCellnode = async () => {
@@ -46,6 +141,7 @@ export const getAllClaimTypesFromCellnode = async () => {
   }
 };
 
+// TODO add graphql to cellnode so we dont cause memory heaps is queries take too long
 export const getClaimTypesFromCellnode = async (collectionID: string) => {
   // Get Collection Entity to get Collection Cellnode Service URI
   const collection = await getCollectionById(collectionID);
