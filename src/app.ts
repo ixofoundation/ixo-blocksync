@@ -16,7 +16,7 @@ import { Postgraphile } from "./postgraphile";
 
 const limiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minutes
-  max: 100, // Limit each IP to 100 requests per `window`
+  max: 10000, // Limit each IP to 100 requests per `window`
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
   message: "Too many requests from this IP, please try again after 1 minutes",
@@ -88,6 +88,26 @@ app.get("/api/ipfs/:cid", async (req, res, next) => {
 });
 
 // =================================
+// Claims
+// =================================
+
+app.get("/api/claims/collection/:id/claims", async (req, res, next) => {
+  try {
+    const claims = await ClaimsHandler.getCollectionClaims(
+      req.params.id,
+      req.query.status as string,
+      req.query.type as string,
+      req.query.take as string,
+      req.query.cursor as string,
+      req.query.orderBy as any
+    );
+    res.json(claims);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// =================================
 // CRON Jobs
 // =================================
 // Get entity type "asset/device" with no externalId and check if it has a deviceCredential
@@ -103,7 +123,6 @@ new CronJob(
   "Etc/UTC"
 );
 
-// TODO add graphql to cellnode so we dont cause memory heaps is queries take too long
 // Get all collections with claims that have no schemaType and then get the schemaType from cellnode
 new CronJob(
   "1 */1 * * * *",
