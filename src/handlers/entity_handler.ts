@@ -30,8 +30,6 @@ export const getFullEntityById = async (id: string, parentEntityLoader?) => {
 
   const serviceIds = baseEntity!.IID.service.map((s) => s.id);
   const linkedResourceIds = baseEntity!.IID.linkedResource.map((r) => r.id);
-  const linkedEntityIds = baseEntity!.IID.linkedEntity.map((e) => e.id);
-  const linkedClaimIds = baseEntity!.IID.linkedClaim.map((e) => e.id);
 
   for (const key of Object.keys(baseEntity!.IID)) {
     if (!baseEntity[key]) baseEntity[key] = baseEntity!.IID[key];
@@ -57,18 +55,6 @@ export const getFullEntityById = async (id: string, parentEntityLoader?) => {
         if (!linkedResourceIds.includes(linkedResource.id)) {
           baseEntity!.linkedResource.push(linkedResource);
           linkedResourceIds.push(linkedResource.id);
-        }
-      }
-      for (const linkedEntity of record!.IID.linkedEntity) {
-        if (!linkedEntityIds.includes(linkedEntity.id)) {
-          baseEntity!.linkedEntity.push(linkedEntity);
-          linkedEntityIds.push(linkedEntity.id);
-        }
-      }
-      for (const linkedClaim of record!.IID.linkedClaim) {
-        if (!linkedClaimIds.includes(linkedClaim.id)) {
-          baseEntity!.linkedClaim.push(linkedClaim);
-          linkedClaimIds.push(linkedClaim.id);
         }
       }
       // if no more parents then break
