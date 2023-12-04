@@ -7,6 +7,7 @@ import * as Sentry from "@sentry/node";
 import * as EntityHandler from "./handlers/entity_handler";
 import * as IpfsHandler from "./handlers/ipfs_handler";
 import * as ClaimsHandler from "./handlers/claims_handler";
+import * as TokenomicsHandler from "./handlers/tokenomics_handler";
 import { SENTRYDSN, TRUST_PROXY } from "./util/secrets";
 import swaggerUi from "swagger-ui-express";
 import helmet from "helmet";
@@ -102,6 +103,19 @@ app.get("/api/claims/collection/:id/claims", async (req, res, next) => {
       req.query.orderBy as any
     );
     res.json(claims);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// =================================
+// Tokenomics
+// =================================
+
+app.get("/api/tokenomics/fetchAccounts", async (req, res, next) => {
+  try {
+    const result = await TokenomicsHandler.getAccountsAndBalances();
+    res.json(result);
   } catch (error) {
     next(error);
   }
