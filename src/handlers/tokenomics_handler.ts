@@ -44,7 +44,7 @@ export const supplyStaked = async () => {
 
 export const supplyCommunityPool = async () => {
   const res = await queryClient.cosmos.distribution.v1beta1.communityPool();
-  return res.pool;
+  return res.pool.map((c) => ({ ...c, amount: c.amount.slice(0, -18) }));
 };
 
 export const inflation = async () => {
@@ -56,6 +56,7 @@ export const inflation = async () => {
 };
 
 export const getAccountsAndBalances = async () => {
+  let skippedSomeUpload = false;
   try {
     let accounts: any[] = [];
     let key: Uint8Array | undefined;
@@ -75,7 +76,11 @@ export const getAccountsAndBalances = async () => {
         ...accounts,
         ...res.accounts.map((acc) => {
           const parsedAccount = registry.decode(acc);
-          return parsedAccount.baseAccount ?? parsedAccount;
+          return (
+            parsedAccount.baseVestingAccount?.baseAccount ??
+            parsedAccount.baseAccount ??
+            parsedAccount
+          );
         }),
       ];
       key = res.pagination?.nextKey || undefined;
@@ -85,8 +90,6 @@ export const getAccountsAndBalances = async () => {
     let i = 0;
     // get balances for each account
     for (const acc of accounts) {
-      console.log(i++);
-      console.log(acc);
       await sleep(50);
       const [availBalance, delegationsBalance, rewardsBalance] =
         await Promise.all([
@@ -126,28 +129,35 @@ export const getAccountsAndBalances = async () => {
           })(),
         ]);
 
-      await prisma.tokenomicsAccount.upsert({
-        where: { address: acc.address },
-        update: {
-          availBalance,
-          delegationsBalance,
-          rewardsBalance,
-          totalBalance: availBalance + delegationsBalance + rewardsBalance,
-        },
-        create: {
-          address: acc.address,
-          accountNumber: acc.accountNumber.low,
-          availBalance,
-          delegationsBalance,
-          rewardsBalance,
-          totalBalance: availBalance + delegationsBalance + rewardsBalance,
-        },
-      });
+      try {
+        await prisma.tokenomicsAccount.upsert({
+          where: { address: acc.address },
+          update: {
+            availBalance,
+            delegationsBalance,
+            rewardsBalance,
+            totalBalance: availBalance + delegationsBalance + rewardsBalance,
+          },
+          create: {
+            address: acc.address,
+            accountNumber: acc.accountNumber.low,
+            availBalance,
+            delegationsBalance,
+            rewardsBalance,
+            totalBalance: availBalance + delegationsBalance + rewardsBalance,
+          },
+        });
+      } catch (error) {
+        skippedSomeUpload = true;
+        console.error(
+          "ERROR::tokenomics::getAccountsAndBalances::prisma ",
+          error
+        );
+      }
     }
-    console.log("doner!!!");
-    return { success: true };
+    return { success: true, skippedSomeUpload };
   } catch (error) {
     console.log("ERROR::tokenomics::getAccountsAndBalances ", error);
-    return { success: false, error };
+    return { success: false, error: String(error), skippedSomeUpload };
   }
 };

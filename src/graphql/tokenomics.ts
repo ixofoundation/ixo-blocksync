@@ -27,14 +27,6 @@ export const TokenomicsPlugin = makeExtendSchemaPlugin((build) => {
         tokenomicsSupplyStaked: async (c, args, ctx, rInfo) => {
           return await TokenomicsHandler.supplyStaked();
         },
-        // tokenomicsAccounts: async (c, args, ctx, rInfo) => {
-        //   return await TokenomicsHandler.getTokensTotalForCollectionAmounts(
-        //     args.did,
-        //     args.name,
-        //     ctx.getAccountTransactionsLoader,
-        //     args.allEntityRetired
-        //   );
-        // },
       },
     },
   };
