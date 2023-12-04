@@ -12,6 +12,7 @@ import {
   TokenPlugin,
   createGetAccountTransactionsLoader,
 } from "./graphql/token";
+import { TokenomicsPlugin } from "./graphql/tokenomics";
 
 const isProd = process.env.NODE_ENV === "production";
 
@@ -58,6 +59,7 @@ export const Postgraphile = postgraphile(DATABASE_URL, "public", {
     TokenPlugin,
     ClaimsPlugin,
     EntityPlugin,
+    TokenomicsPlugin,
     PgSimplifyInflectorPlugin,
     ConnectionFilterPlugin,
   ],

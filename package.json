@@ -21,7 +21,7 @@
   "license": "Apache 2",
   "dependencies": {
     "@graphile-contrib/pg-simplify-inflector": "6.1.0",
-    "@ixo/impactxclient-sdk": "1.1.13",
+    "@ixo/impactxclient-sdk": "1.1.21",
     "@prisma/client": "4.11.0",
     "@sentry/node": "7.36.0",
     "@sentry/tracing": "7.36.0",

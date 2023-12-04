@@ -379,3 +379,15 @@ model Ipfs {
   contentType String
   data        String
 }
+
+// ========================================
+// Tokenomics
+// ========================================
+model TokenomicsAccount {
+  address            String @id
+  accountNumber      Int
+  availBalance       BigInt
+  delegationsBalance BigInt
+  rewardsBalance     BigInt
+  totalBalance       BigInt
+}

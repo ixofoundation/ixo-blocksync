@@ -226,10 +226,10 @@
   dependencies:
     tslib "^2.0.1"
 
-"@ixo/impactxclient-sdk@1.1.13":
-  version "1.1.13"
-  resolved "https://registry.yarnpkg.com/@ixo/impactxclient-sdk/-/impactxclient-sdk-1.1.13.tgz#8e5656c184dde9221c5aedb54be7151842db4172"
-  integrity sha512-k1Yyl9fdsAzKnm15KKlPXDTskIGOP/EDF3PrTcZREkGs3iTb5j82mG8j+5V1l3votWR1+d++cE0csvs75X/7xA==
+"@ixo/impactxclient-sdk@1.1.21":
+  version "1.1.21"
+  resolved "https://registry.yarnpkg.com/@ixo/impactxclient-sdk/-/impactxclient-sdk-1.1.21.tgz#5892b875c9eb7e59d6c93a09b83df40a9952f6a5"
+  integrity sha512-cx72ocnrPhjUPTqiGpP7F0bmJ+Lg0D7MNYTM3atbzRCqMLBDL+sM5x4cs5FY2UqXUt87glRWFt43Nf4qaOfEew==
   dependencies:
     "@babel/runtime" "7.19.4"
     "@cosmjs/amino" "0.29.4"
