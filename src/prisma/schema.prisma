@@ -384,10 +384,11 @@ model Ipfs {
 // Tokenomics
 // ========================================
 model TokenomicsAccount {
-  address            String @id
+  address            String  @id
   accountNumber      Int
   availBalance       BigInt
   delegationsBalance BigInt
   rewardsBalance     BigInt
   totalBalance       BigInt
+  type               String?
 }

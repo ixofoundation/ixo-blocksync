@@ -37,6 +37,52 @@ export const supplyTotal = async () => {
   return supply;
 };
 
+export const supplyIBC = async () => {
+  const escrows = await getIBCEscrows(true);
+
+  let total = 0;
+  escrows.forEach((e) => {
+    total += Number(e.balance);
+  });
+
+  return total;
+};
+
+const getIBCEscrows = async (includeBalance = false) => {
+  // get all ibc channels
+  const channels = await queryClient.ibc.core.channel.v1.channels({
+    pagination: {
+      // @ts-ignore
+      key: [],
+      limit: Long.fromNumber(1000),
+      offset: Long.fromNumber(0),
+    },
+  });
+
+  const escrows = await Promise.all(
+    channels.channels.map(async (c) => {
+      // get ibc channel escrow account
+      const escrowAcc =
+        await queryClient.ibc.applications.transfer.v1.escrowAddress({
+          portId: c.portId,
+          channelId: c.channelId,
+        });
+      // get balance for the escrow account
+      const escrowBalance = includeBalance
+        ? await queryClient.cosmos.bank.v1beta1.balance({
+            address: escrowAcc.escrowAddress,
+            denom: "uixo",
+          })
+        : undefined;
+      return {
+        account: escrowAcc.escrowAddress,
+        balance: escrowBalance?.balance?.amount ?? "0",
+      };
+    })
+  );
+  return escrows;
+};
+
 export const supplyStaked = async () => {
   const res = await queryClient.cosmos.staking.v1beta1.pool({});
   return res.pool;
@@ -58,6 +104,8 @@ export const inflation = async () => {
 export const getAccountsAndBalances = async () => {
   let skippedSomeUpload = false;
   try {
+    let ibcEscrows = (await getIBCEscrows()).map((e) => e.account);
+
     let accounts: any[] = [];
     let key: Uint8Array | undefined;
     const query = async (key?: Uint8Array) =>
@@ -76,11 +124,20 @@ export const getAccountsAndBalances = async () => {
         ...accounts,
         ...res.accounts.map((acc) => {
           const parsedAccount = registry.decode(acc);
-          return (
+          const baseAccount =
             parsedAccount.baseVestingAccount?.baseAccount ??
             parsedAccount.baseAccount ??
-            parsedAccount
-          );
+            parsedAccount;
+
+          let type = parsedAccount.baseVestingAccount?.baseAccount
+            ? "vesting"
+            : parsedAccount.baseAccount
+            ? parsedAccount.name ?? null
+            : null;
+          if (ibcEscrows.includes(parsedAccount.address)) type = "ibc_escrow";
+          baseAccount.type = type;
+
+          return baseAccount;
         }),
       ];
       key = res.pagination?.nextKey || undefined;
@@ -90,6 +147,7 @@ export const getAccountsAndBalances = async () => {
     let i = 0;
     // get balances for each account
     for (const acc of accounts) {
+      // console.log("fetch acc balance", i++, acc.address);
       await sleep(50);
       const [availBalance, delegationsBalance, rewardsBalance] =
         await Promise.all([
@@ -137,6 +195,7 @@ export const getAccountsAndBalances = async () => {
             delegationsBalance,
             rewardsBalance,
             totalBalance: availBalance + delegationsBalance + rewardsBalance,
+            type: acc.type,
           },
           create: {
             address: acc.address,
@@ -145,6 +204,7 @@ export const getAccountsAndBalances = async () => {
             delegationsBalance,
             rewardsBalance,
             totalBalance: availBalance + delegationsBalance + rewardsBalance,
+            type: acc.type,
           },
         });
       } catch (error) {
