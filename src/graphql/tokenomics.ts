@@ -11,6 +11,7 @@ export const TokenomicsPlugin = makeExtendSchemaPlugin((build) => {
         tokenomicsSupplyCommunityPool: JSON!
         tokenomicsInflation: JSON!
         tokenomicsSupplyStaked: JSON!
+        tokenomicsSupplyIBC: JSON!
       }
     `,
     resolvers: {
@@ -26,6 +27,9 @@ export const TokenomicsPlugin = makeExtendSchemaPlugin((build) => {
         },
         tokenomicsSupplyStaked: async (c, args, ctx, rInfo) => {
           return await TokenomicsHandler.supplyStaked();
+        },
+        tokenomicsSupplyIBC: async (c, args, ctx, rInfo) => {
+          return await TokenomicsHandler.supplyIBC();
         },
       },
     },
