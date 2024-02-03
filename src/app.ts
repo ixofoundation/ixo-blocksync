@@ -14,16 +14,15 @@ import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import { web3StorageRateLimiter } from "./util/rate-limiter";
 import { Postgraphile } from "./postgraphile";
+import swaggerFile from "./swagger.json";
 
 const limiter = rateLimit({
-  windowMs: 1 * 60 * 1000, // 1 minutes
-  max: 10000, // Limit each IP to 100 requests per `window`
+  windowMs: 1 * 1000, // 1 second
+  max: 50, // Limit each IP to 100 requests per `window`
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-  message: "Too many requests from this IP, please try again after 1 minutes",
+  message: "Too many requests from this IP, please try again after 1 second",
 });
-
-const swaggerFile = require(`${__dirname}/../../swagger.json`);
 
 export const app = express();
 app.set("trust proxy", TRUST_PROXY);

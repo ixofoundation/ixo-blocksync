@@ -1117,6 +1117,7 @@ type Query implements Node {
   tokenomicsSupplyCommunityPool: JSON!
   tokenomicsInflation: JSON!
   tokenomicsSupplyStaked: JSON!
+  tokenomicsSupplyIBC: JSON!
 }
 
 """An object with a globally unique `ID`."""
@@ -5902,6 +5903,7 @@ type TokenomicsAccount implements Node {
   delegationsBalance: BigInt!
   rewardsBalance: BigInt!
   totalBalance: BigInt!
+  type: String
 }
 
 """
@@ -5935,6 +5937,8 @@ enum TokenomicsAccountsOrderBy {
   REWARDS_BALANCE_DESC
   TOTAL_BALANCE_ASC
   TOTAL_BALANCE_DESC
+  TYPE_ASC
+  TYPE_DESC
   PRIMARY_KEY_ASC
   PRIMARY_KEY_DESC
 }
@@ -5961,6 +5965,9 @@ input TokenomicsAccountCondition {
 
   """Checks for equality with the object’s `totalBalance` field."""
   totalBalance: BigInt
+
+  """Checks for equality with the object’s `type` field."""
+  type: String
 }
 
 """
@@ -5984,6 +5991,9 @@ input TokenomicsAccountFilter {
 
   """Filter by the object’s `totalBalance` field."""
   totalBalance: BigIntFilter
+
+  """Filter by the object’s `type` field."""
+  type: StringFilter
 
   """Checks for all expressions in this list."""
   and: [TokenomicsAccountFilter!]
