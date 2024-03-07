@@ -2,6 +2,9 @@ import { makeExtendSchemaPlugin, gql } from "graphile-utils";
 import * as TokenHandler from "../handlers/token_handler";
 import DataLoader from "dataloader";
 
+export type GetAccountTransactionsLoader = ReturnType<
+  typeof createGetAccountTransactionsLoader
+>;
 export const createGetAccountTransactionsLoader = () => {
   return new DataLoader(async (keys: string[]) => {
     return keys.map(async (key) => {

@@ -274,12 +274,22 @@ export const syncEventData = async (
             description: createTokenToken.description,
             image: createTokenToken.image,
             type: createTokenToken.type,
-            cap: createTokenToken.cap,
-            supply: createTokenToken.supply,
+            cap: BigInt(createTokenToken.cap ?? 0),
+            supply: BigInt(createTokenToken.supply ?? 0),
             paused: createTokenToken.paused,
             stopped: createTokenToken.stopped,
-            retired: { create: createTokenToken.retired },
-            cancelled: { create: createTokenToken.cancelled },
+            retired: {
+              create: createTokenToken.retired.map((r) => ({
+                ...r,
+                amount: BigInt(r.amount ?? 0),
+              })),
+            },
+            cancelled: {
+              create: createTokenToken.cancelled.map((r) => ({
+                ...r,
+                amount: BigInt(r.amount ?? 0),
+              })),
+            },
           },
         });
         break;
@@ -304,12 +314,22 @@ export const syncEventData = async (
             description: updateTokenToken.description,
             image: updateTokenToken.image,
             type: updateTokenToken.type,
-            cap: updateTokenToken.cap,
-            supply: updateTokenToken.supply,
+            cap: BigInt(updateTokenToken.cap ?? 0),
+            supply: BigInt(updateTokenToken.supply ?? 0),
             paused: updateTokenToken.paused,
             stopped: updateTokenToken.stopped,
-            retired: { create: updateTokenToken.retired },
-            cancelled: { create: updateTokenToken.cancelled },
+            retired: {
+              create: updateTokenToken.retired.map((r) => ({
+                ...r,
+                amount: BigInt(r.amount ?? 0),
+              })),
+            },
+            cancelled: {
+              create: updateTokenToken.cancelled.map((r) => ({
+                ...r,
+                amount: BigInt(r.amount ?? 0),
+              })),
+            },
           },
         });
         break;

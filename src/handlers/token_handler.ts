@@ -1,3 +1,4 @@
+import { GetAccountTransactionsLoader } from "../graphql/token";
 import { prisma } from "../prisma/prisma_client";
 
 export const createGetAccountTransactionsKey = (
@@ -65,6 +66,16 @@ export const getTokensTotalForEntities = async (
   return tokensTotal.filter((t) => Object.keys(t.tokens).length > 0);
 };
 
+type TokenTransactions = {
+  Token: {
+    name: string;
+    collection: string;
+  };
+  amount: bigint;
+  to: string;
+  from: string;
+  tokenId: string;
+}[];
 export const getAccountTransactions = async (
   address: string,
   name?: string
@@ -72,11 +83,11 @@ export const getAccountTransactions = async (
   if (!address) return [];
 
   const PAGE_SIZE = 30000; // Fetch 10,000 records at a time. Adjust as per your needs.
-  let tokenTransactions: any[] = [];
+  let tokenTransactions: TokenTransactions = [];
   let skip = 0;
 
   while (true) {
-    const tokens = await prisma.tokenTransaction.findMany({
+    const tokens: TokenTransactions = await prisma.tokenTransaction.findMany({
       where: {
         OR: [{ from: address }, { to: address }],
         ...(name && { Token: { name: name } }),
@@ -122,14 +133,26 @@ export const getAccountTransactions = async (
 export const getAccountTokens = async (
   address: string,
   name?: string,
-  transactionLoader?: any,
+  transactionLoader?: GetAccountTransactionsLoader,
   allEntityRetired?: boolean
 ) => {
-  let tokenTransactions: any[] = transactionLoader
+  let tokenTransactions = transactionLoader
     ? await transactionLoader.load(
         createGetAccountTransactionsKey(address, name)
       )
     : await getAccountTransactions(address, name);
+
+  // const test = await prisma.tokenTransaction.groupBy({
+  //   by: ["from", "to", "tokenId"],
+  //   where: {
+  //     OR: [{ from: address }, { to: address }],
+  //     ...(name && { Token: { name: name } }),
+  //   },
+  //   _sum: {
+  //     amount: true,
+  //   },
+  // });
+  // console.dir(test, { depth: null });
 
   const tokens = {};
   for (const curr of tokenTransactions) {

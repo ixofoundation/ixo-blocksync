@@ -45,7 +45,7 @@ export const syncWasmEventData = async (event: GetEventType): Promise<any> => {
         const tokenTransaction = {
           from: getWasmAttr(message, "from"),
           to: getWasmAttr(message, "to"),
-          amount: getWasmAttr(message, "amount"),
+          amount: BigInt(getWasmAttr(message, "amount") ?? 0),
         };
         if (getWasmAttr(message, "from")) {
           await prisma.token.update({
