@@ -66,6 +66,7 @@ The server exposes a Graphql api endpoint at `/graphql` which is set up using [P
 
 - [pg-simplify-inflector](https://github.com/graphile/pg-simplify-inflector)
 - [postgraphile-plugin-connection-filter](https://github.com/graphile-contrib/postgraphile-plugin-connection-filter)
+- [pg-aggregates](https://github.com/graphile/pg-aggregates)
 
 A graphiql playground gets exposed at the endpoint `/graphiql` where you can play around, test queries and see the schemas.
 

@@ -129,8 +129,8 @@ model TokenClass {
   description     String
   image           String
   type            String
-  cap             String
-  supply          String
+  cap             BigInt
+  supply          BigInt
   paused          Boolean
   stopped         Boolean
   Token           Token[]
@@ -170,7 +170,7 @@ model TokenRetired {
   id           String
   reason       String
   jurisdiction String
-  amount       String
+  amount       BigInt
   owner        String
   Token        TokenClass @relation(fields: [name], references: [name])
   // Token to TokenClass already existed so making TokenAsset to Token to prevent breaking clients
@@ -184,7 +184,7 @@ model TokenCancelled {
   aid    Int        @id @default(autoincrement())
   id     String
   reason String
-  amount String
+  amount BigInt
   owner  String
   Token  TokenClass @relation(fields: [name], references: [name])
   name   String
@@ -196,7 +196,7 @@ model TokenTransaction {
   aid     Int    @id @default(autoincrement())
   from    String
   to      String
-  amount  String
+  amount  BigInt
   Token   Token  @relation(fields: [tokenId], references: [id])
   tokenId String
 

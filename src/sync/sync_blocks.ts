@@ -20,6 +20,7 @@ export const startSync = async () => {
   // if already has synced, start from next block
   if (currentBlock !== 1) currentBlock++;
 
+  let count = 0;
   if (logSync100Time) console.time("sync");
   while (syncing) {
     try {
@@ -28,6 +29,7 @@ export const startSync = async () => {
       if (logFetchTime) console.timeEnd("fetch");
 
       if (block) {
+        count = 0;
         if (logIndexTime) console.time("index");
 
         await Promise.all([
@@ -51,7 +53,10 @@ export const startSync = async () => {
         if (logIndexTime) console.timeEnd("index");
         currentBlock++;
       } else {
-        console.log(`Next block: ${currentBlock}`);
+        count++;
+        if (count === 10) {
+          console.log(`Next block, 10th attempt: ${currentBlock}`);
+        }
         await sleep(1000);
       }
     } catch (error) {

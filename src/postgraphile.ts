@@ -1,6 +1,7 @@
 import postgraphile from "postgraphile";
 import PgSimplifyInflectorPlugin from "@graphile-contrib/pg-simplify-inflector";
 import ConnectionFilterPlugin from "postgraphile-plugin-connection-filter";
+import PgAggregatesPlugin from "@graphile/pg-aggregates";
 import { DATABASE_URL } from "./util/secrets";
 import {
   EntityPlugin,
@@ -13,6 +14,7 @@ import {
   createGetAccountTransactionsLoader,
 } from "./graphql/token";
 import { TokenomicsPlugin } from "./graphql/tokenomics";
+import { SmartTagsPlugin } from "./graphql/smart_tags_plugin";
 
 const isProd = process.env.NODE_ENV === "production";
 
@@ -56,12 +58,14 @@ export const Postgraphile = postgraphile(DATABASE_URL, "public", {
     statement_timeout: "4000",
   },
   appendPlugins: [
+    SmartTagsPlugin,
     TokenPlugin,
     ClaimsPlugin,
     EntityPlugin,
     TokenomicsPlugin,
     PgSimplifyInflectorPlugin,
     ConnectionFilterPlugin,
+    PgAggregatesPlugin,
   ],
   // Optional customisation
   graphileBuildOptions: {
@@ -127,5 +131,12 @@ export const Postgraphile = postgraphile(DATABASE_URL, "public", {
     connectionFilterAllowNullInput: true, // default: false
     // Allow/forbid empty objects ({}) in input:
     connectionFilterAllowEmptyObjectInput: true, // default: false
+
+    // --------------------------------------------
+    // PgAggregatesPlugin Options
+    // --------------------------------------------
+    // Disable aggregates by default; opt each table in via the `@aggregates` smart tag
+    disableAggregatesByDefault: true,
+    // enable certain tables only in the smart tags plugin at /src/graphql/smart_tags_plugin.ts
   },
 });
