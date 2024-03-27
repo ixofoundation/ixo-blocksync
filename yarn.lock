@@ -236,10 +236,10 @@
     debug "^4.3.1"
     graphile-utils "^4.12.0-alpha.0"
 
-"@ixo/impactxclient-sdk@1.1.21":
-  version "1.1.21"
-  resolved "https://registry.yarnpkg.com/@ixo/impactxclient-sdk/-/impactxclient-sdk-1.1.21.tgz#5892b875c9eb7e59d6c93a09b83df40a9952f6a5"
-  integrity sha512-cx72ocnrPhjUPTqiGpP7F0bmJ+Lg0D7MNYTM3atbzRCqMLBDL+sM5x4cs5FY2UqXUt87glRWFt43Nf4qaOfEew==
+"@ixo/impactxclient-sdk@1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@ixo/impactxclient-sdk/-/impactxclient-sdk-1.2.0.tgz#e2350784d6c972accd4d3ecdb4e8a82852e29a18"
+  integrity sha512-X6kYhvirTNy2kCpWWGbGZZmeOL7pugZa+iEdUH57kF0SaAuBSMA5tcj+UIrIM5GhIP/LWChvKonukf3NZUAsmQ==
   dependencies:
     "@babel/runtime" "7.19.4"
     "@cosmjs/amino" "0.29.4"

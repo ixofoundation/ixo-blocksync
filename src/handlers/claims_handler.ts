@@ -171,6 +171,8 @@ export const getClaimTypesFromCellnode = async (collectionID: string) => {
     } catch (error) {
       // if error 404 then claim not on cellnode, type "unknown"
       if (error.response?.status === 404) type = "unknown";
+      // if error "Claim type not found" then claim type not extracted from doc, type "extracterror"
+      else if (error.message == "Claim type not found") type = "extracterror";
       else console.error(error.message);
     } finally {
       if (type)

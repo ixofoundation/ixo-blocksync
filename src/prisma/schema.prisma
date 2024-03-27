@@ -64,21 +64,22 @@ model Entity {
 // ========================================
 
 model ClaimCollection {
-  id        String    @id
-  entity    String
-  admin     String
-  protocol  String
-  startDate DateTime?
-  endDate   DateTime?
-  quota     Int
-  count     Int
-  evaluated Int
-  approved  Int
-  rejected  Int
-  disputed  Int
-  state     Int
-  payments  Json
-  Claim     Claim[]
+  id          String    @id
+  entity      String
+  admin       String
+  protocol    String
+  startDate   DateTime?
+  endDate     DateTime?
+  quota       Int
+  count       Int
+  evaluated   Int
+  approved    Int
+  rejected    Int
+  disputed    Int
+  invalidated Int       @default(0)
+  state       Int
+  payments    Json
+  Claim       Claim[]
 }
 
 model Claim {

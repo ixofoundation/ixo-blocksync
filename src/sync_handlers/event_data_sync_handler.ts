@@ -152,6 +152,7 @@ export const syncEventData = async (
             approved: Number(createCollection.approved),
             rejected: Number(createCollection.rejected),
             disputed: Number(createCollection.disputed),
+            invalidated: Number(createCollection.invalidated),
             state: ixo.claims.v1beta1.collectionStateFromJSON(
               createCollection.state
             ),
@@ -179,6 +180,7 @@ export const syncEventData = async (
             approved: Number(updateCollection.approved),
             rejected: Number(updateCollection.rejected),
             disputed: Number(updateCollection.disputed),
+            invalidated: Number(updateCollection.invalidated),
             state: ixo.claims.v1beta1.collectionStateFromJSON(
               updateCollection.state
             ),
