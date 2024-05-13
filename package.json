@@ -1,6 +1,6 @@
 {
   "name": "ixo-blocksync",
-  "version": "1.2.5",
+  "version": "2.1.0",
   "description": "Syncs all the public info from an ixo blockchain to an instance of PostgresQL ",
   "main": "index.js",
   "scripts": {
@@ -9,9 +9,10 @@
     "dev": "npx ts-node src/index.ts",
     "swagger-gen": "npx ts-node ./src/swagger.ts",
     "docs-gen": "npx typedoc src/* src/*/*",
-    "prisma:dev": "npx prisma migrate dev",
-    "prisma:reset": "npx prisma migrate reset",
-    "prisma:generate": "npx prisma generate --schema src/prisma/schema.prisma && npx prisma generate --schema src/prisma/schema_core.prisma"
+    "migrate:up": "node-pg-migrate up -m ./src/postgres/migrations",
+    "migrate:down": "node-pg-migrate down  -m ./src/postgres/migrations",
+    "migrate:redo": "node-pg-migrate redo  -m ./src/postgres/migrations",
+    "migrate:create": "node-pg-migrate create  --migration-filename-format utc --migration-file-language sql  -m ./src/postgres/migrations"
   },
   "repository": "https://github.com/ixofoundation/ixo-blocksync",
   "keywords": [
@@ -23,7 +24,6 @@
     "@graphile-contrib/pg-simplify-inflector": "6.1.0",
     "@graphile/pg-aggregates": "0.1.1",
     "@ixo/impactxclient-sdk": "1.2.0",
-    "@prisma/client": "4.11.0",
     "@sentry/node": "7.36.0",
     "@sentry/tracing": "7.36.0",
     "axios": "1.4.0",
@@ -41,9 +41,10 @@
     "http": "0.0.0",
     "limiter": "2.1.0",
     "log-timestamp": "0.3.0",
+    "node-pg-migrate": "7.0.0",
+    "pg": "8.11.5",
     "postgraphile": "4.13.0",
     "postgraphile-plugin-connection-filter": "2.3.0",
-    "prisma": "4.11.0",
     "swagger-autogen": "2.23.0",
     "swagger-ui-express": "4.6.0",
     "ts-node": "10.9.1",
@@ -51,14 +52,14 @@
     "typescript": "4.9.5"
   },
   "devDependencies": {
+    "@semantic-release/git": "^10.0.1",
     "@types/compression": "1.7.2",
     "@types/cors": "2.8.13",
     "@types/cron": "2.0.1",
     "@types/express": "4.17.17",
     "@types/node": "18.13.0",
-    "@types/swagger-ui-express": "4.1.3"
-  },
-  "prisma": {
-    "schema": "src/prisma/schema.prisma"
+    "@types/swagger-ui-express": "4.1.3",
+    "conventional-changelog-conventionalcommits": "^7.0.2",
+    "semantic-release": "22"
   }
 }

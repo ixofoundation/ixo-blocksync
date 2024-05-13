@@ -2,13 +2,17 @@ import { makeExtendSchemaPlugin, gql } from "graphile-utils";
 import DataLoader from "dataloader";
 import * as EntityHandler from "../handlers/entity_handler";
 
+export type ParentEntityLoader = ReturnType<typeof createParentEntityLoader>;
 export const createParentEntityLoader = () => {
   return new DataLoader(async (ids: string[]) => {
     return ids.map(async (id) => await EntityHandler.getParentEntityById(id));
   });
 };
 
-export const createFullEntityLoader = (parentEntityLoader) => {
+export type FullEntityLoader = ReturnType<typeof createFullEntityLoader>;
+export const createFullEntityLoader = (
+  parentEntityLoader: ParentEntityLoader
+) => {
   return new DataLoader(async (ids: string[]) => {
     return ids.map(
       async (id) =>
@@ -22,10 +26,7 @@ export const EntityPlugin = makeExtendSchemaPlugin((build) => {
 
   return {
     typeDefs: gql`
-      extend type EntitiesConnection {
-        """
-        Checks if there are any asset/device entities with null externalId
-        """
+      extend type Query {
         deviceExternalIdsLoaded: Boolean!
       }
 
@@ -48,8 +49,8 @@ export const EntityPlugin = makeExtendSchemaPlugin((build) => {
       }
     `,
     resolvers: {
-      EntitiesConnection: {
-        deviceExternalIdsLoaded: async (connection, args, ctx, rInfo) => {
+      Query: {
+        deviceExternalIdsLoaded: async (c, args, ctx, rInfo) => {
           return await EntityHandler.deviceExternalIdsLoaded();
         },
       },

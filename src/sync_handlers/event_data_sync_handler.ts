@@ -1,7 +1,6 @@
 import { EntitySDKType } from "@ixo/impactxclient-sdk/types/codegen/ixo/entity/v1beta1/entity";
 import { IidDocumentSDKType } from "@ixo/impactxclient-sdk/types/codegen/ixo/iid/v1beta1/iid";
 import { EventTypes } from "../types/Event";
-import { prisma } from "../prisma/prisma_client";
 import {
   TokenPropertiesSDKType,
   TokenSDKType,
@@ -19,10 +18,35 @@ import {
   SellOrderSDKType,
   SwapOrderSDKType,
 } from "@ixo/impactxclient-sdk/types/codegen/ixo/bonds/v1beta1/bonds";
-import { GetEventType } from "../types/getBlock";
+import { EventCore } from "../postgres/blocksync_core/block";
+import { createIid, updateIid } from "../postgres/iid";
+import { createEntity, updateEntity } from "../postgres/entity";
+import {
+  createClaim,
+  createClaimCollection,
+  createDispute,
+  updateClaim,
+  updateClaimCollection,
+} from "../postgres/claim";
+import {
+  createBond,
+  createBondAlpha,
+  createBondBuy,
+  createBondSell,
+  createBondSwap,
+  createOutcomePayment,
+  createReserveWithdrawal,
+  createShareWithdrawal,
+  updateBond,
+} from "../postgres/bond";
+import {
+  createToken,
+  createTokenClass,
+  updateTokenClass,
+} from "../postgres/token";
 
 export const syncEventData = async (
-  event: GetEventType,
+  event: EventCore,
   blockHeight: number,
   timestamp: Date
 ) => {
@@ -32,56 +56,51 @@ export const syncEventData = async (
       // IID
       // ==========================================================
       case EventTypes.createIid:
-        const createIid: IidDocumentSDKType = getDocFromAttributes(
+        const cIid: IidDocumentSDKType = getDocFromAttributes(
           event.attributes,
           event.type
         );
-        await prisma.iID.create({
-          data: {
-            id: createIid.id,
-            controller: createIid.controller,
-            authentication: createIid.authentication,
-            assertionMethod: createIid.assertionMethod,
-            keyAgreement: createIid.keyAgreement,
-            capabilityInvocation: createIid.capabilityInvocation,
-            capabilityDelegation: createIid.capabilityDelegation,
-            alsoKnownAs: createIid.alsoKnownAs,
-            verificationMethod: createIid.verificationMethod as any,
-            metadata: createIid.metadata as any,
-            context: createIid.context as any,
-            service: createIid.service as any,
-            linkedResource: createIid.linkedResource as any,
-            linkedClaim: createIid.linkedClaim as any,
-            accordedRight: createIid.accordedRight as any,
-            linkedEntity: createIid.linkedEntity as any,
-          },
+        await createIid({
+          id: cIid.id,
+          controller: cIid.controller,
+          authentication: cIid.authentication,
+          assertionMethod: cIid.assertionMethod,
+          keyAgreement: cIid.keyAgreement,
+          capabilityInvocation: cIid.capabilityInvocation,
+          capabilityDelegation: cIid.capabilityDelegation,
+          alsoKnownAs: cIid.alsoKnownAs,
+          verificationMethod: cIid.verificationMethod,
+          metadata: cIid.metadata,
+          context: cIid.context,
+          service: cIid.service,
+          linkedResource: cIid.linkedResource,
+          linkedClaim: cIid.linkedClaim,
+          accordedRight: cIid.accordedRight,
+          linkedEntity: cIid.linkedEntity,
         });
         break;
       case EventTypes.updateIid:
-        const updateIid: IidDocumentSDKType = getDocFromAttributes(
+        const uIid: IidDocumentSDKType = getDocFromAttributes(
           event.attributes,
           event.type
         );
-        await prisma.iID.update({
-          where: { id: updateIid.id },
-          data: {
-            id: updateIid.id,
-            controller: updateIid.controller,
-            verificationMethod: updateIid.verificationMethod as any,
-            authentication: updateIid.authentication,
-            assertionMethod: updateIid.assertionMethod,
-            keyAgreement: updateIid.keyAgreement,
-            capabilityInvocation: updateIid.capabilityInvocation,
-            capabilityDelegation: updateIid.capabilityDelegation,
-            alsoKnownAs: updateIid.alsoKnownAs,
-            metadata: updateIid.metadata as any,
-            context: updateIid.context as any,
-            service: updateIid.service as any,
-            linkedResource: updateIid.linkedResource as any,
-            linkedClaim: updateIid.linkedClaim as any,
-            accordedRight: updateIid.accordedRight as any,
-            linkedEntity: updateIid.linkedEntity as any,
-          },
+        await updateIid({
+          id: uIid.id,
+          controller: uIid.controller,
+          verificationMethod: uIid.verificationMethod,
+          authentication: uIid.authentication,
+          assertionMethod: uIid.assertionMethod,
+          keyAgreement: uIid.keyAgreement,
+          capabilityInvocation: uIid.capabilityInvocation,
+          capabilityDelegation: uIid.capabilityDelegation,
+          alsoKnownAs: uIid.alsoKnownAs,
+          metadata: uIid.metadata,
+          context: uIid.context,
+          service: uIid.service,
+          linkedResource: uIid.linkedResource,
+          linkedClaim: uIid.linkedClaim,
+          accordedRight: uIid.accordedRight,
+          linkedEntity: uIid.linkedEntity,
         });
         break;
 
@@ -89,44 +108,39 @@ export const syncEventData = async (
       // ENTITY
       // ==========================================================
       case EventTypes.createEntity:
-        const createEntity: EntitySDKType = getDocFromAttributes(
+        const cEntity: EntitySDKType = getDocFromAttributes(
           event.attributes,
           event.type
         );
-        await prisma.entity.create({
-          data: {
-            id: createEntity.id,
-            type: createEntity.type,
-            startDate: createEntity.start_date as any,
-            endDate: createEntity.end_date as any,
-            status: createEntity.status,
-            relayerNode: createEntity.relayer_node,
-            credentials: createEntity.credentials,
-            entityVerified: createEntity.entity_verified,
-            metadata: createEntity.metadata as any,
-            accounts: createEntity.accounts as any,
-          },
+        await createEntity({
+          id: cEntity.id,
+          type: cEntity.type,
+          startDate: cEntity.start_date as any,
+          endDate: cEntity.end_date as any,
+          status: cEntity.status,
+          relayerNode: cEntity.relayer_node,
+          credentials: cEntity.credentials,
+          entityVerified: cEntity.entity_verified,
+          metadata: cEntity.metadata,
+          accounts: cEntity.accounts,
         });
         break;
       case EventTypes.updateEntity:
-        const updateEntity: EntitySDKType = getDocFromAttributes(
+        const uEntity: EntitySDKType = getDocFromAttributes(
           event.attributes,
           event.type
         );
-        await prisma.entity.update({
-          where: { id: updateEntity.id },
-          data: {
-            id: updateEntity.id,
-            type: updateEntity.type,
-            startDate: updateEntity.start_date as any,
-            endDate: updateEntity.end_date as any,
-            status: updateEntity.status,
-            relayerNode: updateEntity.relayer_node,
-            credentials: updateEntity.credentials,
-            entityVerified: updateEntity.entity_verified,
-            metadata: updateEntity.metadata as any,
-            accounts: updateEntity.accounts as any,
-          },
+        await updateEntity({
+          id: uEntity.id,
+          type: uEntity.type,
+          startDate: uEntity.start_date as any,
+          endDate: uEntity.end_date as any,
+          status: uEntity.status,
+          relayerNode: uEntity.relayer_node,
+          credentials: uEntity.credentials,
+          entityVerified: uEntity.entity_verified,
+          metadata: uEntity.metadata,
+          accounts: uEntity.accounts,
         });
         break;
 
@@ -134,128 +148,106 @@ export const syncEventData = async (
       // CLAIMS
       // ==========================================================
       case EventTypes.createCollection:
-        const createCollection: CollectionSDKType = getDocFromAttributes(
+        const cCollection: CollectionSDKType = getDocFromAttributes(
           event.attributes,
           event.type
         );
-        await prisma.claimCollection.create({
-          data: {
-            id: createCollection.id,
-            entity: createCollection.entity,
-            admin: createCollection.admin,
-            protocol: createCollection.protocol,
-            startDate: createCollection.start_date as any,
-            endDate: createCollection.end_date as any,
-            quota: Number(createCollection.quota),
-            count: Number(createCollection.count),
-            evaluated: Number(createCollection.evaluated),
-            approved: Number(createCollection.approved),
-            rejected: Number(createCollection.rejected),
-            disputed: Number(createCollection.disputed),
-            invalidated: Number(createCollection.invalidated),
-            state: ixo.claims.v1beta1.collectionStateFromJSON(
-              createCollection.state
-            ),
-            payments: createCollection.payments as any,
-          },
+        await createClaimCollection({
+          id: cCollection.id,
+          entity: cCollection.entity,
+          admin: cCollection.admin,
+          protocol: cCollection.protocol,
+          startDate: cCollection.start_date as any,
+          endDate: cCollection.end_date as any,
+          quota: Number(cCollection.quota),
+          count: Number(cCollection.count),
+          evaluated: Number(cCollection.evaluated),
+          approved: Number(cCollection.approved),
+          rejected: Number(cCollection.rejected),
+          disputed: Number(cCollection.disputed),
+          invalidated: Number(cCollection.invalidated ?? 0),
+          state: ixo.claims.v1beta1.collectionStateFromJSON(cCollection.state),
+          payments: cCollection.payments,
         });
         break;
       case EventTypes.updateCollection:
-        const updateCollection: CollectionSDKType = getDocFromAttributes(
+        const uCollection: CollectionSDKType = getDocFromAttributes(
           event.attributes,
           event.type
         );
-        await prisma.claimCollection.update({
-          where: { id: updateCollection.id },
-          data: {
-            id: updateCollection.id,
-            entity: updateCollection.entity,
-            admin: updateCollection.admin,
-            protocol: updateCollection.protocol,
-            startDate: updateCollection.start_date as any,
-            endDate: updateCollection.end_date as any,
-            quota: Number(updateCollection.quota),
-            count: Number(updateCollection.count),
-            evaluated: Number(updateCollection.evaluated),
-            approved: Number(updateCollection.approved),
-            rejected: Number(updateCollection.rejected),
-            disputed: Number(updateCollection.disputed),
-            invalidated: Number(updateCollection.invalidated),
-            state: ixo.claims.v1beta1.collectionStateFromJSON(
-              updateCollection.state
-            ),
-            payments: updateCollection.payments as any,
-          },
+        await updateClaimCollection({
+          id: uCollection.id,
+          entity: uCollection.entity,
+          admin: uCollection.admin,
+          protocol: uCollection.protocol,
+          startDate: uCollection.start_date as any,
+          endDate: uCollection.end_date as any,
+          quota: Number(uCollection.quota),
+          count: Number(uCollection.count),
+          evaluated: Number(uCollection.evaluated),
+          approved: Number(uCollection.approved),
+          rejected: Number(uCollection.rejected),
+          disputed: Number(uCollection.disputed),
+          invalidated: Number(uCollection.invalidated ?? 0),
+          state: ixo.claims.v1beta1.collectionStateFromJSON(uCollection.state),
+          payments: uCollection.payments,
         });
         break;
       case EventTypes.submitClaim:
-        const submitClaim: ClaimSDKType = getDocFromAttributes(
+        const cClaim: ClaimSDKType = getDocFromAttributes(
           event.attributes,
           event.type
         );
-        await prisma.claim.create({
-          data: {
-            claimId: submitClaim.claim_id,
-            collectionId: submitClaim.collection_id,
-            agentDid: submitClaim.agent_did,
-            agentAddress: submitClaim.agent_address,
-            submissionDate: submitClaim.submission_date as any,
-            paymentsStatus: submitClaim.payments_status as any,
-          },
+        await createClaim({
+          claimId: cClaim.claim_id,
+          collectionId: cClaim.collection_id,
+          agentDid: cClaim.agent_did,
+          agentAddress: cClaim.agent_address,
+          submissionDate: cClaim.submission_date as any,
+          paymentsStatus: cClaim.payments_status,
         });
         break;
       case EventTypes.updateClaim:
-        const updateClaim: ClaimSDKType = getDocFromAttributes(
+        const uClaim: ClaimSDKType = getDocFromAttributes(
           event.attributes,
           event.type
         );
-        const evaluation = updateClaim.evaluation
+        const evaluation = uClaim.evaluation
           ? {
-              collectionId: updateClaim.evaluation!.collection_id,
-              oracle: updateClaim.evaluation!.oracle,
-              agentDid: updateClaim.evaluation!.agent_did,
-              agentAddress: updateClaim.evaluation!.agent_address,
+              collectionId: uClaim.evaluation!.collection_id,
+              oracle: uClaim.evaluation!.oracle,
+              agentDid: uClaim.evaluation!.agent_did,
+              agentAddress: uClaim.evaluation!.agent_address,
               status: ixo.claims.v1beta1.evaluationStatusFromJSON(
-                updateClaim.evaluation!.status
+                uClaim.evaluation!.status
               ),
-              reason: updateClaim.evaluation!.reason,
-              verificationProof: updateClaim.evaluation!.verification_proof,
-              evaluationDate: updateClaim.evaluation!.evaluation_date as any,
-              amount: updateClaim.evaluation!.amount as any,
+              reason: uClaim.evaluation!.reason,
+              verificationProof: uClaim.evaluation!.verification_proof,
+              evaluationDate: uClaim.evaluation!.evaluation_date as any,
+              amount: uClaim.evaluation!.amount,
+              claimId: uClaim.claim_id,
             }
-          : null;
-        await prisma.claim.update({
-          where: { claimId: updateClaim.claim_id },
-          data: {
-            claimId: updateClaim.claim_id,
-            collectionId: updateClaim.collection_id,
-            agentDid: updateClaim.agent_did,
-            agentAddress: updateClaim.agent_address,
-            submissionDate: updateClaim.submission_date as any,
-            paymentsStatus: updateClaim.payments_status as any,
-            ...(evaluation && {
-              evaluation: {
-                upsert: {
-                  create: evaluation,
-                  update: evaluation,
-                },
-              },
-            }),
-          },
+          : undefined;
+        await updateClaim({
+          claimId: uClaim.claim_id,
+          collectionId: uClaim.collection_id,
+          agentDid: uClaim.agent_did,
+          agentAddress: uClaim.agent_address,
+          submissionDate: uClaim.submission_date as any,
+          paymentsStatus: uClaim.payments_status,
+          evaluation,
         });
         break;
       case EventTypes.disputeClaim:
-        const disputeClaim: DisputeSDKType = getDocFromAttributes(
+        const cDispute: DisputeSDKType = getDocFromAttributes(
           event.attributes,
           event.type
         );
-        await prisma.dispute.create({
-          data: {
-            proof: disputeClaim.data!.proof,
-            subjectId: disputeClaim.subject_id,
-            type: disputeClaim.type,
-            data: disputeClaim.data as any,
-          },
+        await createDispute({
+          proof: cDispute.data!.proof,
+          subjectId: cDispute.subject_id,
+          type: cDispute.type,
+          data: cDispute.data,
         });
         break;
 
@@ -263,95 +255,58 @@ export const syncEventData = async (
       // TOKEN
       // ==========================================================
       case EventTypes.createToken:
-        const createTokenToken: TokenSDKType = getDocFromAttributes(
+        const cTokenClass: TokenSDKType = getDocFromAttributes(
           event.attributes,
           event.type
         );
-        await prisma.tokenClass.create({
-          data: {
-            contractAddress: createTokenToken.contract_address,
-            minter: createTokenToken.minter,
-            class: createTokenToken.class,
-            name: createTokenToken.name,
-            description: createTokenToken.description,
-            image: createTokenToken.image,
-            type: createTokenToken.type,
-            cap: BigInt(createTokenToken.cap ?? 0),
-            supply: BigInt(createTokenToken.supply ?? 0),
-            paused: createTokenToken.paused,
-            stopped: createTokenToken.stopped,
-            retired: {
-              create: createTokenToken.retired.map((r) => ({
-                ...r,
-                amount: BigInt(r.amount ?? 0),
-              })),
-            },
-            cancelled: {
-              create: createTokenToken.cancelled.map((r) => ({
-                ...r,
-                amount: BigInt(r.amount ?? 0),
-              })),
-            },
-          },
+        await createTokenClass({
+          contractAddress: cTokenClass.contract_address,
+          minter: cTokenClass.minter,
+          class: cTokenClass.class,
+          name: cTokenClass.name,
+          description: cTokenClass.description,
+          image: cTokenClass.image,
+          type: cTokenClass.type,
+          cap: BigInt(cTokenClass.cap ?? 0),
+          supply: BigInt(cTokenClass.supply ?? 0),
+          paused: cTokenClass.paused,
+          stopped: cTokenClass.stopped,
         });
         break;
+      // TODO: check sql and make more efficient by using other events also
       case EventTypes.updateToken:
-        const updateTokenToken: TokenSDKType = getDocFromAttributes(
+        const uTokenClass: TokenSDKType = getDocFromAttributes(
           event.attributes,
           event.type
         );
-        await prisma.tokenClass.update({
-          where: { contractAddress: updateTokenToken.contract_address },
-          data: {
-            retired: { deleteMany: {} },
-            cancelled: { deleteMany: {} },
-          },
+        await updateTokenClass({
+          contractAddress: uTokenClass.contract_address,
+          minter: uTokenClass.minter,
+          class: uTokenClass.class,
+          name: uTokenClass.name,
+          description: uTokenClass.description,
+          image: uTokenClass.image,
+          type: uTokenClass.type,
+          cap: BigInt(uTokenClass.cap ?? 0),
+          supply: BigInt(uTokenClass.supply ?? 0),
+          paused: uTokenClass.paused,
+          stopped: uTokenClass.stopped,
+          retired: uTokenClass.retired,
+          cancelled: uTokenClass.cancelled,
         });
-        await prisma.tokenClass.update({
-          where: { contractAddress: updateTokenToken.contract_address },
-          data: {
-            minter: updateTokenToken.minter,
-            class: updateTokenToken.class,
-            name: updateTokenToken.name,
-            description: updateTokenToken.description,
-            image: updateTokenToken.image,
-            type: updateTokenToken.type,
-            cap: BigInt(updateTokenToken.cap ?? 0),
-            supply: BigInt(updateTokenToken.supply ?? 0),
-            paused: updateTokenToken.paused,
-            stopped: updateTokenToken.stopped,
-            retired: {
-              create: updateTokenToken.retired.map((r) => ({
-                ...r,
-                amount: BigInt(r.amount ?? 0),
-              })),
-            },
-            cancelled: {
-              create: updateTokenToken.cancelled.map((r) => ({
-                ...r,
-                amount: BigInt(r.amount ?? 0),
-              })),
-            },
-          },
-        });
+
         break;
       case EventTypes.mintToken:
-        const mintTokenTokenProperties: TokenPropertiesSDKType =
-          getDocFromAttributes(event.attributes, event.type);
-        await prisma.tokenClass.update({
-          where: { name: mintTokenTokenProperties.name },
-          data: {
-            Token: {
-              create: {
-                id: mintTokenTokenProperties.id,
-                index: mintTokenTokenProperties.index,
-                collection: mintTokenTokenProperties.collection,
-                tokenData: {
-                  create: mintTokenTokenProperties.tokenData,
-                },
-              },
-            },
-          },
+        const cToken: TokenPropertiesSDKType = getDocFromAttributes(
+          event.attributes,
+          event.type
+        );
+        await createToken({
+          id: cToken.id,
+          index: cToken.index,
+          collection: cToken.collection,
+          name: cToken.name,
+          tokenData: cToken.tokenData,
         });
         break;
 
@@ -359,92 +314,84 @@ export const syncEventData = async (
       // BONDS
       // ==========================================================
       case EventTypes.createBond:
-        const createBond: BondSDKType = getDocFromAttributes(
+        const cBond: BondSDKType = getDocFromAttributes(
           event.attributes,
           event.type
         );
-        await prisma.bond.create({
-          data: {
-            token: createBond.token,
-            name: createBond.name,
-            description: createBond.description,
-            creatorDid: createBond.creator_did,
-            controllerDid: createBond.controller_did,
-            functionType: createBond.function_type,
-            functionParameters: createBond.function_parameters as any,
-            reserveTokens: createBond.reserve_tokens,
-            txFeePercentage: createBond.tx_fee_percentage,
-            exitFeePercentage: createBond.exit_fee_percentage,
-            feeAddress: createBond.fee_address,
-            reserveWithdrawalAddress: createBond.reserve_withdrawal_address,
-            maxSupply: createBond.max_supply as any,
-            orderQuantityLimits: createBond.order_quantity_limits as any,
-            sanityRate: createBond.sanity_rate,
-            sanityMarginPercentage: createBond.sanity_margin_percentage,
-            currentSupply: createBond.current_supply as any,
-            currentReserve: createBond.current_reserve as any,
-            availableReserve: createBond.available_reserve as any,
-            currentOutcomePaymentReserve:
-              createBond.current_outcome_payment_reserve as any,
-            allowSells: createBond.allow_sells,
-            allowReserveWithdrawals: createBond.allow_reserve_withdrawals,
-            alphaBond: createBond.alpha_bond,
-            batchBlocks: createBond.batch_blocks,
-            outcomePayment: createBond.outcome_payment,
-            state: createBond.state,
-            bondDid: createBond.bond_did,
-            oracleDid: createBond.oracle_did,
-          },
+        await createBond({
+          token: cBond.token,
+          name: cBond.name,
+          description: cBond.description,
+          creatorDid: cBond.creator_did,
+          controllerDid: cBond.controller_did,
+          functionType: cBond.function_type,
+          functionParameters: cBond.function_parameters,
+          reserveTokens: cBond.reserve_tokens,
+          txFeePercentage: cBond.tx_fee_percentage,
+          exitFeePercentage: cBond.exit_fee_percentage,
+          feeAddress: cBond.fee_address,
+          reserveWithdrawalAddress: cBond.reserve_withdrawal_address,
+          maxSupply: cBond.max_supply,
+          orderQuantityLimits: cBond.order_quantity_limits,
+          sanityRate: cBond.sanity_rate,
+          sanityMarginPercentage: cBond.sanity_margin_percentage,
+          currentSupply: cBond.current_supply,
+          currentReserve: cBond.current_reserve,
+          availableReserve: cBond.available_reserve,
+          currentOutcomePaymentReserve: cBond.current_outcome_payment_reserve,
+          allowSells: cBond.allow_sells,
+          allowReserveWithdrawals: cBond.allow_reserve_withdrawals,
+          alphaBond: cBond.alpha_bond,
+          batchBlocks: cBond.batch_blocks,
+          outcomePayment: cBond.outcome_payment,
+          state: cBond.state,
+          bondDid: cBond.bond_did,
+          oracleDid: cBond.oracle_did,
         });
         break;
       case EventTypes.updateBond:
-        const updateBond: BondSDKType = getDocFromAttributes(
+        const uBond: BondSDKType = getDocFromAttributes(
           event.attributes,
           event.type
         );
-        await prisma.bond.update({
-          where: { bondDid: updateBond.bond_did },
-          data: {
-            token: updateBond.token,
-            name: updateBond.name,
-            description: updateBond.description,
-            creatorDid: updateBond.creator_did,
-            controllerDid: updateBond.controller_did,
-            functionType: updateBond.function_type,
-            functionParameters: updateBond.function_parameters as any,
-            reserveTokens: updateBond.reserve_tokens,
-            txFeePercentage: updateBond.tx_fee_percentage,
-            exitFeePercentage: updateBond.exit_fee_percentage,
-            feeAddress: updateBond.fee_address,
-            reserveWithdrawalAddress: updateBond.reserve_withdrawal_address,
-            maxSupply: updateBond.max_supply as any,
-            orderQuantityLimits: updateBond.order_quantity_limits as any,
-            sanityRate: updateBond.sanity_rate,
-            sanityMarginPercentage: updateBond.sanity_margin_percentage,
-            currentSupply: updateBond.current_supply as any,
-            currentReserve: updateBond.current_reserve as any,
-            availableReserve: updateBond.available_reserve as any,
-            currentOutcomePaymentReserve:
-              updateBond.current_outcome_payment_reserve as any,
-            allowSells: updateBond.allow_sells,
-            allowReserveWithdrawals: updateBond.allow_reserve_withdrawals,
-            alphaBond: updateBond.alpha_bond,
-            batchBlocks: updateBond.batch_blocks,
-            outcomePayment: updateBond.outcome_payment,
-            state: updateBond.state,
-            oracleDid: updateBond.oracle_did,
-          },
+        await updateBond({
+          bondDid: uBond.bond_did,
+          token: uBond.token,
+          name: uBond.name,
+          description: uBond.description,
+          creatorDid: uBond.creator_did,
+          controllerDid: uBond.controller_did,
+          functionType: uBond.function_type,
+          functionParameters: uBond.function_parameters,
+          reserveTokens: uBond.reserve_tokens,
+          txFeePercentage: uBond.tx_fee_percentage,
+          exitFeePercentage: uBond.exit_fee_percentage,
+          feeAddress: uBond.fee_address,
+          reserveWithdrawalAddress: uBond.reserve_withdrawal_address,
+          maxSupply: uBond.max_supply,
+          orderQuantityLimits: uBond.order_quantity_limits,
+          sanityRate: uBond.sanity_rate,
+          sanityMarginPercentage: uBond.sanity_margin_percentage,
+          currentSupply: uBond.current_supply,
+          currentReserve: uBond.current_reserve,
+          availableReserve: uBond.available_reserve,
+          currentOutcomePaymentReserve: uBond.current_outcome_payment_reserve,
+          allowSells: uBond.allow_sells,
+          allowReserveWithdrawals: uBond.allow_reserve_withdrawals,
+          alphaBond: uBond.alpha_bond,
+          batchBlocks: uBond.batch_blocks,
+          outcomePayment: uBond.outcome_payment,
+          state: uBond.state,
+          oracleDid: uBond.oracle_did,
         });
         break;
       case EventTypes.setNextAlphaBond:
-        await prisma.bondAlpha.create({
-          data: {
-            bondDid: getValueFromAttributes(event.attributes, "bond_did"),
-            alpha: getValueFromAttributes(event.attributes, "next_alpha"),
-            oracleDid: getValueFromAttributes(event.attributes, "signer"),
-            height: blockHeight,
-            timestamp: timestamp,
-          },
+        await createBondAlpha({
+          bondDid: getValueFromAttributes(event.attributes, "bond_did"),
+          alpha: getValueFromAttributes(event.attributes, "next_alpha"),
+          oracleDid: getValueFromAttributes(event.attributes, "signer"),
+          height: blockHeight,
+          timestamp: timestamp,
         });
         break;
       case EventTypes.buyOrderBond:
@@ -452,15 +399,13 @@ export const syncEventData = async (
           event.attributes,
           event.type
         );
-        await prisma.bondBuy.create({
-          data: {
-            bondDid: getValueFromAttributes(event.attributes, "bond_did"),
-            accountDid: buyOrder.base_order!.account_did,
-            amount: buyOrder.base_order!.amount as any,
-            maxPrices: buyOrder.max_prices as any,
-            height: blockHeight,
-            timestamp: timestamp,
-          },
+        await createBondBuy({
+          bondDid: getValueFromAttributes(event.attributes, "bond_did"),
+          accountDid: buyOrder.base_order!.account_did,
+          amount: buyOrder.base_order!.amount,
+          maxPrices: buyOrder.max_prices,
+          height: blockHeight,
+          timestamp: timestamp,
         });
         break;
       case EventTypes.sellOrderBond:
@@ -468,14 +413,12 @@ export const syncEventData = async (
           event.attributes,
           event.type
         );
-        await prisma.bondSell.create({
-          data: {
-            bondDid: getValueFromAttributes(event.attributes, "bond_did"),
-            accountDid: sellOrder.base_order!.account_did,
-            amount: sellOrder.base_order!.amount as any,
-            height: blockHeight,
-            timestamp: timestamp,
-          },
+        await createBondSell({
+          bondDid: getValueFromAttributes(event.attributes, "bond_did"),
+          accountDid: sellOrder.base_order!.account_did,
+          amount: sellOrder.base_order!.amount,
+          height: blockHeight,
+          timestamp: timestamp,
         });
         break;
       case EventTypes.swapOrderBond:
@@ -483,79 +426,69 @@ export const syncEventData = async (
           event.attributes,
           event.type
         );
-        await prisma.bondSwap.create({
-          data: {
-            bondDid: getValueFromAttributes(event.attributes, "bond_did"),
-            accountDid: swapOrder.base_order!.account_did,
-            amount: swapOrder.base_order!.amount as any,
-            toToken: swapOrder.to_token,
-            height: blockHeight,
-            timestamp: timestamp,
-          },
+        await createBondSwap({
+          bondDid: getValueFromAttributes(event.attributes, "bond_did"),
+          accountDid: swapOrder.base_order!.account_did,
+          amount: swapOrder.base_order!.amount,
+          toToken: swapOrder.to_token,
+          height: blockHeight,
+          timestamp: timestamp,
         });
         break;
       case EventTypes.outcomePaymentBond:
-        await prisma.outcomePayment.create({
-          data: {
-            bondDid: getValueFromAttributes(event.attributes, "bond_did"),
-            senderDid: getValueFromAttributes(event.attributes, "sender_did"),
-            senderAddress: getValueFromAttributes(
-              event.attributes,
-              "sender_address"
-            ),
-            amount: getValueFromAttributes(event.attributes, "outcome_payment"),
-            height: blockHeight,
-            timestamp: timestamp,
-          },
+        await createOutcomePayment({
+          bondDid: getValueFromAttributes(event.attributes, "bond_did"),
+          senderDid: getValueFromAttributes(event.attributes, "sender_did"),
+          senderAddress: getValueFromAttributes(
+            event.attributes,
+            "sender_address"
+          ),
+          amount: getValueFromAttributes(event.attributes, "outcome_payment"),
+          height: blockHeight,
+          timestamp: timestamp,
         });
         break;
       case EventTypes.shareWithdrawalBond:
-        await prisma.shareWithdrawal.create({
-          data: {
-            bondDid: getValueFromAttributes(event.attributes, "bond_did"),
-            recipientDid: getValueFromAttributes(
-              event.attributes,
-              "recipient_did"
-            ),
-            recipientAddress: getValueFromAttributes(
-              event.attributes,
-              "recipient_address"
-            ),
-            amount: getValueFromAttributes(
-              event.attributes,
-              "withdraw_payment"
-            ),
-            height: blockHeight,
-            timestamp: timestamp,
-          },
+        await createShareWithdrawal({
+          bondDid: getValueFromAttributes(event.attributes, "bond_did"),
+          recipientDid: getValueFromAttributes(
+            event.attributes,
+            "recipient_did"
+          ),
+          recipientAddress: getValueFromAttributes(
+            event.attributes,
+            "recipient_address"
+          ),
+          amount: getValueFromAttributes(event.attributes, "withdraw_payment"),
+          height: blockHeight,
+          timestamp: timestamp,
         });
         break;
       case EventTypes.reserveWithdrawalBond:
-        await prisma.reserveWithdrawal.create({
-          data: {
-            bondDid: getValueFromAttributes(event.attributes, "bond_did"),
-            withdrawerDid: getValueFromAttributes(
-              event.attributes,
-              "withdrawer_did"
-            ),
-            withdrawerAddress: getValueFromAttributes(
-              event.attributes,
-              "withdrawer_address"
-            ),
-            amount: getValueFromAttributes(event.attributes, "withdraw_amount"),
-            reserveWithdrawalAddress: getValueFromAttributes(
-              event.attributes,
-              "reserve_withdrawal_address"
-            ),
-            height: blockHeight,
-            timestamp: timestamp,
-          },
+        await createReserveWithdrawal({
+          bondDid: getValueFromAttributes(event.attributes, "bond_did"),
+          withdrawerDid: getValueFromAttributes(
+            event.attributes,
+            "withdrawer_did"
+          ),
+          withdrawerAddress: getValueFromAttributes(
+            event.attributes,
+            "withdrawer_address"
+          ),
+          amount: getValueFromAttributes(event.attributes, "withdraw_amount"),
+          reserveWithdrawalAddress: getValueFromAttributes(
+            event.attributes,
+            "reserve_withdrawal_address"
+          ),
+          height: blockHeight,
+          timestamp: timestamp,
         });
         break;
       default:
         break;
     }
   } catch (error) {
-    console.error("syncEventData: ", error.message);
+    console.error("ERROR::syncEventData:: ", error);
+    // throw error;
   }
 };

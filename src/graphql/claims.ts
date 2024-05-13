@@ -6,18 +6,18 @@ export const ClaimsPlugin = makeExtendSchemaPlugin((build) => {
 
   return {
     typeDefs: gql`
-      extend type ClaimsConnection {
+      extend type ClaimCollection {
         """
-        # Checks if there are any claims with null schemaType
+        Checks if there are any claims with null schemaType
         """
         claimSchemaTypesLoaded: Boolean!
       }
     `,
     resolvers: {
-      ClaimsConnection: {
+      ClaimCollection: {
         claimSchemaTypesLoaded: async (connection, args, ctx, rInfo) => {
-          return (
-            (await ClaimsHandler.getAllCollectionClaimTypesNull()).length < 1
+          return await ClaimsHandler.getCollectionClaimSchemaTypesLoaded(
+            connection.id
           );
         },
       },

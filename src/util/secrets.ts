@@ -9,3 +9,5 @@ export const TRUST_PROXY = process.env.TRUST_PROXY || 1;
 export const ENTITY_MODULE_CONTRACT_ADDRESS =
   process.env.ENTITY_MODULE_CONTRACT_ADDRESS || "";
 export const IPFS_SERVICE_MAPPING = process.env.IPFS_SERVICE_MAPPING || "";
+export const DATABASE_USE_SSL =
+  Number(process.env.DATABASE_USE_SSL ?? "0") || 0;

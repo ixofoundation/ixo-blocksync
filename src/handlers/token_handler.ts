@@ -1,5 +1,13 @@
 import { GetAccountTransactionsLoader } from "../graphql/token";
-import { prisma } from "../prisma/prisma_client";
+import {
+  getEntityAccountsByIidContext,
+  getEntityDeviceAccounts,
+} from "../postgres/entity";
+import {
+  getTokenClass,
+  getTokenRetiredAmountSUM,
+  getTokenTransaction,
+} from "../postgres/token";
 
 export const createGetAccountTransactionsKey = (
   id: string,
@@ -11,7 +19,7 @@ export const createGetAccountTransactionsKey = (
 export const getTokensTotalByAddress = async (
   address: string,
   name?: string,
-  transactionsLoader?: any,
+  transactionsLoader?: GetAccountTransactionsLoader,
   allEntityRetired?: boolean
 ) => {
   const tokens = await getAccountTokens(
@@ -43,13 +51,10 @@ export const getTokensTotalByAddress = async (
 export const getTokensTotalForEntities = async (
   address: string,
   name?: string,
-  transactionsLoader?: any,
+  transactionsLoader?: GetAccountTransactionsLoader,
   allEntityRetired?: boolean
 ) => {
-  const entities = await prisma.entity.findMany({
-    where: { owner: address, type: "asset/device" },
-    select: { id: true, accounts: true },
-  });
+  const entities = await getEntityDeviceAccounts(address);
 
   const tokens = entities.map(async (entity: any) => {
     const entityTokens = await getTokensTotalByAddress(
@@ -66,52 +71,12 @@ export const getTokensTotalForEntities = async (
   return tokensTotal.filter((t) => Object.keys(t.tokens).length > 0);
 };
 
-type TokenTransactions = {
-  Token: {
-    name: string;
-    collection: string;
-  };
-  amount: bigint;
-  to: string;
-  from: string;
-  tokenId: string;
-}[];
 export const getAccountTransactions = async (
   address: string,
   name?: string
 ) => {
   if (!address) return [];
-
-  const PAGE_SIZE = 30000; // Fetch 10,000 records at a time. Adjust as per your needs.
-  let tokenTransactions: TokenTransactions = [];
-  let skip = 0;
-
-  while (true) {
-    const tokens: TokenTransactions = await prisma.tokenTransaction.findMany({
-      where: {
-        OR: [{ from: address }, { to: address }],
-        ...(name && { Token: { name: name } }),
-      },
-      select: {
-        from: true,
-        to: true,
-        amount: true,
-        tokenId: true,
-        Token: {
-          select: { name: true, collection: true },
-        },
-      },
-      skip: skip,
-      take: PAGE_SIZE,
-    });
-
-    // Exit the loop if no more records are found.
-    if (tokens.length === 0) break;
-
-    tokenTransactions.push(...tokens);
-    skip += PAGE_SIZE;
-  }
-  return tokenTransactions;
+  return await getTokenTransaction(address, name);
 };
 
 // Get all the tokens for an account and returns them in a format that is easy to work with:
@@ -142,25 +107,11 @@ export const getAccountTokens = async (
       )
     : await getAccountTransactions(address, name);
 
-  // const test = await prisma.tokenTransaction.groupBy({
-  //   by: ["from", "to", "tokenId"],
-  //   where: {
-  //     OR: [{ from: address }, { to: address }],
-  //     ...(name && { Token: { name: name } }),
-  //   },
-  //   _sum: {
-  //     amount: true,
-  //   },
-  // });
-  // console.dir(test, { depth: null });
-
   const tokens = {};
   for (const curr of tokenTransactions) {
-    if (!tokens[curr.Token.name]) {
-      const tokenClass = await prisma.tokenClass.findFirst({
-        where: { name: curr.Token.name },
-      });
-      tokens[curr.Token.name] = {
+    if (!tokens[curr.name]) {
+      const tokenClass = await getTokenClass(curr.name);
+      tokens[curr.name] = {
         contractAddress: tokenClass?.contractAddress,
         description: tokenClass?.description,
         image: tokenClass?.image,
@@ -170,13 +121,11 @@ export const getAccountTokens = async (
 
     // if from address is same it means it is an outgoing transaction in relation to the address
     if (curr.from === address) {
-      if (tokens[curr.Token.name].tokens[curr.tokenId]) {
-        tokens[curr.Token.name].tokens[curr.tokenId].amount -= Number(
-          curr.amount
-        );
+      if (tokens[curr.name].tokens[curr.tokenId]) {
+        tokens[curr.name].tokens[curr.tokenId].amount -= Number(curr.amount);
       } else {
-        tokens[curr.Token.name].tokens[curr.tokenId] = {
-          collection: curr.Token.collection,
+        tokens[curr.name].tokens[curr.tokenId] = {
+          collection: curr.collection,
           amount: -Number(curr.amount),
           minted: 0,
           retired: 0,
@@ -184,19 +133,15 @@ export const getAccountTokens = async (
       }
       // if no to it means was retired from this address
       if (!curr.to) {
-        tokens[curr.Token.name].tokens[curr.tokenId].retired += Number(
-          curr.amount
-        );
+        tokens[curr.name].tokens[curr.tokenId].retired += Number(curr.amount);
       }
       // if to address is same it means it is an incoming transaction in relation to the address
     } else {
-      if (tokens[curr.Token.name].tokens[curr.tokenId]) {
-        tokens[curr.Token.name].tokens[curr.tokenId].amount += Number(
-          curr.amount
-        );
+      if (tokens[curr.name].tokens[curr.tokenId]) {
+        tokens[curr.name].tokens[curr.tokenId].amount += Number(curr.amount);
       } else {
-        tokens[curr.Token.name].tokens[curr.tokenId] = {
-          collection: curr.Token.collection,
+        tokens[curr.name].tokens[curr.tokenId] = {
+          collection: curr.collection,
           amount: Number(curr.amount),
           minted: 0,
           retired: 0,
@@ -204,9 +149,7 @@ export const getAccountTokens = async (
       }
       // if no from it means was minted to address
       if (!curr.from) {
-        tokens[curr.Token.name].tokens[curr.tokenId].minted += Number(
-          curr.amount
-        );
+        tokens[curr.name].tokens[curr.tokenId].minted += Number(curr.amount);
       }
     }
   }
@@ -223,20 +166,10 @@ export const getAccountTokens = async (
           return null;
         })
         .filter((t) => t !== null);
-      const retiredTokens = await prisma.token.findMany({
-        where: { id: { in: ids } },
-        select: {
-          id: true,
-          TokenRetired: {
-            select: { amount: true },
-          },
-        },
-      });
+
+      const retiredTokens = await getTokenRetiredAmountSUM(ids);
       retiredTokens.forEach((t) => {
-        tokens[key].tokens[t.id].retired = t.TokenRetired.reduce(
-          (a, b) => a + Number(b.amount),
-          0
-        );
+        tokens[key].tokens[t.id].retired = Number(t.amount);
       });
     }
   }
@@ -257,19 +190,12 @@ export const getAccountTokens = async (
 export const getTokensTotalForCollection = async (
   did: string,
   name?: string,
-  transactionLoader?: any,
+  transactionLoader?: GetAccountTransactionsLoader,
   allEntityRetired?: boolean
 ) => {
-  const entities = await prisma.entity.findMany({
-    where: {
-      IID: {
-        context: {
-          array_contains: [{ val: did }],
-        },
-      },
-    },
-    select: { id: true, accounts: true },
-  });
+  const entities = await getEntityAccountsByIidContext(
+    JSON.stringify([{ key: "class", val: did }])
+  );
 
   const tokens = entities.map(async (entity) => {
     const entityTokens = await getTokensTotalByAddress(
@@ -289,7 +215,7 @@ export const getTokensTotalForCollection = async (
 export const getTokensTotalForCollectionAmounts = async (
   did: string,
   name?: string,
-  transactionLoader?: any,
+  transactionLoader?: GetAccountTransactionsLoader,
   allEntityRetired?: boolean
 ) => {
   const tokens = await getTokensTotalForCollection(
