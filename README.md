@@ -29,9 +29,9 @@ Copy `.env.example` to `.env` and configure. If this step is skipped, ixo-blocks
 - Create a database called Blocksync
 
 ```bash
-npm install
-npm run build
-npm start
+yarn install
+yarn build
+yarn start
 ```
 
 ---
