@@ -121,7 +121,7 @@ export const getAllClaimTypesFromCellnode = async () => {
 export const getClaimTypesFromCellnode = async (collectionID: string) => {
   // first get all claims with type null
   const collectionClaims = await getCollectionClaimsTypeNull(collectionID, 150);
-  if (collectionClaims.length < 1) return;
+  if (collectionClaims && collectionClaims.length < 1) return;
   // get Collection Entity to get Collection Cellnode Service URI
   const collectionEntity = await getCollectionEntity(collectionID);
   if (!collectionEntity) return;
