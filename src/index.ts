@@ -1,19 +1,19 @@
 require("log-timestamp");
 require("dotenv").config();
 
+import "./util/long";
 import { app } from "./app";
 import http from "http";
 import * as SyncBlocks from "./sync/sync_blocks";
 import { DATABASE_URL, PORT, MIGRATE_DB_PROGRAMATICALLY } from "./util/secrets";
 import * as SyncChain from "./sync/sync_chain";
-import * as SyncBlocksCustom from "./sync/sync_custom";
-import { prismaMigrate } from "./prisma/migration";
+import { postgresMigrate } from "./postgres/migrations";
 
 (async () => {
   // first apply db migrations if env var set, for prod dbs where no access to shell
   if (MIGRATE_DB_PROGRAMATICALLY) {
     console.log("MIGRATE_DB_PROGRAMATICALLY: ", MIGRATE_DB_PROGRAMATICALLY);
-    await prismaMigrate(DATABASE_URL || "");
+    await postgresMigrate(DATABASE_URL || "");
   }
 
   // server setup and start logic

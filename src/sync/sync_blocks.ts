@@ -1,31 +1,34 @@
-import * as ChainHandler from "../handlers/chain_handler";
 import { sleep } from "../util/sleep";
 import * as TransactionSyncHandler from "../sync_handlers/transaction_sync_handler";
 import * as EventSyncHandler from "../sync_handlers/event_sync_handler";
 import { currentChain } from "./sync_chain";
-import { prismaCore } from "../prisma/prisma_client";
+import { getCoreBlock } from "../postgres/blocksync_core/block";
+import { getChain, updateChain } from "../postgres/chain";
 
 let syncing: boolean;
 
 const logIndexTime = false;
 const logFetchTime = false;
-const logSync100Time = true;
+const logSync1000Time = true;
 
 export const startSync = async () => {
   syncing = true;
 
-  let currentBlock = await ChainHandler.getLastSyncedBlockHeight(currentChain);
+  let currentBlock = (await getChain(currentChain.chainId))?.blockHeight || 1;
   console.log(`Starting Syncing at Block ${currentBlock}`);
 
   // if already has synced, start from next block
   if (currentBlock !== 1) currentBlock++;
 
   let count = 0;
-  if (logSync100Time) console.time("sync");
+  if (logSync1000Time) console.time("sync");
   while (syncing) {
+    if (currentBlock === 10001) return;
     try {
       if (logFetchTime) console.time("fetch");
-      const block = await getBlock(currentBlock);
+      // console.log("wait then get block:", currentBlock, getMemoryUsage().rss);
+      // await sleep(2000);
+      const block = await getCoreBlock(currentBlock);
       if (logFetchTime) console.timeEnd("fetch");
 
       if (block) {
@@ -39,15 +42,15 @@ export const startSync = async () => {
             block.height,
             block.time
           ),
-          ChainHandler.updateChain({
+          updateChain({
             chainId: currentChain.chainId,
             blockHeight: block.height,
           }),
         ]);
 
-        if (block.height % 100 === 0) {
-          console.log(`Synced Block ${block.height}`);
-          if (logSync100Time) console.timeLog("sync");
+        if (currentBlock % 1000 === 0) {
+          console.log(`Synced Block ${currentBlock}`);
+          if (logSync1000Time) console.timeLog("sync");
         }
 
         if (logIndexTime) console.timeEnd("index");
@@ -61,37 +64,7 @@ export const startSync = async () => {
       }
     } catch (error) {
       console.error(`Error Adding Block ${currentBlock}: ${error}`);
+      // break;
     }
   }
-};
-
-export const getBlock = async (blockHeight: number) => {
-  return await prismaCore.blockCore.findFirst({
-    where: { height: blockHeight },
-    select: {
-      height: true,
-      time: true,
-      transactions: {
-        select: {
-          hash: true,
-          code: true,
-          fee: true,
-          gasUsed: true,
-          gasWanted: true,
-          memo: true,
-          messages: { select: { typeUrl: true, value: true } },
-        },
-      },
-      events: {
-        // orderBy is required since blocksync-core saves beginBlock events first
-        // then tx events and lastly endBlock events
-        orderBy: { id: "asc" },
-        select: {
-          id: true,
-          type: true,
-          attributes: true,
-        },
-      },
-    },
-  });
 };

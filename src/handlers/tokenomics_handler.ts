@@ -1,8 +1,8 @@
 import Long from "long";
-import { prisma } from "../prisma/prisma_client";
 import { queryClient, registry } from "../sync/sync_chain";
 import { Uint8ArrayToJS } from "../util/conversions";
 import { sleep } from "../util/sleep";
+import { upsertTokenomicsAccount } from "../postgres/tokenomics_account";
 
 export const supplyTotal = async () => {
   let supply: any[] = [];
@@ -188,29 +188,21 @@ export const getAccountsAndBalances = async () => {
         ]);
 
       try {
-        await prisma.tokenomicsAccount.upsert({
-          where: { address: acc.address },
-          update: {
-            availBalance,
-            delegationsBalance,
-            rewardsBalance,
-            totalBalance: availBalance + delegationsBalance + rewardsBalance,
-            type: acc.type,
-          },
-          create: {
-            address: acc.address,
-            accountNumber: acc.accountNumber.low,
-            availBalance,
-            delegationsBalance,
-            rewardsBalance,
-            totalBalance: availBalance + delegationsBalance + rewardsBalance,
-            type: acc.type,
-          },
+        await upsertTokenomicsAccount({
+          address: acc.address,
+          accountNumber: acc.accountNumber.low,
+          availBalance: BigInt(availBalance),
+          delegationsBalance: BigInt(delegationsBalance),
+          rewardsBalance: BigInt(rewardsBalance),
+          totalBalance: BigInt(
+            availBalance + delegationsBalance + rewardsBalance
+          ),
+          type: acc.type,
         });
       } catch (error) {
         skippedSomeUpload = true;
         console.error(
-          "ERROR::tokenomics::getAccountsAndBalances::prisma ",
+          "ERROR::tokenomics::getAccountsAndBalances::upsertTokenomicsAccount ",
           error
         );
       }
