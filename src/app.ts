@@ -83,7 +83,7 @@ app.get("/api/ipfs/:cid", async (req, res, next) => {
     });
     res.end(buf);
   } catch (error) {
-    next(error);
+    res.status(404).send(error.message || "Document not found");
   }
 });
 
@@ -103,7 +103,7 @@ app.get("/api/claims/collection/:id/claims", async (req, res, next) => {
     );
     res.json(claims);
   } catch (error) {
-    next(error);
+    res.status(500).send(error.message);
   }
 });
 
@@ -116,7 +116,7 @@ app.get("/api/tokenomics/fetchAccounts", async (req, res, next) => {
     const result = await TokenomicsHandler.getAccountsAndBalances();
     res.json(result);
   } catch (error) {
-    next(error);
+    res.status(500).send(error.message);
   }
 });
 

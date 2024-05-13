@@ -27,15 +27,14 @@ export const getIpfsDocument = async (cid: string): Promise<Ipfs> => {
     });
     //  res = await axios.get(`https://ipfs.io/ipfs/${cid}`);
   } catch (error) {
-    if (error.response && error.response.status === 404) {
-      throw new Error(`failed to get ${cid} - [404] Not Found`);
-    }
     if (error.response && error.response.status === 429) {
       await sleep(1000);
       return await getIpfsDocument(cid);
     }
-    if (error.response && error.response.status === 500) {
-      throw new Error(`failed to get ${cid} - [500] Internal Server Error`);
+    if (error.response) {
+      throw new Error(
+        `failed to get ${cid} - [${error.response.status}] ${error.response.statusText}`
+      );
     }
     throw new Error(`failed to get ${cid} - ${error}`);
   }
