@@ -254,10 +254,7 @@ export const getCollectionEntity = async (
   | undefined
 > => {
   try {
-    const res = await pool.query(getCollectionEntitySql, [
-      collectionId,
-      length,
-    ]);
+    const res = await pool.query(getCollectionEntitySql, [collectionId]);
     return res.rows[0];
   } catch (error) {
     throw error;

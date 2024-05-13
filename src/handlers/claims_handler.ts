@@ -108,7 +108,11 @@ export const getAllClaimTypesFromCellnode = async () => {
         await getClaimTypesFromCellnode(collection.id);
       } catch (error) {
         // catch at per collection loop level to avoid stopping the whole process
-        console.error("ERROR::getAllClaimTypesFromCellnode: ", error.message);
+        // uncomment to not fill logs with errors, check this log if debug why some collections are not getting schemaTypes
+        // console.error(
+        //   "ERROR::getAllClaimTypesFromCellnode::inner:: ",
+        //   error.message
+        // );
       }
     }
   } catch (error) {
@@ -121,7 +125,7 @@ export const getAllClaimTypesFromCellnode = async () => {
 export const getClaimTypesFromCellnode = async (collectionID: string) => {
   // first get all claims with type null
   const collectionClaims = await getCollectionClaimsTypeNull(collectionID, 150);
-  if (collectionClaims && collectionClaims.length < 1) return;
+  if (collectionClaims.length < 1) return;
   // get Collection Entity to get Collection Cellnode Service URI
   const collectionEntity = await getCollectionEntity(collectionID);
   if (!collectionEntity) return;
