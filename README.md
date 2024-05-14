@@ -68,4 +68,4 @@ The server exposes a Graphql api endpoint at `/graphql` which is set up using [P
 
 A graphiql playground gets exposed at the endpoint `/graphiql` where you can play around, test queries and see the schemas.
 
-We also generate and expose the full graphql schema file (schema.graphql) under the endpoint `/api/graphql_schema` if you need it to generate clients
+We also generate and expose the full graphql schema file (schema.graphql) under the endpoint `/api/graphql_schema` if you need it to generate clients.
