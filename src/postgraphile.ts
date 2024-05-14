@@ -54,7 +54,7 @@ export const Postgraphile = postgraphile(
     exportGqlSchemaPath: "public/graphql/schema.graphql",
     enableQueryBatching: true,
     legacyRelations: "omit",
-    watchPg: true,
+    // watchPg: true,
     enableCors: true,
     bodySizeLimit: "500kB",
     graphiql: true,
