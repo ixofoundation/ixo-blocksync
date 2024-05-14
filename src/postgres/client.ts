@@ -1,9 +1,9 @@
 import { Pool } from "pg";
-import { DATABASE_USE_SSL } from "../util/secrets";
+import { DATABASE_URL, DATABASE_USE_SSL } from "../util/secrets";
 
 export const pool = new Pool({
   application_name: "Blocksync",
-  connectionString: process.env.DATABASE_URL,
+  connectionString: DATABASE_URL,
   // maximum number of clients the pool should contain
   // by default this is set to 10.
   max: 30,
