@@ -1,4 +1,5 @@
 import { Pool } from "pg";
+import { DATABASE_USE_SSL } from "../../util/secrets";
 
 export const corePool = new Pool({
   application_name: "Blocksync",
@@ -13,6 +14,7 @@ export const corePool = new Pool({
   // number of milliseconds to wait before timing out when connecting a new client
   // by default this is 0 which means no timeout
   connectionTimeoutMillis: 1000,
+  ...(DATABASE_USE_SSL && { ssl: { rejectUnauthorized: false } }), // Use SSL (recommended
 });
 
 // helper function that manages connect to pool and release,
