@@ -57,8 +57,8 @@ export const startSync = async () => {
         currentBlock++;
       } else {
         count++;
-        if (count === 10) {
-          console.log(`Next block, 10th attempt: ${currentBlock}`);
+        if (count === 15) {
+          console.log(`Next block, 15th attempt: ${currentBlock}`);
         }
         await sleep(1000);
       }
