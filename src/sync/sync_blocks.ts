@@ -23,7 +23,7 @@ export const startSync = async () => {
   let count = 0;
   if (logSync1000Time) console.time("sync");
   while (syncing) {
-    if (currentBlock === 10001) return;
+    // if (currentBlock === 10001) return;
     try {
       if (logFetchTime) console.time("fetch");
       // console.log("wait then get block:", currentBlock, getMemoryUsage().rss);
