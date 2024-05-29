@@ -51,11 +51,9 @@ UPDATE "public"."Entity" SET
 	   "credentials" = $6,
 	"entityVerified" = $7,
 	      "metadata" = $8,
-	      "accounts" = $9,
-	    "externalId" = $10,
-	         "owner" = $11
+	      "accounts" = $9
 WHERE
-	            "id" = $12;
+	            "id" = $10;
 `;
 export const updateEntity = async (p: Entity): Promise<void> => {
   try {
@@ -69,8 +67,6 @@ export const updateEntity = async (p: Entity): Promise<void> => {
       p.entityVerified,
       JSON.stringify(p.metadata),
       JSON.stringify(p.accounts),
-      p.externalId,
-      p.owner,
       p.id,
     ]);
   } catch (error) {
