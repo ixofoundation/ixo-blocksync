@@ -64,7 +64,7 @@ export const startSync = async () => {
       }
     } catch (error) {
       console.error(`Error Adding Block ${currentBlock}: ${error}`);
-      // break;
+      break;
     }
   }
 };

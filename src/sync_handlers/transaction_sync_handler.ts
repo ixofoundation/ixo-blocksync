@@ -49,8 +49,9 @@ export const syncTransactions = async (
 const decodeAndProcessMessage = async (
   message: any,
   transactionHash: string
-): Promise<Message> => {
+): Promise<Message | null> => {
   const value = message.value;
+  if (!value) return null;
 
   let authZExecMsgs: any[] = [];
   if (message.typeUrl === "/cosmos.authz.v1beta1.MsgExec") {
