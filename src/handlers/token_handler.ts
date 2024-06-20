@@ -227,11 +227,15 @@ export const getTokensTotalForCollectionAmounts = async (
   let newTokens = {};
   tokens.forEach((t) => {
     Object.keys(t.tokens).forEach((key) => {
-      const amounts = {
-        amount: t.tokens[key].tokens[did].amount,
-        minted: t.tokens[key].tokens[did].minted,
-        retired: t.tokens[key].tokens[did].retired,
-      };
+      const amounts: any = Object.values(t.tokens[key].tokens).reduce(
+        (acc: any, curr: any) => {
+          acc.amount += curr.amount;
+          acc.minted += curr.minted;
+          acc.retired += curr.retired;
+          return acc;
+        },
+        { amount: 0, minted: 0, retired: 0 }
+      );
       if (!newTokens[key]) {
         newTokens[key] = amounts;
       } else {
