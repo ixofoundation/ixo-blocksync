@@ -20,5 +20,8 @@ import { postgresMigrate } from "./postgres/migrations";
   SyncChain.syncChain().then(() => SyncBlocks.startSync());
 
   const server = http.createServer(app);
+  server.keepAliveTimeout = 76000; // Set the keepalive timeout to 76 seconds
+  server.headersTimeout = 77000; // Set the headers timeout to 77 seconds
+
   server.listen(PORT, () => console.log(`Listening on ${PORT}`));
 })();
