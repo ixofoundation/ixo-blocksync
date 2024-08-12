@@ -22,7 +22,7 @@ export const getIpfsDocument = async (cid: string): Promise<Ipfs> => {
 
   let res;
   try {
-    res = await axios.get(`https://${cid}.ipfs.cf-ipfs.com`, {
+    res = await axios.get(`https://${cid}.ipfs.w3s.link`, {
       responseType: "arraybuffer",
     });
     //  res = await axios.get(`https://ipfs.io/ipfs/${cid}`);
