@@ -1,4 +1,3 @@
-import { prisma } from "../prisma/prisma_client";
 import {
   makeExtendSchemaPlugin,
   gql,
@@ -23,11 +22,7 @@ export const IidPlugin = makeExtendSchemaPlugin((build) => {
     resolvers: {
       Query: {
         testGetIidByIid: async (_query, args, context, resolveInfo) => {
-          const iid = await prisma.iID.findFirst({
-            where: {
-              id: args.id,
-            },
-          });
+          const iid = { id: args.id }; // can do sql or async stuff here
           return iid;
         },
       },

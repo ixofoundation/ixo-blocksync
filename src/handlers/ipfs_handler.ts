@@ -1,9 +1,8 @@
 import axios from "axios";
-import { prisma } from "../prisma/prisma_client";
 import { web3StorageRateLimiter } from "../util/rate-limiter";
 import { sleep } from "../util/sleep";
-import { Ipfs } from "@prisma/client";
 import axiosRetry from "axios-retry";
+import { getIpfs, Ipfs, upsertIpfs } from "../postgres/ipfs";
 
 axiosRetry(axios, {
   retries: 3,
@@ -11,11 +10,7 @@ axiosRetry(axios, {
 });
 
 export const getIpfsDocument = async (cid: string): Promise<Ipfs> => {
-  const doc = await prisma.ipfs.findFirst({
-    where: {
-      cid: cid,
-    },
-  });
+  const doc = await getIpfs(cid);
   if (doc) return doc;
 
   try {
@@ -27,20 +22,19 @@ export const getIpfsDocument = async (cid: string): Promise<Ipfs> => {
 
   let res;
   try {
-    res = await axios.get(`https://${cid}.ipfs.cf-ipfs.com`, {
+    res = await axios.get(`https://${cid}.ipfs.w3s.link`, {
       responseType: "arraybuffer",
     });
     //  res = await axios.get(`https://ipfs.io/ipfs/${cid}`);
   } catch (error) {
-    if (error.response && error.response.status === 404) {
-      throw new Error(`failed to get ${cid} - [404] Not Found`);
-    }
     if (error.response && error.response.status === 429) {
       await sleep(1000);
       return await getIpfsDocument(cid);
     }
-    if (error.response && error.response.status === 500) {
-      throw new Error(`failed to get ${cid} - [500] Internal Server Error`);
+    if (error.response) {
+      throw new Error(
+        `failed to get ${cid} - [${error.response.status}] ${error.response.statusText}`
+      );
     }
     throw new Error(`failed to get ${cid} - ${error}`);
   }
@@ -62,16 +56,15 @@ export const getIpfsDocument = async (cid: string): Promise<Ipfs> => {
 
   const buffer = Buffer.from(res.data);
 
-  return prisma.ipfs.upsert({
-    where: { cid: cid },
-    update: {
-      contentType: type,
-      data: buffer.toString("base64"),
-    },
-    create: {
-      cid: cid,
-      contentType: type,
-      data: buffer.toString("base64"),
-    },
+  await upsertIpfs({
+    cid: cid,
+    contentType: type,
+    data: buffer.toString("base64"),
   });
+
+  return {
+    cid: cid,
+    contentType: type,
+    data: buffer.toString("base64"),
+  };
 };

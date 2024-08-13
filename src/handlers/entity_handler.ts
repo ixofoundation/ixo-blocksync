@@ -1,57 +1,46 @@
-import { prisma } from "../prisma/prisma_client";
-import { base64ToJson } from "../util/helpers";
+import { ParentEntityLoader } from "../graphql/entity";
+import {
+  getEntityAndIid,
+  getEntityDeviceAndNoExternalId,
+  getEntityParentIid,
+  updateEntityExternalId,
+} from "../postgres/entity";
+import { base64ToJson, chunkArray } from "../util/helpers";
 import { IPFS_SERVICE_MAPPING } from "../util/secrets";
 import { getIpfsDocument } from "./ipfs_handler";
 
 export const getParentEntityById = async (id: string) => {
-  return await prisma.entity.findFirst({
-    where: { id: id },
-    select: {
-      IID: {
-        select: {
-          context: true,
-          linkedEntity: true,
-          linkedResource: true,
-          linkedClaim: true,
-          service: true,
-        },
-      },
-    },
-  });
+  return await getEntityParentIid(id);
 };
 
 // Helper function to fetch an entity and all its parents and add it's parents service,
 // linkedResource, linkedEntity, linkedClaim to the entity as it inherits them.
-export const getFullEntityById = async (id: string, parentEntityLoader?) => {
-  const baseEntity: any = await prisma.entity.findFirst({
-    where: { id: id },
-    include: { IID: true },
-  });
+export const getFullEntityById = async (
+  id: string,
+  parentEntityLoader?: ParentEntityLoader
+) => {
+  const baseEntity = await getEntityAndIid(id);
+  if (!baseEntity) throw new Error("ERROR::getFullEntityById");
 
-  const serviceIds = baseEntity!.IID.service.map((s) => s.id);
-  const linkedResourceIds = baseEntity!.IID.linkedResource.map((r) => r.id);
-
-  for (const key of Object.keys(baseEntity!.IID)) {
-    if (!baseEntity[key]) baseEntity[key] = baseEntity!.IID[key];
-  }
-  delete baseEntity!.IID;
+  const serviceIds = baseEntity.service.map((s) => s.id);
+  const linkedResourceIds = baseEntity.linkedResource.map((r) => r.id);
 
   let classVal = baseEntity!.context.find((c) => c.key === "class")?.val;
   if (classVal) {
     while (true) {
-      let record: any = parentEntityLoader
+      let record = parentEntityLoader
         ? await parentEntityLoader.load(classVal)
         : await getParentEntityById(classVal);
-      const newClassVal = record?.IID.context.find(
-        (c) => c.key === "class"
-      )?.val;
-      for (const service of record!.IID.service) {
+      if (!record) break;
+
+      const newClassVal = record.context.find((c) => c.key === "class")?.val;
+      for (const service of record.service) {
         if (!serviceIds.includes(service.id)) {
           baseEntity!.service.push(service);
           serviceIds.push(service.id);
         }
       }
-      for (const linkedResource of record!.IID.linkedResource) {
+      for (const linkedResource of record.linkedResource) {
         if (!linkedResourceIds.includes(linkedResource.id)) {
           baseEntity!.linkedResource.push(linkedResource);
           linkedResourceIds.push(linkedResource.id);
@@ -88,42 +77,32 @@ export const getFullEntityById = async (id: string, parentEntityLoader?) => {
 };
 
 export const deviceExternalIdsLoaded = async () => {
-  const entity = await prisma.entity.findFirst({
-    where: { AND: [{ externalId: null }, { type: "asset/device" }] },
-    select: { id: true },
-  });
-  return !entity;
+  const entity = await getEntityDeviceAndNoExternalId(1);
+  return !entity.length;
 };
 
+let entitiesBusyLoading = false;
 // Helper function to fetch "asset/device" entities with null externalId and update them
 export const getEntitiesExternalId = async (amount: number, isCron = false) => {
-  const unknownEntities = await prisma.entity.findMany({
-    where: { AND: [{ externalId: null }, { type: "asset/device" }] },
-    select: {
-      id: true,
-      IID: {
-        select: {
-          linkedResource: true,
-        },
-      },
-    },
-    take: amount,
-  });
+  if (entitiesBusyLoading) return;
+  entitiesBusyLoading = true;
 
-  const entities = await Promise.all(
-    unknownEntities.map(async (e: any) => {
-      const deviceCredsUri = e.IID.linkedResource.find((lr) =>
+  try {
+    const unknownEntities = await getEntityDeviceAndNoExternalId(amount);
+
+    const promises = unknownEntities.map(async (e) => {
+      const deviceCredsUri = e.linkedResource.find((lr) =>
         lr.id.includes("deviceCredential")
       )?.serviceEndpoint;
       // if not ipfs endpoint then return entity as is, only handling ipfs now
-      if (!deviceCredsUri || !deviceCredsUri.includes("ipfs:")) return e;
+      if (!deviceCredsUri || !deviceCredsUri.includes("ipfs:")) return;
 
       try {
         const doc = await getIpfsDocument(deviceCredsUri.replace("ipfs:", ""));
-        if (!doc) return e;
+        if (!doc) return;
 
         const json = base64ToJson(doc.data);
-        if (!json) return e;
+        if (!json) return;
         let externalId: string;
 
         // handling for cookstoves, can add more below if device credential looks different
@@ -133,24 +112,24 @@ export const getEntitiesExternalId = async (amount: number, isCron = false) => {
         );
         if (!cookstoveCredentialId || cookstoveCredentialId.length < 2)
           cookstoveCredentialId = json.credentialSubject?.id?.split("?id=");
-        if (!cookstoveCredentialId || cookstoveCredentialId.length < 2)
-          return e;
+        if (!cookstoveCredentialId || cookstoveCredentialId.length < 2) return;
         externalId = cookstoveCredentialId[1];
 
-        if (!externalId) return e;
-        return await prisma.entity.update({
-          where: { id: e.id },
-          data: {
-            externalId: externalId,
-          },
-        });
+        if (!externalId) return;
+        await updateEntityExternalId({ id: e.id, externalId: externalId });
       } catch (error) {
         // if isCron the fail silently
         if (!isCron) console.error(error);
-        return e;
       }
-    })
-  );
+    });
 
-  return entities;
+    // chunk promises to avoid memory heap, rate limit and db connection issues
+    for (let promisesChunk of chunkArray(promises, 4)) {
+      await Promise.all(promisesChunk);
+    }
+  } catch (error) {
+    console.error("ERROR::getEntitiesExternalId:: ", error);
+  } finally {
+    entitiesBusyLoading = false;
+  }
 };

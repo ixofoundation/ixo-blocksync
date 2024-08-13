@@ -20,7 +20,7 @@
 <a href="https://github.com/ixofoundation/ixo-blocksync"><img src="https://img.shields.io/github/stars/ixofoundation/jambo?style=social" alt="GitHub"></a>
 <img src="https://img.shields.io/github/repo-size/ixofoundation/ixo-blocksync" alt="GitHub repo size">
 <a href="https://github.com/ixofoundation/jambo/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="License: Apache 2.0"></a></p>
-<p><img src="https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white" alt="Postgres"><img src="https://img.shields.io/badge/express.js-%23404d59.svg?style=for-the-badge&logo=express&logoColor=%2361DAFB" alt="Express.js"><img src="https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white" alt="NodeJS"><img src="https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript"><img src="https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white" alt="Prisma"><img src="https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white" alt="Docker"><img src="https://img.shields.io/badge/-GraphQL-E10098?style=for-the-badge&logo=graphql&logoColor=white" alt="GraphQL"></p>
+<p><img src="https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white" alt="Postgres"><img src="https://img.shields.io/badge/express.js-%23404d59.svg?style=for-the-badge&logo=express&logoColor=%2361DAFB" alt="Express.js"><img src="https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white" alt="NodeJS"><img src="https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript"><img src="https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white" alt="Docker"><img src="https://img.shields.io/badge/-GraphQL-E10098?style=for-the-badge&logo=graphql&logoColor=white" alt="GraphQL"></p>
 <p>Syncs all the public info from an ixo blockchain to an instance of PostgreSQL. It gets fed from a <a href="https://github.com/ixofoundation/ixo-blocksync-core">ixo-blocksync-core</a> database in order to speed up indexing and put less strain on nodes, which means you need an ixo-blocksync-core database connection in order to run this.</p>
 <blockquote>
 <p>For now the only source for information is a ixo-blocksync-core database connection, but we plan on expanding that to different sources in the near future.</p>
@@ -43,7 +43,7 @@
 <ul>
 <li>Create a database called Blocksync</li>
 </ul>
-<pre><code class="language-bash"><span class="hl-0">npm </span><span class="hl-1">install</span><br/><span class="hl-0">npx </span><span class="hl-1">prisma</span><span class="hl-0"> </span><span class="hl-1">migrate</span><span class="hl-0"> </span><span class="hl-1">reset</span><br/><span class="hl-0">npx </span><span class="hl-1">prisma</span><span class="hl-0"> </span><span class="hl-1">generate</span><br/><span class="hl-0">npm </span><span class="hl-1">run</span><span class="hl-0"> </span><span class="hl-1">build</span><br/><span class="hl-0">npm </span><span class="hl-1">start</span>
+<pre><code class="language-bash"><span class="hl-0">npm </span><span class="hl-1">install</span><br/><span class="hl-0">npm </span><span class="hl-1">run</span><span class="hl-0"> </span><span class="hl-1">build</span><br/><span class="hl-0">npm </span><span class="hl-1">start</span>
 </code></pre>
 <hr>
 
@@ -69,6 +69,7 @@ Don&#39;t use quotations when asign env vars for docker<br>Delete the seed folde
 <ul>
 <li><a href="https://github.com/graphile/pg-simplify-inflector">pg-simplify-inflector</a></li>
 <li><a href="https://github.com/graphile-contrib/postgraphile-plugin-connection-filter">postgraphile-plugin-connection-filter</a></li>
+<li><a href="https://github.com/graphile/pg-aggregates">pg-aggregates</a></li>
 </ul>
 <p>A graphiql playground gets exposed at the endpoint <code>/graphiql</code> where you can play around, test queries and see the schemas.</p>
 <p>We also generate and expose the full graphql schema file (schema.graphql) under the endpoint <code>/api/graphql_schema</code> if you need it to generate clients.</p>
@@ -98,26 +99,43 @@ Don&#39;t use quotations when asign env vars for docker<br>Delete the seed folde
 <li class="tsd-kind-module"><a href="modules/graphql_claims.html">graphql/claims</a></li>
 <li class="tsd-kind-module"><a href="modules/graphql_entity.html">graphql/entity</a></li>
 <li class="tsd-kind-module"><a href="modules/graphql_example.html">graphql/example</a></li>
+<li class="tsd-kind-module"><a href="modules/graphql_smart_tags_plugin.html">graphql/smart_<wbr/>tags_<wbr/>plugin</a></li>
 <li class="tsd-kind-module"><a href="modules/graphql_token.html">graphql/token</a></li>
-<li class="tsd-kind-module"><a href="modules/handlers_chain_handler.html">handlers/chain_<wbr/>handler</a></li>
+<li class="tsd-kind-module"><a href="modules/graphql_tokenomics.html">graphql/tokenomics</a></li>
 <li class="tsd-kind-module"><a href="modules/handlers_claims_handler.html">handlers/claims_<wbr/>handler</a></li>
 <li class="tsd-kind-module"><a href="modules/handlers_entity_handler.html">handlers/entity_<wbr/>handler</a></li>
 <li class="tsd-kind-module"><a href="modules/handlers_ipfs_handler.html">handlers/ipfs_<wbr/>handler</a></li>
 <li class="tsd-kind-module"><a href="modules/handlers_token_handler.html">handlers/token_<wbr/>handler</a></li>
+<li class="tsd-kind-module"><a href="modules/handlers_tokenomics_handler.html">handlers/tokenomics_<wbr/>handler</a></li>
 <li class="tsd-kind-module"><a href="modules/index.html">index</a></li>
 <li class="tsd-kind-module"><a href="modules/postgraphile.html">postgraphile</a></li>
-<li class="tsd-kind-module"><a href="modules/prisma_prisma_client.html">prisma/prisma_<wbr/>client</a></li>
+<li class="tsd-kind-module"><a href="modules/postgres_bond.html">postgres/bond</a></li>
+<li class="tsd-kind-module"><a href="modules/postgres_chain.html">postgres/chain</a></li>
+<li class="tsd-kind-module"><a href="modules/postgres_claim.html">postgres/claim</a></li>
+<li class="tsd-kind-module"><a href="modules/postgres_client.html">postgres/client</a></li>
+<li class="tsd-kind-module"><a href="modules/postgres_entity.html">postgres/entity</a></li>
+<li class="tsd-kind-module"><a href="modules/postgres_iid.html">postgres/iid</a></li>
+<li class="tsd-kind-module"><a href="modules/postgres_ipfs.html">postgres/ipfs</a></li>
+<li class="tsd-kind-module"><a href="modules/postgres_migrations.html">postgres/migrations</a></li>
+<li class="tsd-kind-module"><a href="modules/postgres_token.html">postgres/token</a></li>
+<li class="tsd-kind-module"><a href="modules/postgres_tokenomics_account.html">postgres/tokenomics_<wbr/>account</a></li>
+<li class="tsd-kind-module"><a href="modules/postgres_transaction.html">postgres/transaction</a></li>
 <li class="tsd-kind-module"><a href="modules/swagger.html">swagger</a></li>
+<li class="tsd-kind-module"><a href="modules/swagger_json.html">swagger.json</a></li>
 <li class="tsd-kind-module"><a href="modules/sync_sync_blocks.html">sync/sync_<wbr/>blocks</a></li>
 <li class="tsd-kind-module"><a href="modules/sync_sync_chain.html">sync/sync_<wbr/>chain</a></li>
+<li class="tsd-kind-module"><a href="modules/sync_sync_custom.html">sync/sync_<wbr/>custom</a></li>
 <li class="tsd-kind-module"><a href="modules/sync_handlers_event_data_sync_handler.html">sync_<wbr/>handlers/event_<wbr/>data_<wbr/>sync_<wbr/>handler</a></li>
 <li class="tsd-kind-module"><a href="modules/sync_handlers_event_data_sync_wasm_handler.html">sync_<wbr/>handlers/event_<wbr/>data_<wbr/>sync_<wbr/>wasm_<wbr/>handler</a></li>
 <li class="tsd-kind-module"><a href="modules/sync_handlers_event_sync_handler.html">sync_<wbr/>handlers/event_<wbr/>sync_<wbr/>handler</a></li>
 <li class="tsd-kind-module"><a href="modules/sync_handlers_transaction_sync_handler.html">sync_<wbr/>handlers/transaction_<wbr/>sync_<wbr/>handler</a></li>
 <li class="tsd-kind-module"><a href="modules/types_Event.html">types/<wbr/>Event</a></li>
 <li class="tsd-kind-module"><a href="modules/types_General.html">types/<wbr/>General</a></li>
-<li class="tsd-kind-module"><a href="modules/types_getBlock.html">types/get<wbr/>Block</a></li>
+<li class="tsd-kind-module"><a href="modules/util_conversions.html">util/conversions</a></li>
+<li class="tsd-kind-module"><a href="modules/util_db.html">util/db</a></li>
 <li class="tsd-kind-module"><a href="modules/util_helpers.html">util/helpers</a></li>
+<li class="tsd-kind-module"><a href="modules/util_long.html">util/long</a></li>
+<li class="tsd-kind-module"><a href="modules/util_memory.html">util/memory</a></li>
 <li class="tsd-kind-module"><a href="modules/util_proto.html">util/proto</a></li>
 <li class="tsd-kind-module"><a href="modules/util_rate_limiter.html">util/rate-<wbr/>limiter</a></li>
 <li class="tsd-kind-module"><a href="modules/util_secrets.html">util/secrets</a></li>
