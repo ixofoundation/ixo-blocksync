@@ -1,6 +1,6 @@
 {
   "name": "ixo-blocksync",
-  "version": "2.1.0",
+  "version": "2.1.1-develop.1",
   "description": "Syncs all the public info from an ixo blockchain to an instance of PostgresQL ",
   "main": "index.js",
   "scripts": {
@@ -26,7 +26,7 @@
     "@ixo/impactxclient-sdk": "1.2.0",
     "@sentry/node": "7.36.0",
     "@sentry/tracing": "7.36.0",
-    "axios": "1.4.0",
+    "axios": "1.7.3",
     "axios-retry": "3.5.0",
     "body-parser": "1.20.1",
     "compression": "1.7.4",
