@@ -1,6 +1,6 @@
 {
   "name": "ixo-blocksync",
-  "version": "2.1.3-develop.1",
+  "version": "2.1.3",
   "description": "Syncs all the public info from an ixo blockchain to an instance of PostgresQL ",
   "main": "index.js",
   "scripts": {
