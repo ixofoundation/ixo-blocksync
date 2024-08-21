@@ -1,4 +1,4 @@
-# ixo-blocksync 
+# ixo-blocksync
 
 [![ixo](https://img.shields.io/badge/ixo-project-blue)](https://ixo.foundation)
 [![GitHub](https://img.shields.io/github/stars/ixofoundation/jambo?style=social)](https://github.com/ixofoundation/ixo-blocksync)
