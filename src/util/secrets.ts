@@ -11,3 +11,4 @@ export const ENTITY_MODULE_CONTRACT_ADDRESS =
 export const IPFS_SERVICE_MAPPING = process.env.IPFS_SERVICE_MAPPING || "";
 export const DATABASE_USE_SSL =
   Number(process.env.DATABASE_USE_SSL ?? "0") || 0;
+export const STATIC_CHAIN_ID = process.env.STATIC_CHAIN_ID;

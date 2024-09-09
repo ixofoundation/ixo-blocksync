@@ -20,7 +20,7 @@ export const syncEvents = async (
     let res: any = null;
     try {
       if (event.type === "wasm") {
-        res = await syncWasmEventData(event);
+        res = await syncWasmEventData(event, timestamp);
       } else {
         await syncEventData(event, blockHeight, timestamp);
       }

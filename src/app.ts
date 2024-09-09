@@ -15,6 +15,7 @@ import rateLimit from "express-rate-limit";
 import { web3StorageRateLimiter } from "./util/rate-limiter";
 import { Postgraphile } from "./postgraphile";
 import swaggerFile from "./swagger.json";
+import { getCoreBlock } from "./postgres/blocksync_core/block";
 
 const limiter = rateLimit({
   windowMs: 1 * 1000, // 1 second
@@ -114,6 +115,19 @@ app.get("/api/claims/collection/:id/claims", async (req, res, next) => {
 app.get("/api/tokenomics/fetchAccounts", async (req, res, next) => {
   try {
     const result = await TokenomicsHandler.getAccountsAndBalances();
+    res.json(result);
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+});
+
+// =================================
+// Custom helpers for local development
+// =================================
+
+app.get("/api/development/getCoreBlock/:height", async (req, res, next) => {
+  try {
+    const result = await getCoreBlock(Number(req.params.height || 0));
     res.json(result);
   } catch (error) {
     res.status(500).send(error.message);
