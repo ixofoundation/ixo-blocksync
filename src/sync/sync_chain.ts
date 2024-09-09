@@ -1,6 +1,6 @@
 import { createQueryClient, createRegistry } from "@ixo/impactxclient-sdk";
 import * as Proto from "../util/proto";
-import { RPC } from "../util/secrets";
+import { RPC, STATIC_CHAIN_ID } from "../util/secrets";
 import { sleep } from "../util/sleep";
 import { ChainCore, getCoreChain } from "../postgres/blocksync_core/chain";
 import { Chain, createChain, getChain } from "../postgres/chain";
@@ -11,12 +11,18 @@ export let registry: ReturnType<typeof createRegistry>;
 
 export const syncChain = async () => {
   try {
-    queryClient = await createQueryClient(RPC);
     registry = createRegistry();
 
-    const res = await Proto.getLatestBlock();
-    const chainId = res?.block?.header?.chainId || "";
-    if (!chainId) throw new Error("No Chain Found on RPC Endpoint");
+    let chainId: string;
+    if (STATIC_CHAIN_ID) {
+      // if want to run without needing above rpc endpoint, can use this instead and comment above
+      chainId = STATIC_CHAIN_ID;
+    } else {
+      queryClient = await createQueryClient(RPC);
+      const res = await Proto.getLatestBlock();
+      chainId = res?.block?.header?.chainId || "";
+      if (!chainId) throw new Error("No Chain Found on RPC Endpoint");
+    }
 
     let coreChain: ChainCore | undefined;
     while (true) {
