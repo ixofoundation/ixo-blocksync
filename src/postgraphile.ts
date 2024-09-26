@@ -17,6 +17,7 @@ import { TokenomicsPlugin } from "./graphql/tokenomics";
 import { SmartTagsPlugin } from "./graphql/smart_tags_plugin";
 
 const isProd = process.env.NODE_ENV === "production";
+console.log("isProd: ", isProd);
 
 export const Postgraphile = postgraphile(
   {

@@ -192,8 +192,6 @@ export const insertIxoSwapPriceHistory = async (e: {
 }): Promise<void> => {
   try {
     await withTransaction(async (client) => {
-      console.log("token1155Reserve: ", e.token1155Reserve);
-      console.log("token2Reserve: ", e.token2Reserve);
       const token1155ReserveDecimal = new Decimal(e.token1155Reserve);
       const token2ReserveDecimal = new Decimal(e.token2Reserve);
       // safegaurd against divide by zero
@@ -205,8 +203,6 @@ export const insertIxoSwapPriceHistory = async (e: {
       const token_2_price = isEitherZero
         ? decimalZero
         : token1155ReserveDecimal.div(token2ReserveDecimal);
-      console.log("token_1155_price: ", token_1155_price.toString());
-      console.log("token_2_price: ", token_2_price.toString());
       await client.query(insertIxoSwapPriceHistorySql, [
         e.address,
         e.timestamp,

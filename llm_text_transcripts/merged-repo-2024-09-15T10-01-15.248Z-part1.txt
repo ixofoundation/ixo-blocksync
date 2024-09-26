@@ -1,0 +1,3207 @@
+
+/.ENV.EXAMPLE CODE IS BELOW
+PORT="8080"
+# express trust proxy config for if you are using a reverse proxy
+TRUST_PROXY=1
+NODE_ENV=production
+
+SENTRYDSN=
+
+RPC=
+DATABASE_URL=postgresql://username:password@block-sync-db:5432/Blocksync?schema=public
+# database url for core database where seeding information from
+DATABASE_URL_CORE=
+
+# whether to migrate the database programatically or not, if set to true, the database will be migrated programatically
+# according to postgres/migrations, for prod environtments where dont have direct db access or dont want to connect to db directly.
+# Please note this has its own limitations, if this is used please dont modify the db schema manually at all, only rely on the
+# programatic migrations.
+# 1 = true, 0 = false
+MIGRATE_DB_PROGRAMATICALLY=1
+# whether to use ssl for the database connection or not, for localhost db disable this
+# 1 = true, 0 = false
+DATABASE_USE_SSL=0
+
+# optional endpoint to map entity ipfs service to when entity is resolved on blocksync
+IPFS_SERVICE_MAPPING="https://devnet-blocksync.ixo.earth/api/ipfs/"
+
+# entity module contract address to check cosmwasm events to index
+ENTITY_MODULE_CONTRACT_ADDRESS="ixo14hj2tavq8fpesdwxxcu44rty3hh90vhujrvcmstl4zr3txmfvw9sqa3vn7"
+
+# if want to use a static chainId, so when wana skip the rpc call to get the chainId
+STATIC_CHAIN_ID=pandora-8
+
+/.GITHUB/WORKFLOWS/NODE-CI-BUILD.YML CODE IS BELOW
+name: Build and Release
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+jobs:
+  build-and-release:
+    uses: ixofoundation/ixo-github-actions/.github/workflows/node-ci-build.yml@main
+    with:
+      commit_sha: ${{ github.sha }}
+    secrets: inherit
+
+
+/.GITHUB/WORKFLOWS/NODE-CI-PR.YML CODE IS BELOW
+name: Pull Request Build and Test
+on:
+  pull_request:
+
+jobs:
+  call-ci-workflow:
+    uses: ixofoundation/ixo-github-actions/.github/workflows/node-ci-pr.yml@main
+
+/.RELEASERC.JSON CODE IS BELOW
+{
+  "branches": [
+    "main",
+    {
+      "name": "develop",
+      "channel": "alpha",
+      "prerelease": true
+    },
+    {
+      "name": "test",
+      "channel": "beta",
+      "prerelease": true
+    }
+  ],
+  "ci": true,
+  "preset": "conventionalcommits",
+  "plugins": [
+    [
+      "@semantic-release/commit-analyzer",
+      {
+        "releaseRules": [
+          { "breaking": true, "release": "major" },
+          { "type": "feat", "release": "minor" },
+          { "type": "fix", "release": "patch" },
+          { "type": "perf", "release": "patch" },
+          { "type": "build", "release": "patch" },
+          { "scope": "security", "release": "patch" },
+          { "type": "chore", "release": false },
+          { "type": "ci", "release": false },
+          { "type": "docs", "release": false },
+          { "type": "refactor", "release": false },
+          { "type": "revert", "release": false },
+          { "type": "style", "release": false },
+          { "type": "test", "release": false },
+          { "scope": "no-release", "release": false },
+          { "scope": "release", "release": "patch" }
+        ],
+        "presetConfig": true
+      }
+    ],
+    [
+      "@semantic-release/release-notes-generator",
+      {
+        "presetConfig": true
+      }
+    ],
+    [
+      "@semantic-release/npm",
+      {
+        "npmPublish": false
+      }
+    ],
+    "@semantic-release/github"
+  ]
+}
+
+
+/DOCKERFILE CODE IS BELOW
+FROM --platform=linux/amd64 node:18.17.0
+
+# Create app directory
+RUN mkdir /usr/src/app
+WORKDIR /usr/src/app
+
+# Install app dependencies
+COPY package.json yarn.lock ./
+RUN yarn --pure-lockfile --production && yarn cache clean
+
+# Copy rest of files
+COPY . .
+
+
+EXPOSE 8080
+
+# Start
+CMD ["yarn", "start"]
+
+
+/README.MD CODE IS BELOW
+# ixo-blocksync
+
+[![ixo](https://img.shields.io/badge/ixo-project-blue)](https://ixo.foundation)
+[![GitHub](https://img.shields.io/github/stars/ixofoundation/jambo?style=social)](https://github.com/ixofoundation/ixo-blocksync)
+![GitHub repo size](https://img.shields.io/github/repo-size/ixofoundation/ixo-blocksync)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/ixofoundation/jambo/blob/main/LICENSE)
+
+![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)![Express.js](https://img.shields.io/badge/express.js-%23404d59.svg?style=for-the-badge&logo=express&logoColor=%2361DAFB)![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)![GraphQL](https://img.shields.io/badge/-GraphQL-E10098?style=for-the-badge&logo=graphql&logoColor=white)
+
+Syncs all the public info from an ixo blockchain to an instance of PostgreSQL. It gets fed from a [ixo-blocksync-core](https://github.com/ixofoundation/ixo-blocksync-core) database in order to speed up indexing and put less strain on nodes, which means you need an ixo-blocksync-core database connection in order to run this.
+
+> For now the only source for information is a ixo-blocksync-core database connection, but we plan on expanding that to different sources in the near future.
+
+## Run
+
+### From Source
+
+Requirements
+
+- [PostgreSQL](https://www.postgresql.org/download/)
+
+```bash
+git clone https://github.com/ixofoundation/ixo-blocksync.git
+cd ixo-blocksync/
+```
+
+Copy `.env.example` to `.env` and configure. If this step is skipped, ixo-blocksync will use `.env.example` as the configuration by default.
+
+- Create a database called Blocksync
+
+```bash
+yarn install
+yarn build
+yarn start
+```
+
+---
+
+### Using Docker (with Compose)
+
+Requirements
+
+- [Docker](https://docs.docker.com/engine/install/)
+- [Docker Compose](https://docs.docker.com/compose/install/)
+
+```bash
+git clone https://github.com/ixofoundation/ixo-blocksync.git
+cd ixo-blocksync/
+```
+
+Copy `.env.example` to `.env` and configure. If this step is skipped, ixo-blocksync will use `.env.example` as the configuration by default.
+Don't use quotations when asign env vars for docker  
+Delete the seed folder in src/seed/\* if you do not plan to import data from json  
+Create a role(e.g. app_user) in the DB for postgress to work
+
+```bash
+docker build -t ixofoundation/ixo-blocksync:latest .
+docker compose up -d
+```
+
+## API interface
+
+The server exposes a Graphql api endpoint at `/graphql` which is set up using [Postgraphile](https://www.graphile.org/postgraphile/) along with some plugins:
+
+- [pg-simplify-inflector](https://github.com/graphile/pg-simplify-inflector)
+- [postgraphile-plugin-connection-filter](https://github.com/graphile-contrib/postgraphile-plugin-connection-filter)
+- [pg-aggregates](https://github.com/graphile/pg-aggregates)
+
+A graphiql playground gets exposed at the endpoint `/graphiql` where you can play around, test queries and see the schemas.
+
+We also generate and expose the full graphql schema file (schema.graphql) under the endpoint `/api/graphql_schema` if you need it to generate clients.
+
+
+/DOCKER-COMPOSE.YML CODE IS BELOW
+version: "3.6"
+services:
+  blocksync:
+    container_name: blocksync
+    image: ghcr.io/ixofoundation/ixo-blocksync:latest
+    env_file: .env
+    restart: always
+    ports:
+      - 8080:8080
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1m"
+        max-file: "1"
+    depends_on:
+      - blocksync-db
+
+  blocksync-db:
+    container_name: blocksync-db
+    image: postgres:12.12
+    restart: always
+    environment:
+      - POSTGRES_DB=Blocksync
+      - POSTGRES_PASSWORD=postgrespw
+    ports:
+      - 5432:5432
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+
+
+/PACKAGE.JSON CODE IS BELOW
+{
+  "name": "ixo-blocksync",
+  "version": "2.1.4-develop.1",
+  "description": "Syncs all the public info from an ixo blockchain to an instance of PostgresQL ",
+  "main": "index.js",
+  "scripts": {
+    "start": "tsc && node build/dist/index.js",
+    "build": "tsc",
+    "dev": "npx ts-node src/index.ts",
+    "swagger-gen": "npx ts-node ./src/swagger.ts",
+    "docs-gen": "npx typedoc src/* src/*/*",
+    "migrate:up": "node-pg-migrate up -m ./src/postgres/migrations",
+    "migrate:down": "node-pg-migrate down  -m ./src/postgres/migrations",
+    "migrate:redo": "node-pg-migrate redo  -m ./src/postgres/migrations",
+    "migrate:create": "node-pg-migrate create  --migration-filename-format utc --migration-file-language sql  -m ./src/postgres/migrations",
+    "llm": "node llm_text_transcripts/merge-repo.js"
+  },
+  "repository": "https://github.com/ixofoundation/ixo-blocksync",
+  "keywords": [
+    "blockchain"
+  ],
+  "author": "Ixo Foundation",
+  "license": "Apache 2",
+  "dependencies": {
+    "@graphile-contrib/pg-simplify-inflector": "6.1.0",
+    "@graphile/pg-aggregates": "0.1.1",
+    "@ixo/impactxclient-sdk": "1.2.0",
+    "@sentry/node": "7.36.0",
+    "@sentry/tracing": "7.36.0",
+    "axios": "1.7.3",
+    "axios-retry": "3.5.0",
+    "body-parser": "1.20.1",
+    "compression": "1.7.4",
+    "cors": "2.8.5",
+    "cron": "2.3.1",
+    "dataloader": "2.2.2",
+    "decimal.js": "^10.4.3",
+    "dotenv": "16.0.3",
+    "express": "4.18.2",
+    "express-rate-limit": "6.7.0",
+    "graphql-subscriptions": "2.0.0",
+    "helmet": "6.0.1",
+    "http": "0.0.0",
+    "limiter": "2.1.0",
+    "log-timestamp": "0.3.0",
+    "node-pg-migrate": "7.0.0",
+    "pg": "8.11.5",
+    "postgraphile": "4.13.0",
+    "postgraphile-plugin-connection-filter": "2.3.0",
+    "swagger-autogen": "2.23.0",
+    "swagger-ui-express": "4.6.0",
+    "ts-node": "10.9.1",
+    "typedoc": "0.23.24",
+    "typescript": "4.9.5"
+  },
+  "devDependencies": {
+    "@semantic-release/git": "^10.0.1",
+    "@types/compression": "1.7.2",
+    "@types/cors": "2.8.13",
+    "@types/cron": "2.0.1",
+    "@types/express": "4.17.17",
+    "@types/node": "18.13.0",
+    "@types/swagger-ui-express": "4.1.3",
+    "conventional-changelog-conventionalcommits": "^7.0.2",
+    "semantic-release": "22"
+  }
+}
+
+/SRC/APP.TS CODE IS BELOW
+import express from "express";
+import cors from "cors";
+import bodyParser from "body-parser";
+import compression from "compression";
+import { CronJob } from "cron";
+import * as Sentry from "@sentry/node";
+import * as EntityHandler from "./handlers/entity_handler";
+import * as IpfsHandler from "./handlers/ipfs_handler";
+import * as ClaimsHandler from "./handlers/claims_handler";
+import * as TokenomicsHandler from "./handlers/tokenomics_handler";
+import { SENTRYDSN, TRUST_PROXY } from "./util/secrets";
+import swaggerUi from "swagger-ui-express";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
+import { web3StorageRateLimiter } from "./util/rate-limiter";
+import { Postgraphile } from "./postgraphile";
+import swaggerFile from "./swagger.json";
+import { getCoreBlock } from "./postgres/blocksync_core/block";
+
+const limiter = rateLimit({
+  windowMs: 1 * 1000, // 1 second
+  max: 200, // Limit each IP to 100 requests per `window`
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  message: "Too many requests from this IP, please try again after 1 second",
+});
+
+export const app = express();
+app.set("trust proxy", TRUST_PROXY);
+
+Sentry.init({ dsn: SENTRYDSN, tracesSampleRate: 1.0 });
+app.use(cors());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(compression());
+app.use(express.static("public"));
+app.use(Sentry.Handlers.requestHandler());
+app.use(
+  Sentry.Handlers.errorHandler({
+    shouldHandleError(error) {
+      return !!error;
+    },
+  })
+);
+app.use(limiter);
+app.use("/swagger", swaggerUi.serve, swaggerUi.setup(swaggerFile));
+app.use(helmet());
+app.use(Postgraphile);
+
+app.get("/", (req, res) => {
+  res.send("API is Running");
+});
+
+// app.get("/ip", (request, response) =>
+//   response.send({
+//     ips: request.ips,
+//     ip: request.ip,
+//     protocol: request.protocol,
+//     headers: request.headers["x-forwarded-for"],
+//   })
+// );
+
+app.get("/api/graphql_schema", (request, response) =>
+  response.send({
+    ips: request.ips,
+    ip: request.ip,
+    protocol: request.protocol,
+    headers: request.headers["x-forwarded-for"],
+  })
+);
+
+// =================================
+// Ipfs
+// =================================
+
+app.get("/api/ipfs/:cid", async (req, res, next) => {
+  try {
+    const doc = await IpfsHandler.getIpfsDocument(req.params.cid);
+    if (!doc) throw new Error("Document not found");
+    const buf = Buffer.from(doc.data, "base64");
+    res.writeHead(200, {
+      "Content-Type": doc.contentType,
+      "Content-Length": buf.length,
+    });
+    res.end(buf);
+  } catch (error) {
+    res.status(404).send(error.message || "Document not found");
+  }
+});
+
+// =================================
+// Claims
+// =================================
+
+app.get("/api/claims/collection/:id/claims", async (req, res, next) => {
+  try {
+    const claims = await ClaimsHandler.getCollectionClaims(
+      req.params.id,
+      req.query.status as string,
+      req.query.type as string,
+      req.query.take as string,
+      req.query.cursor as string,
+      req.query.orderBy as any
+    );
+    res.json(claims);
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+});
+
+// =================================
+// Tokenomics
+// =================================
+
+app.get("/api/tokenomics/fetchAccounts", async (req, res, next) => {
+  try {
+    const result = await TokenomicsHandler.getAccountsAndBalances();
+    res.json(result);
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+});
+
+// =================================
+// Custom helpers for local development
+// =================================
+
+app.get("/api/development/getCoreBlock/:height", async (req, res, next) => {
+  try {
+    const result = await getCoreBlock(Number(req.params.height || 0));
+    res.json(result);
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+});
+
+// =================================
+// CRON Jobs
+// =================================
+// Get entity type "asset/device" with no externalId and check if it has a deviceCredential
+// Since ipfs rate limit is 200 per minute, we do 100 every 1 minutes to lessen strain
+new CronJob(
+  "1 */1 * * * *",
+  function () {
+    const tokens = web3StorageRateLimiter.getTokensRemaining();
+    if (tokens > 110) EntityHandler.getEntitiesExternalId(100, true);
+  },
+  null,
+  true,
+  "Etc/UTC"
+);
+
+// Get all collections with claims that have no schemaType and then get the schemaType from cellnode
+new CronJob(
+  "1 */1 * * * *",
+  function () {
+    ClaimsHandler.getAllClaimTypesFromCellnode();
+  },
+  null,
+  true,
+  "Etc/UTC"
+);
+
+
+/SRC/GRAPHQL/CLAIMS.TS CODE IS BELOW
+import { makeExtendSchemaPlugin, gql } from "graphile-utils";
+import * as ClaimsHandler from "../handlers/claims_handler";
+
+export const ClaimsPlugin = makeExtendSchemaPlugin((build) => {
+  const { pgSql: sql, inflection } = build;
+
+  return {
+    typeDefs: gql`
+      extend type ClaimCollection {
+        """
+        Checks if there are any claims with null schemaType
+        """
+        claimSchemaTypesLoaded: Boolean!
+      }
+    `,
+    resolvers: {
+      ClaimCollection: {
+        claimSchemaTypesLoaded: async (connection, args, ctx, rInfo) => {
+          return await ClaimsHandler.getCollectionClaimSchemaTypesLoaded(
+            connection.id
+          );
+        },
+      },
+    },
+  };
+});
+
+
+/SRC/GRAPHQL/ENTITY.TS CODE IS BELOW
+import { makeExtendSchemaPlugin, gql } from "graphile-utils";
+import DataLoader from "dataloader";
+import * as EntityHandler from "../handlers/entity_handler";
+
+export type ParentEntityLoader = ReturnType<typeof createParentEntityLoader>;
+export const createParentEntityLoader = () => {
+  return new DataLoader(async (ids: string[]) => {
+    return ids.map(async (id) => await EntityHandler.getParentEntityById(id));
+  });
+};
+
+export type FullEntityLoader = ReturnType<typeof createFullEntityLoader>;
+export const createFullEntityLoader = (
+  parentEntityLoader: ParentEntityLoader
+) => {
+  return new DataLoader(async (ids: string[]) => {
+    return ids.map(
+      async (id) =>
+        await EntityHandler.getFullEntityById(id, parentEntityLoader)
+    );
+  });
+};
+
+export const EntityPlugin = makeExtendSchemaPlugin((build) => {
+  const { pgSql: sql, inflection } = build;
+
+  return {
+    typeDefs: gql`
+      extend type Query {
+        deviceExternalIdsLoaded: Boolean!
+      }
+
+      extend type Entity {
+        context: JSON!
+        controller: [String!]!
+        verificationMethod: JSON!
+        service: JSON!
+        authentication: [String!]!
+        assertionMethod: [String!]!
+        keyAgreement: [String!]!
+        capabilityInvocation: [String!]!
+        capabilityDelegation: [String!]!
+        linkedResource: JSON!
+        linkedClaim: JSON!
+        accordedRight: JSON!
+        linkedEntity: JSON!
+        alsoKnownAs: String!
+        settings: JSON!
+      }
+    `,
+    resolvers: {
+      Query: {
+        deviceExternalIdsLoaded: async (c, args, ctx, rInfo) => {
+          return await EntityHandler.deviceExternalIdsLoaded();
+        },
+      },
+      Entity: {
+        context: async (entity, args, ctx, rInfo) => {
+          return (await ctx.entityLoader.load(entity.__identifiers[0])).context;
+        },
+        controller: async (entity, args, ctx, rInfo) => {
+          return (await ctx.entityLoader.load(entity.__identifiers[0]))
+            .controller;
+        },
+        verificationMethod: async (entity, args, ctx, rInfo) => {
+          return (await ctx.entityLoader.load(entity.__identifiers[0]))
+            .verificationMethod;
+        },
+        service: async (entity, args, ctx, rInfo) => {
+          return (await ctx.entityLoader.load(entity.__identifiers[0])).service;
+        },
+        authentication: async (entity, args, ctx, rInfo) => {
+          return (await ctx.entityLoader.load(entity.__identifiers[0]))
+            .authentication;
+        },
+        assertionMethod: async (entity, args, ctx, rInfo) => {
+          return (await ctx.entityLoader.load(entity.__identifiers[0]))
+            .assertionMethod;
+        },
+        keyAgreement: async (entity, args, ctx, rInfo) => {
+          return (await ctx.entityLoader.load(entity.__identifiers[0]))
+            .keyAgreement;
+        },
+        capabilityInvocation: async (entity, args, ctx, rInfo) => {
+          return (await ctx.entityLoader.load(entity.__identifiers[0]))
+            .capabilityInvocation;
+        },
+        capabilityDelegation: async (entity, args, ctx, rInfo) => {
+          return (await ctx.entityLoader.load(entity.__identifiers[0]))
+            .capabilityDelegation;
+        },
+        linkedResource: async (entity, args, ctx, rInfo) => {
+          return (await ctx.entityLoader.load(entity.__identifiers[0]))
+            .linkedResource;
+        },
+        linkedClaim: async (entity, args, ctx, rInfo) => {
+          return (await ctx.entityLoader.load(entity.__identifiers[0]))
+            .linkedClaim;
+        },
+        accordedRight: async (entity, args, ctx, rInfo) => {
+          return (await ctx.entityLoader.load(entity.__identifiers[0]))
+            .accordedRight;
+        },
+        linkedEntity: async (entity, args, ctx, rInfo) => {
+          return (await ctx.entityLoader.load(entity.__identifiers[0]))
+            .linkedEntity;
+        },
+        alsoKnownAs: async (entity, args, ctx, rInfo) => {
+          return (await ctx.entityLoader.load(entity.__identifiers[0]))
+            .alsoKnownAs;
+        },
+        settings: async (entity, args, ctx, rInfo) => {
+          return (await ctx.entityLoader.load(entity.__identifiers[0]))
+            .settings;
+        },
+      },
+    },
+  };
+});
+
+
+/SRC/GRAPHQL/EXAMPLE.TS CODE IS BELOW
+import {
+  makeExtendSchemaPlugin,
+  gql,
+  makeWrapResolversPlugin,
+} from "graphile-utils";
+
+// Example of a plugin that adds a new query
+export const IidPlugin = makeExtendSchemaPlugin((build) => {
+  const { pgSql: sql, inflection } = build;
+
+  return {
+    typeDefs: gql`
+      type Setting {
+        type: String!
+        # setting: LinkedResource!
+      }
+
+      extend type Query {
+        getIidByIid(id: String!): Iid
+      }
+    `,
+    resolvers: {
+      Query: {
+        testGetIidByIid: async (_query, args, context, resolveInfo) => {
+          const iid = { id: args.id }; // can do sql or async stuff here
+          return iid;
+        },
+      },
+    },
+  };
+});
+
+// Example of a plugin that wraps resolvers
+export const testPlugin = makeWrapResolversPlugin({
+  Entity: {
+    async id(resolver, entity, args, context, resolveInfo) {
+      const result = await resolver(entity, args, context, resolveInfo);
+      console.log(`entity.id output for entity ${entity.id}:`, result);
+      return result;
+    },
+  },
+});
+
+
+/SRC/GRAPHQL/SMART_TAGS_PLUGIN.TS CODE IS BELOW
+import { makeJSONPgSmartTagsPlugin } from "graphile-utils";
+
+export const SmartTagsPlugin = makeJSONPgSmartTagsPlugin({
+  version: 1,
+  config: {
+    class: {
+      "public.TokenTransaction": {
+        tags: {
+          aggregates: "on",
+        },
+      },
+      "public.TokenRetired": {
+        tags: {
+          aggregates: "on",
+        },
+      },
+      "public.TokenCancelled": {
+        tags: {
+          aggregates: "on",
+        },
+      },
+    },
+  },
+});
+
+
+/SRC/GRAPHQL/TOKEN.TS CODE IS BELOW
+import { makeExtendSchemaPlugin, gql } from "graphile-utils";
+import * as TokenHandler from "../handlers/token_handler";
+import DataLoader from "dataloader";
+
+export type GetAccountTransactionsLoader = ReturnType<
+  typeof createGetAccountTransactionsLoader
+>;
+export const createGetAccountTransactionsLoader = () => {
+  return new DataLoader(async (keys: string[]) => {
+    return keys.map(async (key) => {
+      const [id, name] = key.split("-");
+      const actualName = name === "NULL" ? undefined : name;
+      return await TokenHandler.getAccountTransactions(id, actualName);
+    });
+  });
+};
+
+export const TokenPlugin = makeExtendSchemaPlugin((build) => {
+  const { pgSql: sql, inflection } = build;
+
+  return {
+    typeDefs: gql`
+      extend type Query {
+        getAccountTokens(
+          address: String!
+          name: String
+          allEntityRetired: Boolean
+        ): JSON!
+        getTokensTotalByAddress(
+          address: String!
+          name: String
+          allEntityRetired: Boolean
+        ): JSON!
+        getTokensTotalForEntities(
+          address: String!
+          name: String
+          allEntityRetired: Boolean
+        ): JSON!
+        getTokensTotalForCollection(
+          did: String!
+          name: String
+          allEntityRetired: Boolean
+        ): JSON!
+        getTokensTotalForCollectionAmounts(
+          did: String!
+          name: String
+          allEntityRetired: Boolean
+        ): JSON!
+      }
+    `,
+    resolvers: {
+      Query: {
+        getAccountTokens: async (c, args, ctx, rInfo) => {
+          return await TokenHandler.getAccountTokens(
+            args.address,
+            args.name,
+            ctx.getAccountTransactionsLoader,
+            args.allEntityRetired
+          );
+        },
+        getTokensTotalByAddress: async (c, args, ctx, rInfo) => {
+          return await TokenHandler.getTokensTotalByAddress(
+            args.address,
+            args.name,
+            ctx.getAccountTransactionsLoader,
+            args.allEntityRetired
+          );
+        },
+        getTokensTotalForEntities: async (c, args, ctx, rInfo) => {
+          return await TokenHandler.getTokensTotalForEntities(
+            args.address,
+            args.name,
+            ctx.getAccountTransactionsLoader,
+            args.allEntityRetired
+          );
+        },
+        getTokensTotalForCollection: async (c, args, ctx, rInfo) => {
+          return await TokenHandler.getTokensTotalForCollection(
+            args.did,
+            args.name,
+            ctx.getAccountTransactionsLoader,
+            args.allEntityRetired
+          );
+        },
+        getTokensTotalForCollectionAmounts: async (c, args, ctx, rInfo) => {
+          return await TokenHandler.getTokensTotalForCollectionAmounts(
+            args.did,
+            args.name,
+            ctx.getAccountTransactionsLoader,
+            args.allEntityRetired
+          );
+        },
+      },
+    },
+  };
+});
+
+
+/SRC/GRAPHQL/TOKENOMICS.TS CODE IS BELOW
+import { makeExtendSchemaPlugin, gql } from "graphile-utils";
+import * as TokenomicsHandler from "../handlers/tokenomics_handler";
+
+export const TokenomicsPlugin = makeExtendSchemaPlugin((build) => {
+  const { pgSql: sql, inflection } = build;
+
+  return {
+    typeDefs: gql`
+      extend type Query {
+        tokenomicsSupplyTotal: JSON!
+        tokenomicsSupplyCommunityPool: JSON!
+        tokenomicsInflation: JSON!
+        tokenomicsSupplyStaked: JSON!
+        tokenomicsSupplyIBC: JSON!
+      }
+    `,
+    resolvers: {
+      Query: {
+        tokenomicsSupplyTotal: async (c, args, ctx, rInfo) => {
+          return await TokenomicsHandler.supplyTotal();
+        },
+        tokenomicsSupplyCommunityPool: async (c, args, ctx, rInfo) => {
+          return await TokenomicsHandler.supplyCommunityPool();
+        },
+        tokenomicsInflation: async (c, args, ctx, rInfo) => {
+          return await TokenomicsHandler.inflation();
+        },
+        tokenomicsSupplyStaked: async (c, args, ctx, rInfo) => {
+          return await TokenomicsHandler.supplyStaked();
+        },
+        tokenomicsSupplyIBC: async (c, args, ctx, rInfo) => {
+          return await TokenomicsHandler.supplyIBC();
+        },
+      },
+    },
+  };
+});
+
+
+/SRC/HANDLERS/CLAIMS_HANDLER.TS CODE IS BELOW
+import { customQueries } from "@ixo/impactxclient-sdk";
+import { chunkArray } from "../util/helpers";
+import {
+  getCollectionClaimsByType,
+  getCollectionClaimsTypeNull,
+  getCollectionsClaimTypeNull,
+  getCollectionEntity,
+  updateClaimSchema,
+} from "../postgres/claim";
+import { getEntityService } from "../postgres/entity";
+
+/**
+ * Will return empty list if not all claims schemaTypes have been fetched from cellnode
+ * if empty list, call getCollectionClaims again after 1 minute to avoid cellnode rate limit
+ */
+export const getCollectionClaims = async (
+  id: string,
+  status?: string,
+  type?: string,
+  take?: string,
+  cursor?: string,
+  orderBy: "asc" | "desc" = "asc"
+) => {
+  const cleanStatus = status ? parseInt(status) : undefined;
+  const cleanTake = Number(take || 1000);
+
+  const query = async (take: number, type?: string | null, cursor?: string) =>
+    await getCollectionClaimsByType({
+      collectionId: id,
+      includeType: type !== undefined,
+      type: type ?? null,
+      includeStatus: cleanStatus !== undefined,
+      status: cleanStatus ?? null,
+      orderBy: orderBy,
+      take: take || 1000,
+      cursor: cursor ?? null,
+    });
+
+  // get claims with schemaType null and fetch schemaType from cellnode if claims exist
+  let claims = await query(1, null);
+  if (claims.length && !!type) {
+    await getClaimTypesFromCellnode(id);
+
+    // if any more claims with schemaType null, return empty list
+    claims = await query(1, null);
+  }
+
+  if (claims.length && !!type) {
+    return {
+      data: [],
+      metaData: {
+        cursor: null,
+        hasNextPage: false,
+        schemaTypesLoaded: false,
+        message:
+          "Schema types for claims not loaded yet, please try again after 1 minute",
+      },
+    };
+  }
+
+  // plus 1 to check if there is a next page
+  claims = await query(cleanTake + 1, type, cursor);
+
+  // if no claims then return empty list
+  if (claims.length == 0) {
+    return {
+      data: [],
+      metaData: {
+        cursor: null,
+        hasNextPage: false,
+        schemaTypesLoaded: true,
+        message: "No claims found",
+      },
+    };
+  }
+
+  const hasNextPage = claims.length > cleanTake;
+  // data returned is all claims, except the last one if there is a next page
+  if (hasNextPage) claims.pop();
+
+  return {
+    data: claims,
+    metaData: {
+      cursor: claims[claims.length - 1].claimId,
+      hasNextPage: hasNextPage,
+      schemaTypesLoaded: true,
+      message: "Success",
+    },
+  };
+};
+
+export const getCollectionClaimSchemaTypesLoaded = async (id?: string) => {
+  if (!id) return false;
+  const claims = await getCollectionClaimsTypeNull(id, 1);
+  return claims.length == 0;
+};
+
+let isFetchingClaimsSchemaTypes = false;
+// Helper  function to get all collections with claims that have no schemaType
+// and then get the schemaType from cellnode
+export const getAllClaimTypesFromCellnode = async () => {
+  if (isFetchingClaimsSchemaTypes) return;
+  isFetchingClaimsSchemaTypes = true;
+  try {
+    const collections = await getCollectionsClaimTypeNull();
+    for (let collection of collections) {
+      try {
+        await getClaimTypesFromCellnode(collection.id);
+      } catch (error) {
+        // catch at per collection loop level to avoid stopping the whole process
+        // uncomment to not fill logs with errors, check this log if debug why some collections are not getting schemaTypes
+        // console.error(
+        //   "ERROR::getAllClaimTypesFromCellnode::inner:: ",
+        //   error.message
+        // );
+      }
+    }
+  } catch (error) {
+    console.error("ERROR::getAllClaimTypesFromCellnode: ", error.message);
+  } finally {
+    isFetchingClaimsSchemaTypes = false;
+  }
+};
+
+export const getClaimTypesFromCellnode = async (collectionID: string) => {
+  // first get all claims with type null
+  const collectionClaims = await getCollectionClaimsTypeNull(collectionID, 150);
+  if (collectionClaims.length < 1) return;
+  // get Collection Entity to get Collection Cellnode Service URI
+  const collectionEntity = await getCollectionEntity(collectionID);
+  if (!collectionEntity) return;
+  const iid = await getEntityService(collectionEntity.entity);
+  const cellnodeUri = iid.service.find((s) => s.id.includes("cellnode"));
+  if (!cellnodeUri) throw new Error("Cellnode service not found");
+
+  // promises to fetch schemaType from cellnode
+  const promises = collectionClaims.map(async (c) => {
+    let type: string | null = null;
+    try {
+      const res = await customQueries.cellnode.getPublicDoc(
+        c.claimId,
+        cellnodeUri.serviceEndpoint
+      );
+      type =
+        (res.type || []).find((t) => t.includes("claim:")) ||
+        (res.type || []).find((t) => t.includes("ixo:")) ||
+        (res.type || []).find((t) => !!t);
+      if (!type) throw new Error("Claim type not found");
+
+      const typeSplit = type!.split(":");
+      type = typeSplit[typeSplit.length - 1];
+    } catch (error) {
+      // if error 404 then claim not on cellnode, type "unknown"
+      if (error.response?.status === 404) type = "unknown";
+      // if error "Claim type not found" then claim type not extracted from doc, type "extracterror"
+      else if (error.message == "Claim type not found") type = "extracterror";
+      else console.error(error.message);
+    } finally {
+      if (type) {
+        await updateClaimSchema(c.claimId, type);
+      }
+    }
+  });
+
+  // chunk promises to avoid memory heap, rate limit and db connection issues
+  for (let promisesChunk of chunkArray(promises, 4)) {
+    await Promise.all(promisesChunk);
+  }
+};
+
+
+/SRC/HANDLERS/ENTITY_HANDLER.TS CODE IS BELOW
+import { ParentEntityLoader } from "../graphql/entity";
+import {
+  getEntityAndIid,
+  getEntityDeviceAndNoExternalId,
+  getEntityParentIid,
+  updateEntityExternalId,
+} from "../postgres/entity";
+import { base64ToJson, chunkArray } from "../util/helpers";
+import { IPFS_SERVICE_MAPPING } from "../util/secrets";
+import { getIpfsDocument } from "./ipfs_handler";
+
+export const getParentEntityById = async (id: string) => {
+  return await getEntityParentIid(id);
+};
+
+// Helper function to fetch an entity and all its parents and add it's parents service,
+// linkedResource, linkedEntity, linkedClaim to the entity as it inherits them.
+export const getFullEntityById = async (
+  id: string,
+  parentEntityLoader?: ParentEntityLoader
+) => {
+  const baseEntity = await getEntityAndIid(id);
+  if (!baseEntity) throw new Error("ERROR::getFullEntityById");
+
+  const serviceIds = baseEntity.service.map((s) => s.id);
+  const linkedResourceIds = baseEntity.linkedResource.map((r) => r.id);
+
+  let classVal = baseEntity!.context.find((c) => c.key === "class")?.val;
+  if (classVal) {
+    while (true) {
+      let record = parentEntityLoader
+        ? await parentEntityLoader.load(classVal)
+        : await getParentEntityById(classVal);
+      if (!record) break;
+
+      const newClassVal = record.context.find((c) => c.key === "class")?.val;
+      for (const service of record.service) {
+        if (!serviceIds.includes(service.id)) {
+          baseEntity!.service.push(service);
+          serviceIds.push(service.id);
+        }
+      }
+      for (const linkedResource of record.linkedResource) {
+        if (!linkedResourceIds.includes(linkedResource.id)) {
+          baseEntity!.linkedResource.push(linkedResource);
+          linkedResourceIds.push(linkedResource.id);
+        }
+      }
+      // if no more parents then break
+      if (!newClassVal) break;
+      classVal = newClassVal;
+    }
+  }
+
+  const settings: any = {};
+  const settingsArr = baseEntity!.linkedResource.filter(
+    (r) => r.type === "Settings"
+  );
+  baseEntity!.linkedResource = baseEntity!.linkedResource.filter(
+    (r) => r.type !== "Settings"
+  );
+  for (const setting of settingsArr) {
+    settings[setting.description] = setting;
+  }
+  baseEntity["settings"] = settings;
+
+  // Custom
+  if (IPFS_SERVICE_MAPPING) {
+    baseEntity.service = baseEntity.service.map((s) =>
+      s.id.includes("ipfs")
+        ? { ...s, serviceEndpoint: IPFS_SERVICE_MAPPING }
+        : s
+    );
+  }
+
+  return baseEntity;
+};
+
+export const deviceExternalIdsLoaded = async () => {
+  const entity = await getEntityDeviceAndNoExternalId(1);
+  return !entity.length;
+};
+
+// TODO: see if can improve below, maybe checked list or something?
+let entitiesBusyLoading = false;
+// Helper function to fetch "asset/device" entities with null externalId and update them
+export const getEntitiesExternalId = async (amount: number, isCron = false) => {
+  if (entitiesBusyLoading) return;
+  entitiesBusyLoading = true;
+
+  try {
+    const unknownEntities = await getEntityDeviceAndNoExternalId(amount);
+
+    const promises = unknownEntities.map(async (e) => {
+      const deviceCredsUri = e.linkedResource.find((lr) =>
+        lr.id.includes("deviceCredential")
+      )?.serviceEndpoint;
+      // if not ipfs endpoint then return entity as is, only handling ipfs now
+      if (!deviceCredsUri || !deviceCredsUri.includes("ipfs:")) return;
+
+      try {
+        const doc = await getIpfsDocument(deviceCredsUri.replace("ipfs:", ""));
+        if (!doc) return;
+
+        const json = base64ToJson(doc.data);
+        if (!json) return;
+        let externalId: string;
+
+        // handling for cookstoves, can add more below if device credential looks different
+        let cookstoveCredentialId: string[];
+        cookstoveCredentialId = json.credentialSubject?.id?.split(
+          "emerging.eco/devices/"
+        );
+        if (!cookstoveCredentialId || cookstoveCredentialId.length < 2)
+          cookstoveCredentialId = json.credentialSubject?.id?.split("?id=");
+        if (!cookstoveCredentialId || cookstoveCredentialId.length < 2) return;
+        externalId = cookstoveCredentialId[1];
+
+        if (!externalId) return;
+        await updateEntityExternalId({ id: e.id, externalId: externalId });
+      } catch (error) {
+        // if isCron the fail silently
+        if (!isCron) console.error(error);
+      }
+    });
+
+    // chunk promises to avoid memory heap, rate limit and db connection issues
+    for (let promisesChunk of chunkArray(promises, 4)) {
+      await Promise.all(promisesChunk);
+    }
+  } catch (error) {
+    console.error("ERROR::getEntitiesExternalId:: ", error);
+  } finally {
+    entitiesBusyLoading = false;
+  }
+};
+
+
+/SRC/HANDLERS/IPFS_HANDLER.TS CODE IS BELOW
+import axios from "axios";
+import { web3StorageRateLimiter } from "../util/rate-limiter";
+import { sleep } from "../util/sleep";
+import axiosRetry from "axios-retry";
+import { getIpfs, Ipfs, upsertIpfs } from "../postgres/ipfs";
+
+axiosRetry(axios, {
+  retries: 3,
+  retryDelay: () => 500,
+});
+
+export const getIpfsDocument = async (cid: string): Promise<Ipfs> => {
+  const doc = await getIpfs(cid);
+  if (doc) return doc;
+
+  try {
+    await web3StorageRateLimiter.removeTokens(1);
+  } catch (error) {
+    await sleep(1000);
+    return await getIpfsDocument(cid);
+  }
+
+  let res;
+  try {
+    res = await axios.get(`https://${cid}.ipfs.w3s.link`, {
+      responseType: "arraybuffer",
+    });
+    //  res = await axios.get(`https://ipfs.io/ipfs/${cid}`);
+  } catch (error) {
+    if (error.response && error.response.status === 429) {
+      await sleep(1000);
+      return await getIpfsDocument(cid);
+    }
+    if (error.response) {
+      throw new Error(
+        `failed to get ${cid} - [${error.response.status}] ${error.response.statusText}`
+      );
+    }
+    throw new Error(`failed to get ${cid} - ${error}`);
+  }
+
+  if (res.status !== 200) {
+    if (res.status === 429) {
+      await sleep(1000);
+      return await getIpfsDocument(cid);
+    }
+
+    throw new Error(`failed to get ${cid} - [${res.status}] ${res.statusText}`);
+  }
+
+  const type = res.headers["content-type"] || "";
+  // We dont support html at the moment as it can be directories instead of files
+  if (!type || type.includes("text/html")) {
+    throw new Error(`invalid content type ${type}`);
+  }
+
+  const buffer = Buffer.from(res.data);
+
+  await upsertIpfs({
+    cid: cid,
+    contentType: type,
+    data: buffer.toString("base64"),
+  });
+
+  return {
+    cid: cid,
+    contentType: type,
+    data: buffer.toString("base64"),
+  };
+};
+
+
+/SRC/HANDLERS/TOKEN_HANDLER.TS CODE IS BELOW
+import { GetAccountTransactionsLoader } from "../graphql/token";
+import {
+  getEntityAccountsByIidContext,
+  getEntityDeviceAccounts,
+} from "../postgres/entity";
+import {
+  getTokenClass,
+  getTokenRetiredAmountSUM,
+  getTokenTransaction,
+} from "../postgres/token";
+
+export const createGetAccountTransactionsKey = (
+  id: string,
+  name?: string | null | undefined
+): string => {
+  return `${id}-${name || "NULL"}`;
+};
+
+export const getTokensTotalByAddress = async (
+  address: string,
+  name?: string,
+  transactionsLoader?: GetAccountTransactionsLoader,
+  allEntityRetired?: boolean
+) => {
+  const tokens = await getAccountTokens(
+    address,
+    name,
+    transactionsLoader,
+    allEntityRetired
+  );
+  Object.keys(tokens).forEach((key) => {
+    const newTokens = {};
+    Object.values(tokens[key].tokens).forEach((t: any) => {
+      if (!newTokens[t.collection]) {
+        newTokens[t.collection] = {
+          amount: t.amount,
+          minted: t.minted,
+          retired: t.retired,
+        };
+      } else {
+        newTokens[t.collection].amount += t.amount;
+        newTokens[t.collection].minted += t.minted;
+        newTokens[t.collection].retired += t.retired;
+      }
+    });
+    tokens[key].tokens = newTokens;
+  });
+  return tokens;
+};
+
+export const getTokensTotalForEntities = async (
+  address: string,
+  name?: string,
+  transactionsLoader?: GetAccountTransactionsLoader,
+  allEntityRetired?: boolean
+) => {
+  const entities = await getEntityDeviceAccounts(address);
+
+  const tokens = entities.map(async (entity: any) => {
+    const entityTokens = await getTokensTotalByAddress(
+      entity.accounts.find((a) => a.name === "admin")?.address,
+      name,
+      transactionsLoader,
+      allEntityRetired
+    );
+    return { entity: entity.id, tokens: entityTokens };
+  });
+
+  const tokensTotal = await Promise.all(tokens);
+
+  return tokensTotal.filter((t) => Object.keys(t.tokens).length > 0);
+};
+
+export const getAccountTransactions = async (
+  address: string,
+  name?: string
+) => {
+  if (!address) return [];
+  return await getTokenTransaction(address, name);
+};
+
+// Get all the tokens for an account and returns them in a format that is easy to work with:
+// {
+//   [NAME]: {
+//     contractAddress: "",
+//     description: "",
+//     image: "",
+//     tokens: {
+//       [ID]: {
+//         collection: "",
+//         amount: 0,
+//         minted: 0,
+//         retired: 0,
+//       },
+//     },
+//   }
+// }
+export const getAccountTokens = async (
+  address: string,
+  name?: string,
+  transactionLoader?: GetAccountTransactionsLoader,
+  allEntityRetired?: boolean
+) => {
+  let tokenTransactions = transactionLoader
+    ? await transactionLoader.load(
+        createGetAccountTransactionsKey(address, name)
+      )
+    : await getAccountTransactions(address, name);
+
+  const tokens = {};
+  for (const curr of tokenTransactions) {
+    if (!tokens[curr.name]) {
+      const tokenClass = await getTokenClass(curr.name);
+      tokens[curr.name] = {
+        contractAddress: tokenClass?.contractAddress,
+        description: tokenClass?.description,
+        image: tokenClass?.image,
+        tokens: {},
+      };
+    }
+
+    // if from address is same it means it is an outgoing transaction in relation to the address
+    if (curr.from === address) {
+      if (tokens[curr.name].tokens[curr.tokenId]) {
+        tokens[curr.name].tokens[curr.tokenId].amount -= Number(curr.amount);
+      } else {
+        tokens[curr.name].tokens[curr.tokenId] = {
+          collection: curr.collection,
+          amount: -Number(curr.amount),
+          minted: 0,
+          retired: 0,
+        };
+      }
+      // if no to it means was retired from this address
+      if (!curr.to) {
+        tokens[curr.name].tokens[curr.tokenId].retired += Number(curr.amount);
+      }
+      // if to address is same it means it is an incoming transaction in relation to the address
+    } else {
+      if (tokens[curr.name].tokens[curr.tokenId]) {
+        tokens[curr.name].tokens[curr.tokenId].amount += Number(curr.amount);
+      } else {
+        tokens[curr.name].tokens[curr.tokenId] = {
+          collection: curr.collection,
+          amount: Number(curr.amount),
+          minted: 0,
+          retired: 0,
+        };
+      }
+      // if no from it means was minted to address
+      if (!curr.from) {
+        tokens[curr.name].tokens[curr.tokenId].minted += Number(curr.amount);
+      }
+    }
+  }
+
+  // if allEntityRetired is true then for retired values get all retired ever from
+  // any address for the tokens minted to this address
+  if (allEntityRetired) {
+    for (const [key, value] of Object.entries(tokens)) {
+      const ids = Object.entries((value as any).tokens)
+        .map(([key2, value2]: any[]) => {
+          tokens[key].tokens[key2].retired = 0;
+          // if token minted it means it is the address(entity's) token and all retired must be counted
+          if (value2.minted !== 0) return key2;
+          return null;
+        })
+        .filter((t) => t !== null);
+
+      const retiredTokens = await getTokenRetiredAmountSUM(ids);
+      retiredTokens.forEach((t) => {
+        tokens[key].tokens[t.id].retired = Number(t.amount);
+      });
+    }
+  }
+
+  Object.entries(tokens).forEach(([key, value]: any[]) => {
+    Object.entries(value.tokens).forEach(([key2, value2]: any[]) => {
+      // if all 3 values is 0 then remove token id from list of tokens
+      if (value2.amount === 0 && value2.minted === 0 && value2.retired === 0)
+        delete tokens[key].tokens[key2];
+    });
+    // if list of tokens for the NAME is empty then remove the NAME
+    if (Object.keys(tokens[key].tokens).length === 0) delete tokens[key];
+  });
+
+  return tokens;
+};
+
+export const getTokensTotalForCollection = async (
+  did: string,
+  name?: string,
+  transactionLoader?: GetAccountTransactionsLoader,
+  allEntityRetired?: boolean
+) => {
+  const entities = await getEntityAccountsByIidContext(
+    JSON.stringify([{ key: "class", val: did }])
+  );
+
+  const tokens = entities.map(async (entity) => {
+    const entityTokens = await getTokensTotalByAddress(
+      (entity.accounts as any).find((a) => a.name === "admin")?.address,
+      name,
+      transactionLoader,
+      allEntityRetired
+    );
+    return { entity: entity.id, tokens: entityTokens };
+  });
+
+  const tokensTotal = await Promise.all(tokens);
+
+  return tokensTotal.filter((t) => Object.keys(t.tokens).length > 0);
+};
+
+export const getTokensTotalForCollectionAmounts = async (
+  did: string,
+  name?: string,
+  transactionLoader?: GetAccountTransactionsLoader,
+  allEntityRetired?: boolean
+) => {
+  const tokens = await getTokensTotalForCollection(
+    did,
+    name,
+    transactionLoader,
+    allEntityRetired
+  );
+  let newTokens = {};
+  tokens.forEach((t) => {
+    Object.keys(t.tokens).forEach((key) => {
+      const amounts: any = Object.values(t.tokens[key].tokens).reduce(
+        (acc: any, curr: any) => {
+          acc.amount += curr.amount;
+          acc.minted += curr.minted;
+          acc.retired += curr.retired;
+          return acc;
+        },
+        { amount: 0, minted: 0, retired: 0 }
+      );
+      if (!newTokens[key]) {
+        newTokens[key] = amounts;
+      } else {
+        newTokens[key].amount += amounts.amount;
+        newTokens[key].retired += amounts.retired;
+        newTokens[key].minted += amounts.minted;
+      }
+    });
+  });
+  return newTokens;
+};
+
+
+/SRC/HANDLERS/TOKENOMICS_HANDLER.TS CODE IS BELOW
+import Long from "long";
+import { queryClient, registry } from "../sync/sync_chain";
+import { Uint8ArrayToJS } from "../util/conversions";
+import { sleep } from "../util/sleep";
+import { upsertTokenomicsAccount } from "../postgres/tokenomics_account";
+
+export const supplyTotal = async () => {
+  let supply: any[] = [];
+  let key: Uint8Array | undefined;
+  const query = async (key?: Uint8Array) =>
+    await queryClient.cosmos.bank.v1beta1.totalSupply({
+      pagination: {
+        // @ts-ignore
+        key: key || [],
+        limit: Long.fromNumber(1000),
+        offset: Long.fromNumber(0),
+      },
+    });
+
+  while (true) {
+    const res = await query(key);
+    supply = [...supply, ...res.supply];
+    key = res.pagination?.nextKey || undefined;
+    if (!key?.length) break;
+  }
+
+  // convert all ibc denoms to traces to see the original denom
+  for (const sup of supply) {
+    if (sup.denom.includes("ibc/")) {
+      const trace = await queryClient.ibc.applications.transfer.v1.denomTrace({
+        hash: sup.denom.split("/")[1],
+      });
+      sup.trace = trace.denomTrace;
+    }
+  }
+
+  return supply;
+};
+
+export const supplyIBC = async () => {
+  const escrows = await getIBCEscrows(true);
+
+  let total = 0;
+  escrows.forEach((e) => {
+    total += Number(e.balance);
+  });
+
+  return total;
+};
+
+const getIBCEscrows = async (includeBalance = false) => {
+  // get all ibc channels
+  const channels = await queryClient.ibc.core.channel.v1.channels({
+    pagination: {
+      // @ts-ignore
+      key: [],
+      limit: Long.fromNumber(1000),
+      offset: Long.fromNumber(0),
+    },
+  });
+
+  const escrows = await Promise.all(
+    channels.channels.map(async (c) => {
+      // get ibc channel escrow account
+      const escrowAcc =
+        await queryClient.ibc.applications.transfer.v1.escrowAddress({
+          portId: c.portId,
+          channelId: c.channelId,
+        });
+      // get balance for the escrow account
+      const escrowBalance = includeBalance
+        ? await queryClient.cosmos.bank.v1beta1.balance({
+            address: escrowAcc.escrowAddress,
+            denom: "uixo",
+          })
+        : undefined;
+      return {
+        account: escrowAcc.escrowAddress,
+        balance: escrowBalance?.balance?.amount ?? "0",
+      };
+    })
+  );
+  return escrows;
+};
+
+export const supplyStaked = async () => {
+  const res = await queryClient.cosmos.staking.v1beta1.pool({});
+  return res.pool;
+};
+
+export const supplyCommunityPool = async () => {
+  const res = await queryClient.cosmos.distribution.v1beta1.communityPool();
+  return res.pool.map((c) => ({ ...c, amount: c.amount.slice(0, -18) }));
+};
+
+export const inflation = async () => {
+  const res = await queryClient.cosmos.mint.v1beta1.inflation();
+  const inflation = Number(Uint8ArrayToJS(res.inflation));
+
+  // Cosmos DEC is 18 decimals, so devide by 10^16 to get the correct percentage value
+  return inflation / Math.pow(10, 16);
+};
+
+export const getAccountsAndBalances = async () => {
+  let skippedSomeUpload = false;
+  try {
+    let ibcEscrows = (await getIBCEscrows()).map((e) => e.account);
+
+    let accounts: any[] = [];
+    let key: Uint8Array | undefined;
+    const query = async (key?: Uint8Array) =>
+      await queryClient.cosmos.auth.v1beta1.accounts({
+        pagination: {
+          // @ts-ignore
+          key: key || [],
+          limit: Long.fromNumber(1000),
+          offset: Long.fromNumber(0),
+        },
+      });
+
+    while (true) {
+      const res = await query(key);
+      accounts = [
+        ...accounts,
+        ...res.accounts.map((acc) => {
+          const parsedAccount = registry.decode(acc);
+          const baseAccount =
+            parsedAccount.baseVestingAccount?.baseAccount ??
+            parsedAccount.baseAccount ??
+            parsedAccount;
+
+          let type = parsedAccount.baseVestingAccount?.baseAccount
+            ? "vesting"
+            : parsedAccount.baseAccount
+            ? parsedAccount.name ?? null
+            : null;
+          if (ibcEscrows.includes(parsedAccount.address)) type = "ibc_escrow";
+          baseAccount.type = type;
+
+          return baseAccount;
+        }),
+      ];
+      key = res.pagination?.nextKey || undefined;
+      if (!key?.length) break;
+    }
+
+    let i = 0;
+    // get balances for each account
+    for (const acc of accounts) {
+      // console.log("fetch acc balance", i++, acc.address);
+      await sleep(50);
+      const [availBalance, delegationsBalance, rewardsBalance] =
+        await Promise.all([
+          (async () => {
+            // avail balance
+            const availBalance = await queryClient.cosmos.bank.v1beta1.balance({
+              denom: "uixo",
+              address: acc.address,
+            });
+            return Number(availBalance?.balance?.amount || 0);
+          })(),
+          (async () => {
+            // delegations balance
+            const delegations =
+              await queryClient.cosmos.staking.v1beta1.delegatorDelegations({
+                delegatorAddr: acc.address,
+              });
+            let delegationsBalance = 0;
+            delegations.delegationResponses.map((d) => {
+              const amount = Number(d.balance?.amount ?? "0");
+              delegationsBalance += amount;
+            });
+            return delegationsBalance;
+          })(),
+          (async () => {
+            // rewards balance
+            const rewardsBalance =
+              await queryClient.cosmos.distribution.v1beta1.delegationTotalRewards(
+                {
+                  delegatorAddress: acc.address,
+                }
+              );
+            const rewardsBalanceAmount = rewardsBalance?.total?.[0]?.amount;
+            return Number(
+              rewardsBalanceAmount ? rewardsBalanceAmount.slice(0, -18) : 0
+            );
+          })(),
+        ]);
+
+      try {
+        await upsertTokenomicsAccount({
+          address: acc.address,
+          accountNumber: acc.accountNumber.low,
+          availBalance: BigInt(availBalance),
+          delegationsBalance: BigInt(delegationsBalance),
+          rewardsBalance: BigInt(rewardsBalance),
+          totalBalance: BigInt(
+            availBalance + delegationsBalance + rewardsBalance
+          ),
+          type: acc.type,
+        });
+      } catch (error) {
+        skippedSomeUpload = true;
+        console.error(
+          "ERROR::tokenomics::getAccountsAndBalances::upsertTokenomicsAccount ",
+          error
+        );
+      }
+    }
+    return { success: true, skippedSomeUpload };
+  } catch (error) {
+    console.log("ERROR::tokenomics::getAccountsAndBalances ", error);
+    return { success: false, error: String(error), skippedSomeUpload };
+  }
+};
+
+
+/SRC/INDEX.TS CODE IS BELOW
+require("log-timestamp");
+require("dotenv").config();
+
+import "./util/long";
+import { app } from "./app";
+import http from "http";
+import * as SyncBlocks from "./sync/sync_blocks";
+import { DATABASE_URL, PORT, MIGRATE_DB_PROGRAMATICALLY } from "./util/secrets";
+import * as SyncChain from "./sync/sync_chain";
+import { postgresMigrate } from "./postgres/migrations";
+
+(async () => {
+  // first apply db migrations if env var set, for prod dbs where no access to shell
+  if (MIGRATE_DB_PROGRAMATICALLY) {
+    console.log("MIGRATE_DB_PROGRAMATICALLY: ", MIGRATE_DB_PROGRAMATICALLY);
+    await postgresMigrate(DATABASE_URL || "");
+  }
+
+  // server setup and start logic
+  SyncChain.syncChain().then(() => SyncBlocks.startSync());
+
+  const server = http.createServer(app);
+  // server.keepAliveTimeout = 76000; // Set the keepalive timeout to 76 seconds
+  // server.headersTimeout = 77000; // Set the headers timeout to 77 seconds
+
+  server.listen(PORT, () => console.log(`Listening on ${PORT}`));
+})();
+
+
+/SRC/POSTGRAPHILE.TS CODE IS BELOW
+import postgraphile from "postgraphile";
+import PgSimplifyInflectorPlugin from "@graphile-contrib/pg-simplify-inflector";
+import ConnectionFilterPlugin from "postgraphile-plugin-connection-filter";
+import PgAggregatesPlugin from "@graphile/pg-aggregates";
+import { DATABASE_URL, DATABASE_USE_SSL } from "./util/secrets";
+import {
+  EntityPlugin,
+  createFullEntityLoader,
+  createParentEntityLoader,
+} from "./graphql/entity";
+import { ClaimsPlugin } from "./graphql/claims";
+import {
+  TokenPlugin,
+  createGetAccountTransactionsLoader,
+} from "./graphql/token";
+import { TokenomicsPlugin } from "./graphql/tokenomics";
+import { SmartTagsPlugin } from "./graphql/smart_tags_plugin";
+
+const isProd = process.env.NODE_ENV === "production";
+console.log("isProd: ", isProd);
+
+export const Postgraphile = postgraphile(
+  {
+    application_name: "Blocksync-graphql",
+    connectionString: DATABASE_URL,
+    // maximum number of clients the pool should contain
+    // by default this is set to 10.
+    max: 30,
+    // min: 3,
+    // number of milliseconds a client must sit idle in the pool and not be checked out
+    // before it is disconnected from the backend and discarded
+    // default is 10000 (10 seconds) - set to 0 to disable auto-disconnection of idle clients
+    // idleTimeoutMillis: 10000,
+    // number of milliseconds to wait before timing out when connecting a new client
+    // by default this is 0 which means no timeout
+    connectionTimeoutMillis: 4000,
+    ...(DATABASE_USE_SSL && { ssl: { rejectUnauthorized: false } }), // Use SSL (recommended
+  },
+  "public",
+  {
+    ...(isProd
+      ? {
+          // all prod only options
+          retryOnInitFail: true,
+          extendedErrors: ["errcode"],
+          disableQueryLog: true,
+          allowExplain: false,
+        }
+      : {
+          // all dev only options
+          showErrorStack: "json",
+          extendedErrors: ["hint", "detail", "errcode"],
+          allowExplain: true,
+        }),
+    exportGqlSchemaPath: "public/graphql/schema.graphql",
+    enableQueryBatching: true,
+    legacyRelations: "omit",
+    // watchPg: true,
+    enableCors: true,
+    bodySizeLimit: "500kB",
+    graphiql: true,
+    enhanceGraphiql: true,
+    dynamicJson: true,
+    setofFunctionsContainNulls: false,
+    ignoreRBAC: false,
+    disableDefaultMutations: true,
+    additionalGraphQLContextFromRequest: async (req, res) => {
+      const parentEntityLoader = createParentEntityLoader();
+      return {
+        entityLoader: createFullEntityLoader(parentEntityLoader),
+        getAccountTransactionsLoader: createGetAccountTransactionsLoader(),
+      };
+    },
+    subscriptions: true,
+    pgSettings: {
+      // place a timeout on the database operations, this will halt any query that takes longer than the specified number of milliseconds to execute.
+      statement_timeout: "4000",
+    },
+    appendPlugins: [
+      SmartTagsPlugin,
+      TokenPlugin,
+      ClaimsPlugin,
+      EntityPlugin,
+      TokenomicsPlugin,
+      PgSimplifyInflectorPlugin,
+      ConnectionFilterPlugin,
+      PgAggregatesPlugin,
+    ],
+    // Optional customisation
+    graphileBuildOptions: {
+      // --------------------------------------------
+      // PgSimplifyInflectorPlugin Options
+      // --------------------------------------------
+      /*
+       * Uncomment if you want simple collections to lose the 'List' suffix
+       * (and connections to gain a 'Connection' suffix).
+       */
+      //pgOmitListSuffix: true,
+      /*
+       * Uncomment if you want 'userPatch' instead of 'patch' in update
+       * mutations.
+       */
+      //pgSimplifyPatch: false,
+      /*
+       * Uncomment if you want 'allUsers' instead of 'users' at root level.
+       */
+      //pgSimplifyAllRows: false,
+      /*
+       * Uncomment if you want primary key queries and mutations to have
+       * `ById` (or similar) suffix; and the `nodeId` queries/mutations
+       * to lose their `ByNodeId` suffix.
+       */
+      // pgShortPk: true,
+
+      // --------------------------------------------
+      // ConnectionFilterPlugin Options
+      // --------------------------------------------
+      // Restrict filtering to specific operators:
+      // connectionFilterAllowedOperators: [
+      //   "isNull",
+      //   "equalTo",
+      //   "notEqualTo",
+      //   "distinctFrom",
+      //   "notDistinctFrom",
+      //   "lessThan",
+      //   "lessThanOrEqualTo",
+      //   "greaterThan",
+      //   "greaterThanOrEqualTo",
+      //   "in",
+      //   "notIn",
+      // ],
+      // Restrict filtering to specific field types:
+      // connectionFilterAllowedFieldTypes: ["String", "Int"],
+      // Enable/disable filtering on PostgreSQL arrays:
+      // connectionFilterArrays: false, // default: true
+      // Enable/disable filtering by computed columns:
+      // connectionFilterComputedColumns: false, // default: true
+      // Use alternative names (e.g. eq, ne) for operators:
+      // connectionFilterOperatorNames: {
+      //   equalTo: "eq",
+      //   notEqualTo: "ne",
+      // },
+      // Enable/disable filtering on related fields:
+      connectionFilterRelations: true, // default: false
+      // Enable/disable filtering on functions that return setof:
+      // connectionFilterSetofFunctions: false, // default: true
+      // Enable/disable filtering with logical operators (and/or/not):
+      // connectionFilterLogicalOperators: false, // default: true
+      // Allow/forbid null literals in input:
+      connectionFilterAllowNullInput: true, // default: false
+      // Allow/forbid empty objects ({}) in input:
+      connectionFilterAllowEmptyObjectInput: true, // default: false
+
+      // --------------------------------------------
+      // PgAggregatesPlugin Options
+      // --------------------------------------------
+      // Disable aggregates by default; opt each table in via the `@aggregates` smart tag
+      disableAggregatesByDefault: true,
+      // enable certain tables only in the smart tags plugin at /src/graphql/smart_tags_plugin.ts
+    },
+  }
+);
+
+
+/SRC/POSTGRES/README.MD CODE IS BELOW
+# PostgresQL
+
+This guide outlines the setup and usage of PostgreSQL for the project. It covers connecting to the database, executing raw SQL queries with transactions, and managing database migrations.
+
+## Connecting to the Database
+
+In order to use the setup please ensure to add the following environment variable to your `.env` file, replacing `<your_database_url>` with the actual connection string for your PostgreSQL database:
+
+```
+DATABASE_URL=<your_database_url>
+```
+
+The `src/postgres/client.ts` file provides helper functions for connecting to the PostgreSQL database and managing transactions.
+The `withTransaction` function simplifies executing queries within a single transaction and also a `ROLLBACK` in case an error occurrs. Below is an example:
+
+```ts
+const insertBlockSql = `
+INSERT INTO "BlockCore" (height, hash, "time")
+VALUES ($1, $2, $3);
+`;
+const insertTransactionSql = `
+INSERT INTO "TransactionCore" (hash, code, fee, "gasUsed", "gasWanted", memo, "time", "blockHeight")
+SELECT tr.hash, tr.code, tr.fee, tr."gasUsed", tr."gasWanted", tr.memo, $2, $3
+FROM jsonb_to_recordset($1) AS tr(hash text, code int, fee jsonb, "gasUsed" text, "gasWanted" text, memo text);
+`;
+export const insertBlock = async (block: BlockCore): Promise<void> => {
+  try {
+    // do all the insertions in a single transaction
+    await withTransaction(async (client) => {
+      await client.query(insertBlockSql, [
+        block.height,
+        block.hash,
+        block.time,
+      ]);
+      if (block.transactions.length) {
+        await client.query(insertTransactionSql, [
+          JSON.stringify(block.transactions),
+          block.time,
+          block.height,
+        ]);
+      }
+    });
+  } catch (error) {
+    throw error;
+  }
+};
+```
+
+You can execute raw SQL queries using the connected client object. Remember to escape user-provided data to prevent SQL injection vulnerabilities. Below is an example:
+
+```ts
+const getChainSql = `
+SELECT * FROM "ChainCore" WHERE "chainId" = $1
+`;
+export const getChain = async (chainId: string): Promise<Chain | undefined> => {
+  try {
+    const res = await pool.query(getChainSql, [chainId]);
+    return res.rows[0];
+  } catch (error) {
+    throw error;
+  }
+};
+```
+
+## Database Migrations
+
+The `src/postgres/migrations` folder contains migration scripts for managing your database schema changes. These scripts are executed programmatically using the `node-pg-migrate` package.
+
+The `MIGRATE_DB_PROGRAMMATICALLY` environment variable controls programmatic migration execution. Set it to true in your `.env` file to enable automatic migrations on application startup.
+
+### Migration Scripts
+
+- Each migration script should be named with a utc string prefix and migration name (e.g. 00000000000000000_init.sql). Please use the provided `package.json` script `migrate:create` to create the files eg: `yarn migrate:create my_migration`
+- The script should contain SQL statements for creating/altering tables, indexes, and constraints.
+- Up and down migrations are defined within the script using comments:
+
+```sql
+-- ... Quick summary for migration on top
+
+-- Up Migration
+-- ... SQL statements for creating tables ...
+
+-- Down Migration
+-- ... SQL statements for dropping tables ...
+```
+
+### Running Migrations
+
+The `package.json` file includes scripts for managing migrations:
+
+- `migrate:up`: Applies all pending up migrations.
+- `migrate:down`: Reverts the latest migration.
+- `migrate:redo`: Re-applies the latest migration.
+- `migrate:create`: Creates a new migration file with a timestamp prefix.
+
+### Programatic Migration
+
+The `postgresMigrate` function in `src/postgres/migrations` allows programmatic execution of migrations at startup if the `MIGRATE_DB_PROGRAMMATICALLY` environment variable is set. This is setup for those who dont have access to the db directly through cli, but is is also the preferred method for migrations on new releases as it doesnt need any intervention that could go wrong.
+
+Please don't try to do any manual migrations and have this enabled as it will fail on server startup and the server tries to run the migrations!
+
+## Conclusion
+
+This guide provides a basic overview of using PostgreSQL with this project. Refer to the provided code examples for further details on connecting, executing queries, and managing migrations. Remember to consult the PostgreSQL documentation for more advanced features and functionalities.
+
+
+/SRC/POSTGRES/BLOCKSYNC_CORE/BLOCK.TS CODE IS BELOW
+import { corePool } from "./client";
+
+export type BlockCore = {
+  height: number;
+  time: Date;
+  transactions: TransactionCore[];
+  events: EventCore[];
+};
+
+export type TransactionCore = {
+  hash: string;
+  code: number;
+  fee: any; // JSON
+  gasUsed: string;
+  gasWanted: string;
+  memo: string;
+  messages: MessageCore[];
+};
+
+export type MessageCore = {
+  typeUrl: string;
+  value: any; // JSON
+};
+
+export type EventCore = {
+  type: string;
+  attributes: any[]; // JSON
+};
+
+const sqlTransactions = `
+SELECT   
+  t."hash",
+  t."code",
+  t."fee",
+  t."gasUsed",
+  t."gasWanted",
+  t."memo",
+  json_agg(json_build_object('typeUrl', "m"."typeUrl", 'value', m.value)) AS messages
+FROM "TransactionCore" as t
+LEFT OUTER JOIN "MessageCore" as m ON t.hash = m."transactionHash" 
+WHERE t."blockHeight" = $1
+Group By t.hash;
+`;
+const sqlEvents = `
+SELECT
+  b."height",
+  b."time",
+  json_agg(json_build_object('type', e.type, 'attributes', e.attributes)) AS events
+FROM "BlockCore" as b
+LEFT OUTER JOIN (
+  SELECT "type", attributes
+    from "EventCore"
+    where "blockHeight" = $1
+    order by id asc
+  ) as e on TRUE
+WHERE b.height = $1
+GROUP BY b.height, b."time"
+`;
+export const getCoreBlock = async (
+  blockHeight: number
+): Promise<BlockCore | null> => {
+  try {
+    let blockAndEvents: any = await corePool.query(sqlEvents, [blockHeight]);
+    // If no block is found, return null before querying transactions
+    if (blockAndEvents.rows.length === 0) return null;
+    let transactions: any = await corePool.query(sqlTransactions, [
+      blockHeight,
+    ]);
+
+    blockAndEvents = blockAndEvents.rows[0];
+    transactions = transactions.rows.map((row: any) => ({
+      hash: row.hash,
+      code: row.code,
+      fee: row.fee,
+      gasUsed: row.gasUsed,
+      gasWanted: row.gasWanted,
+      memo: row.memo,
+      messages: row.messages,
+    }));
+
+    return {
+      height: blockAndEvents.height,
+      time: blockAndEvents.time,
+      transactions,
+      events: blockAndEvents.events,
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
+
+/SRC/POSTGRES/BLOCKSYNC_CORE/CHAIN.TS CODE IS BELOW
+import { corePool } from "./client";
+
+export type ChainCore = {
+  chainId: string;
+  blockHeight: number;
+};
+
+const getChainSql = `
+SELECT * FROM "ChainCore" WHERE "chainId" = $1;
+`;
+export const getCoreChain = async (
+  chainId: string
+): Promise<ChainCore | undefined> => {
+  try {
+    let chain = await corePool.query(getChainSql, [chainId]);
+    return chain.rows[0];
+  } catch (error) {
+    console.error("ERROR::getCoreChain::", error);
+    throw error;
+  }
+};
+
+
+/SRC/POSTGRES/BLOCKSYNC_CORE/CLIENT.TS CODE IS BELOW
+import { Pool } from "pg";
+import { DATABASE_USE_SSL } from "../../util/secrets";
+
+export const corePool = new Pool({
+  application_name: "Blocksync",
+  connectionString: process.env.DATABASE_URL_CORE,
+  // maximum number of clients the pool should contain
+  // by default this is set to 10.
+  // max: 20,
+  // number of milliseconds a client must sit idle in the pool and not be checked out
+  // before it is disconnected from the backend and discarded
+  // default is 10000 (10 seconds) - set to 0 to disable auto-disconnection of idle clients
+  idleTimeoutMillis: 10000,
+  // number of milliseconds to wait before timing out when connecting a new client
+  // by default this is 0 which means no timeout
+  connectionTimeoutMillis: 1000,
+  ...(DATABASE_USE_SSL && { ssl: { rejectUnauthorized: false } }), // Use SSL (recommended
+});
+
+// helper function that manages connect to pool and release,
+// user can just pass a function that takes a client as argument
+export const withCoreQuery = async (fn: (client: any) => Promise<any>) => {
+  // const start = Date.now();
+  const client = await corePool.connect();
+  try {
+    return await fn(client);
+  } catch (error) {
+    throw error;
+  } finally {
+    client.release();
+    // console.log("executed query", { duration: Date.now() - start });
+  }
+};
+
+
+/SRC/POSTGRES/BOND.TS CODE IS BELOW
+import { pool } from "./client";
+
+export type Bond = {
+  bondDid: string;
+  state: string;
+  token: string;
+  name: string;
+  description: string;
+  functionType: string;
+  functionParameters: any; // JSON
+  creatorDid: string;
+  controllerDid: string;
+  reserveTokens: string[];
+  txFeePercentage: string;
+  exitFeePercentage: string;
+  feeAddress: string;
+  reserveWithdrawalAddress: string;
+  maxSupply?: any; // JSON
+  orderQuantityLimits: any; // JSON
+  sanityRate: string;
+  sanityMarginPercentage: string;
+  currentSupply?: any; // JSON
+  currentReserve: any; // JSON
+  availableReserve: any; // JSON
+  currentOutcomePaymentReserve: any; // JSON
+  allowSells: boolean;
+  allowReserveWithdrawals: boolean;
+  alphaBond: boolean;
+  batchBlocks: string;
+  outcomePayment: string;
+  oracleDid: string;
+};
+
+const createBondSql = `
+INSERT INTO "public"."Bond" ( "bondDid", "state", "token", "name", "description", "functionType", "functionParameters", "creatorDid", "controllerDid", "reserveTokens", "txFeePercentage", "exitFeePercentage", "feeAddress", "reserveWithdrawalAddress", "maxSupply", "orderQuantityLimits", "sanityRate", "sanityMarginPercentage", "currentSupply", "currentReserve", "availableReserve", "currentOutcomePaymentReserve", "allowSells", "allowReserveWithdrawals", "alphaBond", "batchBlocks", "outcomePayment", "oracleDid") 
+VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28 );
+`;
+export const createBond = async (p: Bond): Promise<void> => {
+  try {
+    await pool.query(createBondSql, [
+      p.bondDid,
+      p.state,
+      p.token,
+      p.name,
+      p.description,
+      p.functionType,
+      JSON.stringify(p.functionParameters),
+      p.creatorDid,
+      p.controllerDid,
+      p.reserveTokens,
+      p.txFeePercentage,
+      p.exitFeePercentage,
+      p.feeAddress,
+      p.reserveWithdrawalAddress,
+      JSON.stringify(p.maxSupply),
+      JSON.stringify(p.orderQuantityLimits),
+      p.sanityRate,
+      p.sanityMarginPercentage,
+      JSON.stringify(p.currentSupply),
+      JSON.stringify(p.currentReserve),
+      JSON.stringify(p.availableReserve),
+      JSON.stringify(p.currentOutcomePaymentReserve),
+      p.allowSells,
+      p.allowReserveWithdrawals,
+      p.alphaBond,
+      p.batchBlocks,
+      p.outcomePayment,
+      p.oracleDid,
+    ]);
+  } catch (error) {
+    throw error;
+  }
+};
+
+const updateBondSql = `
+UPDATE "public"."Bond" SET
+	                       "state" = $1,
+	                       "token" = $2,
+	                        "name" = $3,
+	                 "description" = $4,
+	                "functionType" = $5,
+	          "functionParameters" = $6,
+	                  "creatorDid" = $7,
+	               "controllerDid" = $8,
+	               "reserveTokens" = $9,
+	             "txFeePercentage" = $10,
+	           "exitFeePercentage" = $11,
+	                  "feeAddress" = $12,
+	    "reserveWithdrawalAddress" = $13,
+	                   "maxSupply" = $14,
+	         "orderQuantityLimits" = $15,
+	                  "sanityRate" = $16,
+	      "sanityMarginPercentage" = $17,
+	               "currentSupply" = $18,
+	              "currentReserve" = $19,
+	            "availableReserve" = $20,
+	"currentOutcomePaymentReserve" = $21,
+	                  "allowSells" = $22,
+	     "allowReserveWithdrawals" = $23,
+	                   "alphaBond" = $24,
+	                 "batchBlocks" = $25,
+	              "outcomePayment" = $26,
+	                   "oracleDid" = $27
+WHERE
+	                     "bondDid" = $28;
+`;
+export const updateBond = async (p: Bond): Promise<void> => {
+  try {
+    await pool.query(updateBondSql, [
+      p.state,
+      p.token,
+      p.name,
+      p.description,
+      p.functionType,
+      JSON.stringify(p.functionParameters),
+      p.creatorDid,
+      p.controllerDid,
+      p.reserveTokens,
+      p.txFeePercentage,
+      p.exitFeePercentage,
+      p.feeAddress,
+      p.reserveWithdrawalAddress,
+      JSON.stringify(p.maxSupply),
+      JSON.stringify(p.orderQuantityLimits),
+      p.sanityRate,
+      p.sanityMarginPercentage,
+      JSON.stringify(p.currentSupply),
+      JSON.stringify(p.currentReserve),
+      JSON.stringify(p.availableReserve),
+      JSON.stringify(p.currentOutcomePaymentReserve),
+      p.allowSells,
+      p.allowReserveWithdrawals,
+      p.alphaBond,
+      p.batchBlocks,
+      p.outcomePayment,
+      p.oracleDid,
+      p.bondDid,
+    ]);
+  } catch (error) {
+    throw error;
+  }
+};
+
+export type BondAlpha = {
+  bondDid: string;
+  alpha: string;
+  oracleDid: string;
+  height: number;
+  timestamp: Date;
+};
+
+const createBondAlphaSql = `
+INSERT INTO "public"."BondAlpha" ( "bondDid", "alpha", "oracleDid", "height", "timestamp")
+VALUES ( $1, $2, $3, $4, $5 );
+`;
+export const createBondAlpha = async (p: BondAlpha): Promise<void> => {
+  try {
+    await pool.query(createBondAlphaSql, [
+      p.bondDid,
+      p.alpha,
+      p.oracleDid,
+      p.height,
+      p.timestamp,
+    ]);
+  } catch (error) {
+    throw error;
+  }
+};
+
+export type BondBuy = {
+  bondDid: string;
+  accountDid: string;
+  amount: any; // JSON
+  maxPrices: any; // JSON
+  height: number;
+  timestamp: Date;
+};
+
+const createBondBuySql = `
+INSERT INTO "public"."BondBuy" ( "bondDid", "accountDid", "amount", "maxPrices", "height", "timestamp")
+VALUES ( $1, $2, $3, $4, $5, $6 );
+`;
+export const createBondBuy = async (p: BondBuy): Promise<void> => {
+  try {
+    await pool.query(createBondBuySql, [
+      p.bondDid,
+      p.accountDid,
+      JSON.stringify(p.amount),
+      JSON.stringify(p.maxPrices),
+      p.height,
+      p.timestamp,
+    ]);
+  } catch (error) {
+    throw error;
+  }
+};
+
+export type BondSell = {
+  bondDid: string;
+  accountDid: string;
+  amount: any; // JSON
+  height: number;
+  timestamp: Date;
+};
+
+const createBondSellSql = `
+INSERT INTO "public"."BondSell" ( "bondDid", "accountDid", "amount", "height", "timestamp")
+VALUES ( $1, $2, $3, $4, $5 );
+`;
+export const createBondSell = async (p: BondSell): Promise<void> => {
+  try {
+    await pool.query(createBondSellSql, [
+      p.bondDid,
+      p.accountDid,
+      JSON.stringify(p.amount),
+      p.height,
+      p.timestamp,
+    ]);
+  } catch (error) {
+    throw error;
+  }
+};
+
+export type BondSwap = {
+  bondDid: string;
+  accountDid: string;
+  amount: any; // JSON
+  toToken: string;
+  height: number;
+  timestamp: Date;
+};
+
+const createBondSwapSql = `
+INSERT INTO "public"."BondSwap" ( "bondDid", "accountDid", "amount", "toToken", "height", "timestamp")
+VALUES ( $1, $2, $3, $4, $5, $6 );
+`;
+export const createBondSwap = async (p: BondSwap): Promise<void> => {
+  try {
+    await pool.query(createBondSwapSql, [
+      p.bondDid,
+      p.accountDid,
+      JSON.stringify(p.amount),
+      p.toToken,
+      p.height,
+      p.timestamp,
+    ]);
+  } catch (error) {
+    throw error;
+  }
+};
+
+export type ShareWithdrawal = {
+  bondDid: string;
+  recipientDid: string;
+  recipientAddress: string;
+  amount: any; // JSON
+  height: number;
+  timestamp: Date;
+};
+
+const createShareWithdrawalSql = `
+INSERT INTO "public"."ShareWithdrawal" ( "bondDid", "recipientDid", "recipientAddress", "amount", "height", "timestamp")
+VALUES ( $1, $2, $3, $4, $5, $6 );
+`;
+export const createShareWithdrawal = async (
+  p: ShareWithdrawal
+): Promise<void> => {
+  try {
+    await pool.query(createShareWithdrawalSql, [
+      p.bondDid,
+      p.recipientDid,
+      p.recipientAddress,
+      JSON.stringify(p.amount),
+      p.height,
+      p.timestamp,
+    ]);
+  } catch (error) {
+    throw error;
+  }
+};
+
+export type OutcomePayment = {
+  bondDid: string;
+  senderDid: string;
+  senderAddress: string;
+  amount: any; // JSON
+  height: number;
+  timestamp: Date;
+};
+
+const createOutcomePaymentSql = `
+INSERT INTO "public"."OutcomePayment" ( "bondDid", "senderDid", "senderAddress", "amount", "height", "timestamp")
+VALUES ( $1, $2, $3, $4, $5, $6 );
+`;
+export const createOutcomePayment = async (
+  p: OutcomePayment
+): Promise<void> => {
+  try {
+    await pool.query(createOutcomePaymentSql, [
+      p.bondDid,
+      p.senderDid,
+      p.senderAddress,
+      JSON.stringify(p.amount),
+      p.height,
+      p.timestamp,
+    ]);
+  } catch (error) {
+    throw error;
+  }
+};
+
+export type ReserveWithdrawal = {
+  bondDid: string;
+  withdrawerDid: string;
+  withdrawerAddress: string;
+  amount: any; // JSON
+  reserveWithdrawalAddress: string;
+  height: number;
+  timestamp: Date;
+};
+
+const createReserveWithdrawalSql = `
+INSERT INTO "public"."ReserveWithdrawal" ( "bondDid", "withdrawerDid", "withdrawerAddress", "amount", "reserveWithdrawalAddress", "height", "timestamp")
+VALUES ( $1, $2, $3, $4, $5, $6, $7 );
+`;
+export const createReserveWithdrawal = async (
+  p: ReserveWithdrawal
+): Promise<void> => {
+  try {
+    await pool.query(createReserveWithdrawalSql, [
+      p.bondDid,
+      p.withdrawerDid,
+      p.withdrawerAddress,
+      JSON.stringify(p.amount),
+      p.reserveWithdrawalAddress,
+      p.height,
+      p.timestamp,
+    ]);
+  } catch (error) {
+    throw error;
+  }
+};
+
+
+/SRC/POSTGRES/CHAIN.TS CODE IS BELOW
+import { pool } from "./client";
+
+export type Chain = {
+  chainId: string;
+  blockHeight: number;
+};
+
+const getChainSql = `
+SELECT * FROM "Chain" WHERE "chainId" = $1;
+`;
+export const getChain = async (chainId: string): Promise<Chain | undefined> => {
+  try {
+    const res = await pool.query(getChainSql, [chainId]);
+    return res.rows[0];
+  } catch (error) {
+    throw error;
+  }
+};
+
+const createChainSql = `
+INSERT INTO "Chain" ("chainId", "blockHeight") VALUES ($1, $2) RETURNING *;
+`;
+export const createChain = async (chainDoc: Chain): Promise<Chain> => {
+  try {
+    const res = await pool.query(createChainSql, [
+      chainDoc.chainId,
+      chainDoc.blockHeight,
+    ]);
+    return res.rows[0];
+  } catch (error) {
+    throw error;
+  }
+};
+
+const updateChainSql = `
+UPDATE "Chain" SET "blockHeight" = $2 WHERE "chainId" = $1;
+`;
+export const updateChain = async (chainDoc: Chain): Promise<void> => {
+  try {
+    await pool.query(updateChainSql, [chainDoc.chainId, chainDoc.blockHeight]);
+  } catch (error) {
+    throw error;
+  }
+};
+
+
+/SRC/POSTGRES/CLAIM.TS CODE IS BELOW
+import { pool, withTransaction } from "./client";
+
+export type ClaimCollection = {
+  id: string;
+  entity: string;
+  admin: string;
+  protocol: string;
+  startDate?: Date;
+  endDate?: Date;
+  quota: number;
+  count: number;
+  evaluated: number;
+  approved: number;
+  rejected: number;
+  disputed: number;
+  invalidated: number;
+  state: number;
+  payments: any; // JSON
+};
+
+const createClaimCollectionSql = `
+INSERT INTO "public"."ClaimCollection" ( "id", "entity", "admin", "protocol", "startDate", "endDate", "quota", "count", "evaluated", "approved", "rejected", "disputed", "invalidated", "state", "payments") 
+VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15 );
+`;
+export const createClaimCollection = async (
+  p: ClaimCollection
+): Promise<void> => {
+  try {
+    await pool.query(createClaimCollectionSql, [
+      p.id,
+      p.entity,
+      p.admin,
+      p.protocol,
+      p.startDate,
+      p.endDate,
+      p.quota,
+      p.count,
+      p.evaluated,
+      p.approved,
+      p.rejected,
+      p.disputed,
+      p.invalidated,
+      p.state,
+      JSON.stringify(p.payments),
+    ]);
+  } catch (error) {
+    throw error;
+  }
+};
+
+const updateClaimCollectionSql = `
+UPDATE "public"."ClaimCollection" SET
+	     "entity" = $1,
+	      "admin" = $2,
+	   "protocol" = $3,
+	  "startDate" = $4,
+	    "endDate" = $5,
+	      "quota" = $6,
+	      "count" = $7,
+	  "evaluated" = $8,
+	   "approved" = $9,
+	   "rejected" = $10,
+	   "disputed" = $11,
+	"invalidated" = $12,
+	      "state" = $13,
+	   "payments" = $14
+WHERE
+	         "id" = $15;
+`;
+export const updateClaimCollection = async (
+  p: ClaimCollection
+): Promise<void> => {
+  try {
+    await pool.query(updateClaimCollectionSql, [
+      p.entity,
+      p.admin,
+      p.protocol,
+      p.startDate,
+      p.endDate,
+      p.quota,
+      p.count,
+      p.evaluated,
+      p.approved,
+      p.rejected,
+      p.disputed,
+      p.invalidated,
+      p.state,
+      JSON.stringify(p.payments),
+      p.id,
+    ]);
+  } catch (error) {
+    throw error;
+  }
+};
+
+export type Claim = {
+  claimId: string;
+  agentDid: string;
+  agentAddress: string;
+  submissionDate: Date;
+  paymentsStatus: any; // JSON
+  schemaType?: string;
+  collectionId: string;
+  evaluation?: Evaluation;
+};
+
+const createClaimSql = `
+INSERT INTO "public"."Claim" ( "claimId", "agentDid", "agentAddress", "submissionDate", "paymentsStatus", "schemaType", "collectionId") 
+VALUES ( $1, $2, $3, $4, $5, $6, $7 );
+`;
+export const createClaim = async (p: Claim): Promise<void> => {
+  try {
+    await pool.query(createClaimSql, [
+      p.claimId,
+      p.agentDid,
+      p.agentAddress,
+      p.submissionDate,
+      JSON.stringify(p.paymentsStatus),
+      p.schemaType,
+      p.collectionId,
+    ]);
+  } catch (error) {
+    throw error;
+  }
+};
+
+const updateClaimSql = `
+UPDATE "public"."Claim" SET
+	      "agentDid" = $1,
+	  "agentAddress" = $2,
+	"submissionDate" = $3,
+	"paymentsStatus" = $4,
+	    "schemaType" = $5,
+	  "collectionId" = $6
+WHERE
+	       "claimId" = $7;
+`;
+export const updateClaim = async (p: Claim): Promise<void> => {
+  try {
+    // do all the insertions in a single transaction
+    await withTransaction(async (client) => {
+      await client.query(updateClaimSql, [
+        p.agentDid,
+        p.agentAddress,
+        p.submissionDate,
+        JSON.stringify(p.paymentsStatus),
+        p.schemaType,
+        p.collectionId,
+        p.claimId,
+      ]);
+
+      if (p.evaluation) {
+        await client.query(upsertEvaluationSql, [
+          p.evaluation.collectionId,
+          p.evaluation.oracle,
+          p.evaluation.agentDid,
+          p.evaluation.agentAddress,
+          p.evaluation.status,
+          p.evaluation.reason,
+          p.evaluation.verificationProof,
+          JSON.stringify(p.evaluation.amount),
+          p.evaluation.evaluationDate,
+          p.evaluation.claimId,
+        ]);
+      }
+    });
+  } catch (error) {
+    throw error;
+  }
+};
+
+export type Evaluation = {
+  collectionId: string;
+  oracle: string;
+  agentDid: string;
+  agentAddress: string;
+  status: number;
+  reason: number;
+  verificationProof?: string;
+  amount: any; // JSON
+  evaluationDate: Date;
+  claimId: string;
+};
+
+const upsertEvaluationSql = `
+INSERT INTO "public"."Evaluation" ( "collectionId", "oracle", "agentDid", "agentAddress", "status", "reason", "verificationProof", "amount", "evaluationDate", "claimId") 
+VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10 )
+ON CONFLICT("claimId") DO UPDATE SET
+  "collectionId" = EXCLUDED."collectionId",
+  "oracle" = EXCLUDED."oracle",
+  "agentDid" = EXCLUDED."agentDid",
+  "agentAddress" = EXCLUDED."agentAddress",
+  "status" = EXCLUDED."status",
+  "reason" = EXCLUDED."reason",
+  "verificationProof" = EXCLUDED."verificationProof",
+  "amount" = EXCLUDED."amount",
+  "evaluationDate" = EXCLUDED."evaluationDate"
+WHERE "Evaluation"."claimId" = EXCLUDED."claimId";
+`;
+
+export type Dispute = {
+  proof: string;
+  subjectId: string;
+  type: number;
+  data: any; // JSON
+};
+
+const createDisputeSql = `
+INSERT INTO "public"."Dispute" ( "proof", "subjectId", "type", "data") 
+VALUES ( $1, $2, $3, $4 );
+`;
+export const createDispute = async (p: Dispute): Promise<void> => {
+  try {
+    await pool.query(createDisputeSql, [
+      p.proof,
+      p.subjectId,
+      p.type,
+      JSON.stringify(p.data),
+    ]);
+  } catch (error) {
+    throw error;
+  }
+};
+
+const getCollectionsClaimTypeNullSql = `
+SELECT cc.id
+FROM "ClaimCollection" AS cc
+INNER JOIN "Claim" AS c ON cc."id" = c."collectionId"
+WHERE c."schemaType" IS NULL
+GROUP BY cc.id;
+`;
+export const getCollectionsClaimTypeNull = async (): Promise<
+  { id: string }[]
+> => {
+  try {
+    const res = await pool.query(getCollectionsClaimTypeNullSql);
+    return res.rows;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const getCollectionEntitySql = `
+SELECT cc."entity"
+FROM "ClaimCollection" AS cc
+WHERE cc.id = $1;
+`;
+export const getCollectionEntity = async (
+  collectionId: string
+): Promise<
+  | {
+      entity: string;
+    }
+  | undefined
+> => {
+  try {
+    const res = await pool.query(getCollectionEntitySql, [collectionId]);
+    return res.rows[0];
+  } catch (error) {
+    throw error;
+  }
+};
+
+const getCollectionClaimsTypeNullSql = `
+SELECT c."claimId"
+FROM "ClaimCollection" AS cc
+INNER JOIN "Claim" AS c ON cc."id" = c."collectionId"
+WHERE cc.id = $1 AND c."schemaType" IS NULL
+LIMIT $2;
+`;
+export const getCollectionClaimsTypeNull = async (
+  collectionId: string,
+  length: number
+): Promise<
+  {
+    claimId: string;
+  }[]
+> => {
+  try {
+    const res = await pool.query(getCollectionClaimsTypeNullSql, [
+      collectionId,
+      length,
+    ]);
+    return res.rows;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const updateClaimSchemaSql = `
+UPDATE "public"."Claim" SET "schemaType" = $2
+WHERE "claimId" = $1;
+`;
+export const updateClaimSchema = async (
+  claimId: string,
+  schemaType: string
+): Promise<void> => {
+  try {
+    await pool.query(updateClaimSchemaSql, [claimId, schemaType]);
+  } catch (error) {
+    throw error;
+  }
+};
+
+// cant have asc or desc as query parameter, so use direct string interpolation to generate query
+const getCollectionClaimsByTypeSql = (orderBy: "asc" | "desc") => `
+SELECT c.*,
+      CASE WHEN ev."claimId" IS NULL THEN NULL
+      ELSE jsonb_build_object(
+        'collectionId', ev."collectionId",
+        'oracle', ev."oracle",
+        'agentDid', ev."agentDid",
+        'agentAddress', ev."agentAddress",
+        'status', ev."status",
+        'reason', ev."reason",
+        'verificationProof', ev."verificationProof",
+        'amount', ev."amount",
+        'evaluationDate', ev."evaluationDate"
+      )
+      END AS "evaluation"
+FROM "Claim" c
+LEFT JOIN "Evaluation" AS ev ON c."claimId" = ev."claimId"
+WHERE c."collectionId" = $1
+  AND (
+    ($2::boolean IS NULL) OR /* No type filter */
+    ($3::text IS NOT NULL AND c."schemaType" = $3::text) OR /* With non-null type */
+    ($3::text IS NULL AND c."schemaType" IS NULL) /* With null type */
+  )
+  AND (
+    ($4::boolean IS NULL) OR /* No status filter */
+    (($5::smallint IS NULL OR $5::smallint = 0) AND ev."claimId" IS NULL) OR /* Unevaluated */
+    (ev."claimId" IS NOT NULL AND ev."status" = $5::smallint) /* Evaluated with specific status */
+  )
+  /* pagination below */
+  AND (
+    $8::text IS NULL OR /* No claimId cursor */
+    CASE $6::text
+      WHEN 'desc' THEN ( /* Descending order */
+        c."submissionDate" < (SELECT c2."submissionDate" FROM "Claim" c2 WHERE c2."claimId" = $8::text) OR
+        (c."submissionDate" = (SELECT c2."submissionDate" FROM "Claim" c2 WHERE c2."claimId" = $8::text) AND c."claimId" < $8::text)
+      )
+      ELSE /* ASC(Ascending order) or Invalid order (default to ASC) */
+        (
+          c."submissionDate" > (SELECT c2."submissionDate" FROM "Claim" c2 WHERE c2."claimId" = $8::text) OR
+          (c."submissionDate" = (SELECT c2."submissionDate" FROM "Claim" c2 WHERE c2."claimId" = $8::text) AND c."claimId" > $8::text)
+        )
+    END
+  )
+ORDER BY c."submissionDate" ${orderBy}, c."claimId" ${orderBy}
+LIMIT $7
+`;
+export const getCollectionClaimsByType = async (p: {
+  collectionId: string;
+  includeType: boolean;
+  type: string | null;
+  includeStatus: boolean;
+  status: number | null;
+  orderBy: "asc" | "desc";
+  take: number;
+  cursor: string | null;
+}): Promise<Claim[]> => {
+  try {
+    const res = await pool.query(getCollectionClaimsByTypeSql(p.orderBy), [
+      p.collectionId,
+      p.includeType || null,
+      p.type,
+      p.includeStatus || null,
+      p.status,
+      p.orderBy,
+      p.take,
+      p.cursor,
+    ]);
+    return res.rows;
+  } catch (error) {
+    throw error;
+  }
+};
+
+
+/SRC/POSTGRES/CLIENT.TS CODE IS BELOW
+import { Pool } from "pg";
+import { DATABASE_URL, DATABASE_USE_SSL } from "../util/secrets";
+
+export const pool = new Pool({
+  application_name: "Blocksync",
+  connectionString: DATABASE_URL,
+  // maximum number of clients the pool should contain
+  // by default this is set to 10.
+  max: 30,
+  min: 3,
+  // number of milliseconds a client must sit idle in the pool and not be checked out
+  // before it is disconnected from the backend and discarded
+  // default is 10000 (10 seconds) - set to 0 to disable auto-disconnection of idle clients
+  // idleTimeoutMillis: 10000,
+  // number of milliseconds to wait before timing out when connecting a new client
+  // by default this is 0 which means no timeout
+  connectionTimeoutMillis: 4000,
+  ...(DATABASE_USE_SSL && { ssl: { rejectUnauthorized: false } }), // Use SSL (recommended
+});
+
+// helper function that manages connection transaction start and commit and rollback
+// on fail, user can just pass a function that takes a client as argument
+export const withTransaction = async (fn: (client: any) => Promise<any>) => {
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const res = await fn(client);
+    await client.query("COMMIT");
+    return res;
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
+// helper function that manages connect to pool and release,
+// user can just pass a function that takes a client as argument
+export const withQuery = async (fn: (client: any) => Promise<any>) => {
+  // const start = Date.now();
+  const client = await pool.connect();
+  try {
+    return await fn(client);
+  } catch (error) {
+    throw error;
+  } finally {
+    client.release();
+    // console.log("executed query", { duration: Date.now() - start });
+  }
+};
+
+
+/SRC/POSTGRES/ENTITY.TS CODE IS BELOW
+import { pool } from "./client";
+import { Iid } from "./iid";
+
+export type Entity = {
+  id: string;
+  type: string;
+  startDate?: Date;
+  endDate?: Date;
+  status: number;
+  relayerNode: string;
+  credentials: string[];
+  entityVerified: boolean;
+  metadata: any; // JSON
+  accounts: any; // JSON
+  externalId?: string;
+  owner?: string;
+};
+
+const createEntitySql = `
+INSERT INTO "Entity" ( "id", "type", "startDate", "endDate", "status", "relayerNode", "credentials", "entityVerified", "metadata", "accounts", "externalId", "owner") 
+VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12 );
+`;
+export const createEntity = async (p: Entity): Promise<void> => {
+  try {
+    await pool.query(createEntitySql, [
+      p.id,
+      p.type,
+      p.startDate,
+      p.endDate,
+      p.status,
+      p.relayerNode,
+      p.credentials,
+      p.entityVerified,
+      JSON.stringify(p.metadata),
+      JSON.stringify(p.accounts),
+      p.externalId,
+      p.owner,
+    ]);
+  } catch (error) {
+    throw error;
+  }
+};
+
+const updateEntitySql = `
+UPDATE "public"."Entity" SET
+	          "type" = $1,
+	     "startDate" = $2,
+	       "endDate" = $3,
+	        "status" = $4,
+	   "relayerNode" = $5,
+	   "credentials" = $6,
+	"entityVerified" = $7,
+	      "metadata" = $8,
+	      "accounts" = $9
+WHERE
+	            "id" = $10;
+`;
+export const updateEntity = async (p: Entity): Promise<void> => {
+  try {
+    await pool.query(updateEntitySql, [
+      p.type,
+      p.startDate,
+      p.endDate,
+      p.status,
+      p.relayerNode,
+      p.credentials,
+      p.entityVerified,
+      JSON.stringify(p.metadata),
+      JSON.stringify(p.accounts),
+      p.id,
+    ]);
+  } catch (error) {
+    throw error;
+  }
+};
+
+const updateEntityOwnerSql = `
+UPDATE "Entity" SET owner = $2 WHERE id = $1;
+`;
+export const updateEntityOwner = async (e: {
+  id: string;
+  owner: string;
+}): Promise<void> => {
+  try {
+    await pool.query(updateEntityOwnerSql, [e.id, e.owner]);
+  } catch (error) {
+    throw error;
+  }
+};
+
+const updateEntityExternalIdSql = `
+UPDATE "Entity" SET "externalId" = $2 WHERE id = $1;
+`;
+export const updateEntityExternalId = async (e: {
+  id: string;
+  externalId: string;
+}): Promise<void> => {
+  try {
+    await pool.query(updateEntityExternalIdSql, [e.id, e.externalId]);
+  } catch (error) {
+    throw error;
+  }
+};
+
+const getEntityDeviceAndNoExternalIdSql = `
+SELECT e."id", i."linkedResource"
+FROM "Entity" AS e
+INNER JOIN "IID" AS i USING("id")
+WHERE e."externalId" IS NULL AND e."type" = 'asset/device'
+LIMIT $1;
+`;
+export const getEntityDeviceAndNoExternalId = async (
+  length: number
+): Promise<
+  {
+    id: string;
+    linkedResource: any;
+  }[]
+> => {
+  try {
+    const res = await pool.query(getEntityDeviceAndNoExternalIdSql, [length]);
+    return res.rows;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const getEntityServiceSql = `
+SELECT i."service"
+FROM "IID" AS i
+WHERE i.id = $1;
+`;
+export const getEntityService = async (id: string): Promise<any> => {
+  try {
+    const res = await pool.query(getEntityServiceSql, [id]);
+    return res.rows[0];
+  } catch (error) {
+    throw error;
+  }
+};
+
+const getEntityParentIidSql = `
+SELECT i."service", i."context", i."linkedResource", i."linkedEntity", i."linkedClaim"
+FROM "IID" AS i
+WHERE i.id = $1;
+`;
+export const getEntityParentIid = async (
+  id: string
+): Promise<
+  | {
+      service: any;
+      context: any;
+      linkedResource: any;
+      linkedEntity: any;
+      linkedClaim: any;
+    }
+  | undefined
+> => {
+  try {
+    const res = await pool.query(getEntityParentIidSql, [id]);
+    return res.rows[0];
+  } catch (error) {
+    throw error;
+  }
+};
+
+export type EntityAndIid = Entity & Iid;
+
+const getEntityAndIidSql = `
+SELECT
+  e.*,
+  i."context",
+	i."controller",
+	i."verificationMethod",
+	i."service",
+	i."authentication",
+	i."assertionMethod",
+	i."keyAgreement",
+	i."capabilityInvocation",
+	i."capabilityDelegation",
+	i."linkedResource",
+	i."linkedClaim",
+	i."accordedRight",
+	i."linkedEntity",
+	i."alsoKnownAs"
+FROM "Entity" AS e
+INNER JOIN "IID" AS i USING("id")
+WHERE e.id = $1;
+`;
+export const getEntityAndIid = async (
+  id: string
+): Promise<EntityAndIid | undefined> => {
+  try {
+    const res = await pool.query(getEntityAndIidSql, [id]);
+    return res.rows[0];
+  } catch (error) {
+    throw error;
+  }
+};
+
+const getEntityDeviceAccountsSql = `
+SELECT e."id", e."accounts"
+FROM "Entity" e
+WHERE e."owner" = $1 AND e."type" = 'asset/device';
+`;
+export const getEntityDeviceAccounts = async (
+  owner: string
+): Promise<{ id: string; accounts: any }[]> => {
+  try {
+    const res = await pool.query(getEntityDeviceAccountsSql, [owner]);
+    return res.rows;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const getEntityAccountsByIidContextSql = `
+SELECT e."id", e."accounts"
+FROM "Entity" e
+INNER JOIN "IID" i ON e."id" = i."id"
+WHERE i."context" @> $1;
+`;
+export const getEntityAccountsByIidContext = async (
+  context: any
+): Promise<{ id: string; accounts: any }[]> => {
+  try {
+    const res = await pool.query(getEntityAccountsByIidContextSql, [context]);
+    return res.rows;
+  } catch (error) {
+    throw error;
+  }
+};
+
