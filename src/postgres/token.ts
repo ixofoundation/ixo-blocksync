@@ -1,4 +1,4 @@
-import { pool, withTransaction } from "./client";
+import { pool, withTransaction, dbQuery } from "./client";
 
 const getTokenNameSql = `
 SELECT name FROM "Token" WHERE id = $1;
@@ -26,7 +26,7 @@ export const createTokenTransaction = async (
   t: TokenTransaction
 ): Promise<void> => {
   try {
-    await pool.query(createTokenTransactionSql, [
+    await dbQuery(createTokenTransactionSql, [
       t.from,
       t.to,
       t.amount,
@@ -75,7 +75,7 @@ VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11 );
 `;
 export const createTokenClass = async (p: TokenClass): Promise<void> => {
   try {
-    await pool.query(createTokenClassSql, [
+    await dbQuery(createTokenClassSql, [
       p.contractAddress,
       p.minter,
       p.class,
@@ -111,38 +111,32 @@ WHERE
 // TODO: UPDATE to maybe use other events from chain for updating retired and cancelled, as this very inefficient
 export const updateTokenClass = async (p: TokenClass): Promise<void> => {
   try {
-    // do all the insertions in a single transaction
-    await withTransaction(async (client) => {
-      await client.query(updateTokenClassSql, [
-        p.minter,
-        p.class,
+    await dbQuery(updateTokenClassSql, [
+      p.minter,
+      p.class,
+      p.name,
+      p.description,
+      p.image,
+      p.type,
+      p.cap,
+      p.supply,
+      p.paused,
+      p.stopped,
+      p.contractAddress,
+    ]);
+
+    if (p.retired?.length) {
+      await dbQuery(deleteTokenRetiredSql, [p.name]);
+      await dbQuery(createTokenRetiredSql, [JSON.stringify(p.retired), p.name]);
+    }
+
+    if (p.cancelled?.length) {
+      await dbQuery(deleteTokenCancelledSql, [p.name]);
+      await dbQuery(createTokenCancelledSql, [
+        JSON.stringify(p.cancelled),
         p.name,
-        p.description,
-        p.image,
-        p.type,
-        p.cap,
-        p.supply,
-        p.paused,
-        p.stopped,
-        p.contractAddress,
       ]);
-
-      if (p.retired?.length) {
-        await client.query(deleteTokenRetiredSql, [p.name]);
-        await client.query(createTokenRetiredSql, [
-          JSON.stringify(p.retired),
-          p.name,
-        ]);
-      }
-
-      if (p.cancelled?.length) {
-        await client.query(deleteTokenCancelledSql, [p.name]);
-        await client.query(createTokenCancelledSql, [
-          JSON.stringify(p.cancelled),
-          p.name,
-        ]);
-      }
-    });
+    }
   } catch (error) {
     throw error;
   }
@@ -195,17 +189,11 @@ VALUES ( $1, $2, $3, $4 );
 `;
 export const createToken = async (p: Token): Promise<void> => {
   try {
-    // do all the insertions in a single transaction
-    await withTransaction(async (client) => {
-      await client.query(createTokenSql, [p.id, p.index, p.name, p.collection]);
+    await dbQuery(createTokenSql, [p.id, p.index, p.name, p.collection]);
 
-      if (p.tokenData?.length) {
-        await client.query(createTokenDataSql, [
-          JSON.stringify(p.tokenData),
-          p.id,
-        ]);
-      }
-    });
+    if (p.tokenData?.length) {
+      await dbQuery(createTokenDataSql, [JSON.stringify(p.tokenData), p.id]);
+    }
   } catch (error) {
     throw error;
   }

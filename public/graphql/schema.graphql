@@ -1265,40 +1265,6 @@ type Bond implements Node {
   outcomePayment: String!
   oracleDid: String!
 
-  """Reads and enables pagination through a set of `BondAlpha`."""
-  bondAlphasByBondDid(
-    """Only read the first `n` values of the set."""
-    first: Int
-
-    """Only read the last `n` values of the set."""
-    last: Int
-
-    """
-    Skip the first `n` values from our `after` cursor, an alternative to cursor
-    based pagination. May not be used with `last`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """The method to use when ordering `BondAlpha`."""
-    orderBy: [BondAlphasOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: BondAlphaCondition
-
-    """
-    A filter to be used in determining which values should be returned by the collection.
-    """
-    filter: BondAlphaFilter
-  ): BondAlphasConnection!
-
   """Reads and enables pagination through a set of `BondBuy`."""
   bondBuysByBondDid(
     """Only read the first `n` values of the set."""
@@ -1401,40 +1367,6 @@ type Bond implements Node {
     filter: BondSwapFilter
   ): BondSwapsConnection!
 
-  """Reads and enables pagination through a set of `OutcomePayment`."""
-  outcomePaymentsByBondDid(
-    """Only read the first `n` values of the set."""
-    first: Int
-
-    """Only read the last `n` values of the set."""
-    last: Int
-
-    """
-    Skip the first `n` values from our `after` cursor, an alternative to cursor
-    based pagination. May not be used with `last`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """The method to use when ordering `OutcomePayment`."""
-    orderBy: [OutcomePaymentsOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: OutcomePaymentCondition
-
-    """
-    A filter to be used in determining which values should be returned by the collection.
-    """
-    filter: OutcomePaymentFilter
-  ): OutcomePaymentsConnection!
-
   """Reads and enables pagination through a set of `ReserveWithdrawal`."""
   reserveWithdrawalsByBondDid(
     """Only read the first `n` values of the set."""
@@ -1502,6 +1434,74 @@ type Bond implements Node {
     """
     filter: ShareWithdrawalFilter
   ): ShareWithdrawalsConnection!
+
+  """Reads and enables pagination through a set of `OutcomePayment`."""
+  outcomePaymentsByBondDid(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `OutcomePayment`."""
+    orderBy: [OutcomePaymentsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: OutcomePaymentCondition
+
+    """
+    A filter to be used in determining which values should be returned by the collection.
+    """
+    filter: OutcomePaymentFilter
+  ): OutcomePaymentsConnection!
+
+  """Reads and enables pagination through a set of `BondAlpha`."""
+  bondAlphasByBondDid(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `BondAlpha`."""
+    orderBy: [BondAlphasOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: BondAlphaCondition
+
+    """
+    A filter to be used in determining which values should be returned by the collection.
+    """
+    filter: BondAlphaFilter
+  ): BondAlphasConnection!
 }
 
 """
@@ -1509,36 +1509,37 @@ The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://
 """
 scalar JSON
 
-"""A connection to a list of `BondAlpha` values."""
-type BondAlphasConnection {
-  """A list of `BondAlpha` objects."""
-  nodes: [BondAlpha!]!
+"""A connection to a list of `BondBuy` values."""
+type BondBuysConnection {
+  """A list of `BondBuy` objects."""
+  nodes: [BondBuy!]!
 
   """
-  A list of edges which contains the `BondAlpha` and cursor to aid in pagination.
+  A list of edges which contains the `BondBuy` and cursor to aid in pagination.
   """
-  edges: [BondAlphasEdge!]!
+  edges: [BondBuysEdge!]!
 
   """Information to aid in pagination."""
   pageInfo: PageInfo!
 
-  """The count of *all* `BondAlpha` you could get from the connection."""
+  """The count of *all* `BondBuy` you could get from the connection."""
   totalCount: Int!
 }
 
-type BondAlpha implements Node {
+type BondBuy implements Node {
   """
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
   """
   nodeId: ID!
   id: Int!
   bondDid: String!
-  alpha: String!
-  oracleDid: String!
+  accountDid: String!
+  amount: JSON!
+  maxPrices: JSON!
   height: Int!
   timestamp: Datetime!
 
-  """Reads a single `Bond` that is related to this `BondAlpha`."""
+  """Reads a single `Bond` that is related to this `BondBuy`."""
   bondByBondDid: Bond
 }
 
@@ -1548,13 +1549,13 @@ A point in time as described by the [ISO
 """
 scalar Datetime
 
-"""A `BondAlpha` edge in the connection."""
-type BondAlphasEdge {
+"""A `BondBuy` edge in the connection."""
+type BondBuysEdge {
   """A cursor for use in pagination."""
   cursor: Cursor
 
-  """The `BondAlpha` at the end of the edge."""
-  node: BondAlpha!
+  """The `BondBuy` at the end of the edge."""
+  node: BondBuy!
 }
 
 """A location in a connection that can be used for resuming pagination."""
@@ -1575,17 +1576,19 @@ type PageInfo {
   endCursor: Cursor
 }
 
-"""Methods to use when ordering `BondAlpha`."""
-enum BondAlphasOrderBy {
+"""Methods to use when ordering `BondBuy`."""
+enum BondBuysOrderBy {
   NATURAL
   ID_ASC
   ID_DESC
   BOND_DID_ASC
   BOND_DID_DESC
-  ALPHA_ASC
-  ALPHA_DESC
-  ORACLE_DID_ASC
-  ORACLE_DID_DESC
+  ACCOUNT_DID_ASC
+  ACCOUNT_DID_DESC
+  AMOUNT_ASC
+  AMOUNT_DESC
+  MAX_PRICES_ASC
+  MAX_PRICES_DESC
   HEIGHT_ASC
   HEIGHT_DESC
   TIMESTAMP_ASC
@@ -1595,21 +1598,23 @@ enum BondAlphasOrderBy {
 }
 
 """
-A condition to be used against `BondAlpha` object types. All fields are tested
-for equality and combined with a logical ‘and.’
+A condition to be used against `BondBuy` object types. All fields are tested for equality and combined with a logical ‘and.’
 """
-input BondAlphaCondition {
+input BondBuyCondition {
   """Checks for equality with the object’s `id` field."""
   id: Int
 
   """Checks for equality with the object’s `bondDid` field."""
   bondDid: String
 
-  """Checks for equality with the object’s `alpha` field."""
-  alpha: String
+  """Checks for equality with the object’s `accountDid` field."""
+  accountDid: String
 
-  """Checks for equality with the object’s `oracleDid` field."""
-  oracleDid: String
+  """Checks for equality with the object’s `amount` field."""
+  amount: JSON
+
+  """Checks for equality with the object’s `maxPrices` field."""
+  maxPrices: JSON
 
   """Checks for equality with the object’s `height` field."""
   height: Int
@@ -1619,20 +1624,23 @@ input BondAlphaCondition {
 }
 
 """
-A filter to be used against `BondAlpha` object types. All fields are combined with a logical ‘and.’
+A filter to be used against `BondBuy` object types. All fields are combined with a logical ‘and.’
 """
-input BondAlphaFilter {
+input BondBuyFilter {
   """Filter by the object’s `id` field."""
   id: IntFilter
 
   """Filter by the object’s `bondDid` field."""
   bondDid: StringFilter
 
-  """Filter by the object’s `alpha` field."""
-  alpha: StringFilter
+  """Filter by the object’s `accountDid` field."""
+  accountDid: StringFilter
 
-  """Filter by the object’s `oracleDid` field."""
-  oracleDid: StringFilter
+  """Filter by the object’s `amount` field."""
+  amount: JSONFilter
+
+  """Filter by the object’s `maxPrices` field."""
+  maxPrices: JSONFilter
 
   """Filter by the object’s `height` field."""
   height: IntFilter
@@ -1644,13 +1652,13 @@ input BondAlphaFilter {
   bondByBondDid: BondFilter
 
   """Checks for all expressions in this list."""
-  and: [BondAlphaFilter!]
+  and: [BondBuyFilter!]
 
   """Checks for any expressions in this list."""
-  or: [BondAlphaFilter!]
+  or: [BondBuyFilter!]
 
   """Negates the expression."""
-  not: BondAlphaFilter
+  not: BondBuyFilter
 }
 
 """
@@ -1828,6 +1836,63 @@ input StringFilter {
 }
 
 """
+A filter to be used against JSON fields. All fields are combined with a logical ‘and.’
+"""
+input JSONFilter {
+  """
+  Is null (if `true` is specified) or is not null (if `false` is specified).
+  """
+  isNull: Boolean
+
+  """Equal to the specified value."""
+  equalTo: JSON
+
+  """Not equal to the specified value."""
+  notEqualTo: JSON
+
+  """
+  Not equal to the specified value, treating null like an ordinary value.
+  """
+  distinctFrom: JSON
+
+  """Equal to the specified value, treating null like an ordinary value."""
+  notDistinctFrom: JSON
+
+  """Included in the specified list."""
+  in: [JSON!]
+
+  """Not included in the specified list."""
+  notIn: [JSON!]
+
+  """Less than the specified value."""
+  lessThan: JSON
+
+  """Less than or equal to the specified value."""
+  lessThanOrEqualTo: JSON
+
+  """Greater than the specified value."""
+  greaterThan: JSON
+
+  """Greater than or equal to the specified value."""
+  greaterThanOrEqualTo: JSON
+
+  """Contains the specified JSON."""
+  contains: JSON
+
+  """Contains the specified key."""
+  containsKey: String
+
+  """Contains all of the specified keys."""
+  containsAllKeys: [String!]
+
+  """Contains any of the specified keys."""
+  containsAnyKeys: [String!]
+
+  """Contained by the specified JSON."""
+  containedBy: JSON
+}
+
+"""
 A filter to be used against Datetime fields. All fields are combined with a logical ‘and.’
 """
 input DatetimeFilter {
@@ -1957,12 +2022,6 @@ input BondFilter {
   """Filter by the object’s `oracleDid` field."""
   oracleDid: StringFilter
 
-  """Filter by the object’s `bondAlphasByBondDid` relation."""
-  bondAlphasByBondDid: BondToManyBondAlphaFilter
-
-  """Some related `bondAlphasByBondDid` exist."""
-  bondAlphasByBondDidExist: Boolean
-
   """Filter by the object’s `bondBuysByBondDid` relation."""
   bondBuysByBondDid: BondToManyBondBuyFilter
 
@@ -1981,12 +2040,6 @@ input BondFilter {
   """Some related `bondSwapsByBondDid` exist."""
   bondSwapsByBondDidExist: Boolean
 
-  """Filter by the object’s `outcomePaymentsByBondDid` relation."""
-  outcomePaymentsByBondDid: BondToManyOutcomePaymentFilter
-
-  """Some related `outcomePaymentsByBondDid` exist."""
-  outcomePaymentsByBondDidExist: Boolean
-
   """Filter by the object’s `reserveWithdrawalsByBondDid` relation."""
   reserveWithdrawalsByBondDid: BondToManyReserveWithdrawalFilter
 
@@ -1999,6 +2052,18 @@ input BondFilter {
   """Some related `shareWithdrawalsByBondDid` exist."""
   shareWithdrawalsByBondDidExist: Boolean
 
+  """Filter by the object’s `outcomePaymentsByBondDid` relation."""
+  outcomePaymentsByBondDid: BondToManyOutcomePaymentFilter
+
+  """Some related `outcomePaymentsByBondDid` exist."""
+  outcomePaymentsByBondDidExist: Boolean
+
+  """Filter by the object’s `bondAlphasByBondDid` relation."""
+  bondAlphasByBondDid: BondToManyBondAlphaFilter
+
+  """Some related `bondAlphasByBondDid` exist."""
+  bondAlphasByBondDidExist: Boolean
+
   """Checks for all expressions in this list."""
   and: [BondFilter!]
 
@@ -2007,63 +2072,6 @@ input BondFilter {
 
   """Negates the expression."""
   not: BondFilter
-}
-
-"""
-A filter to be used against JSON fields. All fields are combined with a logical ‘and.’
-"""
-input JSONFilter {
-  """
-  Is null (if `true` is specified) or is not null (if `false` is specified).
-  """
-  isNull: Boolean
-
-  """Equal to the specified value."""
-  equalTo: JSON
-
-  """Not equal to the specified value."""
-  notEqualTo: JSON
-
-  """
-  Not equal to the specified value, treating null like an ordinary value.
-  """
-  distinctFrom: JSON
-
-  """Equal to the specified value, treating null like an ordinary value."""
-  notDistinctFrom: JSON
-
-  """Included in the specified list."""
-  in: [JSON!]
-
-  """Not included in the specified list."""
-  notIn: [JSON!]
-
-  """Less than the specified value."""
-  lessThan: JSON
-
-  """Less than or equal to the specified value."""
-  lessThanOrEqualTo: JSON
-
-  """Greater than the specified value."""
-  greaterThan: JSON
-
-  """Greater than or equal to the specified value."""
-  greaterThanOrEqualTo: JSON
-
-  """Contains the specified JSON."""
-  contains: JSON
-
-  """Contains the specified key."""
-  containsKey: String
-
-  """Contains all of the specified keys."""
-  containsAllKeys: [String!]
-
-  """Contains any of the specified keys."""
-  containsAnyKeys: [String!]
-
-  """Contained by the specified JSON."""
-  containedBy: JSON
 }
 
 """
@@ -2172,26 +2180,6 @@ input BooleanFilter {
 }
 
 """
-A filter to be used against many `BondAlpha` object types. All fields are combined with a logical ‘and.’
-"""
-input BondToManyBondAlphaFilter {
-  """
-  Every related `BondAlpha` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  every: BondAlphaFilter
-
-  """
-  Some related `BondAlpha` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  some: BondAlphaFilter
-
-  """
-  No related `BondAlpha` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  none: BondAlphaFilter
-}
-
-"""
 A filter to be used against many `BondBuy` object types. All fields are combined with a logical ‘and.’
 """
 input BondToManyBondBuyFilter {
@@ -2209,44 +2197,6 @@ input BondToManyBondBuyFilter {
   No related `BondBuy` matches the filter criteria. All fields are combined with a logical ‘and.’
   """
   none: BondBuyFilter
-}
-
-"""
-A filter to be used against `BondBuy` object types. All fields are combined with a logical ‘and.’
-"""
-input BondBuyFilter {
-  """Filter by the object’s `id` field."""
-  id: IntFilter
-
-  """Filter by the object’s `bondDid` field."""
-  bondDid: StringFilter
-
-  """Filter by the object’s `accountDid` field."""
-  accountDid: StringFilter
-
-  """Filter by the object’s `amount` field."""
-  amount: JSONFilter
-
-  """Filter by the object’s `maxPrices` field."""
-  maxPrices: JSONFilter
-
-  """Filter by the object’s `height` field."""
-  height: IntFilter
-
-  """Filter by the object’s `timestamp` field."""
-  timestamp: DatetimeFilter
-
-  """Filter by the object’s `bondByBondDid` relation."""
-  bondByBondDid: BondFilter
-
-  """Checks for all expressions in this list."""
-  and: [BondBuyFilter!]
-
-  """Checks for any expressions in this list."""
-  or: [BondBuyFilter!]
-
-  """Negates the expression."""
-  not: BondBuyFilter
 }
 
 """
@@ -2360,64 +2310,6 @@ input BondSwapFilter {
 
   """Negates the expression."""
   not: BondSwapFilter
-}
-
-"""
-A filter to be used against many `OutcomePayment` object types. All fields are combined with a logical ‘and.’
-"""
-input BondToManyOutcomePaymentFilter {
-  """
-  Every related `OutcomePayment` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  every: OutcomePaymentFilter
-
-  """
-  Some related `OutcomePayment` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  some: OutcomePaymentFilter
-
-  """
-  No related `OutcomePayment` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  none: OutcomePaymentFilter
-}
-
-"""
-A filter to be used against `OutcomePayment` object types. All fields are combined with a logical ‘and.’
-"""
-input OutcomePaymentFilter {
-  """Filter by the object’s `id` field."""
-  id: IntFilter
-
-  """Filter by the object’s `bondDid` field."""
-  bondDid: StringFilter
-
-  """Filter by the object’s `senderDid` field."""
-  senderDid: StringFilter
-
-  """Filter by the object’s `senderAddress` field."""
-  senderAddress: StringFilter
-
-  """Filter by the object’s `amount` field."""
-  amount: JSONFilter
-
-  """Filter by the object’s `height` field."""
-  height: IntFilter
-
-  """Filter by the object’s `timestamp` field."""
-  timestamp: DatetimeFilter
-
-  """Filter by the object’s `bondByBondDid` relation."""
-  bondByBondDid: BondFilter
-
-  """Checks for all expressions in this list."""
-  and: [OutcomePaymentFilter!]
-
-  """Checks for any expressions in this list."""
-  or: [OutcomePaymentFilter!]
-
-  """Negates the expression."""
-  not: OutcomePaymentFilter
 }
 
 """
@@ -2539,94 +2431,117 @@ input ShareWithdrawalFilter {
   not: ShareWithdrawalFilter
 }
 
-"""A connection to a list of `BondBuy` values."""
-type BondBuysConnection {
-  """A list of `BondBuy` objects."""
-  nodes: [BondBuy!]!
+"""
+A filter to be used against many `OutcomePayment` object types. All fields are combined with a logical ‘and.’
+"""
+input BondToManyOutcomePaymentFilter {
+  """
+  Every related `OutcomePayment` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  every: OutcomePaymentFilter
 
   """
-  A list of edges which contains the `BondBuy` and cursor to aid in pagination.
+  Some related `OutcomePayment` matches the filter criteria. All fields are combined with a logical ‘and.’
   """
-  edges: [BondBuysEdge!]!
+  some: OutcomePaymentFilter
 
-  """Information to aid in pagination."""
-  pageInfo: PageInfo!
-
-  """The count of *all* `BondBuy` you could get from the connection."""
-  totalCount: Int!
-}
-
-type BondBuy implements Node {
   """
-  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  No related `OutcomePayment` matches the filter criteria. All fields are combined with a logical ‘and.’
   """
-  nodeId: ID!
-  id: Int!
-  bondDid: String!
-  accountDid: String!
-  amount: JSON!
-  maxPrices: JSON!
-  height: Int!
-  timestamp: Datetime!
-
-  """Reads a single `Bond` that is related to this `BondBuy`."""
-  bondByBondDid: Bond
-}
-
-"""A `BondBuy` edge in the connection."""
-type BondBuysEdge {
-  """A cursor for use in pagination."""
-  cursor: Cursor
-
-  """The `BondBuy` at the end of the edge."""
-  node: BondBuy!
-}
-
-"""Methods to use when ordering `BondBuy`."""
-enum BondBuysOrderBy {
-  NATURAL
-  ID_ASC
-  ID_DESC
-  BOND_DID_ASC
-  BOND_DID_DESC
-  ACCOUNT_DID_ASC
-  ACCOUNT_DID_DESC
-  AMOUNT_ASC
-  AMOUNT_DESC
-  MAX_PRICES_ASC
-  MAX_PRICES_DESC
-  HEIGHT_ASC
-  HEIGHT_DESC
-  TIMESTAMP_ASC
-  TIMESTAMP_DESC
-  PRIMARY_KEY_ASC
-  PRIMARY_KEY_DESC
+  none: OutcomePaymentFilter
 }
 
 """
-A condition to be used against `BondBuy` object types. All fields are tested for equality and combined with a logical ‘and.’
+A filter to be used against `OutcomePayment` object types. All fields are combined with a logical ‘and.’
 """
-input BondBuyCondition {
-  """Checks for equality with the object’s `id` field."""
-  id: Int
+input OutcomePaymentFilter {
+  """Filter by the object’s `id` field."""
+  id: IntFilter
 
-  """Checks for equality with the object’s `bondDid` field."""
-  bondDid: String
+  """Filter by the object’s `bondDid` field."""
+  bondDid: StringFilter
 
-  """Checks for equality with the object’s `accountDid` field."""
-  accountDid: String
+  """Filter by the object’s `senderDid` field."""
+  senderDid: StringFilter
 
-  """Checks for equality with the object’s `amount` field."""
-  amount: JSON
+  """Filter by the object’s `senderAddress` field."""
+  senderAddress: StringFilter
 
-  """Checks for equality with the object’s `maxPrices` field."""
-  maxPrices: JSON
+  """Filter by the object’s `amount` field."""
+  amount: JSONFilter
 
-  """Checks for equality with the object’s `height` field."""
-  height: Int
+  """Filter by the object’s `height` field."""
+  height: IntFilter
 
-  """Checks for equality with the object’s `timestamp` field."""
-  timestamp: Datetime
+  """Filter by the object’s `timestamp` field."""
+  timestamp: DatetimeFilter
+
+  """Filter by the object’s `bondByBondDid` relation."""
+  bondByBondDid: BondFilter
+
+  """Checks for all expressions in this list."""
+  and: [OutcomePaymentFilter!]
+
+  """Checks for any expressions in this list."""
+  or: [OutcomePaymentFilter!]
+
+  """Negates the expression."""
+  not: OutcomePaymentFilter
+}
+
+"""
+A filter to be used against many `BondAlpha` object types. All fields are combined with a logical ‘and.’
+"""
+input BondToManyBondAlphaFilter {
+  """
+  Every related `BondAlpha` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  every: BondAlphaFilter
+
+  """
+  Some related `BondAlpha` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  some: BondAlphaFilter
+
+  """
+  No related `BondAlpha` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  none: BondAlphaFilter
+}
+
+"""
+A filter to be used against `BondAlpha` object types. All fields are combined with a logical ‘and.’
+"""
+input BondAlphaFilter {
+  """Filter by the object’s `id` field."""
+  id: IntFilter
+
+  """Filter by the object’s `bondDid` field."""
+  bondDid: StringFilter
+
+  """Filter by the object’s `alpha` field."""
+  alpha: StringFilter
+
+  """Filter by the object’s `oracleDid` field."""
+  oracleDid: StringFilter
+
+  """Filter by the object’s `height` field."""
+  height: IntFilter
+
+  """Filter by the object’s `timestamp` field."""
+  timestamp: DatetimeFilter
+
+  """Filter by the object’s `bondByBondDid` relation."""
+  bondByBondDid: BondFilter
+
+  """Checks for all expressions in this list."""
+  and: [BondAlphaFilter!]
+
+  """Checks for any expressions in this list."""
+  or: [BondAlphaFilter!]
+
+  """Negates the expression."""
+  not: BondAlphaFilter
 }
 
 """A connection to a list of `BondSell` values."""
@@ -2797,97 +2712,6 @@ input BondSwapCondition {
 
   """Checks for equality with the object’s `toToken` field."""
   toToken: String
-
-  """Checks for equality with the object’s `height` field."""
-  height: Int
-
-  """Checks for equality with the object’s `timestamp` field."""
-  timestamp: Datetime
-}
-
-"""A connection to a list of `OutcomePayment` values."""
-type OutcomePaymentsConnection {
-  """A list of `OutcomePayment` objects."""
-  nodes: [OutcomePayment!]!
-
-  """
-  A list of edges which contains the `OutcomePayment` and cursor to aid in pagination.
-  """
-  edges: [OutcomePaymentsEdge!]!
-
-  """Information to aid in pagination."""
-  pageInfo: PageInfo!
-
-  """The count of *all* `OutcomePayment` you could get from the connection."""
-  totalCount: Int!
-}
-
-type OutcomePayment implements Node {
-  """
-  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
-  """
-  nodeId: ID!
-  id: Int!
-  bondDid: String!
-  senderDid: String!
-  senderAddress: String!
-  amount: JSON!
-  height: Int!
-  timestamp: Datetime!
-
-  """Reads a single `Bond` that is related to this `OutcomePayment`."""
-  bondByBondDid: Bond
-}
-
-"""A `OutcomePayment` edge in the connection."""
-type OutcomePaymentsEdge {
-  """A cursor for use in pagination."""
-  cursor: Cursor
-
-  """The `OutcomePayment` at the end of the edge."""
-  node: OutcomePayment!
-}
-
-"""Methods to use when ordering `OutcomePayment`."""
-enum OutcomePaymentsOrderBy {
-  NATURAL
-  ID_ASC
-  ID_DESC
-  BOND_DID_ASC
-  BOND_DID_DESC
-  SENDER_DID_ASC
-  SENDER_DID_DESC
-  SENDER_ADDRESS_ASC
-  SENDER_ADDRESS_DESC
-  AMOUNT_ASC
-  AMOUNT_DESC
-  HEIGHT_ASC
-  HEIGHT_DESC
-  TIMESTAMP_ASC
-  TIMESTAMP_DESC
-  PRIMARY_KEY_ASC
-  PRIMARY_KEY_DESC
-}
-
-"""
-A condition to be used against `OutcomePayment` object types. All fields are
-tested for equality and combined with a logical ‘and.’
-"""
-input OutcomePaymentCondition {
-  """Checks for equality with the object’s `id` field."""
-  id: Int
-
-  """Checks for equality with the object’s `bondDid` field."""
-  bondDid: String
-
-  """Checks for equality with the object’s `senderDid` field."""
-  senderDid: String
-
-  """Checks for equality with the object’s `senderAddress` field."""
-  senderAddress: String
-
-  """Checks for equality with the object’s `amount` field."""
-  amount: JSON
 
   """Checks for equality with the object’s `height` field."""
   height: Int
@@ -3082,6 +2906,182 @@ input ShareWithdrawalCondition {
 
   """Checks for equality with the object’s `amount` field."""
   amount: JSON
+
+  """Checks for equality with the object’s `height` field."""
+  height: Int
+
+  """Checks for equality with the object’s `timestamp` field."""
+  timestamp: Datetime
+}
+
+"""A connection to a list of `OutcomePayment` values."""
+type OutcomePaymentsConnection {
+  """A list of `OutcomePayment` objects."""
+  nodes: [OutcomePayment!]!
+
+  """
+  A list of edges which contains the `OutcomePayment` and cursor to aid in pagination.
+  """
+  edges: [OutcomePaymentsEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `OutcomePayment` you could get from the connection."""
+  totalCount: Int!
+}
+
+type OutcomePayment implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: Int!
+  bondDid: String!
+  senderDid: String!
+  senderAddress: String!
+  amount: JSON!
+  height: Int!
+  timestamp: Datetime!
+
+  """Reads a single `Bond` that is related to this `OutcomePayment`."""
+  bondByBondDid: Bond
+}
+
+"""A `OutcomePayment` edge in the connection."""
+type OutcomePaymentsEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `OutcomePayment` at the end of the edge."""
+  node: OutcomePayment!
+}
+
+"""Methods to use when ordering `OutcomePayment`."""
+enum OutcomePaymentsOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  BOND_DID_ASC
+  BOND_DID_DESC
+  SENDER_DID_ASC
+  SENDER_DID_DESC
+  SENDER_ADDRESS_ASC
+  SENDER_ADDRESS_DESC
+  AMOUNT_ASC
+  AMOUNT_DESC
+  HEIGHT_ASC
+  HEIGHT_DESC
+  TIMESTAMP_ASC
+  TIMESTAMP_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `OutcomePayment` object types. All fields are
+tested for equality and combined with a logical ‘and.’
+"""
+input OutcomePaymentCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: Int
+
+  """Checks for equality with the object’s `bondDid` field."""
+  bondDid: String
+
+  """Checks for equality with the object’s `senderDid` field."""
+  senderDid: String
+
+  """Checks for equality with the object’s `senderAddress` field."""
+  senderAddress: String
+
+  """Checks for equality with the object’s `amount` field."""
+  amount: JSON
+
+  """Checks for equality with the object’s `height` field."""
+  height: Int
+
+  """Checks for equality with the object’s `timestamp` field."""
+  timestamp: Datetime
+}
+
+"""A connection to a list of `BondAlpha` values."""
+type BondAlphasConnection {
+  """A list of `BondAlpha` objects."""
+  nodes: [BondAlpha!]!
+
+  """
+  A list of edges which contains the `BondAlpha` and cursor to aid in pagination.
+  """
+  edges: [BondAlphasEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `BondAlpha` you could get from the connection."""
+  totalCount: Int!
+}
+
+type BondAlpha implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: Int!
+  bondDid: String!
+  alpha: String!
+  oracleDid: String!
+  height: Int!
+  timestamp: Datetime!
+
+  """Reads a single `Bond` that is related to this `BondAlpha`."""
+  bondByBondDid: Bond
+}
+
+"""A `BondAlpha` edge in the connection."""
+type BondAlphasEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `BondAlpha` at the end of the edge."""
+  node: BondAlpha!
+}
+
+"""Methods to use when ordering `BondAlpha`."""
+enum BondAlphasOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  BOND_DID_ASC
+  BOND_DID_DESC
+  ALPHA_ASC
+  ALPHA_DESC
+  ORACLE_DID_ASC
+  ORACLE_DID_DESC
+  HEIGHT_ASC
+  HEIGHT_DESC
+  TIMESTAMP_ASC
+  TIMESTAMP_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `BondAlpha` object types. All fields are tested
+for equality and combined with a logical ‘and.’
+"""
+input BondAlphaCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: Int
+
+  """Checks for equality with the object’s `bondDid` field."""
+  bondDid: String
+
+  """Checks for equality with the object’s `alpha` field."""
+  alpha: String
+
+  """Checks for equality with the object’s `oracleDid` field."""
+  oracleDid: String
 
   """Checks for equality with the object’s `height` field."""
   height: Int
@@ -3929,40 +3929,6 @@ type Entity implements Node {
   """Reads a single `Iid` that is related to this `Entity`."""
   iidById: Iid
 
-  """Reads and enables pagination through a set of `Token`."""
-  tokensByCollection(
-    """Only read the first `n` values of the set."""
-    first: Int
-
-    """Only read the last `n` values of the set."""
-    last: Int
-
-    """
-    Skip the first `n` values from our `after` cursor, an alternative to cursor
-    based pagination. May not be used with `last`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """The method to use when ordering `Token`."""
-    orderBy: [TokensOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: TokenCondition
-
-    """
-    A filter to be used in determining which values should be returned by the collection.
-    """
-    filter: TokenFilter
-  ): TokensConnection!
-
   """Reads and enables pagination through a set of `TokenClass`."""
   tokenClassesByClass(
     """Only read the first `n` values of the set."""
@@ -3996,6 +3962,40 @@ type Entity implements Node {
     """
     filter: TokenClassFilter
   ): TokenClassesConnection!
+
+  """Reads and enables pagination through a set of `Token`."""
+  tokensByCollection(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `Token`."""
+    orderBy: [TokensOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: TokenCondition
+
+    """
+    A filter to be used in determining which values should be returned by the collection.
+    """
+    filter: TokenFilter
+  ): TokensConnection!
   context: JSON!
   controller: [String!]!
   verificationMethod: JSON!
@@ -4038,6 +4038,153 @@ type Iid implements Node {
   """Reads a single `Entity` that is related to this `Iid`."""
   entityById: Entity
 }
+
+"""A connection to a list of `TokenClass` values."""
+type TokenClassesConnection {
+  """A list of `TokenClass` objects."""
+  nodes: [TokenClass!]!
+
+  """
+  A list of edges which contains the `TokenClass` and cursor to aid in pagination.
+  """
+  edges: [TokenClassesEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `TokenClass` you could get from the connection."""
+  totalCount: Int!
+}
+
+type TokenClass implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  contractAddress: String!
+  minter: String!
+  class: String!
+  name: String!
+  description: String!
+  image: String!
+  type: String!
+  cap: BigInt!
+  supply: BigInt!
+  paused: Boolean!
+  stopped: Boolean!
+
+  """Reads a single `Entity` that is related to this `TokenClass`."""
+  entityByClass: Entity
+
+  """Reads and enables pagination through a set of `Token`."""
+  tokensByName(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `Token`."""
+    orderBy: [TokensOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: TokenCondition
+
+    """
+    A filter to be used in determining which values should be returned by the collection.
+    """
+    filter: TokenFilter
+  ): TokensConnection!
+
+  """Reads and enables pagination through a set of `TokenRetired`."""
+  tokenRetiredsByName(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `TokenRetired`."""
+    orderBy: [TokenRetiredsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: TokenRetiredCondition
+
+    """
+    A filter to be used in determining which values should be returned by the collection.
+    """
+    filter: TokenRetiredFilter
+  ): TokenRetiredsConnection!
+
+  """Reads and enables pagination through a set of `TokenCancelled`."""
+  tokenCancelledsByName(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `TokenCancelled`."""
+    orderBy: [TokenCancelledsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: TokenCancelledCondition
+
+    """
+    A filter to be used in determining which values should be returned by the collection.
+    """
+    filter: TokenCancelledFilter
+  ): TokenCancelledsConnection!
+}
+
+"""
+A signed eight-byte integer. The upper big integer values are greater than the
+max value for a JavaScript number. Therefore all big integers will be output as
+strings and not numbers.
+"""
+scalar BigInt
 
 """A connection to a list of `Token` values."""
 type TokensConnection {
@@ -4175,386 +4322,133 @@ type Token implements Node {
   ): TokenTransactionsConnection!
 }
 
-type TokenClass implements Node {
+"""A connection to a list of `TokenDatum` values."""
+type TokenDataConnection {
+  """A list of `TokenDatum` objects."""
+  nodes: [TokenDatum!]!
+
+  """
+  A list of edges which contains the `TokenDatum` and cursor to aid in pagination.
+  """
+  edges: [TokenDataEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `TokenDatum` you could get from the connection."""
+  totalCount: Int!
+}
+
+type TokenDatum implements Node {
   """
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
   """
   nodeId: ID!
-  contractAddress: String!
-  minter: String!
-  class: String!
-  name: String!
-  description: String!
-  image: String!
+  aid: Int!
+  uri: String!
+  encrypted: Boolean!
+  proof: String!
   type: String!
-  cap: BigInt!
-  supply: BigInt!
-  paused: Boolean!
-  stopped: Boolean!
+  id: String!
+  tokenId: String!
 
-  """Reads a single `Entity` that is related to this `TokenClass`."""
-  entityByClass: Entity
-
-  """Reads and enables pagination through a set of `Token`."""
-  tokensByName(
-    """Only read the first `n` values of the set."""
-    first: Int
-
-    """Only read the last `n` values of the set."""
-    last: Int
-
-    """
-    Skip the first `n` values from our `after` cursor, an alternative to cursor
-    based pagination. May not be used with `last`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """The method to use when ordering `Token`."""
-    orderBy: [TokensOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: TokenCondition
-
-    """
-    A filter to be used in determining which values should be returned by the collection.
-    """
-    filter: TokenFilter
-  ): TokensConnection!
-
-  """Reads and enables pagination through a set of `TokenCancelled`."""
-  tokenCancelledsByName(
-    """Only read the first `n` values of the set."""
-    first: Int
-
-    """Only read the last `n` values of the set."""
-    last: Int
-
-    """
-    Skip the first `n` values from our `after` cursor, an alternative to cursor
-    based pagination. May not be used with `last`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """The method to use when ordering `TokenCancelled`."""
-    orderBy: [TokenCancelledsOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: TokenCancelledCondition
-
-    """
-    A filter to be used in determining which values should be returned by the collection.
-    """
-    filter: TokenCancelledFilter
-  ): TokenCancelledsConnection!
-
-  """Reads and enables pagination through a set of `TokenRetired`."""
-  tokenRetiredsByName(
-    """Only read the first `n` values of the set."""
-    first: Int
-
-    """Only read the last `n` values of the set."""
-    last: Int
-
-    """
-    Skip the first `n` values from our `after` cursor, an alternative to cursor
-    based pagination. May not be used with `last`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """The method to use when ordering `TokenRetired`."""
-    orderBy: [TokenRetiredsOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: TokenRetiredCondition
-
-    """
-    A filter to be used in determining which values should be returned by the collection.
-    """
-    filter: TokenRetiredFilter
-  ): TokenRetiredsConnection!
+  """Reads a single `Token` that is related to this `TokenDatum`."""
+  token: Token
 }
 
-"""
-A signed eight-byte integer. The upper big integer values are greater than the
-max value for a JavaScript number. Therefore all big integers will be output as
-strings and not numbers.
-"""
-scalar BigInt
+"""A `TokenDatum` edge in the connection."""
+type TokenDataEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
 
-"""Methods to use when ordering `Token`."""
-enum TokensOrderBy {
+  """The `TokenDatum` at the end of the edge."""
+  node: TokenDatum!
+}
+
+"""Methods to use when ordering `TokenDatum`."""
+enum TokenDataOrderBy {
   NATURAL
+  AID_ASC
+  AID_DESC
+  URI_ASC
+  URI_DESC
+  ENCRYPTED_ASC
+  ENCRYPTED_DESC
+  PROOF_ASC
+  PROOF_DESC
+  TYPE_ASC
+  TYPE_DESC
   ID_ASC
   ID_DESC
-  INDEX_ASC
-  INDEX_DESC
-  NAME_ASC
-  NAME_DESC
-  COLLECTION_ASC
-  COLLECTION_DESC
+  TOKEN_ID_ASC
+  TOKEN_ID_DESC
   PRIMARY_KEY_ASC
   PRIMARY_KEY_DESC
-  TOKEN_RETIREDS_BY_ID_COUNT_ASC
-  TOKEN_RETIREDS_BY_ID_COUNT_DESC
-  TOKEN_RETIREDS_BY_ID_SUM_AID_ASC
-  TOKEN_RETIREDS_BY_ID_SUM_AID_DESC
-  TOKEN_RETIREDS_BY_ID_SUM_ID_ASC
-  TOKEN_RETIREDS_BY_ID_SUM_ID_DESC
-  TOKEN_RETIREDS_BY_ID_SUM_REASON_ASC
-  TOKEN_RETIREDS_BY_ID_SUM_REASON_DESC
-  TOKEN_RETIREDS_BY_ID_SUM_JURISDICTION_ASC
-  TOKEN_RETIREDS_BY_ID_SUM_JURISDICTION_DESC
-  TOKEN_RETIREDS_BY_ID_SUM_AMOUNT_ASC
-  TOKEN_RETIREDS_BY_ID_SUM_AMOUNT_DESC
-  TOKEN_RETIREDS_BY_ID_SUM_OWNER_ASC
-  TOKEN_RETIREDS_BY_ID_SUM_OWNER_DESC
-  TOKEN_RETIREDS_BY_ID_SUM_NAME_ASC
-  TOKEN_RETIREDS_BY_ID_SUM_NAME_DESC
-  TOKEN_RETIREDS_BY_ID_DISTINCT_COUNT_AID_ASC
-  TOKEN_RETIREDS_BY_ID_DISTINCT_COUNT_AID_DESC
-  TOKEN_RETIREDS_BY_ID_DISTINCT_COUNT_ID_ASC
-  TOKEN_RETIREDS_BY_ID_DISTINCT_COUNT_ID_DESC
-  TOKEN_RETIREDS_BY_ID_DISTINCT_COUNT_REASON_ASC
-  TOKEN_RETIREDS_BY_ID_DISTINCT_COUNT_REASON_DESC
-  TOKEN_RETIREDS_BY_ID_DISTINCT_COUNT_JURISDICTION_ASC
-  TOKEN_RETIREDS_BY_ID_DISTINCT_COUNT_JURISDICTION_DESC
-  TOKEN_RETIREDS_BY_ID_DISTINCT_COUNT_AMOUNT_ASC
-  TOKEN_RETIREDS_BY_ID_DISTINCT_COUNT_AMOUNT_DESC
-  TOKEN_RETIREDS_BY_ID_DISTINCT_COUNT_OWNER_ASC
-  TOKEN_RETIREDS_BY_ID_DISTINCT_COUNT_OWNER_DESC
-  TOKEN_RETIREDS_BY_ID_DISTINCT_COUNT_NAME_ASC
-  TOKEN_RETIREDS_BY_ID_DISTINCT_COUNT_NAME_DESC
-  TOKEN_RETIREDS_BY_ID_MIN_AID_ASC
-  TOKEN_RETIREDS_BY_ID_MIN_AID_DESC
-  TOKEN_RETIREDS_BY_ID_MIN_ID_ASC
-  TOKEN_RETIREDS_BY_ID_MIN_ID_DESC
-  TOKEN_RETIREDS_BY_ID_MIN_REASON_ASC
-  TOKEN_RETIREDS_BY_ID_MIN_REASON_DESC
-  TOKEN_RETIREDS_BY_ID_MIN_JURISDICTION_ASC
-  TOKEN_RETIREDS_BY_ID_MIN_JURISDICTION_DESC
-  TOKEN_RETIREDS_BY_ID_MIN_AMOUNT_ASC
-  TOKEN_RETIREDS_BY_ID_MIN_AMOUNT_DESC
-  TOKEN_RETIREDS_BY_ID_MIN_OWNER_ASC
-  TOKEN_RETIREDS_BY_ID_MIN_OWNER_DESC
-  TOKEN_RETIREDS_BY_ID_MIN_NAME_ASC
-  TOKEN_RETIREDS_BY_ID_MIN_NAME_DESC
-  TOKEN_RETIREDS_BY_ID_MAX_AID_ASC
-  TOKEN_RETIREDS_BY_ID_MAX_AID_DESC
-  TOKEN_RETIREDS_BY_ID_MAX_ID_ASC
-  TOKEN_RETIREDS_BY_ID_MAX_ID_DESC
-  TOKEN_RETIREDS_BY_ID_MAX_REASON_ASC
-  TOKEN_RETIREDS_BY_ID_MAX_REASON_DESC
-  TOKEN_RETIREDS_BY_ID_MAX_JURISDICTION_ASC
-  TOKEN_RETIREDS_BY_ID_MAX_JURISDICTION_DESC
-  TOKEN_RETIREDS_BY_ID_MAX_AMOUNT_ASC
-  TOKEN_RETIREDS_BY_ID_MAX_AMOUNT_DESC
-  TOKEN_RETIREDS_BY_ID_MAX_OWNER_ASC
-  TOKEN_RETIREDS_BY_ID_MAX_OWNER_DESC
-  TOKEN_RETIREDS_BY_ID_MAX_NAME_ASC
-  TOKEN_RETIREDS_BY_ID_MAX_NAME_DESC
-  TOKEN_RETIREDS_BY_ID_AVERAGE_AID_ASC
-  TOKEN_RETIREDS_BY_ID_AVERAGE_AID_DESC
-  TOKEN_RETIREDS_BY_ID_AVERAGE_ID_ASC
-  TOKEN_RETIREDS_BY_ID_AVERAGE_ID_DESC
-  TOKEN_RETIREDS_BY_ID_AVERAGE_REASON_ASC
-  TOKEN_RETIREDS_BY_ID_AVERAGE_REASON_DESC
-  TOKEN_RETIREDS_BY_ID_AVERAGE_JURISDICTION_ASC
-  TOKEN_RETIREDS_BY_ID_AVERAGE_JURISDICTION_DESC
-  TOKEN_RETIREDS_BY_ID_AVERAGE_AMOUNT_ASC
-  TOKEN_RETIREDS_BY_ID_AVERAGE_AMOUNT_DESC
-  TOKEN_RETIREDS_BY_ID_AVERAGE_OWNER_ASC
-  TOKEN_RETIREDS_BY_ID_AVERAGE_OWNER_DESC
-  TOKEN_RETIREDS_BY_ID_AVERAGE_NAME_ASC
-  TOKEN_RETIREDS_BY_ID_AVERAGE_NAME_DESC
-  TOKEN_RETIREDS_BY_ID_STDDEV_SAMPLE_AID_ASC
-  TOKEN_RETIREDS_BY_ID_STDDEV_SAMPLE_AID_DESC
-  TOKEN_RETIREDS_BY_ID_STDDEV_SAMPLE_ID_ASC
-  TOKEN_RETIREDS_BY_ID_STDDEV_SAMPLE_ID_DESC
-  TOKEN_RETIREDS_BY_ID_STDDEV_SAMPLE_REASON_ASC
-  TOKEN_RETIREDS_BY_ID_STDDEV_SAMPLE_REASON_DESC
-  TOKEN_RETIREDS_BY_ID_STDDEV_SAMPLE_JURISDICTION_ASC
-  TOKEN_RETIREDS_BY_ID_STDDEV_SAMPLE_JURISDICTION_DESC
-  TOKEN_RETIREDS_BY_ID_STDDEV_SAMPLE_AMOUNT_ASC
-  TOKEN_RETIREDS_BY_ID_STDDEV_SAMPLE_AMOUNT_DESC
-  TOKEN_RETIREDS_BY_ID_STDDEV_SAMPLE_OWNER_ASC
-  TOKEN_RETIREDS_BY_ID_STDDEV_SAMPLE_OWNER_DESC
-  TOKEN_RETIREDS_BY_ID_STDDEV_SAMPLE_NAME_ASC
-  TOKEN_RETIREDS_BY_ID_STDDEV_SAMPLE_NAME_DESC
-  TOKEN_RETIREDS_BY_ID_STDDEV_POPULATION_AID_ASC
-  TOKEN_RETIREDS_BY_ID_STDDEV_POPULATION_AID_DESC
-  TOKEN_RETIREDS_BY_ID_STDDEV_POPULATION_ID_ASC
-  TOKEN_RETIREDS_BY_ID_STDDEV_POPULATION_ID_DESC
-  TOKEN_RETIREDS_BY_ID_STDDEV_POPULATION_REASON_ASC
-  TOKEN_RETIREDS_BY_ID_STDDEV_POPULATION_REASON_DESC
-  TOKEN_RETIREDS_BY_ID_STDDEV_POPULATION_JURISDICTION_ASC
-  TOKEN_RETIREDS_BY_ID_STDDEV_POPULATION_JURISDICTION_DESC
-  TOKEN_RETIREDS_BY_ID_STDDEV_POPULATION_AMOUNT_ASC
-  TOKEN_RETIREDS_BY_ID_STDDEV_POPULATION_AMOUNT_DESC
-  TOKEN_RETIREDS_BY_ID_STDDEV_POPULATION_OWNER_ASC
-  TOKEN_RETIREDS_BY_ID_STDDEV_POPULATION_OWNER_DESC
-  TOKEN_RETIREDS_BY_ID_STDDEV_POPULATION_NAME_ASC
-  TOKEN_RETIREDS_BY_ID_STDDEV_POPULATION_NAME_DESC
-  TOKEN_RETIREDS_BY_ID_VARIANCE_SAMPLE_AID_ASC
-  TOKEN_RETIREDS_BY_ID_VARIANCE_SAMPLE_AID_DESC
-  TOKEN_RETIREDS_BY_ID_VARIANCE_SAMPLE_ID_ASC
-  TOKEN_RETIREDS_BY_ID_VARIANCE_SAMPLE_ID_DESC
-  TOKEN_RETIREDS_BY_ID_VARIANCE_SAMPLE_REASON_ASC
-  TOKEN_RETIREDS_BY_ID_VARIANCE_SAMPLE_REASON_DESC
-  TOKEN_RETIREDS_BY_ID_VARIANCE_SAMPLE_JURISDICTION_ASC
-  TOKEN_RETIREDS_BY_ID_VARIANCE_SAMPLE_JURISDICTION_DESC
-  TOKEN_RETIREDS_BY_ID_VARIANCE_SAMPLE_AMOUNT_ASC
-  TOKEN_RETIREDS_BY_ID_VARIANCE_SAMPLE_AMOUNT_DESC
-  TOKEN_RETIREDS_BY_ID_VARIANCE_SAMPLE_OWNER_ASC
-  TOKEN_RETIREDS_BY_ID_VARIANCE_SAMPLE_OWNER_DESC
-  TOKEN_RETIREDS_BY_ID_VARIANCE_SAMPLE_NAME_ASC
-  TOKEN_RETIREDS_BY_ID_VARIANCE_SAMPLE_NAME_DESC
-  TOKEN_RETIREDS_BY_ID_VARIANCE_POPULATION_AID_ASC
-  TOKEN_RETIREDS_BY_ID_VARIANCE_POPULATION_AID_DESC
-  TOKEN_RETIREDS_BY_ID_VARIANCE_POPULATION_ID_ASC
-  TOKEN_RETIREDS_BY_ID_VARIANCE_POPULATION_ID_DESC
-  TOKEN_RETIREDS_BY_ID_VARIANCE_POPULATION_REASON_ASC
-  TOKEN_RETIREDS_BY_ID_VARIANCE_POPULATION_REASON_DESC
-  TOKEN_RETIREDS_BY_ID_VARIANCE_POPULATION_JURISDICTION_ASC
-  TOKEN_RETIREDS_BY_ID_VARIANCE_POPULATION_JURISDICTION_DESC
-  TOKEN_RETIREDS_BY_ID_VARIANCE_POPULATION_AMOUNT_ASC
-  TOKEN_RETIREDS_BY_ID_VARIANCE_POPULATION_AMOUNT_DESC
-  TOKEN_RETIREDS_BY_ID_VARIANCE_POPULATION_OWNER_ASC
-  TOKEN_RETIREDS_BY_ID_VARIANCE_POPULATION_OWNER_DESC
-  TOKEN_RETIREDS_BY_ID_VARIANCE_POPULATION_NAME_ASC
-  TOKEN_RETIREDS_BY_ID_VARIANCE_POPULATION_NAME_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_COUNT_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_COUNT_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_SUM_AID_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_SUM_AID_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_SUM_FROM_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_SUM_FROM_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_SUM_TO_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_SUM_TO_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_SUM_AMOUNT_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_SUM_AMOUNT_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_SUM_TOKEN_ID_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_SUM_TOKEN_ID_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_DISTINCT_COUNT_AID_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_DISTINCT_COUNT_AID_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_DISTINCT_COUNT_FROM_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_DISTINCT_COUNT_FROM_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_DISTINCT_COUNT_TO_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_DISTINCT_COUNT_TO_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_DISTINCT_COUNT_AMOUNT_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_DISTINCT_COUNT_AMOUNT_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_DISTINCT_COUNT_TOKEN_ID_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_DISTINCT_COUNT_TOKEN_ID_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_MIN_AID_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_MIN_AID_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_MIN_FROM_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_MIN_FROM_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_MIN_TO_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_MIN_TO_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_MIN_AMOUNT_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_MIN_AMOUNT_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_MIN_TOKEN_ID_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_MIN_TOKEN_ID_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_MAX_AID_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_MAX_AID_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_MAX_FROM_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_MAX_FROM_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_MAX_TO_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_MAX_TO_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_MAX_AMOUNT_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_MAX_AMOUNT_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_MAX_TOKEN_ID_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_MAX_TOKEN_ID_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_AVERAGE_AID_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_AVERAGE_AID_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_AVERAGE_FROM_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_AVERAGE_FROM_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_AVERAGE_TO_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_AVERAGE_TO_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_AVERAGE_AMOUNT_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_AVERAGE_AMOUNT_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_AVERAGE_TOKEN_ID_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_AVERAGE_TOKEN_ID_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_STDDEV_SAMPLE_AID_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_STDDEV_SAMPLE_AID_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_STDDEV_SAMPLE_FROM_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_STDDEV_SAMPLE_FROM_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_STDDEV_SAMPLE_TO_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_STDDEV_SAMPLE_TO_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_STDDEV_SAMPLE_AMOUNT_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_STDDEV_SAMPLE_AMOUNT_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_STDDEV_SAMPLE_TOKEN_ID_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_STDDEV_SAMPLE_TOKEN_ID_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_STDDEV_POPULATION_AID_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_STDDEV_POPULATION_AID_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_STDDEV_POPULATION_FROM_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_STDDEV_POPULATION_FROM_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_STDDEV_POPULATION_TO_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_STDDEV_POPULATION_TO_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_STDDEV_POPULATION_AMOUNT_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_STDDEV_POPULATION_AMOUNT_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_STDDEV_POPULATION_TOKEN_ID_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_STDDEV_POPULATION_TOKEN_ID_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_VARIANCE_SAMPLE_AID_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_VARIANCE_SAMPLE_AID_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_VARIANCE_SAMPLE_FROM_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_VARIANCE_SAMPLE_FROM_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_VARIANCE_SAMPLE_TO_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_VARIANCE_SAMPLE_TO_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_VARIANCE_SAMPLE_AMOUNT_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_VARIANCE_SAMPLE_AMOUNT_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_VARIANCE_SAMPLE_TOKEN_ID_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_VARIANCE_SAMPLE_TOKEN_ID_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_VARIANCE_POPULATION_AID_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_VARIANCE_POPULATION_AID_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_VARIANCE_POPULATION_FROM_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_VARIANCE_POPULATION_FROM_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_VARIANCE_POPULATION_TO_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_VARIANCE_POPULATION_TO_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_VARIANCE_POPULATION_AMOUNT_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_VARIANCE_POPULATION_AMOUNT_DESC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_VARIANCE_POPULATION_TOKEN_ID_ASC
-  TOKEN_TRANSACTIONS_BY_TOKEN_ID_VARIANCE_POPULATION_TOKEN_ID_DESC
 }
 
 """
-A condition to be used against `Token` object types. All fields are tested for equality and combined with a logical ‘and.’
+A condition to be used against `TokenDatum` object types. All fields are tested
+for equality and combined with a logical ‘and.’
 """
-input TokenCondition {
+input TokenDatumCondition {
+  """Checks for equality with the object’s `aid` field."""
+  aid: Int
+
+  """Checks for equality with the object’s `uri` field."""
+  uri: String
+
+  """Checks for equality with the object’s `encrypted` field."""
+  encrypted: Boolean
+
+  """Checks for equality with the object’s `proof` field."""
+  proof: String
+
+  """Checks for equality with the object’s `type` field."""
+  type: String
+
   """Checks for equality with the object’s `id` field."""
   id: String
 
-  """Checks for equality with the object’s `index` field."""
-  index: String
+  """Checks for equality with the object’s `tokenId` field."""
+  tokenId: String
+}
 
-  """Checks for equality with the object’s `name` field."""
-  name: String
+"""
+A filter to be used against `TokenDatum` object types. All fields are combined with a logical ‘and.’
+"""
+input TokenDatumFilter {
+  """Filter by the object’s `aid` field."""
+  aid: IntFilter
 
-  """Checks for equality with the object’s `collection` field."""
-  collection: String
+  """Filter by the object’s `uri` field."""
+  uri: StringFilter
+
+  """Filter by the object’s `encrypted` field."""
+  encrypted: BooleanFilter
+
+  """Filter by the object’s `proof` field."""
+  proof: StringFilter
+
+  """Filter by the object’s `type` field."""
+  type: StringFilter
+
+  """Filter by the object’s `id` field."""
+  id: StringFilter
+
+  """Filter by the object’s `tokenId` field."""
+  tokenId: StringFilter
+
+  """Filter by the object’s `token` relation."""
+  token: TokenFilter
+
+  """Checks for all expressions in this list."""
+  and: [TokenDatumFilter!]
+
+  """Checks for any expressions in this list."""
+  or: [TokenDatumFilter!]
+
+  """Negates the expression."""
+  not: TokenDatumFilter
 }
 
 """
@@ -4625,44 +4519,6 @@ input TokenToManyTokenDatumFilter {
   No related `TokenDatum` matches the filter criteria. All fields are combined with a logical ‘and.’
   """
   none: TokenDatumFilter
-}
-
-"""
-A filter to be used against `TokenDatum` object types. All fields are combined with a logical ‘and.’
-"""
-input TokenDatumFilter {
-  """Filter by the object’s `aid` field."""
-  aid: IntFilter
-
-  """Filter by the object’s `uri` field."""
-  uri: StringFilter
-
-  """Filter by the object’s `encrypted` field."""
-  encrypted: BooleanFilter
-
-  """Filter by the object’s `proof` field."""
-  proof: StringFilter
-
-  """Filter by the object’s `type` field."""
-  type: StringFilter
-
-  """Filter by the object’s `id` field."""
-  id: StringFilter
-
-  """Filter by the object’s `tokenId` field."""
-  tokenId: StringFilter
-
-  """Filter by the object’s `token` relation."""
-  token: TokenFilter
-
-  """Checks for all expressions in this list."""
-  and: [TokenDatumFilter!]
-
-  """Checks for any expressions in this list."""
-  or: [TokenDatumFilter!]
-
-  """Negates the expression."""
-  not: TokenDatumFilter
 }
 
 """
@@ -4814,17 +4670,17 @@ input TokenClassFilter {
   """Some related `tokensByName` exist."""
   tokensByNameExist: Boolean
 
-  """Filter by the object’s `tokenCancelledsByName` relation."""
-  tokenCancelledsByName: TokenClassToManyTokenCancelledFilter
-
-  """Some related `tokenCancelledsByName` exist."""
-  tokenCancelledsByNameExist: Boolean
-
   """Filter by the object’s `tokenRetiredsByName` relation."""
   tokenRetiredsByName: TokenClassToManyTokenRetiredFilter
 
   """Some related `tokenRetiredsByName` exist."""
   tokenRetiredsByNameExist: Boolean
+
+  """Filter by the object’s `tokenCancelledsByName` relation."""
+  tokenCancelledsByName: TokenClassToManyTokenCancelledFilter
+
+  """Some related `tokenCancelledsByName` exist."""
+  tokenCancelledsByNameExist: Boolean
 
   """Filter by the object’s `entityByClass` relation."""
   entityByClass: EntityFilter
@@ -4857,6 +4713,165 @@ input TokenClassToManyTokenFilter {
   No related `Token` matches the filter criteria. All fields are combined with a logical ‘and.’
   """
   none: TokenFilter
+}
+
+"""
+A filter to be used against many `TokenRetired` object types. All fields are combined with a logical ‘and.’
+"""
+input TokenClassToManyTokenRetiredFilter {
+  """
+  Every related `TokenRetired` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  every: TokenRetiredFilter
+
+  """
+  Some related `TokenRetired` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  some: TokenRetiredFilter
+
+  """
+  No related `TokenRetired` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  none: TokenRetiredFilter
+
+  """Aggregates across related `TokenRetired` match the filter criteria."""
+  aggregates: TokenRetiredAggregatesFilter
+}
+
+"""A filter to be used against aggregates of `TokenRetired` object types."""
+input TokenRetiredAggregatesFilter {
+  """
+  A filter that must pass for the relevant `TokenRetired` object to be included within the aggregate.
+  """
+  filter: TokenRetiredFilter
+
+  """Sum aggregate over matching `TokenRetired` objects."""
+  sum: TokenRetiredSumAggregateFilter
+
+  """Distinct count aggregate over matching `TokenRetired` objects."""
+  distinctCount: TokenRetiredDistinctCountAggregateFilter
+
+  """Minimum aggregate over matching `TokenRetired` objects."""
+  min: TokenRetiredMinAggregateFilter
+
+  """Maximum aggregate over matching `TokenRetired` objects."""
+  max: TokenRetiredMaxAggregateFilter
+
+  """Mean average aggregate over matching `TokenRetired` objects."""
+  average: TokenRetiredAverageAggregateFilter
+
+  """
+  Sample standard deviation aggregate over matching `TokenRetired` objects.
+  """
+  stddevSample: TokenRetiredStddevSampleAggregateFilter
+
+  """
+  Population standard deviation aggregate over matching `TokenRetired` objects.
+  """
+  stddevPopulation: TokenRetiredStddevPopulationAggregateFilter
+
+  """Sample variance aggregate over matching `TokenRetired` objects."""
+  varianceSample: TokenRetiredVarianceSampleAggregateFilter
+
+  """Population variance aggregate over matching `TokenRetired` objects."""
+  variancePopulation: TokenRetiredVariancePopulationAggregateFilter
+}
+
+input TokenRetiredSumAggregateFilter {
+  aid: BigIntFilter
+  amount: BigFloatFilter
+}
+
+"""
+A filter to be used against BigFloat fields. All fields are combined with a logical ‘and.’
+"""
+input BigFloatFilter {
+  """
+  Is null (if `true` is specified) or is not null (if `false` is specified).
+  """
+  isNull: Boolean
+
+  """Equal to the specified value."""
+  equalTo: BigFloat
+
+  """Not equal to the specified value."""
+  notEqualTo: BigFloat
+
+  """
+  Not equal to the specified value, treating null like an ordinary value.
+  """
+  distinctFrom: BigFloat
+
+  """Equal to the specified value, treating null like an ordinary value."""
+  notDistinctFrom: BigFloat
+
+  """Included in the specified list."""
+  in: [BigFloat!]
+
+  """Not included in the specified list."""
+  notIn: [BigFloat!]
+
+  """Less than the specified value."""
+  lessThan: BigFloat
+
+  """Less than or equal to the specified value."""
+  lessThanOrEqualTo: BigFloat
+
+  """Greater than the specified value."""
+  greaterThan: BigFloat
+
+  """Greater than or equal to the specified value."""
+  greaterThanOrEqualTo: BigFloat
+}
+
+"""
+A floating point number that requires more precision than IEEE 754 binary 64
+"""
+scalar BigFloat
+
+input TokenRetiredDistinctCountAggregateFilter {
+  aid: BigIntFilter
+  id: BigIntFilter
+  reason: BigIntFilter
+  jurisdiction: BigIntFilter
+  amount: BigIntFilter
+  owner: BigIntFilter
+  name: BigIntFilter
+}
+
+input TokenRetiredMinAggregateFilter {
+  aid: IntFilter
+  amount: BigIntFilter
+}
+
+input TokenRetiredMaxAggregateFilter {
+  aid: IntFilter
+  amount: BigIntFilter
+}
+
+input TokenRetiredAverageAggregateFilter {
+  aid: BigFloatFilter
+  amount: BigFloatFilter
+}
+
+input TokenRetiredStddevSampleAggregateFilter {
+  aid: BigFloatFilter
+  amount: BigFloatFilter
+}
+
+input TokenRetiredStddevPopulationAggregateFilter {
+  aid: BigFloatFilter
+  amount: BigFloatFilter
+}
+
+input TokenRetiredVarianceSampleAggregateFilter {
+  aid: BigFloatFilter
+  amount: BigFloatFilter
+}
+
+input TokenRetiredVariancePopulationAggregateFilter {
+  aid: BigFloatFilter
+  amount: BigFloatFilter
 }
 
 """
@@ -4963,53 +4978,6 @@ input TokenCancelledSumAggregateFilter {
   amount: BigFloatFilter
 }
 
-"""
-A filter to be used against BigFloat fields. All fields are combined with a logical ‘and.’
-"""
-input BigFloatFilter {
-  """
-  Is null (if `true` is specified) or is not null (if `false` is specified).
-  """
-  isNull: Boolean
-
-  """Equal to the specified value."""
-  equalTo: BigFloat
-
-  """Not equal to the specified value."""
-  notEqualTo: BigFloat
-
-  """
-  Not equal to the specified value, treating null like an ordinary value.
-  """
-  distinctFrom: BigFloat
-
-  """Equal to the specified value, treating null like an ordinary value."""
-  notDistinctFrom: BigFloat
-
-  """Included in the specified list."""
-  in: [BigFloat!]
-
-  """Not included in the specified list."""
-  notIn: [BigFloat!]
-
-  """Less than the specified value."""
-  lessThan: BigFloat
-
-  """Less than or equal to the specified value."""
-  lessThanOrEqualTo: BigFloat
-
-  """Greater than the specified value."""
-  greaterThan: BigFloat
-
-  """Greater than or equal to the specified value."""
-  greaterThanOrEqualTo: BigFloat
-}
-
-"""
-A floating point number that requires more precision than IEEE 754 binary 64
-"""
-scalar BigFloat
-
 input TokenCancelledDistinctCountAggregateFilter {
   aid: BigIntFilter
   id: BigIntFilter
@@ -5055,118 +5023,6 @@ input TokenCancelledVariancePopulationAggregateFilter {
 }
 
 """
-A filter to be used against many `TokenRetired` object types. All fields are combined with a logical ‘and.’
-"""
-input TokenClassToManyTokenRetiredFilter {
-  """
-  Every related `TokenRetired` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  every: TokenRetiredFilter
-
-  """
-  Some related `TokenRetired` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  some: TokenRetiredFilter
-
-  """
-  No related `TokenRetired` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  none: TokenRetiredFilter
-
-  """Aggregates across related `TokenRetired` match the filter criteria."""
-  aggregates: TokenRetiredAggregatesFilter
-}
-
-"""A filter to be used against aggregates of `TokenRetired` object types."""
-input TokenRetiredAggregatesFilter {
-  """
-  A filter that must pass for the relevant `TokenRetired` object to be included within the aggregate.
-  """
-  filter: TokenRetiredFilter
-
-  """Sum aggregate over matching `TokenRetired` objects."""
-  sum: TokenRetiredSumAggregateFilter
-
-  """Distinct count aggregate over matching `TokenRetired` objects."""
-  distinctCount: TokenRetiredDistinctCountAggregateFilter
-
-  """Minimum aggregate over matching `TokenRetired` objects."""
-  min: TokenRetiredMinAggregateFilter
-
-  """Maximum aggregate over matching `TokenRetired` objects."""
-  max: TokenRetiredMaxAggregateFilter
-
-  """Mean average aggregate over matching `TokenRetired` objects."""
-  average: TokenRetiredAverageAggregateFilter
-
-  """
-  Sample standard deviation aggregate over matching `TokenRetired` objects.
-  """
-  stddevSample: TokenRetiredStddevSampleAggregateFilter
-
-  """
-  Population standard deviation aggregate over matching `TokenRetired` objects.
-  """
-  stddevPopulation: TokenRetiredStddevPopulationAggregateFilter
-
-  """Sample variance aggregate over matching `TokenRetired` objects."""
-  varianceSample: TokenRetiredVarianceSampleAggregateFilter
-
-  """Population variance aggregate over matching `TokenRetired` objects."""
-  variancePopulation: TokenRetiredVariancePopulationAggregateFilter
-}
-
-input TokenRetiredSumAggregateFilter {
-  aid: BigIntFilter
-  amount: BigFloatFilter
-}
-
-input TokenRetiredDistinctCountAggregateFilter {
-  aid: BigIntFilter
-  id: BigIntFilter
-  reason: BigIntFilter
-  jurisdiction: BigIntFilter
-  amount: BigIntFilter
-  owner: BigIntFilter
-  name: BigIntFilter
-}
-
-input TokenRetiredMinAggregateFilter {
-  aid: IntFilter
-  amount: BigIntFilter
-}
-
-input TokenRetiredMaxAggregateFilter {
-  aid: IntFilter
-  amount: BigIntFilter
-}
-
-input TokenRetiredAverageAggregateFilter {
-  aid: BigFloatFilter
-  amount: BigFloatFilter
-}
-
-input TokenRetiredStddevSampleAggregateFilter {
-  aid: BigFloatFilter
-  amount: BigFloatFilter
-}
-
-input TokenRetiredStddevPopulationAggregateFilter {
-  aid: BigFloatFilter
-  amount: BigFloatFilter
-}
-
-input TokenRetiredVarianceSampleAggregateFilter {
-  aid: BigFloatFilter
-  amount: BigFloatFilter
-}
-
-input TokenRetiredVariancePopulationAggregateFilter {
-  aid: BigFloatFilter
-  amount: BigFloatFilter
-}
-
-"""
 A filter to be used against `Entity` object types. All fields are combined with a logical ‘and.’
 """
 input EntityFilter {
@@ -5206,17 +5062,17 @@ input EntityFilter {
   """Filter by the object’s `owner` field."""
   owner: StringFilter
 
-  """Filter by the object’s `tokensByCollection` relation."""
-  tokensByCollection: EntityToManyTokenFilter
-
-  """Some related `tokensByCollection` exist."""
-  tokensByCollectionExist: Boolean
-
   """Filter by the object’s `tokenClassesByClass` relation."""
   tokenClassesByClass: EntityToManyTokenClassFilter
 
   """Some related `tokenClassesByClass` exist."""
   tokenClassesByClassExist: Boolean
+
+  """Filter by the object’s `tokensByCollection` relation."""
+  tokensByCollection: EntityToManyTokenFilter
+
+  """Some related `tokensByCollection` exist."""
+  tokensByCollectionExist: Boolean
 
   """Filter by the object’s `iidById` relation."""
   iidById: IidFilter
@@ -5229,26 +5085,6 @@ input EntityFilter {
 
   """Negates the expression."""
   not: EntityFilter
-}
-
-"""
-A filter to be used against many `Token` object types. All fields are combined with a logical ‘and.’
-"""
-input EntityToManyTokenFilter {
-  """
-  Every related `Token` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  every: TokenFilter
-
-  """
-  Some related `Token` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  some: TokenFilter
-
-  """
-  No related `Token` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  none: TokenFilter
 }
 
 """
@@ -5269,6 +5105,26 @@ input EntityToManyTokenClassFilter {
   No related `TokenClass` matches the filter criteria. All fields are combined with a logical ‘and.’
   """
   none: TokenClassFilter
+}
+
+"""
+A filter to be used against many `Token` object types. All fields are combined with a logical ‘and.’
+"""
+input EntityToManyTokenFilter {
+  """
+  Every related `Token` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  every: TokenFilter
+
+  """
+  Some related `Token` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  some: TokenFilter
+
+  """
+  No related `Token` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  none: TokenFilter
 }
 
 """
@@ -5485,327 +5341,6 @@ input TokenTransactionVarianceSampleAggregateFilter {
 input TokenTransactionVariancePopulationAggregateFilter {
   aid: BigFloatFilter
   amount: BigFloatFilter
-}
-
-"""A connection to a list of `TokenCancelled` values."""
-type TokenCancelledsConnection {
-  """A list of `TokenCancelled` objects."""
-  nodes: [TokenCancelled!]!
-
-  """
-  A list of edges which contains the `TokenCancelled` and cursor to aid in pagination.
-  """
-  edges: [TokenCancelledsEdge!]!
-
-  """Information to aid in pagination."""
-  pageInfo: PageInfo!
-
-  """The count of *all* `TokenCancelled` you could get from the connection."""
-  totalCount: Int!
-
-  """
-  Aggregates across the matching connection (ignoring before/after/first/last/offset)
-  """
-  aggregates: TokenCancelledAggregates
-
-  """
-  Grouped aggregates across the matching connection (ignoring before/after/first/last/offset)
-  """
-  groupedAggregates(
-    """The method to use when grouping `TokenCancelled` for these aggregates."""
-    groupBy: [TokenCancelledGroupBy!]!
-
-    """Conditions on the grouped aggregates."""
-    having: TokenCancelledHavingInput
-  ): [TokenCancelledAggregates!]
-}
-
-type TokenCancelled implements Node {
-  """
-  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
-  """
-  nodeId: ID!
-  aid: Int!
-  id: String!
-  reason: String!
-  amount: BigInt!
-  owner: String!
-  name: String!
-
-  """Reads a single `TokenClass` that is related to this `TokenCancelled`."""
-  tokenClassByName: TokenClass
-}
-
-"""A `TokenCancelled` edge in the connection."""
-type TokenCancelledsEdge {
-  """A cursor for use in pagination."""
-  cursor: Cursor
-
-  """The `TokenCancelled` at the end of the edge."""
-  node: TokenCancelled!
-}
-
-type TokenCancelledAggregates {
-  keys: [String!]
-
-  """
-  Sum aggregates across the matching connection (ignoring before/after/first/last/offset)
-  """
-  sum: TokenCancelledSumAggregates
-
-  """
-  Distinct count aggregates across the matching connection (ignoring before/after/first/last/offset)
-  """
-  distinctCount: TokenCancelledDistinctCountAggregates
-
-  """
-  Minimum aggregates across the matching connection (ignoring before/after/first/last/offset)
-  """
-  min: TokenCancelledMinAggregates
-
-  """
-  Maximum aggregates across the matching connection (ignoring before/after/first/last/offset)
-  """
-  max: TokenCancelledMaxAggregates
-
-  """
-  Mean average aggregates across the matching connection (ignoring before/after/first/last/offset)
-  """
-  average: TokenCancelledAverageAggregates
-
-  """
-  Sample standard deviation aggregates across the matching connection (ignoring before/after/first/last/offset)
-  """
-  stddevSample: TokenCancelledStddevSampleAggregates
-
-  """
-  Population standard deviation aggregates across the matching connection (ignoring before/after/first/last/offset)
-  """
-  stddevPopulation: TokenCancelledStddevPopulationAggregates
-
-  """
-  Sample variance aggregates across the matching connection (ignoring before/after/first/last/offset)
-  """
-  varianceSample: TokenCancelledVarianceSampleAggregates
-
-  """
-  Population variance aggregates across the matching connection (ignoring before/after/first/last/offset)
-  """
-  variancePopulation: TokenCancelledVariancePopulationAggregates
-}
-
-type TokenCancelledSumAggregates {
-  """Sum of aid across the matching connection"""
-  aid: BigInt!
-
-  """Sum of amount across the matching connection"""
-  amount: BigFloat!
-}
-
-type TokenCancelledDistinctCountAggregates {
-  """Distinct count of aid across the matching connection"""
-  aid: BigInt
-
-  """Distinct count of id across the matching connection"""
-  id: BigInt
-
-  """Distinct count of reason across the matching connection"""
-  reason: BigInt
-
-  """Distinct count of amount across the matching connection"""
-  amount: BigInt
-
-  """Distinct count of owner across the matching connection"""
-  owner: BigInt
-
-  """Distinct count of name across the matching connection"""
-  name: BigInt
-}
-
-type TokenCancelledMinAggregates {
-  """Minimum of aid across the matching connection"""
-  aid: Int
-
-  """Minimum of amount across the matching connection"""
-  amount: BigInt
-}
-
-type TokenCancelledMaxAggregates {
-  """Maximum of aid across the matching connection"""
-  aid: Int
-
-  """Maximum of amount across the matching connection"""
-  amount: BigInt
-}
-
-type TokenCancelledAverageAggregates {
-  """Mean average of aid across the matching connection"""
-  aid: BigFloat
-
-  """Mean average of amount across the matching connection"""
-  amount: BigFloat
-}
-
-type TokenCancelledStddevSampleAggregates {
-  """Sample standard deviation of aid across the matching connection"""
-  aid: BigFloat
-
-  """Sample standard deviation of amount across the matching connection"""
-  amount: BigFloat
-}
-
-type TokenCancelledStddevPopulationAggregates {
-  """Population standard deviation of aid across the matching connection"""
-  aid: BigFloat
-
-  """Population standard deviation of amount across the matching connection"""
-  amount: BigFloat
-}
-
-type TokenCancelledVarianceSampleAggregates {
-  """Sample variance of aid across the matching connection"""
-  aid: BigFloat
-
-  """Sample variance of amount across the matching connection"""
-  amount: BigFloat
-}
-
-type TokenCancelledVariancePopulationAggregates {
-  """Population variance of aid across the matching connection"""
-  aid: BigFloat
-
-  """Population variance of amount across the matching connection"""
-  amount: BigFloat
-}
-
-"""Grouping methods for `TokenCancelled` for usage during aggregation."""
-enum TokenCancelledGroupBy {
-  ID
-  REASON
-  AMOUNT
-  OWNER
-  NAME
-}
-
-"""Conditions for `TokenCancelled` aggregates."""
-input TokenCancelledHavingInput {
-  AND: [TokenCancelledHavingInput!]
-  OR: [TokenCancelledHavingInput!]
-  sum: TokenCancelledHavingSumInput
-  distinctCount: TokenCancelledHavingDistinctCountInput
-  min: TokenCancelledHavingMinInput
-  max: TokenCancelledHavingMaxInput
-  average: TokenCancelledHavingAverageInput
-  stddevSample: TokenCancelledHavingStddevSampleInput
-  stddevPopulation: TokenCancelledHavingStddevPopulationInput
-  varianceSample: TokenCancelledHavingVarianceSampleInput
-  variancePopulation: TokenCancelledHavingVariancePopulationInput
-}
-
-input TokenCancelledHavingSumInput {
-  aid: HavingIntFilter
-  amount: HavingBigintFilter
-}
-
-input HavingIntFilter {
-  equalTo: Int
-  notEqualTo: Int
-  greaterThan: Int
-  greaterThanOrEqualTo: Int
-  lessThan: Int
-  lessThanOrEqualTo: Int
-}
-
-input HavingBigintFilter {
-  equalTo: BigInt
-  notEqualTo: BigInt
-  greaterThan: BigInt
-  greaterThanOrEqualTo: BigInt
-  lessThan: BigInt
-  lessThanOrEqualTo: BigInt
-}
-
-input TokenCancelledHavingDistinctCountInput {
-  aid: HavingIntFilter
-  amount: HavingBigintFilter
-}
-
-input TokenCancelledHavingMinInput {
-  aid: HavingIntFilter
-  amount: HavingBigintFilter
-}
-
-input TokenCancelledHavingMaxInput {
-  aid: HavingIntFilter
-  amount: HavingBigintFilter
-}
-
-input TokenCancelledHavingAverageInput {
-  aid: HavingIntFilter
-  amount: HavingBigintFilter
-}
-
-input TokenCancelledHavingStddevSampleInput {
-  aid: HavingIntFilter
-  amount: HavingBigintFilter
-}
-
-input TokenCancelledHavingStddevPopulationInput {
-  aid: HavingIntFilter
-  amount: HavingBigintFilter
-}
-
-input TokenCancelledHavingVarianceSampleInput {
-  aid: HavingIntFilter
-  amount: HavingBigintFilter
-}
-
-input TokenCancelledHavingVariancePopulationInput {
-  aid: HavingIntFilter
-  amount: HavingBigintFilter
-}
-
-"""Methods to use when ordering `TokenCancelled`."""
-enum TokenCancelledsOrderBy {
-  NATURAL
-  AID_ASC
-  AID_DESC
-  ID_ASC
-  ID_DESC
-  REASON_ASC
-  REASON_DESC
-  AMOUNT_ASC
-  AMOUNT_DESC
-  OWNER_ASC
-  OWNER_DESC
-  NAME_ASC
-  NAME_DESC
-  PRIMARY_KEY_ASC
-  PRIMARY_KEY_DESC
-}
-
-"""
-A condition to be used against `TokenCancelled` object types. All fields are
-tested for equality and combined with a logical ‘and.’
-"""
-input TokenCancelledCondition {
-  """Checks for equality with the object’s `aid` field."""
-  aid: Int
-
-  """Checks for equality with the object’s `id` field."""
-  id: String
-
-  """Checks for equality with the object’s `reason` field."""
-  reason: String
-
-  """Checks for equality with the object’s `amount` field."""
-  amount: BigInt
-
-  """Checks for equality with the object’s `owner` field."""
-  owner: String
-
-  """Checks for equality with the object’s `name` field."""
-  name: String
 }
 
 """A connection to a list of `TokenRetired` values."""
@@ -6036,6 +5571,24 @@ input TokenRetiredHavingSumInput {
   amount: HavingBigintFilter
 }
 
+input HavingIntFilter {
+  equalTo: Int
+  notEqualTo: Int
+  greaterThan: Int
+  greaterThanOrEqualTo: Int
+  lessThan: Int
+  lessThanOrEqualTo: Int
+}
+
+input HavingBigintFilter {
+  equalTo: BigInt
+  notEqualTo: BigInt
+  greaterThan: BigInt
+  greaterThanOrEqualTo: BigInt
+  lessThan: BigInt
+  lessThanOrEqualTo: BigInt
+}
+
 input TokenRetiredHavingDistinctCountInput {
   aid: HavingIntFilter
   amount: HavingBigintFilter
@@ -6122,97 +5675,6 @@ input TokenRetiredCondition {
 
   """Checks for equality with the object’s `name` field."""
   name: String
-}
-
-"""A connection to a list of `TokenDatum` values."""
-type TokenDataConnection {
-  """A list of `TokenDatum` objects."""
-  nodes: [TokenDatum!]!
-
-  """
-  A list of edges which contains the `TokenDatum` and cursor to aid in pagination.
-  """
-  edges: [TokenDataEdge!]!
-
-  """Information to aid in pagination."""
-  pageInfo: PageInfo!
-
-  """The count of *all* `TokenDatum` you could get from the connection."""
-  totalCount: Int!
-}
-
-type TokenDatum implements Node {
-  """
-  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
-  """
-  nodeId: ID!
-  aid: Int!
-  uri: String!
-  encrypted: Boolean!
-  proof: String!
-  type: String!
-  id: String!
-  tokenId: String!
-
-  """Reads a single `Token` that is related to this `TokenDatum`."""
-  token: Token
-}
-
-"""A `TokenDatum` edge in the connection."""
-type TokenDataEdge {
-  """A cursor for use in pagination."""
-  cursor: Cursor
-
-  """The `TokenDatum` at the end of the edge."""
-  node: TokenDatum!
-}
-
-"""Methods to use when ordering `TokenDatum`."""
-enum TokenDataOrderBy {
-  NATURAL
-  AID_ASC
-  AID_DESC
-  URI_ASC
-  URI_DESC
-  ENCRYPTED_ASC
-  ENCRYPTED_DESC
-  PROOF_ASC
-  PROOF_DESC
-  TYPE_ASC
-  TYPE_DESC
-  ID_ASC
-  ID_DESC
-  TOKEN_ID_ASC
-  TOKEN_ID_DESC
-  PRIMARY_KEY_ASC
-  PRIMARY_KEY_DESC
-}
-
-"""
-A condition to be used against `TokenDatum` object types. All fields are tested
-for equality and combined with a logical ‘and.’
-"""
-input TokenDatumCondition {
-  """Checks for equality with the object’s `aid` field."""
-  aid: Int
-
-  """Checks for equality with the object’s `uri` field."""
-  uri: String
-
-  """Checks for equality with the object’s `encrypted` field."""
-  encrypted: Boolean
-
-  """Checks for equality with the object’s `proof` field."""
-  proof: String
-
-  """Checks for equality with the object’s `type` field."""
-  type: String
-
-  """Checks for equality with the object’s `id` field."""
-  id: String
-
-  """Checks for equality with the object’s `tokenId` field."""
-  tokenId: String
 }
 
 """A connection to a list of `TokenTransaction` values."""
@@ -6521,21 +5983,559 @@ type TokensEdge {
   node: Token!
 }
 
-"""A connection to a list of `TokenClass` values."""
-type TokenClassesConnection {
-  """A list of `TokenClass` objects."""
-  nodes: [TokenClass!]!
+"""Methods to use when ordering `Token`."""
+enum TokensOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  INDEX_ASC
+  INDEX_DESC
+  NAME_ASC
+  NAME_DESC
+  COLLECTION_ASC
+  COLLECTION_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+  TOKEN_RETIREDS_BY_ID_COUNT_ASC
+  TOKEN_RETIREDS_BY_ID_COUNT_DESC
+  TOKEN_RETIREDS_BY_ID_SUM_AID_ASC
+  TOKEN_RETIREDS_BY_ID_SUM_AID_DESC
+  TOKEN_RETIREDS_BY_ID_SUM_ID_ASC
+  TOKEN_RETIREDS_BY_ID_SUM_ID_DESC
+  TOKEN_RETIREDS_BY_ID_SUM_REASON_ASC
+  TOKEN_RETIREDS_BY_ID_SUM_REASON_DESC
+  TOKEN_RETIREDS_BY_ID_SUM_JURISDICTION_ASC
+  TOKEN_RETIREDS_BY_ID_SUM_JURISDICTION_DESC
+  TOKEN_RETIREDS_BY_ID_SUM_AMOUNT_ASC
+  TOKEN_RETIREDS_BY_ID_SUM_AMOUNT_DESC
+  TOKEN_RETIREDS_BY_ID_SUM_OWNER_ASC
+  TOKEN_RETIREDS_BY_ID_SUM_OWNER_DESC
+  TOKEN_RETIREDS_BY_ID_SUM_NAME_ASC
+  TOKEN_RETIREDS_BY_ID_SUM_NAME_DESC
+  TOKEN_RETIREDS_BY_ID_DISTINCT_COUNT_AID_ASC
+  TOKEN_RETIREDS_BY_ID_DISTINCT_COUNT_AID_DESC
+  TOKEN_RETIREDS_BY_ID_DISTINCT_COUNT_ID_ASC
+  TOKEN_RETIREDS_BY_ID_DISTINCT_COUNT_ID_DESC
+  TOKEN_RETIREDS_BY_ID_DISTINCT_COUNT_REASON_ASC
+  TOKEN_RETIREDS_BY_ID_DISTINCT_COUNT_REASON_DESC
+  TOKEN_RETIREDS_BY_ID_DISTINCT_COUNT_JURISDICTION_ASC
+  TOKEN_RETIREDS_BY_ID_DISTINCT_COUNT_JURISDICTION_DESC
+  TOKEN_RETIREDS_BY_ID_DISTINCT_COUNT_AMOUNT_ASC
+  TOKEN_RETIREDS_BY_ID_DISTINCT_COUNT_AMOUNT_DESC
+  TOKEN_RETIREDS_BY_ID_DISTINCT_COUNT_OWNER_ASC
+  TOKEN_RETIREDS_BY_ID_DISTINCT_COUNT_OWNER_DESC
+  TOKEN_RETIREDS_BY_ID_DISTINCT_COUNT_NAME_ASC
+  TOKEN_RETIREDS_BY_ID_DISTINCT_COUNT_NAME_DESC
+  TOKEN_RETIREDS_BY_ID_MIN_AID_ASC
+  TOKEN_RETIREDS_BY_ID_MIN_AID_DESC
+  TOKEN_RETIREDS_BY_ID_MIN_ID_ASC
+  TOKEN_RETIREDS_BY_ID_MIN_ID_DESC
+  TOKEN_RETIREDS_BY_ID_MIN_REASON_ASC
+  TOKEN_RETIREDS_BY_ID_MIN_REASON_DESC
+  TOKEN_RETIREDS_BY_ID_MIN_JURISDICTION_ASC
+  TOKEN_RETIREDS_BY_ID_MIN_JURISDICTION_DESC
+  TOKEN_RETIREDS_BY_ID_MIN_AMOUNT_ASC
+  TOKEN_RETIREDS_BY_ID_MIN_AMOUNT_DESC
+  TOKEN_RETIREDS_BY_ID_MIN_OWNER_ASC
+  TOKEN_RETIREDS_BY_ID_MIN_OWNER_DESC
+  TOKEN_RETIREDS_BY_ID_MIN_NAME_ASC
+  TOKEN_RETIREDS_BY_ID_MIN_NAME_DESC
+  TOKEN_RETIREDS_BY_ID_MAX_AID_ASC
+  TOKEN_RETIREDS_BY_ID_MAX_AID_DESC
+  TOKEN_RETIREDS_BY_ID_MAX_ID_ASC
+  TOKEN_RETIREDS_BY_ID_MAX_ID_DESC
+  TOKEN_RETIREDS_BY_ID_MAX_REASON_ASC
+  TOKEN_RETIREDS_BY_ID_MAX_REASON_DESC
+  TOKEN_RETIREDS_BY_ID_MAX_JURISDICTION_ASC
+  TOKEN_RETIREDS_BY_ID_MAX_JURISDICTION_DESC
+  TOKEN_RETIREDS_BY_ID_MAX_AMOUNT_ASC
+  TOKEN_RETIREDS_BY_ID_MAX_AMOUNT_DESC
+  TOKEN_RETIREDS_BY_ID_MAX_OWNER_ASC
+  TOKEN_RETIREDS_BY_ID_MAX_OWNER_DESC
+  TOKEN_RETIREDS_BY_ID_MAX_NAME_ASC
+  TOKEN_RETIREDS_BY_ID_MAX_NAME_DESC
+  TOKEN_RETIREDS_BY_ID_AVERAGE_AID_ASC
+  TOKEN_RETIREDS_BY_ID_AVERAGE_AID_DESC
+  TOKEN_RETIREDS_BY_ID_AVERAGE_ID_ASC
+  TOKEN_RETIREDS_BY_ID_AVERAGE_ID_DESC
+  TOKEN_RETIREDS_BY_ID_AVERAGE_REASON_ASC
+  TOKEN_RETIREDS_BY_ID_AVERAGE_REASON_DESC
+  TOKEN_RETIREDS_BY_ID_AVERAGE_JURISDICTION_ASC
+  TOKEN_RETIREDS_BY_ID_AVERAGE_JURISDICTION_DESC
+  TOKEN_RETIREDS_BY_ID_AVERAGE_AMOUNT_ASC
+  TOKEN_RETIREDS_BY_ID_AVERAGE_AMOUNT_DESC
+  TOKEN_RETIREDS_BY_ID_AVERAGE_OWNER_ASC
+  TOKEN_RETIREDS_BY_ID_AVERAGE_OWNER_DESC
+  TOKEN_RETIREDS_BY_ID_AVERAGE_NAME_ASC
+  TOKEN_RETIREDS_BY_ID_AVERAGE_NAME_DESC
+  TOKEN_RETIREDS_BY_ID_STDDEV_SAMPLE_AID_ASC
+  TOKEN_RETIREDS_BY_ID_STDDEV_SAMPLE_AID_DESC
+  TOKEN_RETIREDS_BY_ID_STDDEV_SAMPLE_ID_ASC
+  TOKEN_RETIREDS_BY_ID_STDDEV_SAMPLE_ID_DESC
+  TOKEN_RETIREDS_BY_ID_STDDEV_SAMPLE_REASON_ASC
+  TOKEN_RETIREDS_BY_ID_STDDEV_SAMPLE_REASON_DESC
+  TOKEN_RETIREDS_BY_ID_STDDEV_SAMPLE_JURISDICTION_ASC
+  TOKEN_RETIREDS_BY_ID_STDDEV_SAMPLE_JURISDICTION_DESC
+  TOKEN_RETIREDS_BY_ID_STDDEV_SAMPLE_AMOUNT_ASC
+  TOKEN_RETIREDS_BY_ID_STDDEV_SAMPLE_AMOUNT_DESC
+  TOKEN_RETIREDS_BY_ID_STDDEV_SAMPLE_OWNER_ASC
+  TOKEN_RETIREDS_BY_ID_STDDEV_SAMPLE_OWNER_DESC
+  TOKEN_RETIREDS_BY_ID_STDDEV_SAMPLE_NAME_ASC
+  TOKEN_RETIREDS_BY_ID_STDDEV_SAMPLE_NAME_DESC
+  TOKEN_RETIREDS_BY_ID_STDDEV_POPULATION_AID_ASC
+  TOKEN_RETIREDS_BY_ID_STDDEV_POPULATION_AID_DESC
+  TOKEN_RETIREDS_BY_ID_STDDEV_POPULATION_ID_ASC
+  TOKEN_RETIREDS_BY_ID_STDDEV_POPULATION_ID_DESC
+  TOKEN_RETIREDS_BY_ID_STDDEV_POPULATION_REASON_ASC
+  TOKEN_RETIREDS_BY_ID_STDDEV_POPULATION_REASON_DESC
+  TOKEN_RETIREDS_BY_ID_STDDEV_POPULATION_JURISDICTION_ASC
+  TOKEN_RETIREDS_BY_ID_STDDEV_POPULATION_JURISDICTION_DESC
+  TOKEN_RETIREDS_BY_ID_STDDEV_POPULATION_AMOUNT_ASC
+  TOKEN_RETIREDS_BY_ID_STDDEV_POPULATION_AMOUNT_DESC
+  TOKEN_RETIREDS_BY_ID_STDDEV_POPULATION_OWNER_ASC
+  TOKEN_RETIREDS_BY_ID_STDDEV_POPULATION_OWNER_DESC
+  TOKEN_RETIREDS_BY_ID_STDDEV_POPULATION_NAME_ASC
+  TOKEN_RETIREDS_BY_ID_STDDEV_POPULATION_NAME_DESC
+  TOKEN_RETIREDS_BY_ID_VARIANCE_SAMPLE_AID_ASC
+  TOKEN_RETIREDS_BY_ID_VARIANCE_SAMPLE_AID_DESC
+  TOKEN_RETIREDS_BY_ID_VARIANCE_SAMPLE_ID_ASC
+  TOKEN_RETIREDS_BY_ID_VARIANCE_SAMPLE_ID_DESC
+  TOKEN_RETIREDS_BY_ID_VARIANCE_SAMPLE_REASON_ASC
+  TOKEN_RETIREDS_BY_ID_VARIANCE_SAMPLE_REASON_DESC
+  TOKEN_RETIREDS_BY_ID_VARIANCE_SAMPLE_JURISDICTION_ASC
+  TOKEN_RETIREDS_BY_ID_VARIANCE_SAMPLE_JURISDICTION_DESC
+  TOKEN_RETIREDS_BY_ID_VARIANCE_SAMPLE_AMOUNT_ASC
+  TOKEN_RETIREDS_BY_ID_VARIANCE_SAMPLE_AMOUNT_DESC
+  TOKEN_RETIREDS_BY_ID_VARIANCE_SAMPLE_OWNER_ASC
+  TOKEN_RETIREDS_BY_ID_VARIANCE_SAMPLE_OWNER_DESC
+  TOKEN_RETIREDS_BY_ID_VARIANCE_SAMPLE_NAME_ASC
+  TOKEN_RETIREDS_BY_ID_VARIANCE_SAMPLE_NAME_DESC
+  TOKEN_RETIREDS_BY_ID_VARIANCE_POPULATION_AID_ASC
+  TOKEN_RETIREDS_BY_ID_VARIANCE_POPULATION_AID_DESC
+  TOKEN_RETIREDS_BY_ID_VARIANCE_POPULATION_ID_ASC
+  TOKEN_RETIREDS_BY_ID_VARIANCE_POPULATION_ID_DESC
+  TOKEN_RETIREDS_BY_ID_VARIANCE_POPULATION_REASON_ASC
+  TOKEN_RETIREDS_BY_ID_VARIANCE_POPULATION_REASON_DESC
+  TOKEN_RETIREDS_BY_ID_VARIANCE_POPULATION_JURISDICTION_ASC
+  TOKEN_RETIREDS_BY_ID_VARIANCE_POPULATION_JURISDICTION_DESC
+  TOKEN_RETIREDS_BY_ID_VARIANCE_POPULATION_AMOUNT_ASC
+  TOKEN_RETIREDS_BY_ID_VARIANCE_POPULATION_AMOUNT_DESC
+  TOKEN_RETIREDS_BY_ID_VARIANCE_POPULATION_OWNER_ASC
+  TOKEN_RETIREDS_BY_ID_VARIANCE_POPULATION_OWNER_DESC
+  TOKEN_RETIREDS_BY_ID_VARIANCE_POPULATION_NAME_ASC
+  TOKEN_RETIREDS_BY_ID_VARIANCE_POPULATION_NAME_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_COUNT_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_COUNT_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_SUM_AID_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_SUM_AID_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_SUM_FROM_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_SUM_FROM_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_SUM_TO_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_SUM_TO_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_SUM_AMOUNT_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_SUM_AMOUNT_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_SUM_TOKEN_ID_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_SUM_TOKEN_ID_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_DISTINCT_COUNT_AID_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_DISTINCT_COUNT_AID_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_DISTINCT_COUNT_FROM_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_DISTINCT_COUNT_FROM_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_DISTINCT_COUNT_TO_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_DISTINCT_COUNT_TO_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_DISTINCT_COUNT_AMOUNT_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_DISTINCT_COUNT_AMOUNT_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_DISTINCT_COUNT_TOKEN_ID_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_DISTINCT_COUNT_TOKEN_ID_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_MIN_AID_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_MIN_AID_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_MIN_FROM_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_MIN_FROM_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_MIN_TO_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_MIN_TO_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_MIN_AMOUNT_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_MIN_AMOUNT_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_MIN_TOKEN_ID_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_MIN_TOKEN_ID_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_MAX_AID_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_MAX_AID_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_MAX_FROM_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_MAX_FROM_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_MAX_TO_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_MAX_TO_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_MAX_AMOUNT_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_MAX_AMOUNT_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_MAX_TOKEN_ID_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_MAX_TOKEN_ID_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_AVERAGE_AID_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_AVERAGE_AID_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_AVERAGE_FROM_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_AVERAGE_FROM_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_AVERAGE_TO_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_AVERAGE_TO_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_AVERAGE_AMOUNT_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_AVERAGE_AMOUNT_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_AVERAGE_TOKEN_ID_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_AVERAGE_TOKEN_ID_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_STDDEV_SAMPLE_AID_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_STDDEV_SAMPLE_AID_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_STDDEV_SAMPLE_FROM_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_STDDEV_SAMPLE_FROM_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_STDDEV_SAMPLE_TO_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_STDDEV_SAMPLE_TO_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_STDDEV_SAMPLE_AMOUNT_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_STDDEV_SAMPLE_AMOUNT_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_STDDEV_SAMPLE_TOKEN_ID_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_STDDEV_SAMPLE_TOKEN_ID_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_STDDEV_POPULATION_AID_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_STDDEV_POPULATION_AID_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_STDDEV_POPULATION_FROM_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_STDDEV_POPULATION_FROM_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_STDDEV_POPULATION_TO_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_STDDEV_POPULATION_TO_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_STDDEV_POPULATION_AMOUNT_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_STDDEV_POPULATION_AMOUNT_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_STDDEV_POPULATION_TOKEN_ID_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_STDDEV_POPULATION_TOKEN_ID_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_VARIANCE_SAMPLE_AID_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_VARIANCE_SAMPLE_AID_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_VARIANCE_SAMPLE_FROM_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_VARIANCE_SAMPLE_FROM_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_VARIANCE_SAMPLE_TO_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_VARIANCE_SAMPLE_TO_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_VARIANCE_SAMPLE_AMOUNT_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_VARIANCE_SAMPLE_AMOUNT_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_VARIANCE_SAMPLE_TOKEN_ID_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_VARIANCE_SAMPLE_TOKEN_ID_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_VARIANCE_POPULATION_AID_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_VARIANCE_POPULATION_AID_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_VARIANCE_POPULATION_FROM_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_VARIANCE_POPULATION_FROM_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_VARIANCE_POPULATION_TO_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_VARIANCE_POPULATION_TO_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_VARIANCE_POPULATION_AMOUNT_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_VARIANCE_POPULATION_AMOUNT_DESC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_VARIANCE_POPULATION_TOKEN_ID_ASC
+  TOKEN_TRANSACTIONS_BY_TOKEN_ID_VARIANCE_POPULATION_TOKEN_ID_DESC
+}
+
+"""
+A condition to be used against `Token` object types. All fields are tested for equality and combined with a logical ‘and.’
+"""
+input TokenCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: String
+
+  """Checks for equality with the object’s `index` field."""
+  index: String
+
+  """Checks for equality with the object’s `name` field."""
+  name: String
+
+  """Checks for equality with the object’s `collection` field."""
+  collection: String
+}
+
+"""A connection to a list of `TokenCancelled` values."""
+type TokenCancelledsConnection {
+  """A list of `TokenCancelled` objects."""
+  nodes: [TokenCancelled!]!
 
   """
-  A list of edges which contains the `TokenClass` and cursor to aid in pagination.
+  A list of edges which contains the `TokenCancelled` and cursor to aid in pagination.
   """
-  edges: [TokenClassesEdge!]!
+  edges: [TokenCancelledsEdge!]!
 
   """Information to aid in pagination."""
   pageInfo: PageInfo!
 
-  """The count of *all* `TokenClass` you could get from the connection."""
+  """The count of *all* `TokenCancelled` you could get from the connection."""
   totalCount: Int!
+
+  """
+  Aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  aggregates: TokenCancelledAggregates
+
+  """
+  Grouped aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  groupedAggregates(
+    """The method to use when grouping `TokenCancelled` for these aggregates."""
+    groupBy: [TokenCancelledGroupBy!]!
+
+    """Conditions on the grouped aggregates."""
+    having: TokenCancelledHavingInput
+  ): [TokenCancelledAggregates!]
+}
+
+type TokenCancelled implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  aid: Int!
+  id: String!
+  reason: String!
+  amount: BigInt!
+  owner: String!
+  name: String!
+
+  """Reads a single `TokenClass` that is related to this `TokenCancelled`."""
+  tokenClassByName: TokenClass
+}
+
+"""A `TokenCancelled` edge in the connection."""
+type TokenCancelledsEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `TokenCancelled` at the end of the edge."""
+  node: TokenCancelled!
+}
+
+type TokenCancelledAggregates {
+  keys: [String!]
+
+  """
+  Sum aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  sum: TokenCancelledSumAggregates
+
+  """
+  Distinct count aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  distinctCount: TokenCancelledDistinctCountAggregates
+
+  """
+  Minimum aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  min: TokenCancelledMinAggregates
+
+  """
+  Maximum aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  max: TokenCancelledMaxAggregates
+
+  """
+  Mean average aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  average: TokenCancelledAverageAggregates
+
+  """
+  Sample standard deviation aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  stddevSample: TokenCancelledStddevSampleAggregates
+
+  """
+  Population standard deviation aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  stddevPopulation: TokenCancelledStddevPopulationAggregates
+
+  """
+  Sample variance aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  varianceSample: TokenCancelledVarianceSampleAggregates
+
+  """
+  Population variance aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  variancePopulation: TokenCancelledVariancePopulationAggregates
+}
+
+type TokenCancelledSumAggregates {
+  """Sum of aid across the matching connection"""
+  aid: BigInt!
+
+  """Sum of amount across the matching connection"""
+  amount: BigFloat!
+}
+
+type TokenCancelledDistinctCountAggregates {
+  """Distinct count of aid across the matching connection"""
+  aid: BigInt
+
+  """Distinct count of id across the matching connection"""
+  id: BigInt
+
+  """Distinct count of reason across the matching connection"""
+  reason: BigInt
+
+  """Distinct count of amount across the matching connection"""
+  amount: BigInt
+
+  """Distinct count of owner across the matching connection"""
+  owner: BigInt
+
+  """Distinct count of name across the matching connection"""
+  name: BigInt
+}
+
+type TokenCancelledMinAggregates {
+  """Minimum of aid across the matching connection"""
+  aid: Int
+
+  """Minimum of amount across the matching connection"""
+  amount: BigInt
+}
+
+type TokenCancelledMaxAggregates {
+  """Maximum of aid across the matching connection"""
+  aid: Int
+
+  """Maximum of amount across the matching connection"""
+  amount: BigInt
+}
+
+type TokenCancelledAverageAggregates {
+  """Mean average of aid across the matching connection"""
+  aid: BigFloat
+
+  """Mean average of amount across the matching connection"""
+  amount: BigFloat
+}
+
+type TokenCancelledStddevSampleAggregates {
+  """Sample standard deviation of aid across the matching connection"""
+  aid: BigFloat
+
+  """Sample standard deviation of amount across the matching connection"""
+  amount: BigFloat
+}
+
+type TokenCancelledStddevPopulationAggregates {
+  """Population standard deviation of aid across the matching connection"""
+  aid: BigFloat
+
+  """Population standard deviation of amount across the matching connection"""
+  amount: BigFloat
+}
+
+type TokenCancelledVarianceSampleAggregates {
+  """Sample variance of aid across the matching connection"""
+  aid: BigFloat
+
+  """Sample variance of amount across the matching connection"""
+  amount: BigFloat
+}
+
+type TokenCancelledVariancePopulationAggregates {
+  """Population variance of aid across the matching connection"""
+  aid: BigFloat
+
+  """Population variance of amount across the matching connection"""
+  amount: BigFloat
+}
+
+"""Grouping methods for `TokenCancelled` for usage during aggregation."""
+enum TokenCancelledGroupBy {
+  ID
+  REASON
+  AMOUNT
+  OWNER
+  NAME
+}
+
+"""Conditions for `TokenCancelled` aggregates."""
+input TokenCancelledHavingInput {
+  AND: [TokenCancelledHavingInput!]
+  OR: [TokenCancelledHavingInput!]
+  sum: TokenCancelledHavingSumInput
+  distinctCount: TokenCancelledHavingDistinctCountInput
+  min: TokenCancelledHavingMinInput
+  max: TokenCancelledHavingMaxInput
+  average: TokenCancelledHavingAverageInput
+  stddevSample: TokenCancelledHavingStddevSampleInput
+  stddevPopulation: TokenCancelledHavingStddevPopulationInput
+  varianceSample: TokenCancelledHavingVarianceSampleInput
+  variancePopulation: TokenCancelledHavingVariancePopulationInput
+}
+
+input TokenCancelledHavingSumInput {
+  aid: HavingIntFilter
+  amount: HavingBigintFilter
+}
+
+input TokenCancelledHavingDistinctCountInput {
+  aid: HavingIntFilter
+  amount: HavingBigintFilter
+}
+
+input TokenCancelledHavingMinInput {
+  aid: HavingIntFilter
+  amount: HavingBigintFilter
+}
+
+input TokenCancelledHavingMaxInput {
+  aid: HavingIntFilter
+  amount: HavingBigintFilter
+}
+
+input TokenCancelledHavingAverageInput {
+  aid: HavingIntFilter
+  amount: HavingBigintFilter
+}
+
+input TokenCancelledHavingStddevSampleInput {
+  aid: HavingIntFilter
+  amount: HavingBigintFilter
+}
+
+input TokenCancelledHavingStddevPopulationInput {
+  aid: HavingIntFilter
+  amount: HavingBigintFilter
+}
+
+input TokenCancelledHavingVarianceSampleInput {
+  aid: HavingIntFilter
+  amount: HavingBigintFilter
+}
+
+input TokenCancelledHavingVariancePopulationInput {
+  aid: HavingIntFilter
+  amount: HavingBigintFilter
+}
+
+"""Methods to use when ordering `TokenCancelled`."""
+enum TokenCancelledsOrderBy {
+  NATURAL
+  AID_ASC
+  AID_DESC
+  ID_ASC
+  ID_DESC
+  REASON_ASC
+  REASON_DESC
+  AMOUNT_ASC
+  AMOUNT_DESC
+  OWNER_ASC
+  OWNER_DESC
+  NAME_ASC
+  NAME_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `TokenCancelled` object types. All fields are
+tested for equality and combined with a logical ‘and.’
+"""
+input TokenCancelledCondition {
+  """Checks for equality with the object’s `aid` field."""
+  aid: Int
+
+  """Checks for equality with the object’s `id` field."""
+  id: String
+
+  """Checks for equality with the object’s `reason` field."""
+  reason: String
+
+  """Checks for equality with the object’s `amount` field."""
+  amount: BigInt
+
+  """Checks for equality with the object’s `owner` field."""
+  owner: String
+
+  """Checks for equality with the object’s `name` field."""
+  name: String
 }
 
 """A `TokenClass` edge in the connection."""
@@ -6574,116 +6574,6 @@ enum TokenClassesOrderBy {
   STOPPED_DESC
   PRIMARY_KEY_ASC
   PRIMARY_KEY_DESC
-  TOKEN_CANCELLEDS_BY_NAME_COUNT_ASC
-  TOKEN_CANCELLEDS_BY_NAME_COUNT_DESC
-  TOKEN_CANCELLEDS_BY_NAME_SUM_AID_ASC
-  TOKEN_CANCELLEDS_BY_NAME_SUM_AID_DESC
-  TOKEN_CANCELLEDS_BY_NAME_SUM_ID_ASC
-  TOKEN_CANCELLEDS_BY_NAME_SUM_ID_DESC
-  TOKEN_CANCELLEDS_BY_NAME_SUM_REASON_ASC
-  TOKEN_CANCELLEDS_BY_NAME_SUM_REASON_DESC
-  TOKEN_CANCELLEDS_BY_NAME_SUM_AMOUNT_ASC
-  TOKEN_CANCELLEDS_BY_NAME_SUM_AMOUNT_DESC
-  TOKEN_CANCELLEDS_BY_NAME_SUM_OWNER_ASC
-  TOKEN_CANCELLEDS_BY_NAME_SUM_OWNER_DESC
-  TOKEN_CANCELLEDS_BY_NAME_SUM_NAME_ASC
-  TOKEN_CANCELLEDS_BY_NAME_SUM_NAME_DESC
-  TOKEN_CANCELLEDS_BY_NAME_DISTINCT_COUNT_AID_ASC
-  TOKEN_CANCELLEDS_BY_NAME_DISTINCT_COUNT_AID_DESC
-  TOKEN_CANCELLEDS_BY_NAME_DISTINCT_COUNT_ID_ASC
-  TOKEN_CANCELLEDS_BY_NAME_DISTINCT_COUNT_ID_DESC
-  TOKEN_CANCELLEDS_BY_NAME_DISTINCT_COUNT_REASON_ASC
-  TOKEN_CANCELLEDS_BY_NAME_DISTINCT_COUNT_REASON_DESC
-  TOKEN_CANCELLEDS_BY_NAME_DISTINCT_COUNT_AMOUNT_ASC
-  TOKEN_CANCELLEDS_BY_NAME_DISTINCT_COUNT_AMOUNT_DESC
-  TOKEN_CANCELLEDS_BY_NAME_DISTINCT_COUNT_OWNER_ASC
-  TOKEN_CANCELLEDS_BY_NAME_DISTINCT_COUNT_OWNER_DESC
-  TOKEN_CANCELLEDS_BY_NAME_DISTINCT_COUNT_NAME_ASC
-  TOKEN_CANCELLEDS_BY_NAME_DISTINCT_COUNT_NAME_DESC
-  TOKEN_CANCELLEDS_BY_NAME_MIN_AID_ASC
-  TOKEN_CANCELLEDS_BY_NAME_MIN_AID_DESC
-  TOKEN_CANCELLEDS_BY_NAME_MIN_ID_ASC
-  TOKEN_CANCELLEDS_BY_NAME_MIN_ID_DESC
-  TOKEN_CANCELLEDS_BY_NAME_MIN_REASON_ASC
-  TOKEN_CANCELLEDS_BY_NAME_MIN_REASON_DESC
-  TOKEN_CANCELLEDS_BY_NAME_MIN_AMOUNT_ASC
-  TOKEN_CANCELLEDS_BY_NAME_MIN_AMOUNT_DESC
-  TOKEN_CANCELLEDS_BY_NAME_MIN_OWNER_ASC
-  TOKEN_CANCELLEDS_BY_NAME_MIN_OWNER_DESC
-  TOKEN_CANCELLEDS_BY_NAME_MIN_NAME_ASC
-  TOKEN_CANCELLEDS_BY_NAME_MIN_NAME_DESC
-  TOKEN_CANCELLEDS_BY_NAME_MAX_AID_ASC
-  TOKEN_CANCELLEDS_BY_NAME_MAX_AID_DESC
-  TOKEN_CANCELLEDS_BY_NAME_MAX_ID_ASC
-  TOKEN_CANCELLEDS_BY_NAME_MAX_ID_DESC
-  TOKEN_CANCELLEDS_BY_NAME_MAX_REASON_ASC
-  TOKEN_CANCELLEDS_BY_NAME_MAX_REASON_DESC
-  TOKEN_CANCELLEDS_BY_NAME_MAX_AMOUNT_ASC
-  TOKEN_CANCELLEDS_BY_NAME_MAX_AMOUNT_DESC
-  TOKEN_CANCELLEDS_BY_NAME_MAX_OWNER_ASC
-  TOKEN_CANCELLEDS_BY_NAME_MAX_OWNER_DESC
-  TOKEN_CANCELLEDS_BY_NAME_MAX_NAME_ASC
-  TOKEN_CANCELLEDS_BY_NAME_MAX_NAME_DESC
-  TOKEN_CANCELLEDS_BY_NAME_AVERAGE_AID_ASC
-  TOKEN_CANCELLEDS_BY_NAME_AVERAGE_AID_DESC
-  TOKEN_CANCELLEDS_BY_NAME_AVERAGE_ID_ASC
-  TOKEN_CANCELLEDS_BY_NAME_AVERAGE_ID_DESC
-  TOKEN_CANCELLEDS_BY_NAME_AVERAGE_REASON_ASC
-  TOKEN_CANCELLEDS_BY_NAME_AVERAGE_REASON_DESC
-  TOKEN_CANCELLEDS_BY_NAME_AVERAGE_AMOUNT_ASC
-  TOKEN_CANCELLEDS_BY_NAME_AVERAGE_AMOUNT_DESC
-  TOKEN_CANCELLEDS_BY_NAME_AVERAGE_OWNER_ASC
-  TOKEN_CANCELLEDS_BY_NAME_AVERAGE_OWNER_DESC
-  TOKEN_CANCELLEDS_BY_NAME_AVERAGE_NAME_ASC
-  TOKEN_CANCELLEDS_BY_NAME_AVERAGE_NAME_DESC
-  TOKEN_CANCELLEDS_BY_NAME_STDDEV_SAMPLE_AID_ASC
-  TOKEN_CANCELLEDS_BY_NAME_STDDEV_SAMPLE_AID_DESC
-  TOKEN_CANCELLEDS_BY_NAME_STDDEV_SAMPLE_ID_ASC
-  TOKEN_CANCELLEDS_BY_NAME_STDDEV_SAMPLE_ID_DESC
-  TOKEN_CANCELLEDS_BY_NAME_STDDEV_SAMPLE_REASON_ASC
-  TOKEN_CANCELLEDS_BY_NAME_STDDEV_SAMPLE_REASON_DESC
-  TOKEN_CANCELLEDS_BY_NAME_STDDEV_SAMPLE_AMOUNT_ASC
-  TOKEN_CANCELLEDS_BY_NAME_STDDEV_SAMPLE_AMOUNT_DESC
-  TOKEN_CANCELLEDS_BY_NAME_STDDEV_SAMPLE_OWNER_ASC
-  TOKEN_CANCELLEDS_BY_NAME_STDDEV_SAMPLE_OWNER_DESC
-  TOKEN_CANCELLEDS_BY_NAME_STDDEV_SAMPLE_NAME_ASC
-  TOKEN_CANCELLEDS_BY_NAME_STDDEV_SAMPLE_NAME_DESC
-  TOKEN_CANCELLEDS_BY_NAME_STDDEV_POPULATION_AID_ASC
-  TOKEN_CANCELLEDS_BY_NAME_STDDEV_POPULATION_AID_DESC
-  TOKEN_CANCELLEDS_BY_NAME_STDDEV_POPULATION_ID_ASC
-  TOKEN_CANCELLEDS_BY_NAME_STDDEV_POPULATION_ID_DESC
-  TOKEN_CANCELLEDS_BY_NAME_STDDEV_POPULATION_REASON_ASC
-  TOKEN_CANCELLEDS_BY_NAME_STDDEV_POPULATION_REASON_DESC
-  TOKEN_CANCELLEDS_BY_NAME_STDDEV_POPULATION_AMOUNT_ASC
-  TOKEN_CANCELLEDS_BY_NAME_STDDEV_POPULATION_AMOUNT_DESC
-  TOKEN_CANCELLEDS_BY_NAME_STDDEV_POPULATION_OWNER_ASC
-  TOKEN_CANCELLEDS_BY_NAME_STDDEV_POPULATION_OWNER_DESC
-  TOKEN_CANCELLEDS_BY_NAME_STDDEV_POPULATION_NAME_ASC
-  TOKEN_CANCELLEDS_BY_NAME_STDDEV_POPULATION_NAME_DESC
-  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_SAMPLE_AID_ASC
-  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_SAMPLE_AID_DESC
-  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_SAMPLE_ID_ASC
-  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_SAMPLE_ID_DESC
-  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_SAMPLE_REASON_ASC
-  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_SAMPLE_REASON_DESC
-  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_SAMPLE_AMOUNT_ASC
-  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_SAMPLE_AMOUNT_DESC
-  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_SAMPLE_OWNER_ASC
-  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_SAMPLE_OWNER_DESC
-  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_SAMPLE_NAME_ASC
-  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_SAMPLE_NAME_DESC
-  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_POPULATION_AID_ASC
-  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_POPULATION_AID_DESC
-  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_POPULATION_ID_ASC
-  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_POPULATION_ID_DESC
-  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_POPULATION_REASON_ASC
-  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_POPULATION_REASON_DESC
-  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_POPULATION_AMOUNT_ASC
-  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_POPULATION_AMOUNT_DESC
-  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_POPULATION_OWNER_ASC
-  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_POPULATION_OWNER_DESC
-  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_POPULATION_NAME_ASC
-  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_POPULATION_NAME_DESC
   TOKEN_RETIREDS_BY_NAME_COUNT_ASC
   TOKEN_RETIREDS_BY_NAME_COUNT_DESC
   TOKEN_RETIREDS_BY_NAME_SUM_AID_ASC
@@ -6812,6 +6702,116 @@ enum TokenClassesOrderBy {
   TOKEN_RETIREDS_BY_NAME_VARIANCE_POPULATION_OWNER_DESC
   TOKEN_RETIREDS_BY_NAME_VARIANCE_POPULATION_NAME_ASC
   TOKEN_RETIREDS_BY_NAME_VARIANCE_POPULATION_NAME_DESC
+  TOKEN_CANCELLEDS_BY_NAME_COUNT_ASC
+  TOKEN_CANCELLEDS_BY_NAME_COUNT_DESC
+  TOKEN_CANCELLEDS_BY_NAME_SUM_AID_ASC
+  TOKEN_CANCELLEDS_BY_NAME_SUM_AID_DESC
+  TOKEN_CANCELLEDS_BY_NAME_SUM_ID_ASC
+  TOKEN_CANCELLEDS_BY_NAME_SUM_ID_DESC
+  TOKEN_CANCELLEDS_BY_NAME_SUM_REASON_ASC
+  TOKEN_CANCELLEDS_BY_NAME_SUM_REASON_DESC
+  TOKEN_CANCELLEDS_BY_NAME_SUM_AMOUNT_ASC
+  TOKEN_CANCELLEDS_BY_NAME_SUM_AMOUNT_DESC
+  TOKEN_CANCELLEDS_BY_NAME_SUM_OWNER_ASC
+  TOKEN_CANCELLEDS_BY_NAME_SUM_OWNER_DESC
+  TOKEN_CANCELLEDS_BY_NAME_SUM_NAME_ASC
+  TOKEN_CANCELLEDS_BY_NAME_SUM_NAME_DESC
+  TOKEN_CANCELLEDS_BY_NAME_DISTINCT_COUNT_AID_ASC
+  TOKEN_CANCELLEDS_BY_NAME_DISTINCT_COUNT_AID_DESC
+  TOKEN_CANCELLEDS_BY_NAME_DISTINCT_COUNT_ID_ASC
+  TOKEN_CANCELLEDS_BY_NAME_DISTINCT_COUNT_ID_DESC
+  TOKEN_CANCELLEDS_BY_NAME_DISTINCT_COUNT_REASON_ASC
+  TOKEN_CANCELLEDS_BY_NAME_DISTINCT_COUNT_REASON_DESC
+  TOKEN_CANCELLEDS_BY_NAME_DISTINCT_COUNT_AMOUNT_ASC
+  TOKEN_CANCELLEDS_BY_NAME_DISTINCT_COUNT_AMOUNT_DESC
+  TOKEN_CANCELLEDS_BY_NAME_DISTINCT_COUNT_OWNER_ASC
+  TOKEN_CANCELLEDS_BY_NAME_DISTINCT_COUNT_OWNER_DESC
+  TOKEN_CANCELLEDS_BY_NAME_DISTINCT_COUNT_NAME_ASC
+  TOKEN_CANCELLEDS_BY_NAME_DISTINCT_COUNT_NAME_DESC
+  TOKEN_CANCELLEDS_BY_NAME_MIN_AID_ASC
+  TOKEN_CANCELLEDS_BY_NAME_MIN_AID_DESC
+  TOKEN_CANCELLEDS_BY_NAME_MIN_ID_ASC
+  TOKEN_CANCELLEDS_BY_NAME_MIN_ID_DESC
+  TOKEN_CANCELLEDS_BY_NAME_MIN_REASON_ASC
+  TOKEN_CANCELLEDS_BY_NAME_MIN_REASON_DESC
+  TOKEN_CANCELLEDS_BY_NAME_MIN_AMOUNT_ASC
+  TOKEN_CANCELLEDS_BY_NAME_MIN_AMOUNT_DESC
+  TOKEN_CANCELLEDS_BY_NAME_MIN_OWNER_ASC
+  TOKEN_CANCELLEDS_BY_NAME_MIN_OWNER_DESC
+  TOKEN_CANCELLEDS_BY_NAME_MIN_NAME_ASC
+  TOKEN_CANCELLEDS_BY_NAME_MIN_NAME_DESC
+  TOKEN_CANCELLEDS_BY_NAME_MAX_AID_ASC
+  TOKEN_CANCELLEDS_BY_NAME_MAX_AID_DESC
+  TOKEN_CANCELLEDS_BY_NAME_MAX_ID_ASC
+  TOKEN_CANCELLEDS_BY_NAME_MAX_ID_DESC
+  TOKEN_CANCELLEDS_BY_NAME_MAX_REASON_ASC
+  TOKEN_CANCELLEDS_BY_NAME_MAX_REASON_DESC
+  TOKEN_CANCELLEDS_BY_NAME_MAX_AMOUNT_ASC
+  TOKEN_CANCELLEDS_BY_NAME_MAX_AMOUNT_DESC
+  TOKEN_CANCELLEDS_BY_NAME_MAX_OWNER_ASC
+  TOKEN_CANCELLEDS_BY_NAME_MAX_OWNER_DESC
+  TOKEN_CANCELLEDS_BY_NAME_MAX_NAME_ASC
+  TOKEN_CANCELLEDS_BY_NAME_MAX_NAME_DESC
+  TOKEN_CANCELLEDS_BY_NAME_AVERAGE_AID_ASC
+  TOKEN_CANCELLEDS_BY_NAME_AVERAGE_AID_DESC
+  TOKEN_CANCELLEDS_BY_NAME_AVERAGE_ID_ASC
+  TOKEN_CANCELLEDS_BY_NAME_AVERAGE_ID_DESC
+  TOKEN_CANCELLEDS_BY_NAME_AVERAGE_REASON_ASC
+  TOKEN_CANCELLEDS_BY_NAME_AVERAGE_REASON_DESC
+  TOKEN_CANCELLEDS_BY_NAME_AVERAGE_AMOUNT_ASC
+  TOKEN_CANCELLEDS_BY_NAME_AVERAGE_AMOUNT_DESC
+  TOKEN_CANCELLEDS_BY_NAME_AVERAGE_OWNER_ASC
+  TOKEN_CANCELLEDS_BY_NAME_AVERAGE_OWNER_DESC
+  TOKEN_CANCELLEDS_BY_NAME_AVERAGE_NAME_ASC
+  TOKEN_CANCELLEDS_BY_NAME_AVERAGE_NAME_DESC
+  TOKEN_CANCELLEDS_BY_NAME_STDDEV_SAMPLE_AID_ASC
+  TOKEN_CANCELLEDS_BY_NAME_STDDEV_SAMPLE_AID_DESC
+  TOKEN_CANCELLEDS_BY_NAME_STDDEV_SAMPLE_ID_ASC
+  TOKEN_CANCELLEDS_BY_NAME_STDDEV_SAMPLE_ID_DESC
+  TOKEN_CANCELLEDS_BY_NAME_STDDEV_SAMPLE_REASON_ASC
+  TOKEN_CANCELLEDS_BY_NAME_STDDEV_SAMPLE_REASON_DESC
+  TOKEN_CANCELLEDS_BY_NAME_STDDEV_SAMPLE_AMOUNT_ASC
+  TOKEN_CANCELLEDS_BY_NAME_STDDEV_SAMPLE_AMOUNT_DESC
+  TOKEN_CANCELLEDS_BY_NAME_STDDEV_SAMPLE_OWNER_ASC
+  TOKEN_CANCELLEDS_BY_NAME_STDDEV_SAMPLE_OWNER_DESC
+  TOKEN_CANCELLEDS_BY_NAME_STDDEV_SAMPLE_NAME_ASC
+  TOKEN_CANCELLEDS_BY_NAME_STDDEV_SAMPLE_NAME_DESC
+  TOKEN_CANCELLEDS_BY_NAME_STDDEV_POPULATION_AID_ASC
+  TOKEN_CANCELLEDS_BY_NAME_STDDEV_POPULATION_AID_DESC
+  TOKEN_CANCELLEDS_BY_NAME_STDDEV_POPULATION_ID_ASC
+  TOKEN_CANCELLEDS_BY_NAME_STDDEV_POPULATION_ID_DESC
+  TOKEN_CANCELLEDS_BY_NAME_STDDEV_POPULATION_REASON_ASC
+  TOKEN_CANCELLEDS_BY_NAME_STDDEV_POPULATION_REASON_DESC
+  TOKEN_CANCELLEDS_BY_NAME_STDDEV_POPULATION_AMOUNT_ASC
+  TOKEN_CANCELLEDS_BY_NAME_STDDEV_POPULATION_AMOUNT_DESC
+  TOKEN_CANCELLEDS_BY_NAME_STDDEV_POPULATION_OWNER_ASC
+  TOKEN_CANCELLEDS_BY_NAME_STDDEV_POPULATION_OWNER_DESC
+  TOKEN_CANCELLEDS_BY_NAME_STDDEV_POPULATION_NAME_ASC
+  TOKEN_CANCELLEDS_BY_NAME_STDDEV_POPULATION_NAME_DESC
+  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_SAMPLE_AID_ASC
+  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_SAMPLE_AID_DESC
+  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_SAMPLE_ID_ASC
+  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_SAMPLE_ID_DESC
+  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_SAMPLE_REASON_ASC
+  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_SAMPLE_REASON_DESC
+  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_SAMPLE_AMOUNT_ASC
+  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_SAMPLE_AMOUNT_DESC
+  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_SAMPLE_OWNER_ASC
+  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_SAMPLE_OWNER_DESC
+  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_SAMPLE_NAME_ASC
+  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_SAMPLE_NAME_DESC
+  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_POPULATION_AID_ASC
+  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_POPULATION_AID_DESC
+  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_POPULATION_ID_ASC
+  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_POPULATION_ID_DESC
+  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_POPULATION_REASON_ASC
+  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_POPULATION_REASON_DESC
+  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_POPULATION_AMOUNT_ASC
+  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_POPULATION_AMOUNT_DESC
+  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_POPULATION_OWNER_ASC
+  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_POPULATION_OWNER_DESC
+  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_POPULATION_NAME_ASC
+  TOKEN_CANCELLEDS_BY_NAME_VARIANCE_POPULATION_NAME_DESC
 }
 
 """
