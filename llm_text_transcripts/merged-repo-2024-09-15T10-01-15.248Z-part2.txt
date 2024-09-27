@@ -1,0 +1,2987 @@
+
+/SRC/POSTGRES/IID.TS CODE IS BELOW
+import { pool } from "./client";
+
+export type Iid = {
+  id: string;
+  context: any; // JSON
+  controller: string[];
+  verificationMethod: any; // JSON
+  service: any; // JSON
+  authentication: string[];
+  assertionMethod: string[];
+  keyAgreement: string[];
+  capabilityInvocation: string[];
+  capabilityDelegation: string[];
+  linkedResource: any; // JSON
+  linkedClaim: any; // JSON
+  accordedRight: any; // JSON
+  linkedEntity: any; // JSON
+  alsoKnownAs: string;
+  metadata: any; // JSON
+};
+
+const createIidSql = `
+INSERT INTO "IID" ( "id", "context", "controller", "verificationMethod", "service", "authentication", "assertionMethod", "keyAgreement", "capabilityInvocation", "capabilityDelegation", "linkedResource", "linkedClaim", "accordedRight", "linkedEntity", "alsoKnownAs", "metadata") 
+VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16 );
+`;
+export const createIid = async (p: Iid): Promise<void> => {
+  try {
+    await pool.query(createIidSql, [
+      p.id,
+      JSON.stringify(p.context),
+      p.controller,
+      JSON.stringify(p.verificationMethod),
+      JSON.stringify(p.service),
+      p.authentication,
+      p.assertionMethod,
+      p.keyAgreement,
+      p.capabilityInvocation,
+      p.capabilityDelegation,
+      JSON.stringify(p.linkedResource),
+      JSON.stringify(p.linkedClaim),
+      JSON.stringify(p.accordedRight),
+      JSON.stringify(p.linkedEntity),
+      p.alsoKnownAs,
+      JSON.stringify(p.metadata),
+    ]);
+  } catch (error) {
+    throw error;
+  }
+};
+
+const updateIidSql = `
+UPDATE "IID"
+SET
+	             "context" = $1,
+	          "controller" = $2,
+	  "verificationMethod" = $3,
+	             "service" = $4,
+	      "authentication" = $5,
+	     "assertionMethod" = $6,
+	        "keyAgreement" = $7,
+	"capabilityInvocation" = $8,
+	"capabilityDelegation" = $9,
+	      "linkedResource" = $10,
+	         "linkedClaim" = $11,
+	       "accordedRight" = $12,
+	        "linkedEntity" = $13,
+	         "alsoKnownAs" = $14,
+	            "metadata" = $15
+WHERE
+	                  "id" = $16;
+`;
+export const updateIid = async (p: Iid): Promise<void> => {
+  try {
+    await pool.query(updateIidSql, [
+      JSON.stringify(p.context),
+      p.controller,
+      JSON.stringify(p.verificationMethod),
+      JSON.stringify(p.service),
+      p.authentication,
+      p.assertionMethod,
+      p.keyAgreement,
+      p.capabilityInvocation,
+      p.capabilityDelegation,
+      JSON.stringify(p.linkedResource),
+      JSON.stringify(p.linkedClaim),
+      JSON.stringify(p.accordedRight),
+      JSON.stringify(p.linkedEntity),
+      p.alsoKnownAs,
+      JSON.stringify(p.metadata),
+      p.id,
+    ]);
+  } catch (error) {
+    throw error;
+  }
+};
+
+
+/SRC/POSTGRES/IPFS.TS CODE IS BELOW
+import { pool } from "./client";
+
+export type Ipfs = {
+  cid: string;
+  contentType: string;
+  data: string;
+};
+
+const getIpfsSql = `
+SELECT * FROM "Ipfs" WHERE "cid" = $1;
+`;
+export const getIpfs = async (cid: string): Promise<Ipfs | undefined> => {
+  try {
+    const res = await pool.query(getIpfsSql, [cid]);
+    return res.rows[0];
+  } catch (error) {
+    throw error;
+  }
+};
+
+const upsertIpfsSql = `
+INSERT INTO "public"."Ipfs" ( "cid", "contentType", "data") 
+VALUES ( $1, $2, $3 )
+ON CONFLICT("cid") DO UPDATE SET
+  "contentType" = EXCLUDED."contentType",
+  "data" = EXCLUDED."data"
+WHERE "Ipfs"."cid" = EXCLUDED."cid";
+`;
+export const upsertIpfs = async (p: Ipfs): Promise<void> => {
+  try {
+    await pool.query(upsertIpfsSql, [p.cid, p.contentType, p.data]);
+  } catch (error) {
+    throw error;
+  }
+};
+
+
+/SRC/POSTGRES/IXO_SWAP.TS CODE IS BELOW
+import Decimal from "decimal.js";
+import { pool, withTransaction } from "./client";
+
+export type IxoSwap = {
+  address: string;
+  lpAddress: string;
+  token1155Denom: string;
+  token1155Reserve: bigint;
+  token2Denom: string;
+  token2Reserve: bigint;
+  protocolFeeRecipient: string;
+  protocolFeePercent: string;
+  lpFeePercent: string;
+  maxSlippagePercent: string;
+  frozen: boolean;
+  owner: string;
+  pendingOwner?: string | null;
+};
+
+const getIxoSwapSql = `
+SELECT * FROM ixo_swap WHERE address = $1;
+`;
+export const getIxoSwap = async (
+  address: string
+): Promise<IxoSwap | undefined> => {
+  try {
+    const res = await pool.query(getIxoSwapSql, [address]);
+    return res.rows[0];
+  } catch (error) {
+    throw error;
+  }
+};
+
+const createIxoSwapSql = `
+INSERT INTO ixo_swap ("address", "lp_address", "token_1155_denom", "token_1155_reserve", "token_2_denom", "token_2_reserve", "protocol_fee_recipient", "protocol_fee_percent", "lp_fee_percent", "max_slippage_percent", "frozen", "owner", "pending_owner") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13);
+`;
+export const createIxoSwap = async (t: IxoSwap): Promise<void> => {
+  try {
+    await pool.query(createIxoSwapSql, [
+      t.address,
+      t.lpAddress,
+      t.token1155Denom,
+      t.token1155Reserve,
+      t.token2Denom,
+      t.token2Reserve,
+      t.protocolFeeRecipient,
+      t.protocolFeePercent,
+      t.lpFeePercent,
+      t.maxSlippagePercent,
+      t.frozen,
+      t.owner,
+      t.pendingOwner,
+    ]);
+  } catch (error) {
+    throw error;
+  }
+};
+
+const updateIxoSwapLPAddressSql = `
+UPDATE ixo_swap SET lp_address = $2 WHERE address = $1;
+`;
+export const updateIxoSwapLPAddress = async (e: {
+  address: string;
+  lpAddress: string;
+}): Promise<void> => {
+  try {
+    await pool.query(updateIxoSwapLPAddressSql, [e.address, e.lpAddress]);
+  } catch (error) {
+    throw error;
+  }
+};
+
+const updateIxoSwapFrozenSql = `
+UPDATE ixo_swap SET frozen = $2 WHERE address = $1;
+`;
+export const updateIxoSwapFrozen = async (e: {
+  address: string;
+  frozen: boolean;
+}): Promise<void> => {
+  try {
+    await pool.query(updateIxoSwapFrozenSql, [e.address, e.frozen]);
+  } catch (error) {
+    throw error;
+  }
+};
+
+const updateIxoSwapNewOwnerSql = `
+UPDATE ixo_swap SET owner = $2, pending_owner = NULL WHERE address = $1;
+`;
+export const updateIxoSwapNewOwner = async (e: {
+  address: string;
+  owner: string;
+}): Promise<void> => {
+  try {
+    await pool.query(updateIxoSwapNewOwnerSql, [e.address, e.owner]);
+  } catch (error) {
+    throw error;
+  }
+};
+
+const updateIxoSwapPendingOwnerSql = `
+UPDATE ixo_swap SET pending_owner = $2 WHERE address = $1;
+`;
+export const updateIxoSwapPendingOwner = async (e: {
+  address: string;
+  pendingOwner: string;
+}): Promise<void> => {
+  try {
+    await pool.query(updateIxoSwapPendingOwnerSql, [e.address, e.pendingOwner]);
+  } catch (error) {
+    throw error;
+  }
+};
+
+const updateIxoSwapMaxSlippagePercentSql = `
+UPDATE ixo_swap SET max_slippage_percent = $2 WHERE address = $1;
+`;
+export const updateIxoSwapMaxSlippagePercent = async (e: {
+  address: string;
+  maxSlippagePercent: string;
+}): Promise<void> => {
+  try {
+    await pool.query(updateIxoSwapMaxSlippagePercentSql, [
+      e.address,
+      e.maxSlippagePercent,
+    ]);
+  } catch (error) {
+    throw error;
+  }
+};
+
+const updateIxoSwapFeeSql = `
+UPDATE ixo_swap SET lp_fee_percent = $2, protocol_fee_percent = $3, protocol_fee_recipient = $4 WHERE address = $1;
+`;
+export const updateIxoSwapFee = async (e: {
+  address: string;
+  lpFeePercent: string;
+  protocolFeePercent: string;
+  protocolFeeRecipient: string;
+}): Promise<void> => {
+  try {
+    await pool.query(updateIxoSwapFeeSql, [
+      e.address,
+      e.lpFeePercent,
+      e.protocolFeePercent,
+      e.protocolFeeRecipient,
+    ]);
+  } catch (error) {
+    throw error;
+  }
+};
+
+const updateIxoSwapReservesSql = `
+UPDATE ixo_swap SET token_1155_reserve = $2, token_2_reserve = $3 WHERE address = $1;
+`;
+export const updateIxoSwapReserves = async (e: {
+  address: string;
+  token1155Reserve: bigint;
+  token2Reserve: bigint;
+}): Promise<void> => {
+  try {
+    await pool.query(updateIxoSwapReservesSql, [
+      e.address,
+      e.token1155Reserve,
+      e.token2Reserve,
+    ]);
+  } catch (error) {
+    throw error;
+  }
+};
+
+const insertIxoSwapPriceHistorySql = `
+INSERT INTO ixo_swap_price_history ("address", "timestamp", "token_1155_price", "token_2_price")
+VALUES ($1, $2, $3, $4)
+ON CONFLICT("timestamp", "address") DO UPDATE SET
+  "token_1155_price" = EXCLUDED."token_1155_price",
+  "token_2_price" = EXCLUDED."token_2_price"
+WHERE ixo_swap_price_history."address" = EXCLUDED."address" AND ixo_swap_price_history."timestamp" = EXCLUDED."timestamp";
+`;
+/**
+ * This function does 2 things:
+ * 1.1- Inserts a new row into ixo_swap_price_history table if no row with same timestamp exists
+ * 1.2- Updates the token_1155_price and token_2_price columns of the ixo_swap table if a row with same timestamp exists
+ * 2- Updates the ixo_swap table with the latest token_1155_reserve and token_2_reserve values
+ */
+const decimalZero = new Decimal(0);
+export const insertIxoSwapPriceHistory = async (e: {
+  address: string;
+  timestamp: Date;
+  token1155Reserve: string;
+  token2Reserve: string;
+}): Promise<void> => {
+  try {
+    await withTransaction(async (client) => {
+      const token1155ReserveDecimal = new Decimal(e.token1155Reserve);
+      const token2ReserveDecimal = new Decimal(e.token2Reserve);
+      // safegaurd against divide by zero
+      const isEitherZero =
+        token1155ReserveDecimal.isZero() || token2ReserveDecimal.isZero();
+      const token_1155_price = isEitherZero
+        ? decimalZero
+        : token2ReserveDecimal.div(token1155ReserveDecimal);
+      const token_2_price = isEitherZero
+        ? decimalZero
+        : token1155ReserveDecimal.div(token2ReserveDecimal);
+      await client.query(insertIxoSwapPriceHistorySql, [
+        e.address,
+        e.timestamp,
+        token_1155_price.toString(),
+        token_2_price.toString(),
+      ]);
+      await client.query(updateIxoSwapReservesSql, [
+        e.address,
+        e.token1155Reserve,
+        e.token2Reserve,
+      ]);
+    });
+  } catch (error) {
+    throw error;
+  }
+};
+
+
+/SRC/POSTGRES/MIGRATIONS/00000000000000000_INIT.SQL CODE IS BELOW
+-- INITIALIZATION SCRIPT, creating all tables and indexes
+
+-- Up Migration
+
+-- CreateTable
+CREATE TABLE "IID" (
+    "id" TEXT NOT NULL,
+    "context" JSONB NOT NULL,
+    "controller" TEXT[],
+    "verificationMethod" JSONB NOT NULL,
+    "service" JSONB NOT NULL,
+    "authentication" TEXT[],
+    "assertionMethod" TEXT[],
+    "keyAgreement" TEXT[],
+    "capabilityInvocation" TEXT[],
+    "capabilityDelegation" TEXT[],
+    "linkedResource" JSONB NOT NULL,
+    "linkedClaim" JSONB NOT NULL,
+    "accordedRight" JSONB NOT NULL,
+    "linkedEntity" JSONB NOT NULL,
+    "alsoKnownAs" TEXT NOT NULL,
+    "metadata" JSONB NOT NULL,
+
+    CONSTRAINT "IID_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Entity" (
+    "id" TEXT NOT NULL,
+    "type" TEXT NOT NULL,
+    "startDate" TIMESTAMP(3),
+    "endDate" TIMESTAMP(3),
+    "status" INTEGER NOT NULL,
+    "relayerNode" TEXT NOT NULL,
+    "credentials" TEXT[],
+    "entityVerified" BOOLEAN NOT NULL,
+    "metadata" JSONB NOT NULL,
+    "accounts" JSONB NOT NULL,
+    "externalId" TEXT,
+    "owner" TEXT,
+
+    CONSTRAINT "Entity_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "ClaimCollection" (
+    "id" TEXT NOT NULL,
+    "entity" TEXT NOT NULL,
+    "admin" TEXT NOT NULL,
+    "protocol" TEXT NOT NULL,
+    "startDate" TIMESTAMP(3),
+    "endDate" TIMESTAMP(3),
+    "quota" INTEGER NOT NULL,
+    "count" INTEGER NOT NULL,
+    "evaluated" INTEGER NOT NULL,
+    "approved" INTEGER NOT NULL,
+    "rejected" INTEGER NOT NULL,
+    "disputed" INTEGER NOT NULL,
+    "invalidated" INTEGER NOT NULL DEFAULT 0,
+    "state" INTEGER NOT NULL,
+    "payments" JSONB NOT NULL,
+
+    CONSTRAINT "ClaimCollection_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Claim" (
+    "claimId" TEXT NOT NULL,
+    "agentDid" TEXT NOT NULL,
+    "agentAddress" TEXT NOT NULL,
+    "submissionDate" TIMESTAMP(3) NOT NULL,
+    "paymentsStatus" JSONB NOT NULL,
+    "schemaType" TEXT,
+    "collectionId" TEXT NOT NULL,
+
+    CONSTRAINT "Claim_pkey" PRIMARY KEY ("claimId")
+);
+
+-- CreateTable
+CREATE TABLE "Evaluation" (
+    "collectionId" TEXT NOT NULL,
+    "oracle" TEXT NOT NULL,
+    "agentDid" TEXT NOT NULL,
+    "agentAddress" TEXT NOT NULL,
+    "status" INTEGER NOT NULL,
+    "reason" INTEGER NOT NULL,
+    "verificationProof" TEXT,
+    "amount" JSONB NOT NULL,
+    "evaluationDate" TIMESTAMP(3) NOT NULL,
+    "claimId" TEXT NOT NULL,
+
+    CONSTRAINT "Evaluation_pkey" PRIMARY KEY ("claimId")
+);
+
+-- CreateTable
+CREATE TABLE "Dispute" (
+    "proof" TEXT NOT NULL,
+    "subjectId" TEXT NOT NULL,
+    "type" INTEGER NOT NULL,
+    "data" JSONB NOT NULL,
+
+    CONSTRAINT "Dispute_pkey" PRIMARY KEY ("proof")
+);
+
+-- CreateTable
+CREATE TABLE "TokenClass" (
+    "contractAddress" TEXT NOT NULL,
+    "minter" TEXT NOT NULL,
+    "class" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "image" TEXT NOT NULL,
+    "type" TEXT NOT NULL,
+    "cap" BIGINT NOT NULL,
+    "supply" BIGINT NOT NULL,
+    "paused" BOOLEAN NOT NULL,
+    "stopped" BOOLEAN NOT NULL,
+
+    CONSTRAINT "TokenClass_pkey" PRIMARY KEY ("contractAddress")
+);
+
+-- CreateTable
+CREATE TABLE "Token" (
+    "id" TEXT NOT NULL,
+    "index" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "collection" TEXT NOT NULL,
+
+    CONSTRAINT "Token_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "TokenData" (
+    "aid" SERIAL NOT NULL,
+    "uri" TEXT NOT NULL,
+    "encrypted" BOOLEAN NOT NULL,
+    "proof" TEXT NOT NULL,
+    "type" TEXT NOT NULL,
+    "id" TEXT NOT NULL,
+    "tokenId" TEXT NOT NULL,
+
+    CONSTRAINT "TokenData_pkey" PRIMARY KEY ("aid")
+);
+
+-- CreateTable
+CREATE TABLE "TokenRetired" (
+    "aid" SERIAL NOT NULL,
+    "id" TEXT NOT NULL,
+    "reason" TEXT NOT NULL,
+    "jurisdiction" TEXT NOT NULL,
+    "amount" BIGINT NOT NULL,
+    "owner" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+
+    CONSTRAINT "TokenRetired_pkey" PRIMARY KEY ("aid")
+);
+
+-- CreateTable
+CREATE TABLE "TokenCancelled" (
+    "aid" SERIAL NOT NULL,
+    "id" TEXT NOT NULL,
+    "reason" TEXT NOT NULL,
+    "amount" BIGINT NOT NULL,
+    "owner" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+
+    CONSTRAINT "TokenCancelled_pkey" PRIMARY KEY ("aid")
+);
+
+-- CreateTable
+CREATE TABLE "TokenTransaction" (
+    "aid" SERIAL NOT NULL,
+    "from" TEXT NOT NULL,
+    "to" TEXT NOT NULL,
+    "amount" BIGINT NOT NULL,
+    "tokenId" TEXT NOT NULL,
+
+    CONSTRAINT "TokenTransaction_pkey" PRIMARY KEY ("aid")
+);
+
+-- CreateTable
+CREATE TABLE "Bond" (
+    "bondDid" TEXT NOT NULL,
+    "state" TEXT NOT NULL,
+    "token" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "functionType" TEXT NOT NULL,
+    "functionParameters" JSONB NOT NULL,
+    "creatorDid" TEXT NOT NULL,
+    "controllerDid" TEXT NOT NULL,
+    "reserveTokens" TEXT[],
+    "txFeePercentage" TEXT NOT NULL,
+    "exitFeePercentage" TEXT NOT NULL,
+    "feeAddress" TEXT NOT NULL,
+    "reserveWithdrawalAddress" TEXT NOT NULL,
+    "maxSupply" JSONB,
+    "orderQuantityLimits" JSONB NOT NULL,
+    "sanityRate" TEXT NOT NULL,
+    "sanityMarginPercentage" TEXT NOT NULL,
+    "currentSupply" JSONB,
+    "currentReserve" JSONB NOT NULL,
+    "availableReserve" JSONB NOT NULL,
+    "currentOutcomePaymentReserve" JSONB NOT NULL,
+    "allowSells" BOOLEAN NOT NULL,
+    "allowReserveWithdrawals" BOOLEAN NOT NULL,
+    "alphaBond" BOOLEAN NOT NULL,
+    "batchBlocks" TEXT NOT NULL,
+    "outcomePayment" TEXT NOT NULL,
+    "oracleDid" TEXT NOT NULL,
+
+    CONSTRAINT "Bond_pkey" PRIMARY KEY ("bondDid")
+);
+
+-- CreateTable
+CREATE TABLE "BondBuy" (
+    "id" SERIAL NOT NULL,
+    "bondDid" TEXT NOT NULL,
+    "accountDid" TEXT NOT NULL,
+    "amount" JSONB NOT NULL,
+    "maxPrices" JSONB NOT NULL,
+    "height" INTEGER NOT NULL,
+    "timestamp" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "BondBuy_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "BondSell" (
+    "id" SERIAL NOT NULL,
+    "bondDid" TEXT NOT NULL,
+    "accountDid" TEXT NOT NULL,
+    "amount" JSONB NOT NULL,
+    "height" INTEGER NOT NULL,
+    "timestamp" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "BondSell_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "BondSwap" (
+    "id" SERIAL NOT NULL,
+    "bondDid" TEXT NOT NULL,
+    "accountDid" TEXT NOT NULL,
+    "amount" JSONB NOT NULL,
+    "toToken" TEXT NOT NULL,
+    "height" INTEGER NOT NULL,
+    "timestamp" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "BondSwap_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "ReserveWithdrawal" (
+    "id" SERIAL NOT NULL,
+    "bondDid" TEXT NOT NULL,
+    "withdrawerDid" TEXT NOT NULL,
+    "withdrawerAddress" TEXT NOT NULL,
+    "amount" JSONB NOT NULL,
+    "reserveWithdrawalAddress" TEXT NOT NULL,
+    "height" INTEGER NOT NULL,
+    "timestamp" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "ReserveWithdrawal_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "ShareWithdrawal" (
+    "id" SERIAL NOT NULL,
+    "bondDid" TEXT NOT NULL,
+    "recipientDid" TEXT NOT NULL,
+    "recipientAddress" TEXT NOT NULL,
+    "amount" JSONB NOT NULL,
+    "height" INTEGER NOT NULL,
+    "timestamp" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "ShareWithdrawal_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "OutcomePayment" (
+    "id" SERIAL NOT NULL,
+    "bondDid" TEXT NOT NULL,
+    "senderDid" TEXT NOT NULL,
+    "senderAddress" TEXT NOT NULL,
+    "amount" JSONB NOT NULL,
+    "height" INTEGER NOT NULL,
+    "timestamp" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "OutcomePayment_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "BondAlpha" (
+    "id" SERIAL NOT NULL,
+    "bondDid" TEXT NOT NULL,
+    "alpha" TEXT NOT NULL,
+    "oracleDid" TEXT NOT NULL,
+    "height" INTEGER NOT NULL,
+    "timestamp" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "BondAlpha_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Chain" (
+    "chainId" TEXT NOT NULL,
+    "blockHeight" INTEGER NOT NULL,
+
+    CONSTRAINT "Chain_pkey" PRIMARY KEY ("chainId")
+);
+
+-- CreateTable
+CREATE TABLE "Transaction" (
+    "hash" TEXT NOT NULL,
+    "height" INTEGER NOT NULL,
+    "code" INTEGER NOT NULL,
+    "fee" JSONB NOT NULL,
+    "gasUsed" TEXT NOT NULL,
+    "gasWanted" TEXT NOT NULL,
+    "time" TIMESTAMP(3) NOT NULL,
+    "memo" TEXT NOT NULL DEFAULT '',
+
+    CONSTRAINT "Transaction_pkey" PRIMARY KEY ("hash")
+);
+
+-- CreateTable
+CREATE TABLE "Message" (
+    "id" SERIAL NOT NULL,
+    "typeUrl" TEXT NOT NULL,
+    "value" JSONB NOT NULL,
+    "from" TEXT,
+    "to" TEXT,
+    "denoms" TEXT[],
+    "tokenNames" TEXT[],
+    "transactionHash" TEXT NOT NULL,
+
+    CONSTRAINT "Message_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Ipfs" (
+    "cid" TEXT NOT NULL,
+    "contentType" TEXT NOT NULL,
+    "data" TEXT NOT NULL,
+
+    CONSTRAINT "Ipfs_pkey" PRIMARY KEY ("cid")
+);
+
+-- CreateTable
+CREATE TABLE "TokenomicsAccount" (
+    "address" TEXT NOT NULL,
+    "accountNumber" INTEGER NOT NULL,
+    "availBalance" BIGINT NOT NULL,
+    "delegationsBalance" BIGINT NOT NULL,
+    "rewardsBalance" BIGINT NOT NULL,
+    "totalBalance" BIGINT NOT NULL,
+    "type" TEXT,
+
+    CONSTRAINT "TokenomicsAccount_pkey" PRIMARY KEY ("address")
+);
+
+-- CreateIndex
+CREATE INDEX "Entity_owner_type_idx" ON "Entity"("owner", "type");
+
+-- CreateIndex
+CREATE INDEX "Claim_collectionId_idx" ON "Claim"("collectionId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "TokenClass_name_key" ON "TokenClass"("name");
+
+-- CreateIndex
+CREATE INDEX "Token_name_idx" ON "Token"("name");
+
+-- CreateIndex
+CREATE INDEX "TokenData_tokenId_idx" ON "TokenData"("tokenId");
+
+-- CreateIndex
+CREATE INDEX "TokenRetired_name_owner_id_idx" ON "TokenRetired"("name", "owner", "id");
+
+-- CreateIndex
+CREATE INDEX "TokenCancelled_name_idx" ON "TokenCancelled"("name");
+
+-- CreateIndex
+CREATE INDEX "TokenTransaction_from_to_idx" ON "TokenTransaction"("from", "to");
+
+-- CreateIndex
+CREATE INDEX "Transaction_height_idx" ON "Transaction"("height");
+
+-- CreateIndex
+CREATE INDEX "Message_transactionHash_from_to_idx" ON "Message"("transactionHash", "from", "to");
+
+-- AddForeignKey
+ALTER TABLE "Entity" ADD CONSTRAINT "Entity_id_fkey" FOREIGN KEY ("id") REFERENCES "IID"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Claim" ADD CONSTRAINT "Claim_collectionId_fkey" FOREIGN KEY ("collectionId") REFERENCES "ClaimCollection"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Evaluation" ADD CONSTRAINT "Evaluation_claimId_fkey" FOREIGN KEY ("claimId") REFERENCES "Claim"("claimId") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "TokenClass" ADD CONSTRAINT "TokenClass_class_fkey" FOREIGN KEY ("class") REFERENCES "Entity"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Token" ADD CONSTRAINT "Token_collection_fkey" FOREIGN KEY ("collection") REFERENCES "Entity"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Token" ADD CONSTRAINT "Token_name_fkey" FOREIGN KEY ("name") REFERENCES "TokenClass"("name") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "TokenData" ADD CONSTRAINT "TokenData_tokenId_fkey" FOREIGN KEY ("tokenId") REFERENCES "Token"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "TokenRetired" ADD CONSTRAINT "TokenRetired_name_fkey" FOREIGN KEY ("name") REFERENCES "TokenClass"("name") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "TokenRetired" ADD CONSTRAINT "TokenRetired_id_fkey" FOREIGN KEY ("id") REFERENCES "Token"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "TokenCancelled" ADD CONSTRAINT "TokenCancelled_name_fkey" FOREIGN KEY ("name") REFERENCES "TokenClass"("name") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "TokenTransaction" ADD CONSTRAINT "TokenTransaction_tokenId_fkey" FOREIGN KEY ("tokenId") REFERENCES "Token"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "BondBuy" ADD CONSTRAINT "BondBuy_bondDid_fkey" FOREIGN KEY ("bondDid") REFERENCES "Bond"("bondDid") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "BondSell" ADD CONSTRAINT "BondSell_bondDid_fkey" FOREIGN KEY ("bondDid") REFERENCES "Bond"("bondDid") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "BondSwap" ADD CONSTRAINT "BondSwap_bondDid_fkey" FOREIGN KEY ("bondDid") REFERENCES "Bond"("bondDid") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ReserveWithdrawal" ADD CONSTRAINT "ReserveWithdrawal_bondDid_fkey" FOREIGN KEY ("bondDid") REFERENCES "Bond"("bondDid") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ShareWithdrawal" ADD CONSTRAINT "ShareWithdrawal_bondDid_fkey" FOREIGN KEY ("bondDid") REFERENCES "Bond"("bondDid") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "OutcomePayment" ADD CONSTRAINT "OutcomePayment_bondDid_fkey" FOREIGN KEY ("bondDid") REFERENCES "Bond"("bondDid") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "BondAlpha" ADD CONSTRAINT "BondAlpha_bondDid_fkey" FOREIGN KEY ("bondDid") REFERENCES "Bond"("bondDid") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Message" ADD CONSTRAINT "Message_transactionHash_fkey" FOREIGN KEY ("transactionHash") REFERENCES "Transaction"("hash") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- Down Migration
+
+
+/SRC/POSTGRES/MIGRATIONS/20240829055329991_IXOSWAP.SQL CODE IS BELOW
+-- Up Migration
+
+-- CreateTable
+CREATE TABLE ixo_swap (
+    "address" TEXT NOT NULL PRIMARY KEY,
+    "lp_address" TEXT NOT NULL,
+    "token_1155_denom" TEXT NOT NULL,
+    "token_1155_reserve" BIGINT NOT NULL,
+    "token_2_denom" TEXT NOT NULL,
+    "token_2_reserve" BIGINT NOT NULL,
+    "protocol_fee_recipient" TEXT NOT NULL,
+    "protocol_fee_percent" TEXT NOT NULL,
+    "lp_fee_percent" TEXT NOT NULL,
+    "max_slippage_percent" TEXT NOT NULL,
+    "frozen" BOOLEAN NOT NULL,
+    "owner" TEXT NOT NULL,
+    "pending_owner" TEXT
+);
+
+-- CreateTable
+CREATE TABLE ixo_swap_price_history (
+    "id" SERIAL NOT NULL PRIMARY KEY,
+    "address" TEXT NOT NULL REFERENCES ixo_swap(address),
+    "timestamp" TIMESTAMP(3) NOT NULL,
+    "token_1155_price" NUMERIC NOT NULL, -- price of token_1155 in terms of token_2
+    "token_2_price" NUMERIC NOT NULL, -- price of token_2 in terms of token_1155
+    UNIQUE ("timestamp", "address")
+);
+
+CREATE INDEX idx_price_history_timestamp ON ixo_swap_price_history ("timestamp");
+
+-- Down Migration
+
+
+/SRC/POSTGRES/MIGRATIONS.TS CODE IS BELOW
+import pg_migrate from "node-pg-migrate";
+import { DATABASE_USE_SSL } from "../util/secrets";
+
+export async function postgresMigrate(databaseUrl: string): Promise<void> {
+  await pg_migrate({
+    dir: "src/postgres/migrations",
+    direction: "up",
+    migrationsTable: "pgmigrations",
+    databaseUrl: {
+      connectionString: databaseUrl,
+      ...(DATABASE_USE_SSL && { ssl: { rejectUnauthorized: false } }), // Use SSL (recommended
+    },
+  });
+}
+
+
+/SRC/POSTGRES/TOKEN.TS CODE IS BELOW
+import { pool, withTransaction } from "./client";
+
+const getTokenNameSql = `
+SELECT name FROM "Token" WHERE id = $1;
+`;
+export const getTokenName = async (id: string): Promise<string | undefined> => {
+  try {
+    const res = await pool.query(getTokenNameSql, [id]);
+    return res.rows[0]?.name;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export type TokenTransaction = {
+  from: string;
+  to: string;
+  amount: bigint;
+  tokenId: string;
+};
+
+const createTokenTransactionSql = `
+INSERT INTO "TokenTransaction" ("from", "to", amount, "tokenId") VALUES ($1, $2, $3, $4);
+`;
+export const createTokenTransaction = async (
+  t: TokenTransaction
+): Promise<void> => {
+  try {
+    await pool.query(createTokenTransactionSql, [
+      t.from,
+      t.to,
+      t.amount,
+      t.tokenId,
+    ]);
+  } catch (error) {
+    throw error;
+  }
+};
+
+const getTokenClassContractAddressSql = `
+SELECT "contractAddress" FROM "TokenClass" WHERE "contractAddress" = $1;
+`;
+export const getTokenClassContractAddress = async (
+  contractAddress: string
+): Promise<string | undefined> => {
+  try {
+    const res = await pool.query(getTokenClassContractAddressSql, [
+      contractAddress,
+    ]);
+    return res.rows[0]?.contractAddress;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export type TokenClass = {
+  contractAddress: string;
+  minter: string;
+  class: string;
+  name: string;
+  description: string;
+  image: string;
+  type: string;
+  cap: bigint;
+  supply: bigint;
+  paused: boolean;
+  stopped: boolean;
+  retired?: TokenRetired[];
+  cancelled?: TokenCancelled[];
+};
+
+const createTokenClassSql = `
+INSERT INTO "public"."TokenClass" ( "contractAddress", "minter", "class", "name", "description", "image", "type", "cap", "supply", "paused", "stopped") 
+VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11 );
+`;
+export const createTokenClass = async (p: TokenClass): Promise<void> => {
+  try {
+    await pool.query(createTokenClassSql, [
+      p.contractAddress,
+      p.minter,
+      p.class,
+      p.name,
+      p.description,
+      p.image,
+      p.type,
+      p.cap,
+      p.supply,
+      p.paused,
+      p.stopped,
+    ]);
+  } catch (error) {
+    throw error;
+  }
+};
+
+const updateTokenClassSql = `
+UPDATE "public"."TokenClass" SET
+	         "minter" = $1,
+	          "class" = $2,
+	           "name" = $3,
+	    "description" = $4,
+	          "image" = $5,
+	           "type" = $6,
+	            "cap" = $7,
+	         "supply" = $8,
+	         "paused" = $9,
+	        "stopped" = $10
+WHERE
+	"contractAddress" = $11;
+`;
+// TODO: UPDATE to maybe use other events from chain for updating retired and cancelled, as this very inefficient
+export const updateTokenClass = async (p: TokenClass): Promise<void> => {
+  try {
+    // do all the insertions in a single transaction
+    await withTransaction(async (client) => {
+      await client.query(updateTokenClassSql, [
+        p.minter,
+        p.class,
+        p.name,
+        p.description,
+        p.image,
+        p.type,
+        p.cap,
+        p.supply,
+        p.paused,
+        p.stopped,
+        p.contractAddress,
+      ]);
+
+      if (p.retired?.length) {
+        await client.query(deleteTokenRetiredSql, [p.name]);
+        await client.query(createTokenRetiredSql, [
+          JSON.stringify(p.retired),
+          p.name,
+        ]);
+      }
+
+      if (p.cancelled?.length) {
+        await client.query(deleteTokenCancelledSql, [p.name]);
+        await client.query(createTokenCancelledSql, [
+          JSON.stringify(p.cancelled),
+          p.name,
+        ]);
+      }
+    });
+  } catch (error) {
+    throw error;
+  }
+};
+
+export type TokenRetired = {
+  id: string;
+  reason: string;
+  jurisdiction: string;
+  amount: string; // bigint in db, but using string here as it is a jsonb function on server that parses it to bigint
+  owner: string;
+};
+
+const deleteTokenRetiredSql = `
+DELETE FROM "TokenRetired" WHERE "name" = $1;
+`;
+const createTokenRetiredSql = `
+INSERT INTO "public"."TokenRetired" ( "id", "reason", "jurisdiction", "amount", "owner", "name") 
+SELECT tr.id, tr.reason, tr.jurisdiction, tr.amount, tr.owner, $2
+FROM jsonb_to_recordset($1) AS tr(id text, reason text, jurisdiction text, amount bigint, owner text);
+`;
+
+export type TokenCancelled = {
+  id: string;
+  reason: string;
+  amount: string; // bigint in db, but using string here as it is a jsonb function on server that parses it to bigint
+  owner: string;
+};
+
+const deleteTokenCancelledSql = `
+DELETE FROM "TokenCancelled" WHERE "name" = $1;
+`;
+const createTokenCancelledSql = `
+INSERT INTO "public"."TokenCancelled" ( "id", "reason", "amount", "owner", "name") 
+SELECT tc.id, tc.reason, tc.amount, tc.owner, $2
+FROM jsonb_to_recordset($1) AS tc(id text, reason text, amount bigint, owner text);
+`;
+
+export type Token = {
+  id: string;
+  index: string;
+  name: string;
+  collection: string;
+  tokenData?: TokenData[];
+};
+
+const createTokenSql = `
+INSERT INTO "public"."Token" ( "id", "index", "name", "collection") 
+VALUES ( $1, $2, $3, $4 );
+`;
+export const createToken = async (p: Token): Promise<void> => {
+  try {
+    // do all the insertions in a single transaction
+    await withTransaction(async (client) => {
+      await client.query(createTokenSql, [p.id, p.index, p.name, p.collection]);
+
+      if (p.tokenData?.length) {
+        await client.query(createTokenDataSql, [
+          JSON.stringify(p.tokenData),
+          p.id,
+        ]);
+      }
+    });
+  } catch (error) {
+    throw error;
+  }
+};
+
+export type TokenData = {
+  uri: string;
+  encrypted: boolean;
+  proof: string;
+  type: string;
+  id: string;
+};
+
+const createTokenDataSql = `
+INSERT INTO "public"."TokenData" ( "uri", "encrypted", "proof", "type", "id", "tokenId") 
+SELECT td.uri, td.encrypted, td.proof, td.type, td.id, $2
+FROM jsonb_to_recordset($1) AS td(uri text, encrypted boolean, proof text, type text, id text);
+`;
+
+export type TokenTransactionWithToken = TokenTransaction & {
+  name: string;
+  collection: string;
+};
+
+const getTokenTransactionSql = `
+SELECT tt."from", tt."to", tt."amount", tt."tokenId",
+       t."name", t."collection"
+FROM "TokenTransaction" tt
+LEFT JOIN "Token" t ON tt."tokenId" = t."id"
+WHERE (tt."from" = $1 OR tt."to" = $1)
+AND ($2::text IS NULL OR t."name" = $2);
+`;
+export const getTokenTransaction = async (
+  address: string,
+  name?: string
+): Promise<TokenTransactionWithToken[]> => {
+  try {
+    const res = await pool.query(getTokenTransactionSql, [address, name]);
+    return res.rows;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// TODO: check performance for IN vs ANY
+const getTokenRetiredAmountSql = `
+SELECT "id", SUM("amount")::bigint AS "amount"
+FROM "TokenRetired"
+WHERE "id" = ANY($1::text[])
+GROUP BY "id";
+`;
+export const getTokenRetiredAmountSUM = async (
+  ids: string[]
+): Promise<{ id: string; amount: bigint }[]> => {
+  try {
+    const res = await pool.query(getTokenRetiredAmountSql, [ids]);
+    return res.rows;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const getTokenClassSql = `
+SELECT "contractAddress", "description", "image"
+FROM "TokenClass"
+WHERE "name" = $1;
+`;
+export const getTokenClass = async (name: string): Promise<TokenClass> => {
+  try {
+    const res = await pool.query(getTokenClassSql, [name]);
+    return res.rows[0];
+  } catch (error) {
+    throw error;
+  }
+};
+
+
+/SRC/POSTGRES/TOKENOMICS_ACCOUNT.TS CODE IS BELOW
+import { pool } from "./client";
+
+export type TokenomicsAccount = {
+  address: string;
+  accountNumber: number;
+  availBalance: bigint;
+  delegationsBalance: bigint;
+  rewardsBalance: bigint;
+  totalBalance: bigint;
+  type?: string;
+};
+
+const upsertTokenomicsAccountSql = `
+INSERT INTO "public"."TokenomicsAccount" ( "address", "accountNumber", "availBalance", "delegationsBalance", "rewardsBalance", "totalBalance", "type") 
+VALUES ( $1, $2, $3, $4, $5, $6, $7 )
+ON CONFLICT("address") DO UPDATE SET
+  "accountNumber" = EXCLUDED."accountNumber",
+  "availBalance" = EXCLUDED."availBalance",
+  "delegationsBalance" = EXCLUDED."delegationsBalance",
+  "rewardsBalance" = EXCLUDED."rewardsBalance",
+  "totalBalance" = EXCLUDED."totalBalance",
+  "type" = EXCLUDED."type"
+WHERE "TokenomicsAccount"."address" = EXCLUDED."address";
+`;
+export const upsertTokenomicsAccount = async (
+  p: TokenomicsAccount
+): Promise<void> => {
+  try {
+    await pool.query(upsertTokenomicsAccountSql, [
+      p.address,
+      p.accountNumber,
+      p.availBalance,
+      p.delegationsBalance,
+      p.rewardsBalance,
+      p.totalBalance,
+      p.type,
+    ]);
+  } catch (error) {
+    throw error;
+  }
+};
+
+
+/SRC/POSTGRES/TRANSACTION.TS CODE IS BELOW
+import { withTransaction } from "./client";
+
+export type Block = {
+  height: number;
+  time: Date;
+  transactions: Transaction[];
+  messages: Message[];
+};
+
+export type Transaction = {
+  hash: string;
+  code: number;
+  fee: any; // JSON
+  gasUsed: string;
+  gasWanted: string;
+  memo: string;
+};
+
+export type Message = {
+  typeUrl: string;
+  value: any; // JSON
+  from?: string;
+  to?: string;
+  denoms: string[];
+  tokenNames: string[];
+  transactionHash: string;
+};
+
+const insertTransactionSql = `
+INSERT INTO "Transaction" (hash, code, fee, "gasUsed", "gasWanted", memo, "time", height)
+SELECT tr.hash, tr.code, tr.fee, tr."gasUsed", tr."gasWanted", tr.memo, $2, $3
+FROM jsonb_to_recordset($1) AS tr(hash text, code int, fee jsonb, "gasUsed" text, "gasWanted" text, memo text);
+`;
+const insertMessageSql = `
+INSERT INTO "Message" ("typeUrl", value, "transactionHash", "from", "to", denoms, "tokenNames")
+SELECT msg."typeUrl", msg.value, msg."transactionHash", msg."from", msg."to", msg.denoms, msg."tokenNames"
+FROM jsonb_to_recordset($1) AS msg("typeUrl" text, value jsonb, "transactionHash" text, "from" text, "to" text, denoms text[], "tokenNames" text[]);
+`;
+export const insertBlock = async (block: Block): Promise<void> => {
+  try {
+    // do all the insertions in a single transaction
+    await withTransaction(async (client) => {
+      if (block.transactions.length) {
+        await client.query(insertTransactionSql, [
+          JSON.stringify(block.transactions),
+          block.time,
+          block.height,
+        ]);
+      }
+      if (block.messages.length) {
+        await client.query(insertMessageSql, [JSON.stringify(block.messages)]);
+      }
+    });
+  } catch (error) {
+    throw error;
+  }
+};
+
+
+/SRC/SWAGGER.JSON CODE IS BELOW
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Blocksync",
+    "version": "1.0.0",
+    "description": ""
+  },
+  "host": "",
+  "basePath": "",
+  "schemes": [
+    "http"
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/graphql_schema": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "x-forwarded-for",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/ipfs/{cid}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "cid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/api/claims/collection/{id}/claims": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "take",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "orderBy",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/tokenomics/fetchAccounts": {
+      "get": {
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  }
+}
+
+/SRC/SWAGGER.TS CODE IS BELOW
+import swaggerAutogen from "swagger-autogen";
+
+const doc = {
+  info: {
+    title: "Blocksync",
+  },
+  host: "",
+  basePath: "",
+  paths: {
+    "/graphiql": {
+      get: {
+        description: "GraphiQL IDE",
+        parameters: [],
+        responses: {
+          "200": {
+            description: "OK",
+          },
+        },
+      },
+    },
+    "/graphql": {
+      post: {
+        description: "GraphQL",
+        parameters: [],
+        responses: {
+          "200": {
+            description: "OK",
+          },
+        },
+      },
+    },
+  },
+};
+
+const outputFile = "src/swagger.json";
+const endpointsFiles = ["src/app.ts"];
+
+swaggerAutogen()(outputFile, endpointsFiles, doc);
+
+
+/SRC/SYNC/SYNC_BLOCKS.TS CODE IS BELOW
+import { sleep } from "../util/sleep";
+import * as TransactionSyncHandler from "../sync_handlers/transaction_sync_handler";
+import * as EventSyncHandler from "../sync_handlers/event_sync_handler";
+import { currentChain } from "./sync_chain";
+import { getCoreBlock } from "../postgres/blocksync_core/block";
+import { getChain, updateChain } from "../postgres/chain";
+
+let syncing: boolean;
+
+const logIndexTime = false;
+const logFetchTime = false;
+const logSync1000Time = true;
+
+export const startSync = async () => {
+  syncing = true;
+
+  let currentBlock = (await getChain(currentChain.chainId))?.blockHeight || 1;
+  console.log(`Starting Syncing at Block ${currentBlock}`);
+
+  // if already has synced, start from next block
+  if (currentBlock !== 1) currentBlock++;
+
+  let count = 0;
+  if (logSync1000Time) console.time("sync");
+  while (syncing) {
+    // if (currentBlock === 460) return;
+    try {
+      if (logFetchTime) console.time("fetch");
+      // console.log("wait then get block:", currentBlock, getMemoryUsage().rss);
+      // await sleep(2000);
+      const block = await getCoreBlock(currentBlock);
+      if (logFetchTime) console.timeEnd("fetch");
+
+      if (block) {
+        count = 0;
+        if (logIndexTime) console.time("index");
+
+        await Promise.all([
+          EventSyncHandler.syncEvents(block.events, block.height, block.time),
+          TransactionSyncHandler.syncTransactions(
+            block.transactions,
+            block.height,
+            block.time
+          ),
+          updateChain({
+            chainId: currentChain.chainId,
+            blockHeight: block.height,
+          }),
+        ]);
+
+        if (currentBlock % 1000 === 0) {
+          console.log(`Synced Block ${currentBlock}`);
+          if (logSync1000Time) console.timeLog("sync");
+        }
+
+        if (logIndexTime) console.timeEnd("index");
+        currentBlock++;
+      } else {
+        count++;
+        if (count === 15) {
+          console.log(`Next block, 15th attempt: ${currentBlock}`);
+        }
+        await sleep(1000);
+      }
+    } catch (error) {
+      console.error(`Error Adding Block ${currentBlock}: ${error}`);
+      break;
+    }
+  }
+};
+
+
+/SRC/SYNC/SYNC_CHAIN.TS CODE IS BELOW
+import { createQueryClient, createRegistry } from "@ixo/impactxclient-sdk";
+import * as Proto from "../util/proto";
+import { RPC, STATIC_CHAIN_ID } from "../util/secrets";
+import { sleep } from "../util/sleep";
+import { ChainCore, getCoreChain } from "../postgres/blocksync_core/chain";
+import { Chain, createChain, getChain } from "../postgres/chain";
+
+export let currentChain: Chain;
+export let queryClient: Awaited<ReturnType<typeof createQueryClient>>;
+export let registry: ReturnType<typeof createRegistry>;
+
+export const syncChain = async () => {
+  try {
+    registry = createRegistry();
+
+    let chainId: string;
+    if (STATIC_CHAIN_ID) {
+      // if want to run without needing above rpc endpoint, can use this instead and comment above
+      chainId = STATIC_CHAIN_ID;
+    } else {
+      queryClient = await createQueryClient(RPC);
+      const res = await Proto.getLatestBlock();
+      chainId = res?.block?.header?.chainId || "";
+      if (!chainId) throw new Error("No Chain Found on RPC Endpoint");
+    }
+
+    let coreChain: ChainCore | undefined;
+    while (true) {
+      try {
+        coreChain = await getCoreChain(chainId);
+        break;
+      } catch (error) {
+        console.log("Waiting for Blocksync-core to start...");
+        await sleep(10000);
+      }
+    }
+    if (!coreChain)
+      throw new Error(
+        "No Chain Found on Blocksync-core DB for this RPC Endpoint"
+      );
+
+    const existingChain = await getChain(coreChain.chainId);
+    if (existingChain) {
+      currentChain = existingChain;
+      return;
+    }
+
+    const newChain = await createChain({
+      chainId: coreChain.chainId,
+      blockHeight: 1,
+    });
+    currentChain = newChain;
+    return;
+  } catch (error) {
+    console.error(`Error occured duting initiation: ${error}`);
+    process.exit();
+  }
+};
+
+
+/SRC/SYNC/SYNC_CUSTOM.TS CODE IS BELOW
+// import { prisma } from "../prisma/prisma_client";
+// import { sleep } from "../util/sleep";
+
+// export const startSync = async () => {
+//   const syncing = true;
+//   let index = 0;
+//   let pageSize = 100;
+//   let nextCursor: string | undefined = undefined;
+
+//   const query = async (take = 1, cursor?: string) =>
+//     await prisma.transaction.findMany({
+//       take: take,
+//       ...(cursor
+//         ? {
+//             cursor: { hash: cursor },
+//             skip: 1,
+//           }
+//         : {}),
+//       orderBy: {
+//         height: "asc",
+//       },
+//       select: {
+//         hash: true,
+//       },
+//     });
+
+//   while (syncing) {
+//     try {
+//       console.log("Batch Index: ", index++);
+//       const res = await query(pageSize, nextCursor);
+//       if (res.length == 0) {
+//         console.log("Done!!!!!!!!!!!");
+//         break;
+//       }
+//       nextCursor = res[res.length - 1].hash;
+
+//       for (const tx of res) {
+//         const txRes = await prismaCore.transactionCore.findFirst({
+//           where: { hash: tx.hash },
+//           select: { memo: true },
+//         });
+//         if (!txRes) {
+//           console.log("Tx not found, skipping");
+//           continue;
+//         }
+//         if (txRes.memo) {
+//           console.log("hash: ", tx.hash, " memo: ", txRes.memo);
+//           await prisma.transaction.update({
+//             where: { hash: tx.hash },
+//             data: {
+//               memo: txRes.memo,
+//             },
+//           });
+//         }
+//       }
+
+//       // wait 1 second to not overload the node
+//       await sleep(1000);
+//     } catch (error) {
+//       console.error(`Error Getting Transactions: ${error}`);
+//     }
+//   }
+// };
+
+
+/SRC/SYNC_HANDLERS/EVENT_DATA_SYNC_HANDLER.TS CODE IS BELOW
+import { EntitySDKType } from "@ixo/impactxclient-sdk/types/codegen/ixo/entity/v1beta1/entity";
+import { IidDocumentSDKType } from "@ixo/impactxclient-sdk/types/codegen/ixo/iid/v1beta1/iid";
+import { EventTypes } from "../types/Event";
+import {
+  TokenPropertiesSDKType,
+  TokenSDKType,
+} from "@ixo/impactxclient-sdk/types/codegen/ixo/token/v1beta1/token";
+import {
+  ClaimSDKType,
+  CollectionSDKType,
+  DisputeSDKType,
+} from "@ixo/impactxclient-sdk/types/codegen/ixo/claims/v1beta1/claims";
+import { getDocFromAttributes, getValueFromAttributes } from "../util/helpers";
+import { ixo } from "@ixo/impactxclient-sdk";
+import {
+  BondSDKType,
+  BuyOrderSDKType,
+  SellOrderSDKType,
+  SwapOrderSDKType,
+} from "@ixo/impactxclient-sdk/types/codegen/ixo/bonds/v1beta1/bonds";
+import { EventCore } from "../postgres/blocksync_core/block";
+import { createIid, updateIid } from "../postgres/iid";
+import { createEntity, updateEntity } from "../postgres/entity";
+import {
+  createClaim,
+  createClaimCollection,
+  createDispute,
+  updateClaim,
+  updateClaimCollection,
+} from "../postgres/claim";
+import {
+  createBond,
+  createBondAlpha,
+  createBondBuy,
+  createBondSell,
+  createBondSwap,
+  createOutcomePayment,
+  createReserveWithdrawal,
+  createShareWithdrawal,
+  updateBond,
+} from "../postgres/bond";
+import {
+  createToken,
+  createTokenClass,
+  updateTokenClass,
+} from "../postgres/token";
+
+export const syncEventData = async (
+  event: EventCore,
+  blockHeight: number,
+  timestamp: Date
+) => {
+  try {
+    switch (event.type) {
+      // ==========================================================
+      // IID
+      // ==========================================================
+      case EventTypes.createIid:
+        const cIid: IidDocumentSDKType = getDocFromAttributes(
+          event.attributes,
+          event.type
+        );
+        await createIid({
+          id: cIid.id,
+          controller: cIid.controller,
+          authentication: cIid.authentication,
+          assertionMethod: cIid.assertionMethod,
+          keyAgreement: cIid.keyAgreement,
+          capabilityInvocation: cIid.capabilityInvocation,
+          capabilityDelegation: cIid.capabilityDelegation,
+          alsoKnownAs: cIid.alsoKnownAs,
+          verificationMethod: cIid.verificationMethod,
+          metadata: cIid.metadata,
+          context: cIid.context,
+          service: cIid.service,
+          linkedResource: cIid.linkedResource,
+          linkedClaim: cIid.linkedClaim,
+          accordedRight: cIid.accordedRight,
+          linkedEntity: cIid.linkedEntity,
+        });
+        break;
+      case EventTypes.updateIid:
+        const uIid: IidDocumentSDKType = getDocFromAttributes(
+          event.attributes,
+          event.type
+        );
+        await updateIid({
+          id: uIid.id,
+          controller: uIid.controller,
+          verificationMethod: uIid.verificationMethod,
+          authentication: uIid.authentication,
+          assertionMethod: uIid.assertionMethod,
+          keyAgreement: uIid.keyAgreement,
+          capabilityInvocation: uIid.capabilityInvocation,
+          capabilityDelegation: uIid.capabilityDelegation,
+          alsoKnownAs: uIid.alsoKnownAs,
+          metadata: uIid.metadata,
+          context: uIid.context,
+          service: uIid.service,
+          linkedResource: uIid.linkedResource,
+          linkedClaim: uIid.linkedClaim,
+          accordedRight: uIid.accordedRight,
+          linkedEntity: uIid.linkedEntity,
+        });
+        break;
+
+      // ==========================================================
+      // ENTITY
+      // ==========================================================
+      case EventTypes.createEntity:
+        const cEntity: EntitySDKType = getDocFromAttributes(
+          event.attributes,
+          event.type
+        );
+        await createEntity({
+          id: cEntity.id,
+          type: cEntity.type,
+          startDate: cEntity.start_date as any,
+          endDate: cEntity.end_date as any,
+          status: cEntity.status,
+          relayerNode: cEntity.relayer_node,
+          credentials: cEntity.credentials,
+          entityVerified: cEntity.entity_verified,
+          metadata: cEntity.metadata,
+          accounts: cEntity.accounts,
+        });
+        break;
+      case EventTypes.updateEntity:
+        const uEntity: EntitySDKType = getDocFromAttributes(
+          event.attributes,
+          event.type
+        );
+        await updateEntity({
+          id: uEntity.id,
+          type: uEntity.type,
+          startDate: uEntity.start_date as any,
+          endDate: uEntity.end_date as any,
+          status: uEntity.status,
+          relayerNode: uEntity.relayer_node,
+          credentials: uEntity.credentials,
+          entityVerified: uEntity.entity_verified,
+          metadata: uEntity.metadata,
+          accounts: uEntity.accounts,
+        });
+        break;
+
+      // ==========================================================
+      // CLAIMS
+      // ==========================================================
+      case EventTypes.createCollection:
+        const cCollection: CollectionSDKType = getDocFromAttributes(
+          event.attributes,
+          event.type
+        );
+        await createClaimCollection({
+          id: cCollection.id,
+          entity: cCollection.entity,
+          admin: cCollection.admin,
+          protocol: cCollection.protocol,
+          startDate: cCollection.start_date as any,
+          endDate: cCollection.end_date as any,
+          quota: Number(cCollection.quota),
+          count: Number(cCollection.count),
+          evaluated: Number(cCollection.evaluated),
+          approved: Number(cCollection.approved),
+          rejected: Number(cCollection.rejected),
+          disputed: Number(cCollection.disputed),
+          invalidated: Number(cCollection.invalidated ?? 0),
+          state: ixo.claims.v1beta1.collectionStateFromJSON(cCollection.state),
+          payments: cCollection.payments,
+        });
+        break;
+      case EventTypes.updateCollection:
+        const uCollection: CollectionSDKType = getDocFromAttributes(
+          event.attributes,
+          event.type
+        );
+        await updateClaimCollection({
+          id: uCollection.id,
+          entity: uCollection.entity,
+          admin: uCollection.admin,
+          protocol: uCollection.protocol,
+          startDate: uCollection.start_date as any,
+          endDate: uCollection.end_date as any,
+          quota: Number(uCollection.quota),
+          count: Number(uCollection.count),
+          evaluated: Number(uCollection.evaluated),
+          approved: Number(uCollection.approved),
+          rejected: Number(uCollection.rejected),
+          disputed: Number(uCollection.disputed),
+          invalidated: Number(uCollection.invalidated ?? 0),
+          state: ixo.claims.v1beta1.collectionStateFromJSON(uCollection.state),
+          payments: uCollection.payments,
+        });
+        break;
+      case EventTypes.submitClaim:
+        const cClaim: ClaimSDKType = getDocFromAttributes(
+          event.attributes,
+          event.type
+        );
+        await createClaim({
+          claimId: cClaim.claim_id,
+          collectionId: cClaim.collection_id,
+          agentDid: cClaim.agent_did,
+          agentAddress: cClaim.agent_address,
+          submissionDate: cClaim.submission_date as any,
+          paymentsStatus: cClaim.payments_status,
+        });
+        break;
+      case EventTypes.updateClaim:
+        const uClaim: ClaimSDKType = getDocFromAttributes(
+          event.attributes,
+          event.type
+        );
+        const evaluation = uClaim.evaluation
+          ? {
+              collectionId: uClaim.evaluation!.collection_id,
+              oracle: uClaim.evaluation!.oracle,
+              agentDid: uClaim.evaluation!.agent_did,
+              agentAddress: uClaim.evaluation!.agent_address,
+              status: ixo.claims.v1beta1.evaluationStatusFromJSON(
+                uClaim.evaluation!.status
+              ),
+              reason: uClaim.evaluation!.reason,
+              verificationProof: uClaim.evaluation!.verification_proof,
+              evaluationDate: uClaim.evaluation!.evaluation_date as any,
+              amount: uClaim.evaluation!.amount,
+              claimId: uClaim.claim_id,
+            }
+          : undefined;
+        await updateClaim({
+          claimId: uClaim.claim_id,
+          collectionId: uClaim.collection_id,
+          agentDid: uClaim.agent_did,
+          agentAddress: uClaim.agent_address,
+          submissionDate: uClaim.submission_date as any,
+          paymentsStatus: uClaim.payments_status,
+          evaluation,
+        });
+        break;
+      case EventTypes.disputeClaim:
+        const cDispute: DisputeSDKType = getDocFromAttributes(
+          event.attributes,
+          event.type
+        );
+        await createDispute({
+          proof: cDispute.data!.proof,
+          subjectId: cDispute.subject_id,
+          type: cDispute.type,
+          data: cDispute.data,
+        });
+        break;
+
+      // ==========================================================
+      // TOKEN
+      // ==========================================================
+      case EventTypes.createToken:
+        const cTokenClass: TokenSDKType = getDocFromAttributes(
+          event.attributes,
+          event.type
+        );
+        await createTokenClass({
+          contractAddress: cTokenClass.contract_address,
+          minter: cTokenClass.minter,
+          class: cTokenClass.class,
+          name: cTokenClass.name,
+          description: cTokenClass.description,
+          image: cTokenClass.image,
+          type: cTokenClass.type,
+          cap: BigInt(cTokenClass.cap ?? 0),
+          supply: BigInt(cTokenClass.supply ?? 0),
+          paused: cTokenClass.paused,
+          stopped: cTokenClass.stopped,
+        });
+        break;
+      // TODO: check sql and make more efficient by using other events also
+      case EventTypes.updateToken:
+        const uTokenClass: TokenSDKType = getDocFromAttributes(
+          event.attributes,
+          event.type
+        );
+        await updateTokenClass({
+          contractAddress: uTokenClass.contract_address,
+          minter: uTokenClass.minter,
+          class: uTokenClass.class,
+          name: uTokenClass.name,
+          description: uTokenClass.description,
+          image: uTokenClass.image,
+          type: uTokenClass.type,
+          cap: BigInt(uTokenClass.cap ?? 0),
+          supply: BigInt(uTokenClass.supply ?? 0),
+          paused: uTokenClass.paused,
+          stopped: uTokenClass.stopped,
+          retired: uTokenClass.retired,
+          cancelled: uTokenClass.cancelled,
+        });
+
+        break;
+      case EventTypes.mintToken:
+        const cToken: TokenPropertiesSDKType = getDocFromAttributes(
+          event.attributes,
+          event.type
+        );
+        await createToken({
+          id: cToken.id,
+          index: cToken.index,
+          collection: cToken.collection,
+          name: cToken.name,
+          tokenData: cToken.tokenData,
+        });
+        break;
+
+      // ==========================================================
+      // BONDS
+      // ==========================================================
+      case EventTypes.createBond:
+        const cBond: BondSDKType = getDocFromAttributes(
+          event.attributes,
+          event.type
+        );
+        await createBond({
+          token: cBond.token,
+          name: cBond.name,
+          description: cBond.description,
+          creatorDid: cBond.creator_did,
+          controllerDid: cBond.controller_did,
+          functionType: cBond.function_type,
+          functionParameters: cBond.function_parameters,
+          reserveTokens: cBond.reserve_tokens,
+          txFeePercentage: cBond.tx_fee_percentage,
+          exitFeePercentage: cBond.exit_fee_percentage,
+          feeAddress: cBond.fee_address,
+          reserveWithdrawalAddress: cBond.reserve_withdrawal_address,
+          maxSupply: cBond.max_supply,
+          orderQuantityLimits: cBond.order_quantity_limits,
+          sanityRate: cBond.sanity_rate,
+          sanityMarginPercentage: cBond.sanity_margin_percentage,
+          currentSupply: cBond.current_supply,
+          currentReserve: cBond.current_reserve,
+          availableReserve: cBond.available_reserve,
+          currentOutcomePaymentReserve: cBond.current_outcome_payment_reserve,
+          allowSells: cBond.allow_sells,
+          allowReserveWithdrawals: cBond.allow_reserve_withdrawals,
+          alphaBond: cBond.alpha_bond,
+          batchBlocks: cBond.batch_blocks,
+          outcomePayment: cBond.outcome_payment,
+          state: cBond.state,
+          bondDid: cBond.bond_did,
+          oracleDid: cBond.oracle_did,
+        });
+        break;
+      case EventTypes.updateBond:
+        const uBond: BondSDKType = getDocFromAttributes(
+          event.attributes,
+          event.type
+        );
+        await updateBond({
+          bondDid: uBond.bond_did,
+          token: uBond.token,
+          name: uBond.name,
+          description: uBond.description,
+          creatorDid: uBond.creator_did,
+          controllerDid: uBond.controller_did,
+          functionType: uBond.function_type,
+          functionParameters: uBond.function_parameters,
+          reserveTokens: uBond.reserve_tokens,
+          txFeePercentage: uBond.tx_fee_percentage,
+          exitFeePercentage: uBond.exit_fee_percentage,
+          feeAddress: uBond.fee_address,
+          reserveWithdrawalAddress: uBond.reserve_withdrawal_address,
+          maxSupply: uBond.max_supply,
+          orderQuantityLimits: uBond.order_quantity_limits,
+          sanityRate: uBond.sanity_rate,
+          sanityMarginPercentage: uBond.sanity_margin_percentage,
+          currentSupply: uBond.current_supply,
+          currentReserve: uBond.current_reserve,
+          availableReserve: uBond.available_reserve,
+          currentOutcomePaymentReserve: uBond.current_outcome_payment_reserve,
+          allowSells: uBond.allow_sells,
+          allowReserveWithdrawals: uBond.allow_reserve_withdrawals,
+          alphaBond: uBond.alpha_bond,
+          batchBlocks: uBond.batch_blocks,
+          outcomePayment: uBond.outcome_payment,
+          state: uBond.state,
+          oracleDid: uBond.oracle_did,
+        });
+        break;
+      case EventTypes.setNextAlphaBond:
+        await createBondAlpha({
+          bondDid: getValueFromAttributes(event.attributes, "bond_did"),
+          alpha: getValueFromAttributes(event.attributes, "next_alpha"),
+          oracleDid: getValueFromAttributes(event.attributes, "signer"),
+          height: blockHeight,
+          timestamp: timestamp,
+        });
+        break;
+      case EventTypes.buyOrderBond:
+        const buyOrder: BuyOrderSDKType = getDocFromAttributes(
+          event.attributes,
+          event.type
+        );
+        await createBondBuy({
+          bondDid: getValueFromAttributes(event.attributes, "bond_did"),
+          accountDid: buyOrder.base_order!.account_did,
+          amount: buyOrder.base_order!.amount,
+          maxPrices: buyOrder.max_prices,
+          height: blockHeight,
+          timestamp: timestamp,
+        });
+        break;
+      case EventTypes.sellOrderBond:
+        const sellOrder: SellOrderSDKType = getDocFromAttributes(
+          event.attributes,
+          event.type
+        );
+        await createBondSell({
+          bondDid: getValueFromAttributes(event.attributes, "bond_did"),
+          accountDid: sellOrder.base_order!.account_did,
+          amount: sellOrder.base_order!.amount,
+          height: blockHeight,
+          timestamp: timestamp,
+        });
+        break;
+      case EventTypes.swapOrderBond:
+        const swapOrder: SwapOrderSDKType = getDocFromAttributes(
+          event.attributes,
+          event.type
+        );
+        await createBondSwap({
+          bondDid: getValueFromAttributes(event.attributes, "bond_did"),
+          accountDid: swapOrder.base_order!.account_did,
+          amount: swapOrder.base_order!.amount,
+          toToken: swapOrder.to_token,
+          height: blockHeight,
+          timestamp: timestamp,
+        });
+        break;
+      case EventTypes.outcomePaymentBond:
+        await createOutcomePayment({
+          bondDid: getValueFromAttributes(event.attributes, "bond_did"),
+          senderDid: getValueFromAttributes(event.attributes, "sender_did"),
+          senderAddress: getValueFromAttributes(
+            event.attributes,
+            "sender_address"
+          ),
+          amount: getValueFromAttributes(event.attributes, "outcome_payment"),
+          height: blockHeight,
+          timestamp: timestamp,
+        });
+        break;
+      case EventTypes.shareWithdrawalBond:
+        await createShareWithdrawal({
+          bondDid: getValueFromAttributes(event.attributes, "bond_did"),
+          recipientDid: getValueFromAttributes(
+            event.attributes,
+            "recipient_did"
+          ),
+          recipientAddress: getValueFromAttributes(
+            event.attributes,
+            "recipient_address"
+          ),
+          amount: getValueFromAttributes(event.attributes, "withdraw_payment"),
+          height: blockHeight,
+          timestamp: timestamp,
+        });
+        break;
+      case EventTypes.reserveWithdrawalBond:
+        await createReserveWithdrawal({
+          bondDid: getValueFromAttributes(event.attributes, "bond_did"),
+          withdrawerDid: getValueFromAttributes(
+            event.attributes,
+            "withdrawer_did"
+          ),
+          withdrawerAddress: getValueFromAttributes(
+            event.attributes,
+            "withdrawer_address"
+          ),
+          amount: getValueFromAttributes(event.attributes, "withdraw_amount"),
+          reserveWithdrawalAddress: getValueFromAttributes(
+            event.attributes,
+            "reserve_withdrawal_address"
+          ),
+          height: blockHeight,
+          timestamp: timestamp,
+        });
+        break;
+      default:
+        break;
+    }
+  } catch (error) {
+    console.error("ERROR::syncEventData:: ", error);
+    // throw error;
+  }
+};
+
+
+/SRC/SYNC_HANDLERS/EVENT_DATA_SYNC_WASM_HANDLER.TS CODE IS BELOW
+import { getWasmAttr, splitAttributesByKeyValue } from "../util/helpers";
+import { ENTITY_MODULE_CONTRACT_ADDRESS } from "../util/secrets";
+import { DelayedFunction } from "./event_sync_handler";
+import { EventCore } from "../postgres/blocksync_core/block";
+import { updateEntityOwner } from "../postgres/entity";
+import {
+  createTokenTransaction,
+  getTokenClassContractAddress,
+} from "../postgres/token";
+import {
+  createIxoSwap,
+  getIxoSwap,
+  updateIxoSwapFee,
+  updateIxoSwapFrozen,
+  updateIxoSwapLPAddress,
+  updateIxoSwapMaxSlippagePercent,
+  updateIxoSwapNewOwner,
+  updateIxoSwapPendingOwner,
+  insertIxoSwapPriceHistory,
+} from "../postgres/ixo_swap";
+
+// General note for future, wasm contract initiations emit an event of type "instantiate" instead of "wasm" with the contract
+// code id that was initiated might want to use this in future if want to index other smart contract like cw20 etc.
+
+// TODO: can optimise this by only getting the tokenClass and ixoSwap contract address at global state once and updating on additions
+//       so that we dont make db query on every wasm event
+// TODO: re-design the whole getWasmAttr function and see if can maek into Map so dont need to filter whole array everytime looking for
+//       wasm action attributes
+
+export const syncWasmEventData = async (
+  event: EventCore,
+  timestamp: Date
+): Promise<void | DelayedFunction> => {
+  try {
+    const contractAddress = getWasmAttr(event.attributes, "_contract_address");
+
+    // --------------------------------------------------------------------------------
+    // Entity Module
+    // --------------------------------------------------------------------------------
+    // wasm execution on entity module contract address, then do handling to set owner of entity
+    if (contractAddress === ENTITY_MODULE_CONTRACT_ADDRESS) {
+      const action = getWasmAttr(event.attributes, "action");
+
+      if (action === "mint") {
+        // if action for entity contract address is mint it means it is a nft minting and since wasm events come before
+        // module events it means the entity creation event on entity module didnt happen yet so we need to delay this
+        // function until the entity creation event happens, which is after iid creation event, thus the skip 2
+        return {
+          skip: 2,
+          func: async () => {
+            await updateEntityOwner({
+              owner: getWasmAttr(event.attributes, "owner"),
+              id: getWasmAttr(event.attributes, "token_id"),
+            });
+          },
+        };
+      } else if (action === "transfer_nft") {
+        return await updateEntityOwner({
+          id: getWasmAttr(event.attributes, "token_id"),
+          owner: getWasmAttr(event.attributes, "recipient"),
+        });
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    // Token Module
+    // --------------------------------------------------------------------------------
+    // token module smart contract handling
+    const tokenClass = await getTokenClassContractAddress(contractAddress);
+    if (tokenClass) {
+      // split attributes by action as cosmwasm joins all attributes into one array
+      const messages = splitAttributesByKeyValue(event.attributes as any);
+      // console.dir(messages);
+      for (const message of messages) {
+        const from = getWasmAttr(message, "from");
+        const to = getWasmAttr(message, "to");
+
+        // if no from and to it means it is anohter wasm action, like approve_all, so no token transaction
+        if (!from && !to) continue;
+        // if from and to are the same it means it is a transfer to self, no need to track it as TokenTransaction id for amounts
+        if (from === to) continue;
+
+        const tokenTransaction = {
+          from,
+          to,
+          amount: BigInt(getWasmAttr(message, "amount") ?? 0),
+          tokenId: getWasmAttr(message, "token_id"),
+        };
+        if (from) {
+          await createTokenTransaction(tokenTransaction);
+        } else {
+          // if no from it means it is a token minting and since wasm events come before module events it means the token creation
+          // event on token module didnt happen yet so we need to delay this function until the token creation event happens
+          // it is safe to return here already inside the for loop as 1155 wasm miont event will always be alone due to being followed
+          // by a ixo.token.v1beta1.TokenMintedEvent event, so wasm module cant batch minting tokens through token module
+          return {
+            skip: 1,
+            func: async () => {
+              await createTokenTransaction(tokenTransaction);
+            },
+          };
+        }
+      }
+      return;
+    }
+
+    // --------------------------------------------------------------------------------
+    // ixo-swap
+    // --------------------------------------------------------------------------------
+    const action = getWasmAttr(event.attributes, "action");
+    const ixoSwap = await getIxoSwap(contractAddress);
+
+    // if ixo-swap exists, then ahndle it's different actions
+    if (ixoSwap) {
+      switch (action) {
+        case "instantiate-lp-token":
+          return await updateIxoSwapLPAddress({
+            address: contractAddress,
+            lpAddress: getWasmAttr(
+              event.attributes,
+              "liquidity_pool_token_address"
+            ),
+          });
+        case "freeze-deposits":
+          return await updateIxoSwapFrozen({
+            address: contractAddress,
+            frozen: getWasmAttr(event.attributes, "frozen") === "true",
+          });
+        case "transfer-ownership":
+          return await updateIxoSwapPendingOwner({
+            address: contractAddress,
+            pendingOwner: getWasmAttr(event.attributes, "pending_owner"),
+          });
+        case "claim-ownership":
+          return await updateIxoSwapNewOwner({
+            address: contractAddress,
+            owner: getWasmAttr(event.attributes, "owner"),
+          });
+        case "update-slippage":
+          return await updateIxoSwapMaxSlippagePercent({
+            address: contractAddress,
+            maxSlippagePercent: getWasmAttr(
+              event.attributes,
+              "max_slippage_percent"
+            ),
+          });
+        case "update-fee":
+          return await updateIxoSwapFee({
+            address: contractAddress,
+            lpFeePercent: getWasmAttr(event.attributes, "lp_fee_percent"),
+            protocolFeePercent: getWasmAttr(
+              event.attributes,
+              "protocol_fee_percent"
+            ),
+            protocolFeeRecipient: getWasmAttr(
+              event.attributes,
+              "protocol_fee_recipient"
+            ),
+          });
+        // for now we dont care about the distinctive attributes, only the reserves and the price history
+        case "add-liquidity":
+        case "remove-liquidity":
+        case "cross-contract-swap":
+        case "swap":
+          return await insertIxoSwapPriceHistory({
+            address: contractAddress,
+            timestamp,
+            token1155Reserve: getWasmAttr(
+              event.attributes,
+              "token1155_reserve"
+            ),
+            token2Reserve: getWasmAttr(event.attributes, "token2_reserve"),
+          });
+        default:
+          throw new Error("Unknown action for ixo-swap: " + action);
+      }
+    }
+
+    // if ixo-swap instantiation, then save the new contract details to ixo_swap table
+    if (action === "instantiate-ixo-swap") {
+      return await createIxoSwap({
+        address: contractAddress,
+        lpAddress: "", // set as empty string next event will be liquidity pool initialization
+        token1155Denom: getWasmAttr(event.attributes, "token_1155_denom"),
+        token1155Reserve: BigInt("0"),
+        token2Denom: getWasmAttr(event.attributes, "token_2_denom"),
+        token2Reserve: BigInt("0"),
+        protocolFeeRecipient: getWasmAttr(
+          event.attributes,
+          "protocol_fee_recipient"
+        ),
+        protocolFeePercent: getWasmAttr(
+          event.attributes,
+          "protocol_fee_percent"
+        ),
+        lpFeePercent: getWasmAttr(event.attributes, "lp_fee_percent"),
+        maxSlippagePercent: getWasmAttr(
+          event.attributes,
+          "max_slippage_percent"
+        ),
+        frozen: false,
+        owner: getWasmAttr(event.attributes, "owner"),
+        pendingOwner: null,
+      });
+    }
+  } catch (error) {
+    console.error("ERROR::syncWasmEventData:: ", error.message);
+  }
+};
+
+
+/SRC/SYNC_HANDLERS/EVENT_SYNC_HANDLER.TS CODE IS BELOW
+import { EventCore } from "../postgres/blocksync_core/block";
+import { syncEventData } from "./event_data_sync_handler";
+import { syncWasmEventData } from "./event_data_sync_wasm_handler";
+
+export type DelayedFunction = {
+  skip: number;
+  func: () => Promise<void>;
+};
+
+export const syncEvents = async (
+  events: EventCore[],
+  blockHeight: number,
+  timestamp: Date
+) => {
+  let delayedFunction: DelayedFunction | null = null;
+
+  // if (events.length > 0) console.log(`Syncing Events for Block ${blockHeight}`);
+
+  for (const event of events) {
+    let res: any = null;
+    try {
+      if (event.type === "wasm") {
+        res = await syncWasmEventData(event, timestamp);
+      } else {
+        await syncEventData(event, blockHeight, timestamp);
+      }
+      // run delayed function after syncEventData if skip value 1
+      if (
+        delayedFunction &&
+        delayedFunction.skip === 1 &&
+        delayedFunction.func instanceof Function
+      ) {
+        await delayedFunction.func();
+      }
+    } catch (error) {
+      console.error("ERROR::syncEvent:: ", error.message);
+    } finally {
+      // if delayedFunction is not null and skip value is not 1, then minus current skip value by 1
+      // NOTE: this means if there is current delayedFunction, then a new one cant be set until the current one is run
+      // which theoretically should never happen
+      if (delayedFunction && delayedFunction.skip !== 1) {
+        delayedFunction.skip--;
+      } else {
+        delayedFunction = res;
+      }
+    }
+  }
+};
+
+
+/SRC/SYNC_HANDLERS/TRANSACTION_SYNC_HANDLER.TS CODE IS BELOW
+import { decodeMessage } from "../util/proto";
+import { TransactionCore } from "../postgres/blocksync_core/block";
+import { insertBlock, Message, Transaction } from "../postgres/transaction";
+import { getTokenName } from "../postgres/token";
+
+export const syncTransactions = async (
+  transactions: TransactionCore[],
+  blockHeight: number,
+  timestamp: Date
+) => {
+  if (transactions.length === 0) return;
+
+  const allMessages: Message[] = [];
+  const allTransactions: Transaction[] = [];
+
+  // NOTE: consider concurrency here but might affect memory usage.
+  for (const transaction of transactions) {
+    // Extract and map messages to their decoded form
+    for (const m of transaction.messages) {
+      const value = await decodeAndProcessMessage(m, transaction.hash);
+      if (value) allMessages.push(value);
+    }
+
+    allTransactions.push({
+      hash: transaction.hash,
+      code: transaction.code,
+      fee: transaction.fee,
+      memo: transaction.memo,
+      gasUsed: transaction.gasUsed,
+      gasWanted: transaction.gasWanted,
+    });
+  }
+
+  // If no transactions, means there also cant be message, return early
+  if (allTransactions.length === 0) return;
+
+  try {
+    await insertBlock({
+      height: blockHeight,
+      time: timestamp,
+      transactions: allTransactions,
+      messages: allMessages,
+    });
+  } catch (error) {
+    console.error("ERROR::syncTransactions:: ", error.message);
+  }
+};
+
+const decodeAndProcessMessage = async (
+  message: any,
+  transactionHash: string
+): Promise<Message | null> => {
+  const value = message.value;
+  if (!value) return null;
+
+  let authZExecMsgs: any[] = [];
+  if (message.typeUrl === "/cosmos.authz.v1beta1.MsgExec") {
+    value.msgs.forEach((m) => {
+      const decodedValue = decodeMessage({
+        typeUrl: m.typeUrl,
+        value: Object.values(m.value),
+      });
+      authZExecMsgs.push({
+        typeUrl: m.typeUrl,
+        value: decodedValue,
+      });
+    });
+  }
+
+  // At moment only doing for first message if it is Authz Execution, need to improve this.
+  const authzValue = authZExecMsgs.length ? authZExecMsgs[0].value : null;
+
+  const denoms = [...new Set(getDenoms(authzValue ?? value))].filter(
+    Boolean
+  ) as string[];
+
+  const tokenNames = [
+    ...new Set(await getTokenNames(authzValue ?? value)),
+  ].filter(Boolean) as string[];
+
+  return {
+    typeUrl: message.typeUrl,
+    value: authZExecMsgs.length ? authZExecMsgs : value,
+    from: getFrom(authzValue ?? value),
+    to: getTo(authzValue ?? value),
+    denoms,
+    tokenNames,
+    transactionHash,
+  };
+};
+
+// Below functions do the custom indexing.
+const getTo = (value: any): string | undefined => {
+  return (
+    value.toAddress ||
+    value.receiver ||
+    value.recipient ||
+    value.recipientAddress ||
+    value.recipientDid
+  );
+};
+
+const getFrom = (value: any): string | undefined => {
+  return (
+    value.fromAddress ||
+    value.ownerAddress ||
+    value.owner ||
+    value.sender ||
+    value.proposer ||
+    value.ownerDid
+  );
+};
+
+const getDenoms = (value: any): string[] => {
+  if (Array.isArray(value.amount)) {
+    return value.amount.map((a: { denom: string }) => a.denom);
+  } else if (value.amount) {
+    return [value.amount.denom];
+  } else if (value.inputs) {
+    return value.inputs.flatMap((i: { coins: Array<{ denom: string }> }) =>
+      i.coins.map((c) => c.denom)
+    );
+  } else {
+    return [];
+  }
+};
+
+const getTokenNames = async (value: any): Promise<string[]> => {
+  if (value.mintBatch) {
+    return value.mintBatch.map((m: { name: string }) => m.name);
+  } else if (value.tokens) {
+    return Promise.all(
+      value.tokens.map(async (t: { id: string }) => await getTokenName(t.id))
+    ).then((names) => names.filter(Boolean)); // Filter out falsy values such as `undefined` or empty strings.
+  } else {
+    return [];
+  }
+};
+
+
+/SRC/TYPES/EVENT.TS CODE IS BELOW
+export enum EventTypes {
+  // iid
+  createIid = "ixo.iid.v1beta1.IidDocumentCreatedEvent",
+  updateIid = "ixo.iid.v1beta1.IidDocumentUpdatedEvent",
+  // entity
+  createEntity = "ixo.entity.v1beta1.EntityCreatedEvent",
+  updateEntity = "ixo.entity.v1beta1.EntityUpdatedEvent",
+  // claims
+  createCollection = "ixo.claims.v1beta1.CollectionCreatedEvent",
+  updateCollection = "ixo.claims.v1beta1.CollectionUpdatedEvent",
+  submitClaim = "ixo.claims.v1beta1.ClaimSubmittedEvent",
+  updateClaim = "ixo.claims.v1beta1.ClaimUpdatedEvent",
+  disputeClaim = "ixo.claims.v1beta1.ClaimDisputedEvent",
+  // token
+  createToken = "ixo.token.v1beta1.TokenCreatedEvent",
+  updateToken = "ixo.token.v1beta1.TokenUpdatedEvent",
+  mintToken = "ixo.token.v1beta1.TokenMintedEvent",
+  // bonds
+  createBond = "ixo.bonds.v1beta1.BondCreatedEvent",
+  updateBond = "ixo.bonds.v1beta1.BondUpdatedEvent",
+  setNextAlphaBond = "ixo.bonds.v1beta1.BondSetNextAlphaEvent",
+  buyOrderBond = "ixo.bonds.v1beta1.BondBuyOrderEvent",
+  sellOrderBond = "ixo.bonds.v1beta1.BondSellOrderEvent",
+  swapOrderBond = "ixo.bonds.v1beta1.BondSwapOrderEvent",
+  outcomePaymentBond = "ixo.bonds.v1beta1.BondMakeOutcomePaymentEvent",
+  shareWithdrawalBond = "ixo.bonds.v1beta1.BondWithdrawShareEvent",
+  reserveWithdrawalBond = "ixo.bonds.v1beta1.BondWithdrawReserveEvent",
+}
+
+export const EventTypesArray = Object.values(EventTypes) as string[];
+
+export const EventTypesAttributeKey: { [key in EventTypes]: string } = {
+  [EventTypes.createIid]: "iidDocument",
+  [EventTypes.updateIid]: "iidDocument",
+  [EventTypes.createEntity]: "entity",
+  [EventTypes.updateEntity]: "entity",
+  [EventTypes.createCollection]: "collection",
+  [EventTypes.updateCollection]: "collection",
+  [EventTypes.submitClaim]: "claim",
+  [EventTypes.updateClaim]: "claim",
+  [EventTypes.disputeClaim]: "dispute",
+  [EventTypes.createToken]: "token",
+  [EventTypes.updateToken]: "token",
+  [EventTypes.mintToken]: "tokenProperties",
+  [EventTypes.createBond]: "bond",
+  [EventTypes.updateBond]: "bond",
+  [EventTypes.setNextAlphaBond]: "next_alpha",
+  [EventTypes.buyOrderBond]: "order",
+  [EventTypes.sellOrderBond]: "order",
+  [EventTypes.swapOrderBond]: "order",
+  [EventTypes.outcomePaymentBond]: "outcome_payment",
+  [EventTypes.shareWithdrawalBond]: "shareWithdrawalBond",
+  [EventTypes.reserveWithdrawalBond]: "reserveWithdrawalBond",
+};
+
+export type Attribute = {
+  key: string;
+  value: string;
+};
+
+
+/SRC/TYPES/GENERAL.TS CODE IS BELOW
+export type ArrElement<ArrType> = ArrType extends readonly (infer ElementType)[]
+  ? ElementType
+  : never;
+
+
+/SRC/UTIL/CONVERSIONS.TS CODE IS BELOW
+import { toBase64 } from "@cosmjs/encoding";
+
+export const b64toUint8Array = function (b64: string) {
+  return Uint8Array.from(Buffer.from(b64, "base64"));
+};
+
+export const b64toJson = function (b64: string) {
+  return JSON.parse(Buffer.from(b64, "base64").toString());
+};
+
+export const Uint8ArrayTob64 = function (u8: Uint8Array) {
+  var b64 = Buffer.from(u8).toString("base64");
+  return b64;
+};
+
+// JSON to Uint8Array parsing and visa versa
+export const JsonToArray = function (json: string) {
+  return new Uint8Array(Buffer.from(json));
+};
+
+function Utf8ArrayToStr(array: Uint8Array) {
+  let out, i, c;
+  let char2, char3;
+
+  out = "";
+  const len = array.length;
+  i = 0;
+  while (i < len) {
+    c = array[i++];
+    switch (c >> 4) {
+      case 0:
+      case 1:
+      case 2:
+      case 3:
+      case 4:
+      case 5:
+      case 6:
+      case 7:
+        // 0xxxxxxx
+        out += String.fromCharCode(c);
+        break;
+      case 12:
+      case 13:
+        // 110x xxxx   10xx xxxx
+        char2 = array[i++];
+        out += String.fromCharCode(((c & 0x1f) << 6) | (char2 & 0x3f));
+        break;
+      case 14:
+        // 1110 xxxx  10xx xxxx  10xx xxxx
+        char2 = array[i++];
+        char3 = array[i++];
+        out += String.fromCharCode(
+          ((c & 0x0f) << 12) | ((char2 & 0x3f) << 6) | ((char3 & 0x3f) << 0)
+        );
+        break;
+    }
+  }
+
+  return out;
+}
+// Converts A Unit8Array to String
+export function Uint8ArrayToJS(data: Uint8Array): string {
+  const decodedData = Utf8ArrayToStr(data);
+  return decodedData;
+}
+
+export const concatArrayBuffers = (...bufs: Uint8Array[]) => {
+  const result = new Uint8Array(
+    bufs.reduce((totalSize, buf) => totalSize + buf.byteLength, 0)
+  );
+  bufs.reduce((offset, buf) => {
+    result.set(buf, offset);
+    return offset + buf.byteLength;
+  }, 0);
+  return result;
+};
+
+export const jsonStringToBase64 = (jsonString: string) => {
+  const base64 = toBase64(JsonToArray(jsonString));
+  return base64;
+};
+
+export const jsonToBase64 = (json: unknown) => {
+  const jsonString = JSON.stringify(json);
+  return jsonStringToBase64(jsonString);
+};
+
+
+/SRC/UTIL/DB.TS CODE IS BELOW
+export function url2obj(url: string) {
+  if (!url) throw new Error("Missing DATABASE_URL environment variable");
+
+  var pattern =
+    /^(?:([^:\/?#\s]+):\/{2})?(?:([^@\/?#\s]+)@)?([^\/?#\s]+)?(?:\/([^?#\s]*))?(?:[?]([^#\s]+))?\S*$/;
+  var matches = url.match(pattern) as string[];
+  if (matches?.length && matches?.length < 6)
+    throw new Error("Invalid DATABASE_URL");
+  var params = {};
+  if (matches[5] != undefined) {
+    matches[5].split("&").map(function (x) {
+      var a = x.split("=");
+      params[a[0]] = a[1];
+    });
+  }
+
+  return {
+    protocol: matches[1],
+    user: matches[2] != undefined ? matches[2].split(":")[0] : "postgres",
+    password: matches[2] != undefined ? matches[2].split(":")[1] : undefined,
+    host: matches[3],
+    hostname:
+      matches[3] != undefined ? matches[3].split(/:(?=\d+$)/)[0] : "localhost",
+    port:
+      matches[3] != undefined ? Number(matches[3].split(/:(?=\d+$)/)[1]) : 5432,
+    segments: matches[4] != undefined ? matches[4].split("/") : "dummy",
+    params: params,
+  };
+}
+
+
+/SRC/UTIL/HELPERS.TS CODE IS BELOW
+import { Attribute, EventTypes, EventTypesAttributeKey } from "../types/Event";
+
+export const upperHexFromUint8Array = (uint8Array: Uint8Array): string => {
+  return Buffer.from(uint8Array).toString("hex").toUpperCase();
+};
+
+export const getDocFromAttributes = (
+  attributes: any[],
+  key: EventTypes,
+  parseJson = true
+) => {
+  return parseJson
+    ? JSON.parse(
+        attributes.find((attr) => attr.key === EventTypesAttributeKey[key])
+          .value
+      )
+    : attributes.find((attr) => attr.key === EventTypesAttributeKey[key]).value;
+};
+
+export const getValueFromAttributes = (
+  attributes: any[],
+  key: string,
+  parseJson = true
+) => {
+  return parseJson
+    ? JSON.parse(attributes.find((attr) => attr.key === key).value || "")
+    : attributes.find((attr) => attr.key === key).value || "";
+};
+
+/**
+ * Gets the value of the wasm event attribute with the given key
+ */
+export const getWasmAttr = (attributes: any[], key: string): string => {
+  return attributes.find((attr) => attr.key === key)?.value || "";
+};
+
+export const base64ToJson = (base64String: string) => {
+  const json = Buffer.from(base64String, "base64").toString();
+  return JSON.parse(json);
+};
+
+/**
+ * Cosmwasm joins all messages events into one array
+ * This function splits the array, after checking if it is a sequential or alphabetical group
+ * It returns a list of message event arrays, to be able to index them by action as if each group was a message
+ */
+export const splitAttributesByKeyValue = (array: Attribute[]) => {
+  let result: Attribute[][] = [];
+
+  // first attribute is always "_contract_address", so remove it
+  // this modifies the original array, which is fine as not used again, thus this more performant
+  array.splice(0, 1);
+
+  // TODO: consider changing return of func to list of maps for performance
+  // currently there is 2 ways the attributes are grouped,
+  // 1-  sequentially(by action), so action then its other attributes, then action again and so on:
+  // {"key": "action","value": "transfer"},
+  // {"key": "amount","value": "5113774"},
+  // {"key": "from","value": "ixo1ffdljtp6l6mr8f7aena8tl8u39y9epd5xgx0w4n9880ww6l8ch0s4ewrzd"},
+  // {"key": "action","value": "transfer"},
+  // {"key": "amount","value": "5113774"},
+  // {"key": "from","value": "ixo1ffdljtp6l6mr8f7aena8tl8u39y9epd5xgx0w4n9880ww6l8ch0s4ewrzd"}
+
+  // 2- alphabetically(by key), so all actions, then all other attributes groupd by key and alphabetically:
+  // {"key": "action","value": "transfer"},
+  // {"key": "action","value": "transfer"},
+  // {"key": "amount","value": "530"},
+  // {"key": "amount","value": "530"},
+  // {"key": "from","value": "ixo1n8yrmeatsk74dw0zs95ess9sgzptd6thgjgcj2"},
+  // {"key": "from","value": "ixo1n8yrmeatsk74dw0zs95ess9sgzptd6thgjgcj2"}
+
+  // first check if first 2 attributes keys is both "action", to know if we need to group by sequentially or alphabetically
+  const isSequential = array[0].key === "action" && array[1].key !== "action";
+
+  // if sequential then group by splitting the array by action
+  if (isSequential) {
+    let currentGroup: Attribute[] = [];
+    for (let attr of array) {
+      if (attr.key === "action") {
+        if (currentGroup.length > 0) result.push(currentGroup);
+        currentGroup = [attr];
+      } else {
+        currentGroup.push(attr);
+      }
+    }
+    if (currentGroup.length > 0) result.push(currentGroup);
+  } else {
+    // if not sequential then group by splitting the array into amount of 'action' attributes
+    // this assumes that all attributes will be for same action type, which is safe assumption for now
+    // and with this assumtion it means the amount of attirbutes will be equal per action
+
+    // Count the number of 'action' keys
+    const actionCount = array.filter((attr) => attr.key === "action").length;
+    // Initialize result with empty arrays for each action group
+    result = Array(actionCount).fill([]);
+    // Distribute attributes across groups
+    for (let i = 0; i < array.length; i++) {
+      const groupIndex = i % actionCount;
+      result[groupIndex].push(array[i]);
+    }
+  }
+
+  return result;
+};
+
+export const chunkArray = <T>(arr: T[], size: number): T[][] =>
+  [...Array(Math.ceil(arr.length / size))].map((_, i) =>
+    arr.slice(size * i, size + size * i)
+  );
+
+export const countTokensByType = (
+  tokens = {},
+  type: "amount" | "minted" | "retired"
+) => Object.values(tokens).reduce((r: any, t: any) => r + (t[type] ?? 0), 0);
+
+
+/SRC/UTIL/LONG.TS CODE IS BELOW
+// @ts-nocheck
+import Long from "long";
+
+// add toJSON method to Long prototype since prisma uses JSONProtocol for serialization and deserialization
+// and Long does not have a toJSON method, please use this with caution as it may have unintended consequences
+
+if (!Long.prototype.toJSON) {
+  Long.prototype.toJSON = function () {
+    // return as object with low and high and unsigned properties
+    return {
+      low: this.low,
+      high: this.high,
+      unsigned: this.unsigned,
+    };
+  };
+}
+
+
+/SRC/UTIL/MEMORY.TS CODE IS BELOW
+export type MemoryUsage = {
+  rss: string;
+  heapTotal: string;
+  heapUsed: string;
+  external: string;
+  arrayBuffers: string;
+};
+
+export const byteSizePretty = function (bytes: number) {
+  if (bytes === 0) {
+    return "0.00 B";
+  }
+
+  let e = Math.floor(Math.log(bytes) / Math.log(1024));
+  return (
+    (bytes / Math.pow(1024, e)).toFixed(2) + " " + " KMGTP".charAt(e) + "B"
+  );
+};
+
+export const bytesSizesPretty = (bytesObject: any) => {
+  return Object.keys(bytesObject).reduce((acc, key) => {
+    acc[key] = byteSizePretty(bytesObject[key]);
+    return acc;
+  }, {}) as MemoryUsage;
+};
+
+export const getMemoryUsage = () => {
+  return bytesSizesPretty(process.memoryUsage());
+};
+
+
+/SRC/UTIL/PROTO.TS CODE IS BELOW
+import { queryClient, registry } from "../sync/sync_chain";
+
+export const getLatestBlock = async () => {
+  try {
+    const res =
+      await queryClient.cosmos.base.tendermint.v1beta1.getLatestBlock();
+    return res;
+  } catch (error) {
+    console.error("getLatestBlock: ", error.message);
+    return;
+  }
+};
+
+export const decodeMessage = ({ typeUrl, value }) => {
+  try {
+    const res = registry.decode({ typeUrl, value });
+    return res;
+  } catch (error) {
+    console.error(error.message);
+    return;
+  }
+};
+
+// export const getAccountBonds = async (address: string) => {
+//   try {
+//     const balances = await queryClient.cosmos.bank.v1beta1.allBalances({
+//       address: address,
+//     });
+//     const denoms: string[] = [];
+//     for (const balance of balances.balances) {
+//       denoms.push(balance.denom);
+//     }
+//     const bonds = await queryClient.ixo.bonds.v1beta1.bondsDetailed();
+//     const accountBonds = bonds.bondsDetailed.filter((bond) => {
+//       const supplyDenom = bond.supply?.denom || "";
+//       return denoms.includes(supplyDenom);
+//     });
+//     const res: any[] = [];
+//     for (let index = 0; index < accountBonds.length; index++) {
+//       const bond = (
+//         await queryClient.ixo.bonds.v1beta1.bond({
+//           bondDid: accountBonds[index].bondDid,
+//         })
+//       ).bond;
+//       const amount = balances.balances[index].amount;
+//       const denom = accountBonds[index].supply?.denom;
+//       const price = accountBonds[index].spotPrice;
+//       res.push({ bond, amount, denom, price });
+//     }
+//     return res;
+//   } catch (error) {
+//     console.error(error);
+//     return;
+//   }
+// };
+
+
+/SRC/UTIL/RATE-LIMITER.TS CODE IS BELOW
+import { RateLimiter } from "limiter";
+
+export const web3StorageRateLimiter = new RateLimiter({
+  tokensPerInterval: 200,
+  interval: 1000 * 60,
+});
+
+
+/SRC/UTIL/SECRETS.TS CODE IS BELOW
+export const PORT = Number(process.env.PORT) || 8080;
+export const SENTRYDSN = process.env.SENTRYDSN || undefined;
+export const RPC = process.env.RPC || "http://localhost:26657";
+export const DATABASE_URL = process.env.DATABASE_URL;
+export const DATABASE_URL_CORE = process.env.DATABASE_URL_CORE;
+export const MIGRATE_DB_PROGRAMATICALLY =
+  Number(process.env.MIGRATE_DB_PROGRAMATICALLY ?? "0") || 0;
+export const TRUST_PROXY = process.env.TRUST_PROXY || 1;
+export const ENTITY_MODULE_CONTRACT_ADDRESS =
+  process.env.ENTITY_MODULE_CONTRACT_ADDRESS || "";
+export const IPFS_SERVICE_MAPPING = process.env.IPFS_SERVICE_MAPPING || "";
+export const DATABASE_USE_SSL =
+  Number(process.env.DATABASE_USE_SSL ?? "0") || 0;
+export const STATIC_CHAIN_ID = process.env.STATIC_CHAIN_ID;
+
+
+/SRC/UTIL/SLEEP.TS CODE IS BELOW
+export function sleep(ms: number) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+
+/TSCONFIG.JSON CODE IS BELOW
+{
+  "compilerOptions": {
+    "outDir": "build/dist",
+    "module": "commonjs",
+    "target": "ES2020",
+    "lib": ["ES2020", "dom", "esnext.asynciterable"],
+    "sourceMap": true,
+    "allowJs": true,
+    "jsx": "react",
+    "moduleResolution": "node",
+    "rootDir": "src",
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noImplicitAny": false,
+    "strictNullChecks": true,
+    "noUnusedLocals": false,
+    "experimentalDecorators": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "strict": false,
+    "skipLibCheck": true
+  },
+  "exclude": ["node_modules", "build", "docs", "src/seed", "test.js"]
+}
+

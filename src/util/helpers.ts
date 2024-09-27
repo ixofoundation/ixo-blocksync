@@ -92,7 +92,7 @@ export const splitAttributesByKeyValue = (array: Attribute[]) => {
     // Count the number of 'action' keys
     const actionCount = array.filter((attr) => attr.key === "action").length;
     // Initialize result with empty arrays for each action group
-    result = Array(actionCount).fill([]);
+    result = Array.from({ length: actionCount }, () => []);
     // Distribute attributes across groups
     for (let i = 0; i < array.length; i++) {
       const groupIndex = i % actionCount;

@@ -3,13 +3,9 @@ import { ENTITY_MODULE_CONTRACT_ADDRESS } from "../util/secrets";
 import { DelayedFunction } from "./event_sync_handler";
 import { EventCore } from "../postgres/blocksync_core/block";
 import { updateEntityOwner } from "../postgres/entity";
-import {
-  createTokenTransaction,
-  getTokenClassContractAddress,
-} from "../postgres/token";
+import { createTokenTransaction } from "../postgres/token";
 import {
   createIxoSwap,
-  getIxoSwap,
   updateIxoSwapFee,
   updateIxoSwapFrozen,
   updateIxoSwapLPAddress,
@@ -18,13 +14,15 @@ import {
   updateIxoSwapPendingOwner,
   insertIxoSwapPriceHistory,
 } from "../postgres/ixo_swap";
+import {
+  getCachedIxoSwap,
+  getCachedTokenClassContractAddress,
+} from "../util/local-cache";
 
 // General note for future, wasm contract initiations emit an event of type "instantiate" instead of "wasm" with the contract
 // code id that was initiated might want to use this in future if want to index other smart contract like cw20 etc.
 
-// TODO: can optimise this by only getting the tokenClass and ixoSwap contract address at global state once and updating on additions
-//       so that we dont make db query on every wasm event
-// TODO: re-design the whole getWasmAttr function and see if can maek into Map so dont need to filter whole array everytime looking for
+// TODO: re-design the whole getWasmAttr function and see if can make into Map so dont need to filter whole array everytime looking for
 //       wasm action attributes
 
 export const syncWasmEventData = async (
@@ -66,7 +64,9 @@ export const syncWasmEventData = async (
     // Token Module
     // --------------------------------------------------------------------------------
     // token module smart contract handling
-    const tokenClass = await getTokenClassContractAddress(contractAddress);
+    const tokenClass = await getCachedTokenClassContractAddress(
+      contractAddress
+    );
     if (tokenClass) {
       // split attributes by action as cosmwasm joins all attributes into one array
       const messages = splitAttributesByKeyValue(event.attributes as any);
@@ -108,7 +108,7 @@ export const syncWasmEventData = async (
     // ixo-swap
     // --------------------------------------------------------------------------------
     const action = getWasmAttr(event.attributes, "action");
-    const ixoSwap = await getIxoSwap(contractAddress);
+    const ixoSwap = await getCachedIxoSwap(contractAddress);
 
     // if ixo-swap exists, then ahndle it's different actions
     if (ixoSwap) {

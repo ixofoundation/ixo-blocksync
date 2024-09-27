@@ -1,4 +1,4 @@
-import { pool, withTransaction } from "./client";
+import { pool, withTransaction, dbQuery } from "./client";
 
 const getTokenNameSql = `
 SELECT name FROM "Token" WHERE id = $1;
@@ -26,7 +26,7 @@ export const createTokenTransaction = async (
   t: TokenTransaction
 ): Promise<void> => {
   try {
-    await pool.query(createTokenTransactionSql, [
+    await dbQuery(createTokenTransactionSql, [
       t.from,
       t.to,
       t.amount,
@@ -70,12 +70,12 @@ export type TokenClass = {
 };
 
 const createTokenClassSql = `
-INSERT INTO "public"."TokenClass" ( "contractAddress", "minter", "class", "name", "description", "image", "type", "cap", "supply", "paused", "stopped") 
+INSERT INTO "public"."TokenClass" ( "contractAddress", "minter", "class", "name", "description", "image", "type", "cap", "supply", "paused", "stopped")
 VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11 );
 `;
 export const createTokenClass = async (p: TokenClass): Promise<void> => {
   try {
-    await pool.query(createTokenClassSql, [
+    await dbQuery(createTokenClassSql, [
       p.contractAddress,
       p.minter,
       p.class,
@@ -111,38 +111,32 @@ WHERE
 // TODO: UPDATE to maybe use other events from chain for updating retired and cancelled, as this very inefficient
 export const updateTokenClass = async (p: TokenClass): Promise<void> => {
   try {
-    // do all the insertions in a single transaction
-    await withTransaction(async (client) => {
-      await client.query(updateTokenClassSql, [
-        p.minter,
-        p.class,
+    await dbQuery(updateTokenClassSql, [
+      p.minter,
+      p.class,
+      p.name,
+      p.description,
+      p.image,
+      p.type,
+      p.cap,
+      p.supply,
+      p.paused,
+      p.stopped,
+      p.contractAddress,
+    ]);
+
+    if (p.retired?.length) {
+      await dbQuery(deleteTokenRetiredSql, [p.name]);
+      await dbQuery(createTokenRetiredSql, [JSON.stringify(p.retired), p.name]);
+    }
+
+    if (p.cancelled?.length) {
+      await dbQuery(deleteTokenCancelledSql, [p.name]);
+      await dbQuery(createTokenCancelledSql, [
+        JSON.stringify(p.cancelled),
         p.name,
-        p.description,
-        p.image,
-        p.type,
-        p.cap,
-        p.supply,
-        p.paused,
-        p.stopped,
-        p.contractAddress,
       ]);
-
-      if (p.retired?.length) {
-        await client.query(deleteTokenRetiredSql, [p.name]);
-        await client.query(createTokenRetiredSql, [
-          JSON.stringify(p.retired),
-          p.name,
-        ]);
-      }
-
-      if (p.cancelled?.length) {
-        await client.query(deleteTokenCancelledSql, [p.name]);
-        await client.query(createTokenCancelledSql, [
-          JSON.stringify(p.cancelled),
-          p.name,
-        ]);
-      }
-    });
+    }
   } catch (error) {
     throw error;
   }
@@ -160,7 +154,7 @@ const deleteTokenRetiredSql = `
 DELETE FROM "TokenRetired" WHERE "name" = $1;
 `;
 const createTokenRetiredSql = `
-INSERT INTO "public"."TokenRetired" ( "id", "reason", "jurisdiction", "amount", "owner", "name") 
+INSERT INTO "public"."TokenRetired" ( "id", "reason", "jurisdiction", "amount", "owner", "name")
 SELECT tr.id, tr.reason, tr.jurisdiction, tr.amount, tr.owner, $2
 FROM jsonb_to_recordset($1) AS tr(id text, reason text, jurisdiction text, amount bigint, owner text);
 `;
@@ -176,7 +170,7 @@ const deleteTokenCancelledSql = `
 DELETE FROM "TokenCancelled" WHERE "name" = $1;
 `;
 const createTokenCancelledSql = `
-INSERT INTO "public"."TokenCancelled" ( "id", "reason", "amount", "owner", "name") 
+INSERT INTO "public"."TokenCancelled" ( "id", "reason", "amount", "owner", "name")
 SELECT tc.id, tc.reason, tc.amount, tc.owner, $2
 FROM jsonb_to_recordset($1) AS tc(id text, reason text, amount bigint, owner text);
 `;
@@ -190,22 +184,16 @@ export type Token = {
 };
 
 const createTokenSql = `
-INSERT INTO "public"."Token" ( "id", "index", "name", "collection") 
+INSERT INTO "public"."Token" ( "id", "index", "name", "collection")
 VALUES ( $1, $2, $3, $4 );
 `;
 export const createToken = async (p: Token): Promise<void> => {
   try {
-    // do all the insertions in a single transaction
-    await withTransaction(async (client) => {
-      await client.query(createTokenSql, [p.id, p.index, p.name, p.collection]);
+    await dbQuery(createTokenSql, [p.id, p.index, p.name, p.collection]);
 
-      if (p.tokenData?.length) {
-        await client.query(createTokenDataSql, [
-          JSON.stringify(p.tokenData),
-          p.id,
-        ]);
-      }
-    });
+    if (p.tokenData?.length) {
+      await dbQuery(createTokenDataSql, [JSON.stringify(p.tokenData), p.id]);
+    }
   } catch (error) {
     throw error;
   }
@@ -220,7 +208,7 @@ export type TokenData = {
 };
 
 const createTokenDataSql = `
-INSERT INTO "public"."TokenData" ( "uri", "encrypted", "proof", "type", "id", "tokenId") 
+INSERT INTO "public"."TokenData" ( "uri", "encrypted", "proof", "type", "id", "tokenId")
 SELECT td.uri, td.encrypted, td.proof, td.type, td.id, $2
 FROM jsonb_to_recordset($1) AS td(uri text, encrypted boolean, proof text, type text, id text);
 `;
@@ -243,7 +231,11 @@ export const getTokenTransaction = async (
   name?: string
 ): Promise<TokenTransactionWithToken[]> => {
   try {
+    // const start = Date.now();
     const res = await pool.query(getTokenTransactionSql, [address, name]);
+    // console.log("executed getTokenTransaction query", {
+    //   duration: Date.now() - start,
+    // });
     return res.rows;
   } catch (error) {
     throw error;
@@ -277,6 +269,56 @@ export const getTokenClass = async (name: string): Promise<TokenClass> => {
   try {
     const res = await pool.query(getTokenClassSql, [name]);
     return res.rows[0];
+  } catch (error) {
+    throw error;
+  }
+};
+
+const getAccountTokensSql = `
+  WITH token_data AS (
+    SELECT
+      t.name,
+      tc."contractAddress",
+      tc.description,
+      tc.image,
+      tt."tokenId",
+      t.collection,
+      SUM(CASE WHEN tt."to" = $1 THEN tt.amount ELSE -tt.amount END) AS amount,
+      SUM(CASE WHEN tt."from" IS NULL THEN tt.amount ELSE 0 END) AS minted,
+      SUM(CASE WHEN tt."to" IS NULL THEN tt.amount ELSE 0 END) AS retired
+    FROM
+      "TokenTransaction" tt
+    LEFT JOIN
+      "Token" t ON tt."tokenId" = t.id
+    LEFT JOIN
+      "TokenClass" tc ON t.name = tc.name
+    WHERE
+      ($2::text IS NULL OR t.name = $2)
+      AND (tt."from" = $1 OR tt."to" = $1)
+    GROUP BY
+      t.name, tc."contractAddress", tc.description, tc.image, tt."tokenId", t.collection
+  )
+  SELECT *
+  FROM token_data
+  WHERE ($3::boolean IS FALSE OR amount <> 0 OR minted <> 0 OR retired <> 0);
+`;
+
+export const getAccountTokensFromDb = async (
+  address: string,
+  name?: string,
+  allEntityRetired?: boolean
+): Promise<any[]> => {
+  try {
+    const start = Date.now();
+    const res = await pool.query(getAccountTokensSql, [
+      address,
+      name,
+      allEntityRetired,
+    ]);
+    console.log("executed getAccountTokensFromDb query", {
+      duration: Date.now() - start,
+    });
+    return res.rows;
   } catch (error) {
     throw error;
   }

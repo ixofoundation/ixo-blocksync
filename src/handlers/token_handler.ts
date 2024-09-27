@@ -4,6 +4,7 @@ import {
   getEntityDeviceAccounts,
 } from "../postgres/entity";
 import {
+  getAccountTokensFromDb,
   getTokenClass,
   getTokenRetiredAmountSUM,
   getTokenTransaction,
@@ -185,6 +186,60 @@ export const getAccountTokens = async (
   });
 
   return tokens;
+};
+
+// testing doing more in postgresql and less in js, but performance is the slower at the moment, too complex queries is needed
+export const getAccountTokens2 = async (
+  address: string,
+  name?: string,
+  allEntityRetired?: boolean
+) => {
+  try {
+    const tokenTransactions = await getAccountTokensFromDb(
+      address,
+      name,
+      allEntityRetired
+    );
+
+    const tokens = {};
+    tokenTransactions.forEach((row) => {
+      if (!tokens[row.name]) {
+        tokens[row.name] = {
+          contractAddress: row.contractAddress,
+          description: row.description,
+          image: row.image,
+          tokens: {},
+        };
+      }
+
+      if (!tokens[row.name].tokens[row.tokenId]) {
+        tokens[row.name].tokens[row.tokenId] = {
+          collection: row.collection,
+          amount: 0,
+          minted: 0,
+          retired: 0,
+        };
+      }
+
+      tokens[row.name].tokens[row.tokenId].amount += Number(row.amount);
+      tokens[row.name].tokens[row.tokenId].minted += Number(row.minted);
+      tokens[row.name].tokens[row.tokenId].retired += Number(row.retired);
+    });
+
+    Object.entries(tokens).forEach(([key, value]: any[]) => {
+      Object.entries(value.tokens).forEach(([key2, value2]: any[]) => {
+        // If all three values are 0, remove token ID from list of tokens
+        if (value2.amount === 0 && value2.minted === 0 && value2.retired === 0)
+          delete tokens[key].tokens[key2];
+      });
+      // If the list of tokens for the NAME is empty, remove the NAME
+      if (Object.keys(tokens[key].tokens).length === 0) delete tokens[key];
+    });
+
+    return tokens;
+  } catch (error) {
+    throw error;
+  }
 };
 
 export const getTokensTotalForCollection = async (

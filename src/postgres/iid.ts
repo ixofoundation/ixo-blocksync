@@ -1,4 +1,4 @@
-import { pool } from "./client";
+import { dbQuery } from "./client";
 
 export type Iid = {
   id: string;
@@ -20,12 +20,12 @@ export type Iid = {
 };
 
 const createIidSql = `
-INSERT INTO "IID" ( "id", "context", "controller", "verificationMethod", "service", "authentication", "assertionMethod", "keyAgreement", "capabilityInvocation", "capabilityDelegation", "linkedResource", "linkedClaim", "accordedRight", "linkedEntity", "alsoKnownAs", "metadata") 
+INSERT INTO "IID" ( "id", "context", "controller", "verificationMethod", "service", "authentication", "assertionMethod", "keyAgreement", "capabilityInvocation", "capabilityDelegation", "linkedResource", "linkedClaim", "accordedRight", "linkedEntity", "alsoKnownAs", "metadata")
 VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16 );
 `;
 export const createIid = async (p: Iid): Promise<void> => {
   try {
-    await pool.query(createIidSql, [
+    await dbQuery(createIidSql, [
       p.id,
       JSON.stringify(p.context),
       p.controller,
@@ -71,7 +71,7 @@ WHERE
 `;
 export const updateIid = async (p: Iid): Promise<void> => {
   try {
-    await pool.query(updateIidSql, [
+    await dbQuery(updateIidSql, [
       JSON.stringify(p.context),
       p.controller,
       JSON.stringify(p.verificationMethod),

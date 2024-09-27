@@ -21,5 +21,12 @@
     "strict": false,
     "skipLibCheck": true
   },
-  "exclude": ["node_modules", "build", "docs", "src/seed", "test.js"]
+  "exclude": [
+    "node_modules",
+    "build",
+    "docs",
+    "src/seed",
+    "test.js",
+    "llm_text_transcripts"
+  ]
 }

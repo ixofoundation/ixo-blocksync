@@ -1,5 +1,5 @@
 import Decimal from "decimal.js";
-import { pool, withTransaction } from "./client";
+import { dbQuery, pool } from "./client";
 
 export type IxoSwap = {
   address: string;
@@ -36,7 +36,7 @@ INSERT INTO ixo_swap ("address", "lp_address", "token_1155_denom", "token_1155_r
 `;
 export const createIxoSwap = async (t: IxoSwap): Promise<void> => {
   try {
-    await pool.query(createIxoSwapSql, [
+    await dbQuery(createIxoSwapSql, [
       t.address,
       t.lpAddress,
       t.token1155Denom,
@@ -64,7 +64,7 @@ export const updateIxoSwapLPAddress = async (e: {
   lpAddress: string;
 }): Promise<void> => {
   try {
-    await pool.query(updateIxoSwapLPAddressSql, [e.address, e.lpAddress]);
+    await dbQuery(updateIxoSwapLPAddressSql, [e.address, e.lpAddress]);
   } catch (error) {
     throw error;
   }
@@ -78,7 +78,7 @@ export const updateIxoSwapFrozen = async (e: {
   frozen: boolean;
 }): Promise<void> => {
   try {
-    await pool.query(updateIxoSwapFrozenSql, [e.address, e.frozen]);
+    await dbQuery(updateIxoSwapFrozenSql, [e.address, e.frozen]);
   } catch (error) {
     throw error;
   }
@@ -92,7 +92,7 @@ export const updateIxoSwapNewOwner = async (e: {
   owner: string;
 }): Promise<void> => {
   try {
-    await pool.query(updateIxoSwapNewOwnerSql, [e.address, e.owner]);
+    await dbQuery(updateIxoSwapNewOwnerSql, [e.address, e.owner]);
   } catch (error) {
     throw error;
   }
@@ -106,7 +106,7 @@ export const updateIxoSwapPendingOwner = async (e: {
   pendingOwner: string;
 }): Promise<void> => {
   try {
-    await pool.query(updateIxoSwapPendingOwnerSql, [e.address, e.pendingOwner]);
+    await dbQuery(updateIxoSwapPendingOwnerSql, [e.address, e.pendingOwner]);
   } catch (error) {
     throw error;
   }
@@ -120,7 +120,7 @@ export const updateIxoSwapMaxSlippagePercent = async (e: {
   maxSlippagePercent: string;
 }): Promise<void> => {
   try {
-    await pool.query(updateIxoSwapMaxSlippagePercentSql, [
+    await dbQuery(updateIxoSwapMaxSlippagePercentSql, [
       e.address,
       e.maxSlippagePercent,
     ]);
@@ -139,7 +139,7 @@ export const updateIxoSwapFee = async (e: {
   protocolFeeRecipient: string;
 }): Promise<void> => {
   try {
-    await pool.query(updateIxoSwapFeeSql, [
+    await dbQuery(updateIxoSwapFeeSql, [
       e.address,
       e.lpFeePercent,
       e.protocolFeePercent,
@@ -153,21 +153,6 @@ export const updateIxoSwapFee = async (e: {
 const updateIxoSwapReservesSql = `
 UPDATE ixo_swap SET token_1155_reserve = $2, token_2_reserve = $3 WHERE address = $1;
 `;
-export const updateIxoSwapReserves = async (e: {
-  address: string;
-  token1155Reserve: bigint;
-  token2Reserve: bigint;
-}): Promise<void> => {
-  try {
-    await pool.query(updateIxoSwapReservesSql, [
-      e.address,
-      e.token1155Reserve,
-      e.token2Reserve,
-    ]);
-  } catch (error) {
-    throw error;
-  }
-};
 
 const insertIxoSwapPriceHistorySql = `
 INSERT INTO ixo_swap_price_history ("address", "timestamp", "token_1155_price", "token_2_price")
@@ -191,34 +176,28 @@ export const insertIxoSwapPriceHistory = async (e: {
   token2Reserve: string;
 }): Promise<void> => {
   try {
-    await withTransaction(async (client) => {
-      console.log("token1155Reserve: ", e.token1155Reserve);
-      console.log("token2Reserve: ", e.token2Reserve);
-      const token1155ReserveDecimal = new Decimal(e.token1155Reserve);
-      const token2ReserveDecimal = new Decimal(e.token2Reserve);
-      // safegaurd against divide by zero
-      const isEitherZero =
-        token1155ReserveDecimal.isZero() || token2ReserveDecimal.isZero();
-      const token_1155_price = isEitherZero
-        ? decimalZero
-        : token2ReserveDecimal.div(token1155ReserveDecimal);
-      const token_2_price = isEitherZero
-        ? decimalZero
-        : token1155ReserveDecimal.div(token2ReserveDecimal);
-      console.log("token_1155_price: ", token_1155_price.toString());
-      console.log("token_2_price: ", token_2_price.toString());
-      await client.query(insertIxoSwapPriceHistorySql, [
-        e.address,
-        e.timestamp,
-        token_1155_price.toString(),
-        token_2_price.toString(),
-      ]);
-      await client.query(updateIxoSwapReservesSql, [
-        e.address,
-        e.token1155Reserve,
-        e.token2Reserve,
-      ]);
-    });
+    const token1155ReserveDecimal = new Decimal(e.token1155Reserve);
+    const token2ReserveDecimal = new Decimal(e.token2Reserve);
+    // safegaurd against divide by zero
+    const isEitherZero =
+      token1155ReserveDecimal.isZero() || token2ReserveDecimal.isZero();
+    const token_1155_price = isEitherZero
+      ? decimalZero
+      : token2ReserveDecimal.div(token1155ReserveDecimal);
+    const token_2_price = isEitherZero
+      ? decimalZero
+      : token1155ReserveDecimal.div(token2ReserveDecimal);
+    await dbQuery(insertIxoSwapPriceHistorySql, [
+      e.address,
+      e.timestamp,
+      token_1155_price.toString(),
+      token_2_price.toString(),
+    ]);
+    await dbQuery(updateIxoSwapReservesSql, [
+      e.address,
+      e.token1155Reserve,
+      e.token2Reserve,
+    ]);
   } catch (error) {
     throw error;
   }
