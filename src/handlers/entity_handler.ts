@@ -81,6 +81,7 @@ export const deviceExternalIdsLoaded = async () => {
   return !entity.length;
 };
 
+// TODO: see if can improve below, maybe checked list or something?
 let entitiesBusyLoading = false;
 // Helper function to fetch "asset/device" entities with null externalId and update them
 export const getEntitiesExternalId = async (amount: number, isCron = false) => {

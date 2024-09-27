@@ -12,7 +12,8 @@
     "migrate:up": "node-pg-migrate up -m ./src/postgres/migrations",
     "migrate:down": "node-pg-migrate down  -m ./src/postgres/migrations",
     "migrate:redo": "node-pg-migrate redo  -m ./src/postgres/migrations",
-    "migrate:create": "node-pg-migrate create  --migration-filename-format utc --migration-file-language sql  -m ./src/postgres/migrations"
+    "migrate:create": "node-pg-migrate create  --migration-filename-format utc --migration-file-language sql  -m ./src/postgres/migrations",
+    "llm": "node llm_text_transcripts/merge-repo.js"
   },
   "repository": "https://github.com/ixofoundation/ixo-blocksync",
   "keywords": [

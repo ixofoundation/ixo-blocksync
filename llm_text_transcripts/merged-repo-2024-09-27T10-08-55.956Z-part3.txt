@@ -1,3 +1,5 @@
+
+/TSCONFIG.JSON CODE IS BELOW
 {
   "compilerOptions": {
     "outDir": "build/dist",
@@ -30,3 +32,4 @@
     "llm_text_transcripts"
   ]
 }
+

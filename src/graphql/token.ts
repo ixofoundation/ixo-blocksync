@@ -26,6 +26,11 @@ export const TokenPlugin = makeExtendSchemaPlugin((build) => {
           name: String
           allEntityRetired: Boolean
         ): JSON!
+        # getAccountTokens2(
+        #   address: String!
+        #   name: String
+        #   allEntityRetired: Boolean
+        # ): JSON!
         getTokensTotalByAddress(
           address: String!
           name: String
@@ -58,6 +63,13 @@ export const TokenPlugin = makeExtendSchemaPlugin((build) => {
             args.allEntityRetired
           );
         },
+        // getAccountTokens2: async (c, args, ctx, rInfo) => {
+        //   return await TokenHandler.getAccountTokens2(
+        //     args.address,
+        //     args.name,
+        //     args.allEntityRetired
+        //   );
+        // },
         getTokensTotalByAddress: async (c, args, ctx, rInfo) => {
           return await TokenHandler.getTokensTotalByAddress(
             args.address,

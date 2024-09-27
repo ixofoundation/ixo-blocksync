@@ -1,4 +1,4 @@
-import { pool, withTransaction } from "./client";
+import { dbQuery, pool, withTransaction } from "./client";
 
 export type ClaimCollection = {
   id: string;
@@ -19,14 +19,14 @@ export type ClaimCollection = {
 };
 
 const createClaimCollectionSql = `
-INSERT INTO "public"."ClaimCollection" ( "id", "entity", "admin", "protocol", "startDate", "endDate", "quota", "count", "evaluated", "approved", "rejected", "disputed", "invalidated", "state", "payments") 
+INSERT INTO "public"."ClaimCollection" ( "id", "entity", "admin", "protocol", "startDate", "endDate", "quota", "count", "evaluated", "approved", "rejected", "disputed", "invalidated", "state", "payments")
 VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15 );
 `;
 export const createClaimCollection = async (
   p: ClaimCollection
 ): Promise<void> => {
   try {
-    await pool.query(createClaimCollectionSql, [
+    await dbQuery(createClaimCollectionSql, [
       p.id,
       p.entity,
       p.admin,
@@ -71,7 +71,7 @@ export const updateClaimCollection = async (
   p: ClaimCollection
 ): Promise<void> => {
   try {
-    await pool.query(updateClaimCollectionSql, [
+    await dbQuery(updateClaimCollectionSql, [
       p.entity,
       p.admin,
       p.protocol,
@@ -105,12 +105,12 @@ export type Claim = {
 };
 
 const createClaimSql = `
-INSERT INTO "public"."Claim" ( "claimId", "agentDid", "agentAddress", "submissionDate", "paymentsStatus", "schemaType", "collectionId") 
+INSERT INTO "public"."Claim" ( "claimId", "agentDid", "agentAddress", "submissionDate", "paymentsStatus", "schemaType", "collectionId")
 VALUES ( $1, $2, $3, $4, $5, $6, $7 );
 `;
 export const createClaim = async (p: Claim): Promise<void> => {
   try {
-    await pool.query(createClaimSql, [
+    await dbQuery(createClaimSql, [
       p.claimId,
       p.agentDid,
       p.agentAddress,
@@ -137,33 +137,30 @@ WHERE
 `;
 export const updateClaim = async (p: Claim): Promise<void> => {
   try {
-    // do all the insertions in a single transaction
-    await withTransaction(async (client) => {
-      await client.query(updateClaimSql, [
-        p.agentDid,
-        p.agentAddress,
-        p.submissionDate,
-        JSON.stringify(p.paymentsStatus),
-        p.schemaType,
-        p.collectionId,
-        p.claimId,
-      ]);
+    await dbQuery(updateClaimSql, [
+      p.agentDid,
+      p.agentAddress,
+      p.submissionDate,
+      JSON.stringify(p.paymentsStatus),
+      p.schemaType,
+      p.collectionId,
+      p.claimId,
+    ]);
 
-      if (p.evaluation) {
-        await client.query(upsertEvaluationSql, [
-          p.evaluation.collectionId,
-          p.evaluation.oracle,
-          p.evaluation.agentDid,
-          p.evaluation.agentAddress,
-          p.evaluation.status,
-          p.evaluation.reason,
-          p.evaluation.verificationProof,
-          JSON.stringify(p.evaluation.amount),
-          p.evaluation.evaluationDate,
-          p.evaluation.claimId,
-        ]);
-      }
-    });
+    if (p.evaluation) {
+      await dbQuery(upsertEvaluationSql, [
+        p.evaluation.collectionId,
+        p.evaluation.oracle,
+        p.evaluation.agentDid,
+        p.evaluation.agentAddress,
+        p.evaluation.status,
+        p.evaluation.reason,
+        p.evaluation.verificationProof,
+        JSON.stringify(p.evaluation.amount),
+        p.evaluation.evaluationDate,
+        p.evaluation.claimId,
+      ]);
+    }
   } catch (error) {
     throw error;
   }
@@ -183,7 +180,7 @@ export type Evaluation = {
 };
 
 const upsertEvaluationSql = `
-INSERT INTO "public"."Evaluation" ( "collectionId", "oracle", "agentDid", "agentAddress", "status", "reason", "verificationProof", "amount", "evaluationDate", "claimId") 
+INSERT INTO "public"."Evaluation" ( "collectionId", "oracle", "agentDid", "agentAddress", "status", "reason", "verificationProof", "amount", "evaluationDate", "claimId")
 VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10 )
 ON CONFLICT("claimId") DO UPDATE SET
   "collectionId" = EXCLUDED."collectionId",
@@ -206,12 +203,12 @@ export type Dispute = {
 };
 
 const createDisputeSql = `
-INSERT INTO "public"."Dispute" ( "proof", "subjectId", "type", "data") 
+INSERT INTO "public"."Dispute" ( "proof", "subjectId", "type", "data")
 VALUES ( $1, $2, $3, $4 );
 `;
 export const createDispute = async (p: Dispute): Promise<void> => {
   try {
-    await pool.query(createDisputeSql, [
+    await dbQuery(createDisputeSql, [
       p.proof,
       p.subjectId,
       p.type,

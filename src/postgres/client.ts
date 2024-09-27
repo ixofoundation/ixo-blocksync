@@ -1,5 +1,6 @@
-import { Pool } from "pg";
+import { Pool, PoolClient } from "pg";
 import { DATABASE_URL, DATABASE_USE_SSL } from "../util/secrets";
+import { currentPool } from "../sync/sync_blocks";
 
 export const pool = new Pool({
   application_name: "Blocksync",
@@ -20,7 +21,9 @@ export const pool = new Pool({
 
 // helper function that manages connection transaction start and commit and rollback
 // on fail, user can just pass a function that takes a client as argument
-export const withTransaction = async (fn: (client: any) => Promise<any>) => {
+export const withTransaction = async (
+  fn: (client: PoolClient) => Promise<any>
+) => {
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
@@ -33,6 +36,14 @@ export const withTransaction = async (fn: (client: any) => Promise<any>) => {
   } finally {
     client.release();
   }
+};
+
+/**
+ * Helper function to execute a query either using the global current pool or a new pool connection
+ */
+export const dbQuery = async (queryText: string, params: any[] = []) => {
+  const client = currentPool || pool;
+  return await client.query(queryText, params);
 };
 
 // helper function that manages connect to pool and release,

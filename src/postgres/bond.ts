@@ -1,4 +1,4 @@
-import { pool } from "./client";
+import { dbQuery } from "./client";
 
 export type Bond = {
   bondDid: string;
@@ -32,12 +32,12 @@ export type Bond = {
 };
 
 const createBondSql = `
-INSERT INTO "public"."Bond" ( "bondDid", "state", "token", "name", "description", "functionType", "functionParameters", "creatorDid", "controllerDid", "reserveTokens", "txFeePercentage", "exitFeePercentage", "feeAddress", "reserveWithdrawalAddress", "maxSupply", "orderQuantityLimits", "sanityRate", "sanityMarginPercentage", "currentSupply", "currentReserve", "availableReserve", "currentOutcomePaymentReserve", "allowSells", "allowReserveWithdrawals", "alphaBond", "batchBlocks", "outcomePayment", "oracleDid") 
+INSERT INTO "public"."Bond" ( "bondDid", "state", "token", "name", "description", "functionType", "functionParameters", "creatorDid", "controllerDid", "reserveTokens", "txFeePercentage", "exitFeePercentage", "feeAddress", "reserveWithdrawalAddress", "maxSupply", "orderQuantityLimits", "sanityRate", "sanityMarginPercentage", "currentSupply", "currentReserve", "availableReserve", "currentOutcomePaymentReserve", "allowSells", "allowReserveWithdrawals", "alphaBond", "batchBlocks", "outcomePayment", "oracleDid")
 VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28 );
 `;
 export const createBond = async (p: Bond): Promise<void> => {
   try {
-    await pool.query(createBondSql, [
+    await dbQuery(createBondSql, [
       p.bondDid,
       p.state,
       p.token,
@@ -106,7 +106,7 @@ WHERE
 `;
 export const updateBond = async (p: Bond): Promise<void> => {
   try {
-    await pool.query(updateBondSql, [
+    await dbQuery(updateBondSql, [
       p.state,
       p.token,
       p.name,
@@ -155,7 +155,7 @@ VALUES ( $1, $2, $3, $4, $5 );
 `;
 export const createBondAlpha = async (p: BondAlpha): Promise<void> => {
   try {
-    await pool.query(createBondAlphaSql, [
+    await dbQuery(createBondAlphaSql, [
       p.bondDid,
       p.alpha,
       p.oracleDid,
@@ -182,7 +182,7 @@ VALUES ( $1, $2, $3, $4, $5, $6 );
 `;
 export const createBondBuy = async (p: BondBuy): Promise<void> => {
   try {
-    await pool.query(createBondBuySql, [
+    await dbQuery(createBondBuySql, [
       p.bondDid,
       p.accountDid,
       JSON.stringify(p.amount),
@@ -209,7 +209,7 @@ VALUES ( $1, $2, $3, $4, $5 );
 `;
 export const createBondSell = async (p: BondSell): Promise<void> => {
   try {
-    await pool.query(createBondSellSql, [
+    await dbQuery(createBondSellSql, [
       p.bondDid,
       p.accountDid,
       JSON.stringify(p.amount),
@@ -236,7 +236,7 @@ VALUES ( $1, $2, $3, $4, $5, $6 );
 `;
 export const createBondSwap = async (p: BondSwap): Promise<void> => {
   try {
-    await pool.query(createBondSwapSql, [
+    await dbQuery(createBondSwapSql, [
       p.bondDid,
       p.accountDid,
       JSON.stringify(p.amount),
@@ -266,7 +266,7 @@ export const createShareWithdrawal = async (
   p: ShareWithdrawal
 ): Promise<void> => {
   try {
-    await pool.query(createShareWithdrawalSql, [
+    await dbQuery(createShareWithdrawalSql, [
       p.bondDid,
       p.recipientDid,
       p.recipientAddress,
@@ -296,7 +296,7 @@ export const createOutcomePayment = async (
   p: OutcomePayment
 ): Promise<void> => {
   try {
-    await pool.query(createOutcomePaymentSql, [
+    await dbQuery(createOutcomePaymentSql, [
       p.bondDid,
       p.senderDid,
       p.senderAddress,
@@ -327,7 +327,7 @@ export const createReserveWithdrawal = async (
   p: ReserveWithdrawal
 ): Promise<void> => {
   try {
-    await pool.query(createReserveWithdrawalSql, [
+    await dbQuery(createReserveWithdrawalSql, [
       p.bondDid,
       p.withdrawerDid,
       p.withdrawerAddress,

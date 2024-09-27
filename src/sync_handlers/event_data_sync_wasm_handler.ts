@@ -3,13 +3,9 @@ import { ENTITY_MODULE_CONTRACT_ADDRESS } from "../util/secrets";
 import { DelayedFunction } from "./event_sync_handler";
 import { EventCore } from "../postgres/blocksync_core/block";
 import { updateEntityOwner } from "../postgres/entity";
-import {
-  createTokenTransaction,
-  getTokenClassContractAddress,
-} from "../postgres/token";
+import { createTokenTransaction } from "../postgres/token";
 import {
   createIxoSwap,
-  getIxoSwap,
   updateIxoSwapFee,
   updateIxoSwapFrozen,
   updateIxoSwapLPAddress,
@@ -17,14 +13,14 @@ import {
   updateIxoSwapNewOwner,
   updateIxoSwapPendingOwner,
   insertIxoSwapPriceHistory,
+  getIxoSwapReserves,
 } from "../postgres/ixo_swap";
+import { getCachedTokenClassContractAddress } from "../util/local-cache";
 
 // General note for future, wasm contract initiations emit an event of type "instantiate" instead of "wasm" with the contract
 // code id that was initiated might want to use this in future if want to index other smart contract like cw20 etc.
 
-// TODO: can optimise this by only getting the tokenClass and ixoSwap contract address at global state once and updating on additions
-//       so that we dont make db query on every wasm event
-// TODO: re-design the whole getWasmAttr function and see if can maek into Map so dont need to filter whole array everytime looking for
+// TODO: re-design the whole getWasmAttr function and see if can make into Map so dont need to filter whole array everytime looking for
 //       wasm action attributes
 
 export const syncWasmEventData = async (
@@ -66,7 +62,9 @@ export const syncWasmEventData = async (
     // Token Module
     // --------------------------------------------------------------------------------
     // token module smart contract handling
-    const tokenClass = await getTokenClassContractAddress(contractAddress);
+    const tokenClass = await getCachedTokenClassContractAddress(
+      contractAddress
+    );
     if (tokenClass) {
       // split attributes by action as cosmwasm joins all attributes into one array
       const messages = splitAttributesByKeyValue(event.attributes as any);
@@ -108,9 +106,9 @@ export const syncWasmEventData = async (
     // ixo-swap
     // --------------------------------------------------------------------------------
     const action = getWasmAttr(event.attributes, "action");
-    const ixoSwap = await getIxoSwap(contractAddress);
+    const ixoSwap = await getIxoSwapReserves(contractAddress);
 
-    // if ixo-swap exists, then ahndle it's different actions
+    // if ixo-swap exists, then handle it's different actions
     if (ixoSwap) {
       switch (action) {
         case "instantiate-lp-token":
@@ -160,8 +158,6 @@ export const syncWasmEventData = async (
         // for now we dont care about the distinctive attributes, only the reserves and the price history
         case "add-liquidity":
         case "remove-liquidity":
-        case "cross-contract-swap":
-        case "swap":
           return await insertIxoSwapPriceHistory({
             address: contractAddress,
             timestamp,
@@ -170,6 +166,24 @@ export const syncWasmEventData = async (
               "token1155_reserve"
             ),
             token2Reserve: getWasmAttr(event.attributes, "token2_reserve"),
+          });
+        case "cross-contract-swap":
+        case "swap":
+          // console.log({
+          //   contractAddress,
+          //   token_1155_reserve: ixoSwap.token_1155_reserve,
+          //   token_2_reserve: ixoSwap.token_2_reserve,
+          // });
+          return await insertIxoSwapPriceHistory({
+            address: contractAddress,
+            timestamp,
+            token1155Reserve: getWasmAttr(
+              event.attributes,
+              "token1155_reserve"
+            ),
+            token2Reserve: getWasmAttr(event.attributes, "token2_reserve"),
+            token1155OldReserve: ixoSwap.token_1155_reserve,
+            token2OldReserve: ixoSwap.token_2_reserve,
           });
         default:
           throw new Error("Unknown action for ixo-swap: " + action);
@@ -180,27 +194,27 @@ export const syncWasmEventData = async (
     if (action === "instantiate-ixo-swap") {
       return await createIxoSwap({
         address: contractAddress,
-        lpAddress: "", // set as empty string next event will be liquidity pool initialization
-        token1155Denom: getWasmAttr(event.attributes, "token_1155_denom"),
-        token1155Reserve: BigInt("0"),
-        token2Denom: getWasmAttr(event.attributes, "token_2_denom"),
-        token2Reserve: BigInt("0"),
-        protocolFeeRecipient: getWasmAttr(
+        lp_address: "", // set as empty string next event will be liquidity pool initialization
+        token_1155_denom: getWasmAttr(event.attributes, "token_1155_denom"),
+        token_1155_reserve: BigInt("0"),
+        token_2_denom: getWasmAttr(event.attributes, "token_2_denom"),
+        token_2_reserve: BigInt("0"),
+        protocol_fee_recipient: getWasmAttr(
           event.attributes,
           "protocol_fee_recipient"
         ),
-        protocolFeePercent: getWasmAttr(
+        protocol_fee_percent: getWasmAttr(
           event.attributes,
           "protocol_fee_percent"
         ),
-        lpFeePercent: getWasmAttr(event.attributes, "lp_fee_percent"),
-        maxSlippagePercent: getWasmAttr(
+        lp_fee_percent: getWasmAttr(event.attributes, "lp_fee_percent"),
+        max_slippage_percent: getWasmAttr(
           event.attributes,
           "max_slippage_percent"
         ),
         frozen: false,
         owner: getWasmAttr(event.attributes, "owner"),
-        pendingOwner: null,
+        pending_owner: null,
       });
     }
   } catch (error) {

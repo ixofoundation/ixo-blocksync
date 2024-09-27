@@ -1,4 +1,4 @@
-import { withTransaction } from "./client";
+import { dbQuery } from "./client";
 
 export type Block = {
   height: number;
@@ -39,18 +39,16 @@ FROM jsonb_to_recordset($1) AS msg("typeUrl" text, value jsonb, "transactionHash
 export const insertBlock = async (block: Block): Promise<void> => {
   try {
     // do all the insertions in a single transaction
-    await withTransaction(async (client) => {
-      if (block.transactions.length) {
-        await client.query(insertTransactionSql, [
-          JSON.stringify(block.transactions),
-          block.time,
-          block.height,
-        ]);
-      }
-      if (block.messages.length) {
-        await client.query(insertMessageSql, [JSON.stringify(block.messages)]);
-      }
-    });
+    if (block.transactions.length) {
+      await dbQuery(insertTransactionSql, [
+        JSON.stringify(block.transactions),
+        block.time,
+        block.height,
+      ]);
+    }
+    if (block.messages.length) {
+      await dbQuery(insertMessageSql, [JSON.stringify(block.messages)]);
+    }
   } catch (error) {
     throw error;
   }

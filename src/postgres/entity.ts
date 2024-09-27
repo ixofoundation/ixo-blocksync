@@ -1,4 +1,4 @@
-import { pool } from "./client";
+import { pool, dbQuery } from "./client";
 import { Iid } from "./iid";
 
 export type Entity = {
@@ -17,12 +17,12 @@ export type Entity = {
 };
 
 const createEntitySql = `
-INSERT INTO "Entity" ( "id", "type", "startDate", "endDate", "status", "relayerNode", "credentials", "entityVerified", "metadata", "accounts", "externalId", "owner") 
+INSERT INTO "Entity" ( "id", "type", "startDate", "endDate", "status", "relayerNode", "credentials", "entityVerified", "metadata", "accounts", "externalId", "owner")
 VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12 );
 `;
 export const createEntity = async (p: Entity): Promise<void> => {
   try {
-    await pool.query(createEntitySql, [
+    await dbQuery(createEntitySql, [
       p.id,
       p.type,
       p.startDate,
@@ -57,7 +57,7 @@ WHERE
 `;
 export const updateEntity = async (p: Entity): Promise<void> => {
   try {
-    await pool.query(updateEntitySql, [
+    await dbQuery(updateEntitySql, [
       p.type,
       p.startDate,
       p.endDate,
@@ -82,7 +82,7 @@ export const updateEntityOwner = async (e: {
   owner: string;
 }): Promise<void> => {
   try {
-    await pool.query(updateEntityOwnerSql, [e.id, e.owner]);
+    await dbQuery(updateEntityOwnerSql, [e.id, e.owner]);
   } catch (error) {
     throw error;
   }
@@ -96,7 +96,7 @@ export const updateEntityExternalId = async (e: {
   externalId: string;
 }): Promise<void> => {
   try {
-    await pool.query(updateEntityExternalIdSql, [e.id, e.externalId]);
+    await dbQuery(updateEntityExternalIdSql, [e.id, e.externalId]);
   } catch (error) {
     throw error;
   }
