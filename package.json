@@ -24,7 +24,7 @@
   "dependencies": {
     "@graphile-contrib/pg-simplify-inflector": "6.1.0",
     "@graphile/pg-aggregates": "0.1.1",
-    "@ixo/impactxclient-sdk": "1.2.0",
+    "@ixo/impactxclient-sdk": "2.1.0",
     "@sentry/node": "7.36.0",
     "@sentry/tracing": "7.36.0",
     "axios": "1.7.3",
