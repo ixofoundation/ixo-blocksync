@@ -1,4 +1,4 @@
-# ixo-blocksync 
+# ixo-blocksync
 
 [![ixo](https://img.shields.io/badge/ixo-project-blue)](https://ixo.foundation)
 [![GitHub](https://img.shields.io/github/stars/ixofoundation/jambo?style=social)](https://github.com/ixofoundation/ixo-blocksync)
@@ -49,8 +49,8 @@ cd ixo-blocksync/
 ```
 
 Copy `.env.example` to `.env` and configure. If this step is skipped, ixo-blocksync will use `.env.example` as the configuration by default.
-Don't use quotations when asign env vars for docker  
-Delete the seed folder in src/seed/\* if you do not plan to import data from json  
+Don't use quotations when asign env vars for docker
+Delete the seed folder in src/seed/\* if you do not plan to import data from json
 Create a role(e.g. app_user) in the DB for postgress to work
 
 ```bash
@@ -68,4 +68,4 @@ The server exposes a Graphql api endpoint at `/graphql` which is set up using [P
 
 A graphiql playground gets exposed at the endpoint `/graphiql` where you can play around, test queries and see the schemas.
 
-We also generate and expose the full graphql schema file (schema.graphql) under the endpoint `/api/graphql_schema` if you need it to generate clients.
+We also generate and expose the full graphql schema file (schema.graphql) under the endpoint `/api/graphql_schema` if you need it to generate clients..
