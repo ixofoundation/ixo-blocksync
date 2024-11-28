@@ -49,8 +49,8 @@ cd ixo-blocksync/
 ```
 
 Copy `.env.example` to `.env` and configure. If this step is skipped, ixo-blocksync will use `.env.example` as the configuration by default.
-Don't use quotations when asign env vars for docker  
-Delete the seed folder in src/seed/\* if you do not plan to import data from json  
+Don't use quotations when asign env vars for docker
+Delete the seed folder in src/seed/\* if you do not plan to import data from json
 Create a role(e.g. app_user) in the DB for postgress to work
 
 ```bash
