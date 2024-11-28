@@ -227,10 +227,10 @@
   resolved "https://registry.yarnpkg.com/@isaacs/string-locale-compare/-/string-locale-compare-1.1.0.tgz#291c227e93fd407a96ecd59879a35809120e432b"
   integrity sha512-SQ7Kzhh9+D+ZW9MA0zkYv3VXhIDNx+LzM6EJ+/65I3QY+enU6Itte7E5XX7EWrqLW2FN4n06GWzBnPoC3th2aQ==
 
-"@ixo/impactxclient-sdk@2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@ixo/impactxclient-sdk/-/impactxclient-sdk-2.1.0.tgz#33136b06e6d92297059d4628a9399491e3f4b0b0"
-  integrity sha512-P1UHzRTuVrF6flDGryjq2dtmtGRydxVRaOMOibOpPHfXhWN/bYsk6kOwV/X0MUj2+fZYAP1RHGUZ7mPXpM6OcA==
+"@ixo/impactxclient-sdk@2.2.0":
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/@ixo/impactxclient-sdk/-/impactxclient-sdk-2.2.0.tgz#df3c8ab27ac3c5b498cdade42ba38bd1c2b7461f"
+  integrity sha512-mPf3fjKIlt8H97rGFYKJsi95SExy8zNo913T+tHPd6ay/PNbNAWIReBT78B84KczeKsz7kDCIAij41bCzja+bA==
   dependencies:
     "@babel/runtime" "7.19.4"
     "@cosmjs/amino" "0.32.4"
