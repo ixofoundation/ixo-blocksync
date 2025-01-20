@@ -94,11 +94,11 @@ export const supplyCommunityPool = async () => {
 };
 
 export const inflation = async () => {
-  const res = await queryClient.cosmos.mint.v1beta1.inflation();
-  const inflation = Number(Uint8ArrayToJS(res.inflation));
-
-  // Cosmos DEC is 18 decimals, so devide by 10^16 to get the correct percentage value
-  return inflation / Math.pow(10, 16);
+  // const res = await queryClient.cosmos.mint.v1beta1.inflation();
+  // const inflation = Number(Uint8ArrayToJS(res.inflation));
+  // // Cosmos DEC is 18 decimals, so devide by 10^16 to get the correct percentage value
+  // return inflation / Math.pow(10, 16);
+  return 0.05;
 };
 
 export const getAccountsAndBalances = async () => {

@@ -227,10 +227,10 @@
   resolved "https://registry.yarnpkg.com/@isaacs/string-locale-compare/-/string-locale-compare-1.1.0.tgz#291c227e93fd407a96ecd59879a35809120e432b"
   integrity sha512-SQ7Kzhh9+D+ZW9MA0zkYv3VXhIDNx+LzM6EJ+/65I3QY+enU6Itte7E5XX7EWrqLW2FN4n06GWzBnPoC3th2aQ==
 
-"@ixo/impactxclient-sdk@2.2.0":
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/@ixo/impactxclient-sdk/-/impactxclient-sdk-2.2.0.tgz#df3c8ab27ac3c5b498cdade42ba38bd1c2b7461f"
-  integrity sha512-mPf3fjKIlt8H97rGFYKJsi95SExy8zNo913T+tHPd6ay/PNbNAWIReBT78B84KczeKsz7kDCIAij41bCzja+bA==
+"@ixo/impactxclient-sdk@2.3.1":
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/@ixo/impactxclient-sdk/-/impactxclient-sdk-2.3.1.tgz#fa1f6398c19f6d348b45e45b6186b028af3f7ad3"
+  integrity sha512-q1funpLUxP6Q/zpBOOkg4HgCcZZeq4PJuLDjH+r0LiaIz3NKoS7ORELGQyp/SE4ZcslAdA5GmOYc8mqivxme+g==
   dependencies:
     "@babel/runtime" "7.19.4"
     "@cosmjs/amino" "0.32.4"
@@ -3539,6 +3539,11 @@ log-timestamp@0.3.0:
   integrity sha512-luRz6soxijd1aJh0GkLXFjKABihxthvTfWTzu3XhCgg5EivG2bsTpSd63QFbUgS+/KmFtL+0RfSpeaD2QvOV8Q==
   dependencies:
     log-prefix "0.1.1"
+
+long@5.2.4:
+  version "5.2.4"
+  resolved "https://registry.yarnpkg.com/long/-/long-5.2.4.tgz#ee651d5c7c25901cfca5e67220ae9911695e99b2"
+  integrity sha512-qtzLbJE8hq7VabR3mISmVGtoXP8KGc2Z/AT8OuqlYD7JTR3oqrgwdjnk07wpj1twXxYmgDXgoKVWUG/fReSzHg==
 
 long@^4.0.0:
   version "4.0.0"

@@ -44,6 +44,12 @@ import {
   createTokenClass,
   updateTokenClass,
 } from "../postgres/token";
+import {
+  addAuthenticator,
+  removeAuthenticator,
+} from "../postgres/smart_account";
+import { queryClient } from "../sync/sync_chain";
+import Long from "long";
 
 export const syncEventData = async (
   event: EventCore,
@@ -484,6 +490,54 @@ export const syncEventData = async (
           timestamp: timestamp,
         });
         break;
+
+      // ==========================================================
+      // SMART ACCOUNTS
+      // ==========================================================
+      case "ixo.smartaccount.v1beta1.AuthenticatorAddedEvent": {
+        const authenticatorType = getValueFromAttributes(
+          event.attributes,
+          "authenticator_type"
+        );
+        const authenticatorId = getValueFromAttributes(
+          event.attributes,
+          "authenticator_id"
+        );
+        const account = getValueFromAttributes(event.attributes, "sender");
+        // if AuthnVerification then we need to fetch the config from chain directly
+        let config: any;
+        if (authenticatorType === "AuthnVerification") {
+          const authenticator =
+            await queryClient.ixo.smartaccount.v1beta1.getAuthenticator({
+              account: account,
+              authenticatorId: Long.fromString(authenticatorId),
+            });
+          if (!authenticator?.accountAuthenticator?.config) {
+            throw new Error(
+              "No config found for authenticator, this should not happen"
+            );
+          }
+          // Decode the authenticator data to get public key info
+          config = ixo.smartaccount.crypto.AuthnPubKey.decode(
+            authenticator.accountAuthenticator.config
+          );
+        }
+        await addAuthenticator(
+          authenticatorId,
+          authenticatorType,
+          account,
+          config,
+          config?.keyId
+        );
+        break;
+      }
+      case "ixo.smartaccount.v1beta1.AuthenticatorRemovedEvent": {
+        await removeAuthenticator(
+          getValueFromAttributes(event.attributes, "authenticator_id"),
+          getValueFromAttributes(event.attributes, "sender")
+        );
+        break;
+      }
       default:
         break;
     }
