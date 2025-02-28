@@ -1,6 +1,5 @@
 import Long from "long";
 import { queryClient, registry } from "../sync/sync_chain";
-import { Uint8ArrayToJS } from "../util/conversions";
 import { sleep } from "../util/sleep";
 import { upsertTokenomicsAccount } from "../postgres/tokenomics_account";
 
@@ -94,14 +93,12 @@ export const supplyCommunityPool = async () => {
 };
 
 export const inflation = async () => {
-  // const res = await queryClient.cosmos.mint.v1beta1.inflation();
-  // const inflation = Number(Uint8ArrayToJS(res.inflation));
-  // // Cosmos DEC is 18 decimals, so devide by 10^16 to get the correct percentage value
-  // return inflation / Math.pow(10, 16);
   return 0.05;
 };
 
+// Get all accounts and balances for tokenomics
 export const getAccountsAndBalances = async () => {
+  const start = Date.now();
   let skippedSomeUpload = false;
   try {
     let ibcEscrows = (await getIBCEscrows()).map((e) => e.account);
@@ -144,11 +141,17 @@ export const getAccountsAndBalances = async () => {
       if (!key?.length) break;
     }
 
+    console.log(
+      "Fetching accounts and balances started for ",
+      accounts.length,
+      " accounts"
+    );
+
     let i = 0;
     // get balances for each account
     for (const acc of accounts) {
       // console.log("fetch acc balance", i++, acc.address);
-      await sleep(50);
+      await sleep(70);
       const [availBalance, delegationsBalance, rewardsBalance] =
         await Promise.all([
           (async () => {
@@ -211,5 +214,12 @@ export const getAccountsAndBalances = async () => {
   } catch (error) {
     console.log("ERROR::tokenomics::getAccountsAndBalances ", error);
     return { success: false, error: String(error), skippedSomeUpload };
+  } finally {
+    const end = Date.now();
+    console.log(
+      `Fetching accounts and balances took: ${
+        end - start
+      }ms, skippedSomeUpload: ${skippedSomeUpload}`
+    );
   }
 };
