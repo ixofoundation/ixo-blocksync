@@ -24,7 +24,7 @@
   "dependencies": {
     "@graphile-contrib/pg-simplify-inflector": "6.1.0",
     "@graphile/pg-aggregates": "0.1.1",
-    "@ixo/impactxclient-sdk": "2.2.0",
+    "@ixo/impactxclient-sdk": "2.4.0",
     "@sentry/node": "7.36.0",
     "@sentry/tracing": "7.36.0",
     "axios": "1.7.3",
@@ -43,6 +43,7 @@
     "http": "0.0.0",
     "limiter": "2.1.0",
     "log-timestamp": "0.3.0",
+    "long": "5.2.4",
     "node-pg-migrate": "7.0.0",
     "pg": "8.11.5",
     "postgraphile": "4.13.0",

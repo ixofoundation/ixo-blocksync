@@ -9,7 +9,7 @@
 
 Syncs all the public info from an ixo blockchain to an instance of PostgreSQL. It gets fed from a [ixo-blocksync-core](https://github.com/ixofoundation/ixo-blocksync-core) database in order to speed up indexing and put less strain on nodes, which means you need an ixo-blocksync-core database connection in order to run this.
 
-> For now the only source for information is a ixo-blocksync-core database connection, but we plan on expanding that to different sources in the near future.
+> For now the only source for information is a ixo-blocksync-core database connection, but we plan on expanding that to different sources in the near future
 
 ## Run
 

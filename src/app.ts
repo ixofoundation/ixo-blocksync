@@ -112,14 +112,35 @@ app.get("/api/claims/collection/:id/claims", async (req, res, next) => {
 // Tokenomics
 // =================================
 
+let busyFetching = false;
 app.get("/api/tokenomics/fetchAccounts", async (req, res, next) => {
   try {
+    if (busyFetching) {
+      res.status(500).send("Already fetching accounts");
+      return;
+    }
+    busyFetching = true;
     const result = await TokenomicsHandler.getAccountsAndBalances();
     res.json(result);
   } catch (error) {
     res.status(500).send(error.message);
+  } finally {
+    busyFetching = false;
   }
 });
+
+// Run getAccountsAndBalances every day to keep it fresh
+new CronJob(
+  "0 0 0 * * *",
+  function () {
+    if (!busyFetching) {
+      TokenomicsHandler.getAccountsAndBalances();
+    }
+  },
+  null,
+  true,
+  "Etc/UTC"
+);
 
 // =================================
 // Custom helpers for local development

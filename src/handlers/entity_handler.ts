@@ -22,46 +22,57 @@ export const getFullEntityById = async (
   const baseEntity = await getEntityAndIid(id);
   if (!baseEntity) throw new Error("ERROR::getFullEntityById");
 
-  const serviceIds = baseEntity.service.map((s) => s.id);
-  const linkedResourceIds = baseEntity.linkedResource.map((r) => r.id);
+  // Use Sets instead of arrays for O(1) lookup performance
+  const serviceIdSet = new Set(baseEntity.service.map((s) => s.id));
+  const linkedResourceIdSet = new Set(
+    baseEntity.linkedResource.map((r) => r.id)
+  );
 
-  let classVal = baseEntity!.context.find((c) => c.key === "class")?.val;
+  // Process parent entities and inherit their properties
+  let classVal = baseEntity.context.find((c) => c.key === "class")?.val;
   if (classVal) {
     while (true) {
-      let record = parentEntityLoader
+      const record = parentEntityLoader
         ? await parentEntityLoader.load(classVal)
         : await getParentEntityById(classVal);
       if (!record) break;
 
-      const newClassVal = record.context.find((c) => c.key === "class")?.val;
+      // Add parent services if not already present
       for (const service of record.service) {
-        if (!serviceIds.includes(service.id)) {
-          baseEntity!.service.push(service);
-          serviceIds.push(service.id);
+        if (!serviceIdSet.has(service.id)) {
+          baseEntity.service.push(service);
+          serviceIdSet.add(service.id);
         }
       }
+
+      // Add parent linked resources if not already present
       for (const linkedResource of record.linkedResource) {
-        if (!linkedResourceIds.includes(linkedResource.id)) {
-          baseEntity!.linkedResource.push(linkedResource);
-          linkedResourceIds.push(linkedResource.id);
+        if (!linkedResourceIdSet.has(linkedResource.id)) {
+          baseEntity.linkedResource.push(linkedResource);
+          linkedResourceIdSet.add(linkedResource.id);
         }
       }
-      // if no more parents then break
+
+      // Check for next parent in the chain
+      const newClassVal = record.context.find((c) => c.key === "class")?.val;
       if (!newClassVal) break;
       classVal = newClassVal;
     }
   }
 
+  // Process settings in a single pass
   const settings: any = {};
-  const settingsArr = baseEntity!.linkedResource.filter(
-    (r) => r.type === "Settings"
-  );
-  baseEntity!.linkedResource = baseEntity!.linkedResource.filter(
-    (r) => r.type !== "Settings"
-  );
-  for (const setting of settingsArr) {
-    settings[setting.description] = setting;
+  const nonSettingsResources: any[] = [];
+
+  for (const resource of baseEntity.linkedResource) {
+    if (resource.type === "Settings") {
+      settings[resource.description] = resource;
+    } else {
+      nonSettingsResources.push(resource);
+    }
   }
+
+  baseEntity.linkedResource = nonSettingsResources;
   baseEntity["settings"] = settings;
 
   // Custom
