@@ -3427,13 +3427,13 @@ type ClaimCollection implements Node {
   protocol: String!
   startDate: Datetime
   endDate: Datetime
-  quota: Int!
-  count: Int!
-  evaluated: Int!
-  approved: Int!
-  rejected: Int!
-  disputed: Int!
-  invalidated: Int!
+  quota: BigFloat!
+  count: BigFloat!
+  evaluated: BigFloat!
+  approved: BigFloat!
+  rejected: BigFloat!
+  disputed: BigFloat!
+  invalidated: BigFloat!
   state: Int!
   payments: JSON!
 
@@ -3474,6 +3474,11 @@ type ClaimCollection implements Node {
   """Checks if there are any claims with null schemaType"""
   claimSchemaTypesLoaded: Boolean!
 }
+
+"""
+A floating point number that requires more precision than IEEE 754 binary 64
+"""
+scalar BigFloat
 
 """Methods to use when ordering `Claim`."""
 enum ClaimsOrderBy {
@@ -3586,7 +3591,7 @@ input EvaluationFilter {
   status: IntFilter
 
   """Filter by the object’s `reason` field."""
-  reason: IntFilter
+  reason: BigFloatFilter
 
   """Filter by the object’s `verificationProof` field."""
   verificationProof: StringFilter
@@ -3614,6 +3619,48 @@ input EvaluationFilter {
 }
 
 """
+A filter to be used against BigFloat fields. All fields are combined with a logical ‘and.’
+"""
+input BigFloatFilter {
+  """
+  Is null (if `true` is specified) or is not null (if `false` is specified).
+  """
+  isNull: Boolean
+
+  """Equal to the specified value."""
+  equalTo: BigFloat
+
+  """Not equal to the specified value."""
+  notEqualTo: BigFloat
+
+  """
+  Not equal to the specified value, treating null like an ordinary value.
+  """
+  distinctFrom: BigFloat
+
+  """Equal to the specified value, treating null like an ordinary value."""
+  notDistinctFrom: BigFloat
+
+  """Included in the specified list."""
+  in: [BigFloat!]
+
+  """Not included in the specified list."""
+  notIn: [BigFloat!]
+
+  """Less than the specified value."""
+  lessThan: BigFloat
+
+  """Less than or equal to the specified value."""
+  lessThanOrEqualTo: BigFloat
+
+  """Greater than the specified value."""
+  greaterThan: BigFloat
+
+  """Greater than or equal to the specified value."""
+  greaterThanOrEqualTo: BigFloat
+}
+
+"""
 A filter to be used against `ClaimCollection` object types. All fields are combined with a logical ‘and.’
 """
 input ClaimCollectionFilter {
@@ -3636,25 +3683,25 @@ input ClaimCollectionFilter {
   endDate: DatetimeFilter
 
   """Filter by the object’s `quota` field."""
-  quota: IntFilter
+  quota: BigFloatFilter
 
   """Filter by the object’s `count` field."""
-  count: IntFilter
+  count: BigFloatFilter
 
   """Filter by the object’s `evaluated` field."""
-  evaluated: IntFilter
+  evaluated: BigFloatFilter
 
   """Filter by the object’s `approved` field."""
-  approved: IntFilter
+  approved: BigFloatFilter
 
   """Filter by the object’s `rejected` field."""
-  rejected: IntFilter
+  rejected: BigFloatFilter
 
   """Filter by the object’s `disputed` field."""
-  disputed: IntFilter
+  disputed: BigFloatFilter
 
   """Filter by the object’s `invalidated` field."""
-  invalidated: IntFilter
+  invalidated: BigFloatFilter
 
   """Filter by the object’s `state` field."""
   state: IntFilter
@@ -3708,7 +3755,7 @@ type Evaluation implements Node {
   agentDid: String!
   agentAddress: String!
   status: Int!
-  reason: Int!
+  reason: BigFloat!
   verificationProof: String
   amount: JSON!
   evaluationDate: Datetime!
@@ -3816,25 +3863,25 @@ input ClaimCollectionCondition {
   endDate: Datetime
 
   """Checks for equality with the object’s `quota` field."""
-  quota: Int
+  quota: BigFloat
 
   """Checks for equality with the object’s `count` field."""
-  count: Int
+  count: BigFloat
 
   """Checks for equality with the object’s `evaluated` field."""
-  evaluated: Int
+  evaluated: BigFloat
 
   """Checks for equality with the object’s `approved` field."""
-  approved: Int
+  approved: BigFloat
 
   """Checks for equality with the object’s `rejected` field."""
-  rejected: Int
+  rejected: BigFloat
 
   """Checks for equality with the object’s `disputed` field."""
-  disputed: Int
+  disputed: BigFloat
 
   """Checks for equality with the object’s `invalidated` field."""
-  invalidated: Int
+  invalidated: BigFloat
 
   """Checks for equality with the object’s `state` field."""
   state: Int
@@ -4828,53 +4875,6 @@ input TokenRetiredSumAggregateFilter {
   aid: BigIntFilter
   amount: BigFloatFilter
 }
-
-"""
-A filter to be used against BigFloat fields. All fields are combined with a logical ‘and.’
-"""
-input BigFloatFilter {
-  """
-  Is null (if `true` is specified) or is not null (if `false` is specified).
-  """
-  isNull: Boolean
-
-  """Equal to the specified value."""
-  equalTo: BigFloat
-
-  """Not equal to the specified value."""
-  notEqualTo: BigFloat
-
-  """
-  Not equal to the specified value, treating null like an ordinary value.
-  """
-  distinctFrom: BigFloat
-
-  """Equal to the specified value, treating null like an ordinary value."""
-  notDistinctFrom: BigFloat
-
-  """Included in the specified list."""
-  in: [BigFloat!]
-
-  """Not included in the specified list."""
-  notIn: [BigFloat!]
-
-  """Less than the specified value."""
-  lessThan: BigFloat
-
-  """Less than or equal to the specified value."""
-  lessThanOrEqualTo: BigFloat
-
-  """Greater than the specified value."""
-  greaterThan: BigFloat
-
-  """Greater than or equal to the specified value."""
-  greaterThanOrEqualTo: BigFloat
-}
-
-"""
-A floating point number that requires more precision than IEEE 754 binary 64
-"""
-scalar BigFloat
 
 input TokenRetiredDistinctCountAggregateFilter {
   aid: BigIntFilter
@@ -7055,7 +7055,7 @@ input EvaluationCondition {
   status: Int
 
   """Checks for equality with the object’s `reason` field."""
-  reason: Int
+  reason: BigFloat
 
   """Checks for equality with the object’s `verificationProof` field."""
   verificationProof: String
