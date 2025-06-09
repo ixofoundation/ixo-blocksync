@@ -65,7 +65,8 @@ export const getFullEntityById = async (
   const nonSettingsResources: any[] = [];
 
   for (const resource of baseEntity.linkedResource) {
-    if (resource.type === "Settings") {
+    // only add settings if not already added, otherwise parents will override childs
+    if (resource.type === "Settings" && !settings[resource.description]) {
       settings[resource.description] = resource;
     } else {
       nonSettingsResources.push(resource);
