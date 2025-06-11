@@ -164,7 +164,7 @@ new CronJob(
   "1 */1 * * * *",
   function () {
     const tokens = web3StorageRateLimiter.getTokensRemaining();
-    if (tokens > 110) EntityHandler.getEntitiesExternalId(100, true);
+    if (tokens > 110) EntityHandler.getEntitiesExternalId(100);
   },
   null,
   true,
