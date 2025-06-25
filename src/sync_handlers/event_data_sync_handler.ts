@@ -506,7 +506,10 @@ export const syncEventData = async (
         const account = getValueFromAttributes(event.attributes, "sender");
         // if AuthnVerification then we need to fetch the config from chain directly
         let config: any;
-        if (authenticatorType === "AuthnVerification") {
+        if (
+          authenticatorType === "AuthnVerification" ||
+          authenticatorType === "SignatureVerification"
+        ) {
           const authenticator =
             await queryClient.ixo.smartaccount.v1beta1.getAuthenticator({
               account: account,
