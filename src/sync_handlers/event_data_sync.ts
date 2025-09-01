@@ -507,6 +507,7 @@ export const syncEventData = async (event: EventCore, block: BlockCore) => {
           authenticatorType === "AuthnVerification" ||
           authenticatorType === "SignatureVerification"
         ) {
+          // TODO: use archive_api to get the config at that block height
           const authenticator =
             await queryClient.ixo.smartaccount.v1beta1.getAuthenticator({
               account: account,
