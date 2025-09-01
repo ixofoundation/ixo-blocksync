@@ -64,7 +64,14 @@ export const queryArchiveApi = async (path: string, height: number) => {
 
     return data;
   } catch (error) {
-    console.error("queryArchiveApi error::", error);
+    console.error(
+      "queryArchiveApi::path::",
+      path,
+      "::height::",
+      height,
+      "::error::",
+      error
+    );
     errorCount++;
     if (errorCount > 5) {
       errorCount = 0; // Reset error count as we got auto healing
