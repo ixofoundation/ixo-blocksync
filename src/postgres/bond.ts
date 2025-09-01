@@ -36,40 +36,36 @@ INSERT INTO "public"."Bond" ( "bondDid", "state", "token", "name", "description"
 VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28 );
 `;
 export const createBond = async (p: Bond): Promise<void> => {
-  try {
-    await dbQuery(createBondSql, [
-      p.bondDid,
-      p.state,
-      p.token,
-      p.name,
-      p.description,
-      p.functionType,
-      JSON.stringify(p.functionParameters),
-      p.creatorDid,
-      p.controllerDid,
-      p.reserveTokens,
-      p.txFeePercentage,
-      p.exitFeePercentage,
-      p.feeAddress,
-      p.reserveWithdrawalAddress,
-      JSON.stringify(p.maxSupply),
-      JSON.stringify(p.orderQuantityLimits),
-      p.sanityRate,
-      p.sanityMarginPercentage,
-      JSON.stringify(p.currentSupply),
-      JSON.stringify(p.currentReserve),
-      JSON.stringify(p.availableReserve),
-      JSON.stringify(p.currentOutcomePaymentReserve),
-      p.allowSells,
-      p.allowReserveWithdrawals,
-      p.alphaBond,
-      p.batchBlocks,
-      p.outcomePayment,
-      p.oracleDid,
-    ]);
-  } catch (error) {
-    throw error;
-  }
+  await dbQuery(createBondSql, [
+    p.bondDid,
+    p.state,
+    p.token,
+    p.name,
+    p.description,
+    p.functionType,
+    JSON.stringify(p.functionParameters),
+    p.creatorDid,
+    p.controllerDid,
+    p.reserveTokens,
+    p.txFeePercentage,
+    p.exitFeePercentage,
+    p.feeAddress,
+    p.reserveWithdrawalAddress,
+    JSON.stringify(p.maxSupply),
+    JSON.stringify(p.orderQuantityLimits),
+    p.sanityRate,
+    p.sanityMarginPercentage,
+    JSON.stringify(p.currentSupply),
+    JSON.stringify(p.currentReserve),
+    JSON.stringify(p.availableReserve),
+    JSON.stringify(p.currentOutcomePaymentReserve),
+    p.allowSells,
+    p.allowReserveWithdrawals,
+    p.alphaBond,
+    p.batchBlocks,
+    p.outcomePayment,
+    p.oracleDid,
+  ]);
 };
 
 const updateBondSql = `
@@ -105,40 +101,36 @@ WHERE
 	                     "bondDid" = $28;
 `;
 export const updateBond = async (p: Bond): Promise<void> => {
-  try {
-    await dbQuery(updateBondSql, [
-      p.state,
-      p.token,
-      p.name,
-      p.description,
-      p.functionType,
-      JSON.stringify(p.functionParameters),
-      p.creatorDid,
-      p.controllerDid,
-      p.reserveTokens,
-      p.txFeePercentage,
-      p.exitFeePercentage,
-      p.feeAddress,
-      p.reserveWithdrawalAddress,
-      JSON.stringify(p.maxSupply),
-      JSON.stringify(p.orderQuantityLimits),
-      p.sanityRate,
-      p.sanityMarginPercentage,
-      JSON.stringify(p.currentSupply),
-      JSON.stringify(p.currentReserve),
-      JSON.stringify(p.availableReserve),
-      JSON.stringify(p.currentOutcomePaymentReserve),
-      p.allowSells,
-      p.allowReserveWithdrawals,
-      p.alphaBond,
-      p.batchBlocks,
-      p.outcomePayment,
-      p.oracleDid,
-      p.bondDid,
-    ]);
-  } catch (error) {
-    throw error;
-  }
+  await dbQuery(updateBondSql, [
+    p.state,
+    p.token,
+    p.name,
+    p.description,
+    p.functionType,
+    JSON.stringify(p.functionParameters),
+    p.creatorDid,
+    p.controllerDid,
+    p.reserveTokens,
+    p.txFeePercentage,
+    p.exitFeePercentage,
+    p.feeAddress,
+    p.reserveWithdrawalAddress,
+    JSON.stringify(p.maxSupply),
+    JSON.stringify(p.orderQuantityLimits),
+    p.sanityRate,
+    p.sanityMarginPercentage,
+    JSON.stringify(p.currentSupply),
+    JSON.stringify(p.currentReserve),
+    JSON.stringify(p.availableReserve),
+    JSON.stringify(p.currentOutcomePaymentReserve),
+    p.allowSells,
+    p.allowReserveWithdrawals,
+    p.alphaBond,
+    p.batchBlocks,
+    p.outcomePayment,
+    p.oracleDid,
+    p.bondDid,
+  ]);
 };
 
 export type BondAlpha = {
@@ -154,17 +146,13 @@ INSERT INTO "public"."BondAlpha" ( "bondDid", "alpha", "oracleDid", "height", "t
 VALUES ( $1, $2, $3, $4, $5 );
 `;
 export const createBondAlpha = async (p: BondAlpha): Promise<void> => {
-  try {
-    await dbQuery(createBondAlphaSql, [
-      p.bondDid,
-      p.alpha,
-      p.oracleDid,
-      p.height,
-      p.timestamp,
-    ]);
-  } catch (error) {
-    throw error;
-  }
+  await dbQuery(createBondAlphaSql, [
+    p.bondDid,
+    p.alpha,
+    p.oracleDid,
+    p.height,
+    p.timestamp,
+  ]);
 };
 
 export type BondBuy = {
@@ -181,18 +169,14 @@ INSERT INTO "public"."BondBuy" ( "bondDid", "accountDid", "amount", "maxPrices",
 VALUES ( $1, $2, $3, $4, $5, $6 );
 `;
 export const createBondBuy = async (p: BondBuy): Promise<void> => {
-  try {
-    await dbQuery(createBondBuySql, [
-      p.bondDid,
-      p.accountDid,
-      JSON.stringify(p.amount),
-      JSON.stringify(p.maxPrices),
-      p.height,
-      p.timestamp,
-    ]);
-  } catch (error) {
-    throw error;
-  }
+  await dbQuery(createBondBuySql, [
+    p.bondDid,
+    p.accountDid,
+    JSON.stringify(p.amount),
+    JSON.stringify(p.maxPrices),
+    p.height,
+    p.timestamp,
+  ]);
 };
 
 export type BondSell = {
@@ -208,17 +192,13 @@ INSERT INTO "public"."BondSell" ( "bondDid", "accountDid", "amount", "height", "
 VALUES ( $1, $2, $3, $4, $5 );
 `;
 export const createBondSell = async (p: BondSell): Promise<void> => {
-  try {
-    await dbQuery(createBondSellSql, [
-      p.bondDid,
-      p.accountDid,
-      JSON.stringify(p.amount),
-      p.height,
-      p.timestamp,
-    ]);
-  } catch (error) {
-    throw error;
-  }
+  await dbQuery(createBondSellSql, [
+    p.bondDid,
+    p.accountDid,
+    JSON.stringify(p.amount),
+    p.height,
+    p.timestamp,
+  ]);
 };
 
 export type BondSwap = {
@@ -235,18 +215,14 @@ INSERT INTO "public"."BondSwap" ( "bondDid", "accountDid", "amount", "toToken", 
 VALUES ( $1, $2, $3, $4, $5, $6 );
 `;
 export const createBondSwap = async (p: BondSwap): Promise<void> => {
-  try {
-    await dbQuery(createBondSwapSql, [
-      p.bondDid,
-      p.accountDid,
-      JSON.stringify(p.amount),
-      p.toToken,
-      p.height,
-      p.timestamp,
-    ]);
-  } catch (error) {
-    throw error;
-  }
+  await dbQuery(createBondSwapSql, [
+    p.bondDid,
+    p.accountDid,
+    JSON.stringify(p.amount),
+    p.toToken,
+    p.height,
+    p.timestamp,
+  ]);
 };
 
 export type ShareWithdrawal = {
@@ -265,18 +241,14 @@ VALUES ( $1, $2, $3, $4, $5, $6 );
 export const createShareWithdrawal = async (
   p: ShareWithdrawal
 ): Promise<void> => {
-  try {
-    await dbQuery(createShareWithdrawalSql, [
-      p.bondDid,
-      p.recipientDid,
-      p.recipientAddress,
-      JSON.stringify(p.amount),
-      p.height,
-      p.timestamp,
-    ]);
-  } catch (error) {
-    throw error;
-  }
+  await dbQuery(createShareWithdrawalSql, [
+    p.bondDid,
+    p.recipientDid,
+    p.recipientAddress,
+    JSON.stringify(p.amount),
+    p.height,
+    p.timestamp,
+  ]);
 };
 
 export type OutcomePayment = {
@@ -295,18 +267,14 @@ VALUES ( $1, $2, $3, $4, $5, $6 );
 export const createOutcomePayment = async (
   p: OutcomePayment
 ): Promise<void> => {
-  try {
-    await dbQuery(createOutcomePaymentSql, [
-      p.bondDid,
-      p.senderDid,
-      p.senderAddress,
-      JSON.stringify(p.amount),
-      p.height,
-      p.timestamp,
-    ]);
-  } catch (error) {
-    throw error;
-  }
+  await dbQuery(createOutcomePaymentSql, [
+    p.bondDid,
+    p.senderDid,
+    p.senderAddress,
+    JSON.stringify(p.amount),
+    p.height,
+    p.timestamp,
+  ]);
 };
 
 export type ReserveWithdrawal = {
@@ -326,17 +294,13 @@ VALUES ( $1, $2, $3, $4, $5, $6, $7 );
 export const createReserveWithdrawal = async (
   p: ReserveWithdrawal
 ): Promise<void> => {
-  try {
-    await dbQuery(createReserveWithdrawalSql, [
-      p.bondDid,
-      p.withdrawerDid,
-      p.withdrawerAddress,
-      JSON.stringify(p.amount),
-      p.reserveWithdrawalAddress,
-      p.height,
-      p.timestamp,
-    ]);
-  } catch (error) {
-    throw error;
-  }
+  await dbQuery(createReserveWithdrawalSql, [
+    p.bondDid,
+    p.withdrawerDid,
+    p.withdrawerAddress,
+    JSON.stringify(p.amount),
+    p.reserveWithdrawalAddress,
+    p.height,
+    p.timestamp,
+  ]);
 };

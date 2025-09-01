@@ -833,6 +833,484 @@ type Query implements Node {
     filter: TransactionFilter
   ): TransactionsConnection
 
+  """Reads and enables pagination through a set of `DaoCore`."""
+  daoCores(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `DaoCore`."""
+    orderBy: [DaoCoresOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: DaoCoreCondition
+
+    """
+    A filter to be used in determining which values should be returned by the collection.
+    """
+    filter: DaoCoreFilter
+  ): DaoCoresConnection
+
+  """Reads and enables pagination through a set of `DaoCw20Staker`."""
+  daoCw20Stakers(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `DaoCw20Staker`."""
+    orderBy: [DaoCw20StakersOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: DaoCw20StakerCondition
+
+    """
+    A filter to be used in determining which values should be returned by the collection.
+    """
+    filter: DaoCw20StakerFilter
+  ): DaoCw20StakersConnection
+
+  """
+  Reads and enables pagination through a set of `DaoCw20StakingContract`.
+  """
+  daoCw20StakingContracts(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `DaoCw20StakingContract`."""
+    orderBy: [DaoCw20StakingContractsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: DaoCw20StakingContractCondition
+
+    """
+    A filter to be used in determining which values should be returned by the collection.
+    """
+    filter: DaoCw20StakingContractFilter
+  ): DaoCw20StakingContractsConnection
+
+  """Reads and enables pagination through a set of `DaoCw4GroupContract`."""
+  daoCw4GroupContracts(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `DaoCw4GroupContract`."""
+    orderBy: [DaoCw4GroupContractsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: DaoCw4GroupContractCondition
+
+    """
+    A filter to be used in determining which values should be returned by the collection.
+    """
+    filter: DaoCw4GroupContractFilter
+  ): DaoCw4GroupContractsConnection
+
+  """Reads and enables pagination through a set of `DaoCw4Member`."""
+  daoCw4Members(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `DaoCw4Member`."""
+    orderBy: [DaoCw4MembersOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: DaoCw4MemberCondition
+
+    """
+    A filter to be used in determining which values should be returned by the collection.
+    """
+    filter: DaoCw4MemberFilter
+  ): DaoCw4MembersConnection
+
+  """Reads and enables pagination through a set of `DaoCw721Staker`."""
+  daoCw721Stakers(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `DaoCw721Staker`."""
+    orderBy: [DaoCw721StakersOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: DaoCw721StakerCondition
+
+    """
+    A filter to be used in determining which values should be returned by the collection.
+    """
+    filter: DaoCw721StakerFilter
+  ): DaoCw721StakersConnection
+
+  """Reads and enables pagination through a set of `DaoNativeStaker`."""
+  daoNativeStakers(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `DaoNativeStaker`."""
+    orderBy: [DaoNativeStakersOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: DaoNativeStakerCondition
+
+    """
+    A filter to be used in determining which values should be returned by the collection.
+    """
+    filter: DaoNativeStakerFilter
+  ): DaoNativeStakersConnection
+
+  """Reads and enables pagination through a set of `DaoPreProposeModule`."""
+  daoPreProposeModules(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `DaoPreProposeModule`."""
+    orderBy: [DaoPreProposeModulesOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: DaoPreProposeModuleCondition
+
+    """
+    A filter to be used in determining which values should be returned by the collection.
+    """
+    filter: DaoPreProposeModuleFilter
+  ): DaoPreProposeModulesConnection
+
+  """Reads and enables pagination through a set of `DaoProposal`."""
+  daoProposals(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `DaoProposal`."""
+    orderBy: [DaoProposalsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: DaoProposalCondition
+
+    """
+    A filter to be used in determining which values should be returned by the collection.
+    """
+    filter: DaoProposalFilter
+  ): DaoProposalsConnection
+
+  """Reads and enables pagination through a set of `DaoProposalModule`."""
+  daoProposalModules(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `DaoProposalModule`."""
+    orderBy: [DaoProposalModulesOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: DaoProposalModuleCondition
+
+    """
+    A filter to be used in determining which values should be returned by the collection.
+    """
+    filter: DaoProposalModuleFilter
+  ): DaoProposalModulesConnection
+
+  """Reads and enables pagination through a set of `DaoVote`."""
+  daoVotes(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `DaoVote`."""
+    orderBy: [DaoVotesOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: DaoVoteCondition
+
+    """
+    A filter to be used in determining which values should be returned by the collection.
+    """
+    filter: DaoVoteFilter
+  ): DaoVotesConnection
+
+  """Reads and enables pagination through a set of `DaoVotingModule`."""
+  daoVotingModules(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `DaoVotingModule`."""
+    orderBy: [DaoVotingModulesOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: DaoVotingModuleCondition
+
+    """
+    A filter to be used in determining which values should be returned by the collection.
+    """
+    filter: DaoVotingModuleFilter
+  ): DaoVotingModulesConnection
+
+  """Reads and enables pagination through a set of `Epoch`."""
+  epoches(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `Epoch`."""
+    orderBy: [EpochesOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: EpochCondition
+
+    """
+    A filter to be used in determining which values should be returned by the collection.
+    """
+    filter: EpochFilter
+  ): EpochesConnection
+
+  """Reads and enables pagination through a set of `EpochEvent`."""
+  epochEvents(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `EpochEvent`."""
+    orderBy: [EpochEventsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: EpochEventCondition
+
+    """
+    A filter to be used in determining which values should be returned by the collection.
+    """
+    filter: EpochEventFilter
+  ): EpochEventsConnection
+
   """Reads and enables pagination through a set of `IxoSwap`."""
   ixoSwaps(
     """Only read the first `n` values of the set."""
@@ -970,6 +1448,40 @@ type Query implements Node {
     """
     filter: SmartAccountAuthenticatorFilter
   ): SmartAccountAuthenticatorsConnection
+
+  """Reads and enables pagination through a set of `WasmInstantiate`."""
+  wasmInstantiates(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `WasmInstantiate`."""
+    orderBy: [WasmInstantiatesOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: WasmInstantiateCondition
+
+    """
+    A filter to be used in determining which values should be returned by the collection.
+    """
+    filter: WasmInstantiateFilter
+  ): WasmInstantiatesConnection
   bond(bondDid: String!): Bond
   bondAlpha(id: Int!): BondAlpha
   bondBuy(id: Int!): BondBuy
@@ -994,11 +1506,26 @@ type Query implements Node {
   tokenTransaction(aid: Int!): TokenTransaction
   tokenomicsAccount(address: String!): TokenomicsAccount
   transaction(hash: String!): Transaction
+  daoCore(address: String!): DaoCore
+  daoCw20Staker(stakingContract: String!, stakerAddress: String!): DaoCw20Staker
+  daoCw20StakingContract(address: String!): DaoCw20StakingContract
+  daoCw4GroupContract(address: String!): DaoCw4GroupContract
+  daoCw4Member(groupContractAddress: String!, memberAddress: String!): DaoCw4Member
+  daoCw721Staker(votingModuleAddress: String!, stakerAddress: String!, tokenId: String!): DaoCw721Staker
+  daoNativeStaker(votingModuleAddress: String!, stakerAddress: String!): DaoNativeStaker
+  daoPreProposeModule(address: String!): DaoPreProposeModule
+  daoProposal(proposalModule: String!, id: BigInt!): DaoProposal
+  daoProposalModule(address: String!): DaoProposalModule
+  daoVote(proposalModule: String!, proposalId: BigInt!, voter: String!): DaoVote
+  daoVotingModule(address: String!): DaoVotingModule
+  epoch(identifier: String!): Epoch
+  epochEvent(id: Int!): EpochEvent
   ixoSwap(address: String!): IxoSwap
   ixoSwapPriceHistory(id: Int!): IxoSwapPriceHistory
   ixoSwapPriceHistoryByTimestampAndAddress(timestamp: Datetime!, address: String!): IxoSwapPriceHistory
   pgmigration(id: Int!): Pgmigration
   smartAccountAuthenticator(id: String!): SmartAccountAuthenticator
+  wasmInstantiate(address: String!): WasmInstantiate
 
   """Reads a single `Bond` using its globally unique `ID`."""
   bondByNodeId(
@@ -1168,6 +1695,114 @@ type Query implements Node {
     nodeId: ID!
   ): Transaction
 
+  """Reads a single `DaoCore` using its globally unique `ID`."""
+  daoCoreByNodeId(
+    """The globally unique `ID` to be used in selecting a single `DaoCore`."""
+    nodeId: ID!
+  ): DaoCore
+
+  """Reads a single `DaoCw20Staker` using its globally unique `ID`."""
+  daoCw20StakerByNodeId(
+    """
+    The globally unique `ID` to be used in selecting a single `DaoCw20Staker`.
+    """
+    nodeId: ID!
+  ): DaoCw20Staker
+
+  """
+  Reads a single `DaoCw20StakingContract` using its globally unique `ID`.
+  """
+  daoCw20StakingContractByNodeId(
+    """
+    The globally unique `ID` to be used in selecting a single `DaoCw20StakingContract`.
+    """
+    nodeId: ID!
+  ): DaoCw20StakingContract
+
+  """Reads a single `DaoCw4GroupContract` using its globally unique `ID`."""
+  daoCw4GroupContractByNodeId(
+    """
+    The globally unique `ID` to be used in selecting a single `DaoCw4GroupContract`.
+    """
+    nodeId: ID!
+  ): DaoCw4GroupContract
+
+  """Reads a single `DaoCw4Member` using its globally unique `ID`."""
+  daoCw4MemberByNodeId(
+    """
+    The globally unique `ID` to be used in selecting a single `DaoCw4Member`.
+    """
+    nodeId: ID!
+  ): DaoCw4Member
+
+  """Reads a single `DaoCw721Staker` using its globally unique `ID`."""
+  daoCw721StakerByNodeId(
+    """
+    The globally unique `ID` to be used in selecting a single `DaoCw721Staker`.
+    """
+    nodeId: ID!
+  ): DaoCw721Staker
+
+  """Reads a single `DaoNativeStaker` using its globally unique `ID`."""
+  daoNativeStakerByNodeId(
+    """
+    The globally unique `ID` to be used in selecting a single `DaoNativeStaker`.
+    """
+    nodeId: ID!
+  ): DaoNativeStaker
+
+  """Reads a single `DaoPreProposeModule` using its globally unique `ID`."""
+  daoPreProposeModuleByNodeId(
+    """
+    The globally unique `ID` to be used in selecting a single `DaoPreProposeModule`.
+    """
+    nodeId: ID!
+  ): DaoPreProposeModule
+
+  """Reads a single `DaoProposal` using its globally unique `ID`."""
+  daoProposalByNodeId(
+    """
+    The globally unique `ID` to be used in selecting a single `DaoProposal`.
+    """
+    nodeId: ID!
+  ): DaoProposal
+
+  """Reads a single `DaoProposalModule` using its globally unique `ID`."""
+  daoProposalModuleByNodeId(
+    """
+    The globally unique `ID` to be used in selecting a single `DaoProposalModule`.
+    """
+    nodeId: ID!
+  ): DaoProposalModule
+
+  """Reads a single `DaoVote` using its globally unique `ID`."""
+  daoVoteByNodeId(
+    """The globally unique `ID` to be used in selecting a single `DaoVote`."""
+    nodeId: ID!
+  ): DaoVote
+
+  """Reads a single `DaoVotingModule` using its globally unique `ID`."""
+  daoVotingModuleByNodeId(
+    """
+    The globally unique `ID` to be used in selecting a single `DaoVotingModule`.
+    """
+    nodeId: ID!
+  ): DaoVotingModule
+
+  """Reads a single `Epoch` using its globally unique `ID`."""
+  epochByNodeId(
+    """The globally unique `ID` to be used in selecting a single `Epoch`."""
+    nodeId: ID!
+  ): Epoch
+
+  """Reads a single `EpochEvent` using its globally unique `ID`."""
+  epochEventByNodeId(
+    """
+    The globally unique `ID` to be used in selecting a single `EpochEvent`.
+    """
+    nodeId: ID!
+  ): EpochEvent
+
   """Reads a single `IxoSwap` using its globally unique `ID`."""
   ixoSwapByNodeId(
     """The globally unique `ID` to be used in selecting a single `IxoSwap`."""
@@ -1199,6 +1834,14 @@ type Query implements Node {
     """
     nodeId: ID!
   ): SmartAccountAuthenticator
+
+  """Reads a single `WasmInstantiate` using its globally unique `ID`."""
+  wasmInstantiateByNodeId(
+    """
+    The globally unique `ID` to be used in selecting a single `WasmInstantiate`.
+    """
+    nodeId: ID!
+  ): WasmInstantiate
   getAccountTokens(address: String!, name: String, allEntityRetired: Boolean): JSON!
   getTokensTotalByAddress(address: String!, name: String, allEntityRetired: Boolean): JSON!
   getTokensTotalForEntities(address: String!, name: String, allEntityRetired: Boolean): JSON!
@@ -7177,6 +7820,7 @@ type Message implements Node {
   denoms: [String]
   tokenNames: [String]
   transactionHash: String!
+  index: Int
 
   """Reads a single `Transaction` that is related to this `Message`."""
   transactionByTransactionHash: Transaction
@@ -7250,6 +7894,8 @@ enum MessagesOrderBy {
   TOKEN_NAMES_DESC
   TRANSACTION_HASH_ASC
   TRANSACTION_HASH_DESC
+  INDEX_ASC
+  INDEX_DESC
   PRIMARY_KEY_ASC
   PRIMARY_KEY_DESC
 }
@@ -7281,6 +7927,9 @@ input MessageCondition {
 
   """Checks for equality with the object’s `transactionHash` field."""
   transactionHash: String
+
+  """Checks for equality with the object’s `index` field."""
+  index: Int
 }
 
 """
@@ -7310,6 +7959,9 @@ input MessageFilter {
 
   """Filter by the object’s `transactionHash` field."""
   transactionHash: StringFilter
+
+  """Filter by the object’s `index` field."""
+  index: IntFilter
 
   """Filter by the object’s `transactionByTransactionHash` relation."""
   transactionByTransactionHash: TransactionFilter
@@ -7599,6 +8251,2505 @@ input TransactionCondition {
 
   """Checks for equality with the object’s `memo` field."""
   memo: String
+}
+
+"""A connection to a list of `DaoCore` values."""
+type DaoCoresConnection {
+  """A list of `DaoCore` objects."""
+  nodes: [DaoCore!]!
+
+  """
+  A list of edges which contains the `DaoCore` and cursor to aid in pagination.
+  """
+  edges: [DaoCoresEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `DaoCore` you could get from the connection."""
+  totalCount: Int!
+}
+
+type DaoCore implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  address: String!
+  name: String
+  description: String
+  imageUrl: String
+  automaticallyAddCw20s: Boolean
+  automaticallyAddCw721s: Boolean
+  daoUri: String
+  adminAddress: String
+  createdAt: Datetime!
+  blockHeight: Int!
+  votingModule: String
+
+  """Reads a single `DaoVotingModule` that is related to this `DaoCore`."""
+  daoVotingModuleByVotingModule: DaoVotingModule
+
+  """Reads and enables pagination through a set of `DaoProposalModule`."""
+  daoProposalModulesByDaoAddress(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `DaoProposalModule`."""
+    orderBy: [DaoProposalModulesOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: DaoProposalModuleCondition
+
+    """
+    A filter to be used in determining which values should be returned by the collection.
+    """
+    filter: DaoProposalModuleFilter
+  ): DaoProposalModulesConnection!
+}
+
+type DaoVotingModule implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  address: String!
+  moduleType: String
+  tokenAddress: String
+  stakingContract: String
+  groupContractAddress: String
+  totalWeight: BigFloat
+  nftContract: String
+  nativeDenom: String
+  activeThreshold: JSON
+  unstakingDuration: JSON
+  createdAt: Datetime!
+  blockHeight: Int!
+
+  """
+  Reads a single `DaoCw20StakingContract` that is related to this `DaoVotingModule`.
+  """
+  daoCw20StakingContractByStakingContract: DaoCw20StakingContract
+
+  """
+  Reads a single `DaoCw4GroupContract` that is related to this `DaoVotingModule`.
+  """
+  daoCw4GroupContractByGroupContractAddress: DaoCw4GroupContract
+
+  """Reads and enables pagination through a set of `DaoCore`."""
+  daoCoresByVotingModule(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `DaoCore`."""
+    orderBy: [DaoCoresOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: DaoCoreCondition
+
+    """
+    A filter to be used in determining which values should be returned by the collection.
+    """
+    filter: DaoCoreFilter
+  ): DaoCoresConnection!
+
+  """Reads and enables pagination through a set of `DaoCw721Staker`."""
+  daoCw721StakersByVotingModuleAddress(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `DaoCw721Staker`."""
+    orderBy: [DaoCw721StakersOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: DaoCw721StakerCondition
+
+    """
+    A filter to be used in determining which values should be returned by the collection.
+    """
+    filter: DaoCw721StakerFilter
+  ): DaoCw721StakersConnection!
+
+  """Reads and enables pagination through a set of `DaoNativeStaker`."""
+  daoNativeStakersByVotingModuleAddress(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `DaoNativeStaker`."""
+    orderBy: [DaoNativeStakersOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: DaoNativeStakerCondition
+
+    """
+    A filter to be used in determining which values should be returned by the collection.
+    """
+    filter: DaoNativeStakerFilter
+  ): DaoNativeStakersConnection!
+}
+
+type DaoCw20StakingContract implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  address: String!
+
+  """Reads and enables pagination through a set of `DaoVotingModule`."""
+  daoVotingModulesByStakingContract(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `DaoVotingModule`."""
+    orderBy: [DaoVotingModulesOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: DaoVotingModuleCondition
+
+    """
+    A filter to be used in determining which values should be returned by the collection.
+    """
+    filter: DaoVotingModuleFilter
+  ): DaoVotingModulesConnection!
+
+  """Reads and enables pagination through a set of `DaoCw20Staker`."""
+  daoCw20StakersByStakingContract(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `DaoCw20Staker`."""
+    orderBy: [DaoCw20StakersOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: DaoCw20StakerCondition
+
+    """
+    A filter to be used in determining which values should be returned by the collection.
+    """
+    filter: DaoCw20StakerFilter
+  ): DaoCw20StakersConnection!
+}
+
+"""A connection to a list of `DaoVotingModule` values."""
+type DaoVotingModulesConnection {
+  """A list of `DaoVotingModule` objects."""
+  nodes: [DaoVotingModule!]!
+
+  """
+  A list of edges which contains the `DaoVotingModule` and cursor to aid in pagination.
+  """
+  edges: [DaoVotingModulesEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  The count of *all* `DaoVotingModule` you could get from the connection.
+  """
+  totalCount: Int!
+}
+
+"""A `DaoVotingModule` edge in the connection."""
+type DaoVotingModulesEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `DaoVotingModule` at the end of the edge."""
+  node: DaoVotingModule!
+}
+
+"""Methods to use when ordering `DaoVotingModule`."""
+enum DaoVotingModulesOrderBy {
+  NATURAL
+  ADDRESS_ASC
+  ADDRESS_DESC
+  MODULE_TYPE_ASC
+  MODULE_TYPE_DESC
+  TOKEN_ADDRESS_ASC
+  TOKEN_ADDRESS_DESC
+  STAKING_CONTRACT_ASC
+  STAKING_CONTRACT_DESC
+  GROUP_CONTRACT_ADDRESS_ASC
+  GROUP_CONTRACT_ADDRESS_DESC
+  TOTAL_WEIGHT_ASC
+  TOTAL_WEIGHT_DESC
+  NFT_CONTRACT_ASC
+  NFT_CONTRACT_DESC
+  NATIVE_DENOM_ASC
+  NATIVE_DENOM_DESC
+  ACTIVE_THRESHOLD_ASC
+  ACTIVE_THRESHOLD_DESC
+  UNSTAKING_DURATION_ASC
+  UNSTAKING_DURATION_DESC
+  CREATED_AT_ASC
+  CREATED_AT_DESC
+  BLOCK_HEIGHT_ASC
+  BLOCK_HEIGHT_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `DaoVotingModule` object types. All fields are
+tested for equality and combined with a logical ‘and.’
+"""
+input DaoVotingModuleCondition {
+  """Checks for equality with the object’s `address` field."""
+  address: String
+
+  """Checks for equality with the object’s `moduleType` field."""
+  moduleType: String
+
+  """Checks for equality with the object’s `tokenAddress` field."""
+  tokenAddress: String
+
+  """Checks for equality with the object’s `stakingContract` field."""
+  stakingContract: String
+
+  """Checks for equality with the object’s `groupContractAddress` field."""
+  groupContractAddress: String
+
+  """Checks for equality with the object’s `totalWeight` field."""
+  totalWeight: BigFloat
+
+  """Checks for equality with the object’s `nftContract` field."""
+  nftContract: String
+
+  """Checks for equality with the object’s `nativeDenom` field."""
+  nativeDenom: String
+
+  """Checks for equality with the object’s `activeThreshold` field."""
+  activeThreshold: JSON
+
+  """Checks for equality with the object’s `unstakingDuration` field."""
+  unstakingDuration: JSON
+
+  """Checks for equality with the object’s `createdAt` field."""
+  createdAt: Datetime
+
+  """Checks for equality with the object’s `blockHeight` field."""
+  blockHeight: Int
+}
+
+"""
+A filter to be used against `DaoVotingModule` object types. All fields are combined with a logical ‘and.’
+"""
+input DaoVotingModuleFilter {
+  """Filter by the object’s `address` field."""
+  address: StringFilter
+
+  """Filter by the object’s `moduleType` field."""
+  moduleType: StringFilter
+
+  """Filter by the object’s `tokenAddress` field."""
+  tokenAddress: StringFilter
+
+  """Filter by the object’s `stakingContract` field."""
+  stakingContract: StringFilter
+
+  """Filter by the object’s `groupContractAddress` field."""
+  groupContractAddress: StringFilter
+
+  """Filter by the object’s `totalWeight` field."""
+  totalWeight: BigFloatFilter
+
+  """Filter by the object’s `nftContract` field."""
+  nftContract: StringFilter
+
+  """Filter by the object’s `nativeDenom` field."""
+  nativeDenom: StringFilter
+
+  """Filter by the object’s `activeThreshold` field."""
+  activeThreshold: JSONFilter
+
+  """Filter by the object’s `unstakingDuration` field."""
+  unstakingDuration: JSONFilter
+
+  """Filter by the object’s `createdAt` field."""
+  createdAt: DatetimeFilter
+
+  """Filter by the object’s `blockHeight` field."""
+  blockHeight: IntFilter
+
+  """Filter by the object’s `daoCoresByVotingModule` relation."""
+  daoCoresByVotingModule: DaoVotingModuleToManyDaoCoreFilter
+
+  """Some related `daoCoresByVotingModule` exist."""
+  daoCoresByVotingModuleExist: Boolean
+
+  """
+  Filter by the object’s `daoCw721StakersByVotingModuleAddress` relation.
+  """
+  daoCw721StakersByVotingModuleAddress: DaoVotingModuleToManyDaoCw721StakerFilter
+
+  """Some related `daoCw721StakersByVotingModuleAddress` exist."""
+  daoCw721StakersByVotingModuleAddressExist: Boolean
+
+  """
+  Filter by the object’s `daoNativeStakersByVotingModuleAddress` relation.
+  """
+  daoNativeStakersByVotingModuleAddress: DaoVotingModuleToManyDaoNativeStakerFilter
+
+  """Some related `daoNativeStakersByVotingModuleAddress` exist."""
+  daoNativeStakersByVotingModuleAddressExist: Boolean
+
+  """
+  Filter by the object’s `daoCw20StakingContractByStakingContract` relation.
+  """
+  daoCw20StakingContractByStakingContract: DaoCw20StakingContractFilter
+
+  """A related `daoCw20StakingContractByStakingContract` exists."""
+  daoCw20StakingContractByStakingContractExists: Boolean
+
+  """
+  Filter by the object’s `daoCw4GroupContractByGroupContractAddress` relation.
+  """
+  daoCw4GroupContractByGroupContractAddress: DaoCw4GroupContractFilter
+
+  """A related `daoCw4GroupContractByGroupContractAddress` exists."""
+  daoCw4GroupContractByGroupContractAddressExists: Boolean
+
+  """Checks for all expressions in this list."""
+  and: [DaoVotingModuleFilter!]
+
+  """Checks for any expressions in this list."""
+  or: [DaoVotingModuleFilter!]
+
+  """Negates the expression."""
+  not: DaoVotingModuleFilter
+}
+
+"""
+A filter to be used against many `DaoCore` object types. All fields are combined with a logical ‘and.’
+"""
+input DaoVotingModuleToManyDaoCoreFilter {
+  """
+  Every related `DaoCore` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  every: DaoCoreFilter
+
+  """
+  Some related `DaoCore` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  some: DaoCoreFilter
+
+  """
+  No related `DaoCore` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  none: DaoCoreFilter
+}
+
+"""
+A filter to be used against `DaoCore` object types. All fields are combined with a logical ‘and.’
+"""
+input DaoCoreFilter {
+  """Filter by the object’s `address` field."""
+  address: StringFilter
+
+  """Filter by the object’s `name` field."""
+  name: StringFilter
+
+  """Filter by the object’s `description` field."""
+  description: StringFilter
+
+  """Filter by the object’s `imageUrl` field."""
+  imageUrl: StringFilter
+
+  """Filter by the object’s `automaticallyAddCw20s` field."""
+  automaticallyAddCw20s: BooleanFilter
+
+  """Filter by the object’s `automaticallyAddCw721s` field."""
+  automaticallyAddCw721s: BooleanFilter
+
+  """Filter by the object’s `daoUri` field."""
+  daoUri: StringFilter
+
+  """Filter by the object’s `adminAddress` field."""
+  adminAddress: StringFilter
+
+  """Filter by the object’s `createdAt` field."""
+  createdAt: DatetimeFilter
+
+  """Filter by the object’s `blockHeight` field."""
+  blockHeight: IntFilter
+
+  """Filter by the object’s `votingModule` field."""
+  votingModule: StringFilter
+
+  """Filter by the object’s `daoProposalModulesByDaoAddress` relation."""
+  daoProposalModulesByDaoAddress: DaoCoreToManyDaoProposalModuleFilter
+
+  """Some related `daoProposalModulesByDaoAddress` exist."""
+  daoProposalModulesByDaoAddressExist: Boolean
+
+  """Filter by the object’s `daoVotingModuleByVotingModule` relation."""
+  daoVotingModuleByVotingModule: DaoVotingModuleFilter
+
+  """A related `daoVotingModuleByVotingModule` exists."""
+  daoVotingModuleByVotingModuleExists: Boolean
+
+  """Checks for all expressions in this list."""
+  and: [DaoCoreFilter!]
+
+  """Checks for any expressions in this list."""
+  or: [DaoCoreFilter!]
+
+  """Negates the expression."""
+  not: DaoCoreFilter
+}
+
+"""
+A filter to be used against many `DaoProposalModule` object types. All fields are combined with a logical ‘and.’
+"""
+input DaoCoreToManyDaoProposalModuleFilter {
+  """
+  Every related `DaoProposalModule` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  every: DaoProposalModuleFilter
+
+  """
+  Some related `DaoProposalModule` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  some: DaoProposalModuleFilter
+
+  """
+  No related `DaoProposalModule` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  none: DaoProposalModuleFilter
+}
+
+"""
+A filter to be used against `DaoProposalModule` object types. All fields are combined with a logical ‘and.’
+"""
+input DaoProposalModuleFilter {
+  """Filter by the object’s `address` field."""
+  address: StringFilter
+
+  """Filter by the object’s `daoAddress` field."""
+  daoAddress: StringFilter
+
+  """Filter by the object’s `moduleType` field."""
+  moduleType: StringFilter
+
+  """Filter by the object’s `createdAt` field."""
+  createdAt: DatetimeFilter
+
+  """Filter by the object’s `blockHeight` field."""
+  blockHeight: IntFilter
+
+  """Filter by the object’s `preProposeModule` field."""
+  preProposeModule: StringFilter
+
+  """Filter by the object’s `proposalCreationPolicy` field."""
+  proposalCreationPolicy: JSONFilter
+
+  """Filter by the object’s `config` field."""
+  config: JSONFilter
+
+  """Filter by the object’s `daoProposalsByProposalModule` relation."""
+  daoProposalsByProposalModule: DaoProposalModuleToManyDaoProposalFilter
+
+  """Some related `daoProposalsByProposalModule` exist."""
+  daoProposalsByProposalModuleExist: Boolean
+
+  """Filter by the object’s `daoCoreByDaoAddress` relation."""
+  daoCoreByDaoAddress: DaoCoreFilter
+
+  """A related `daoCoreByDaoAddress` exists."""
+  daoCoreByDaoAddressExists: Boolean
+
+  """
+  Filter by the object’s `daoPreProposeModuleByPreProposeModule` relation.
+  """
+  daoPreProposeModuleByPreProposeModule: DaoPreProposeModuleFilter
+
+  """A related `daoPreProposeModuleByPreProposeModule` exists."""
+  daoPreProposeModuleByPreProposeModuleExists: Boolean
+
+  """Checks for all expressions in this list."""
+  and: [DaoProposalModuleFilter!]
+
+  """Checks for any expressions in this list."""
+  or: [DaoProposalModuleFilter!]
+
+  """Negates the expression."""
+  not: DaoProposalModuleFilter
+}
+
+"""
+A filter to be used against many `DaoProposal` object types. All fields are combined with a logical ‘and.’
+"""
+input DaoProposalModuleToManyDaoProposalFilter {
+  """
+  Every related `DaoProposal` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  every: DaoProposalFilter
+
+  """
+  Some related `DaoProposal` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  some: DaoProposalFilter
+
+  """
+  No related `DaoProposal` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  none: DaoProposalFilter
+}
+
+"""
+A filter to be used against `DaoProposal` object types. All fields are combined with a logical ‘and.’
+"""
+input DaoProposalFilter {
+  """Filter by the object’s `id` field."""
+  id: BigIntFilter
+
+  """Filter by the object’s `proposalModule` field."""
+  proposalModule: StringFilter
+
+  """Filter by the object’s `title` field."""
+  title: StringFilter
+
+  """Filter by the object’s `description` field."""
+  description: StringFilter
+
+  """Filter by the object’s `proposer` field."""
+  proposer: StringFilter
+
+  """Filter by the object’s `startHeight` field."""
+  startHeight: IntFilter
+
+  """Filter by the object’s `minVotingPeriod` field."""
+  minVotingPeriod: JSONFilter
+
+  """Filter by the object’s `expiration` field."""
+  expiration: JSONFilter
+
+  """Filter by the object’s `threshold` field."""
+  threshold: JSONFilter
+
+  """Filter by the object’s `totalPower` field."""
+  totalPower: StringFilter
+
+  """Filter by the object’s `allowRevoting` field."""
+  allowRevoting: BooleanFilter
+
+  """Filter by the object’s `msgs` field."""
+  msgs: JSONFilter
+
+  """Filter by the object’s `status` field."""
+  status: StringFilter
+
+  """Filter by the object’s `votes` field."""
+  votes: JSONFilter
+
+  """Filter by the object’s `createdAt` field."""
+  createdAt: DatetimeFilter
+
+  """Filter by the object’s `blockHeight` field."""
+  blockHeight: IntFilter
+
+  """
+  Filter by the object’s `daoVotesByProposalModuleAndProposalId` relation.
+  """
+  daoVotesByProposalModuleAndProposalId: DaoProposalToManyDaoVoteFilter
+
+  """Some related `daoVotesByProposalModuleAndProposalId` exist."""
+  daoVotesByProposalModuleAndProposalIdExist: Boolean
+
+  """Filter by the object’s `daoProposalModuleByProposalModule` relation."""
+  daoProposalModuleByProposalModule: DaoProposalModuleFilter
+
+  """Checks for all expressions in this list."""
+  and: [DaoProposalFilter!]
+
+  """Checks for any expressions in this list."""
+  or: [DaoProposalFilter!]
+
+  """Negates the expression."""
+  not: DaoProposalFilter
+}
+
+"""
+A filter to be used against many `DaoVote` object types. All fields are combined with a logical ‘and.’
+"""
+input DaoProposalToManyDaoVoteFilter {
+  """
+  Every related `DaoVote` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  every: DaoVoteFilter
+
+  """
+  Some related `DaoVote` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  some: DaoVoteFilter
+
+  """
+  No related `DaoVote` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  none: DaoVoteFilter
+}
+
+"""
+A filter to be used against `DaoVote` object types. All fields are combined with a logical ‘and.’
+"""
+input DaoVoteFilter {
+  """Filter by the object’s `proposalModule` field."""
+  proposalModule: StringFilter
+
+  """Filter by the object’s `proposalId` field."""
+  proposalId: BigIntFilter
+
+  """Filter by the object’s `voter` field."""
+  voter: StringFilter
+
+  """Filter by the object’s `vote` field."""
+  vote: StringFilter
+
+  """Filter by the object’s `power` field."""
+  power: BigFloatFilter
+
+  """Filter by the object’s `rationale` field."""
+  rationale: StringFilter
+
+  """Filter by the object’s `votedAt` field."""
+  votedAt: DatetimeFilter
+
+  """Filter by the object’s `blockHeight` field."""
+  blockHeight: IntFilter
+
+  """
+  Filter by the object’s `daoProposalByProposalModuleAndProposalId` relation.
+  """
+  daoProposalByProposalModuleAndProposalId: DaoProposalFilter
+
+  """Checks for all expressions in this list."""
+  and: [DaoVoteFilter!]
+
+  """Checks for any expressions in this list."""
+  or: [DaoVoteFilter!]
+
+  """Negates the expression."""
+  not: DaoVoteFilter
+}
+
+"""
+A filter to be used against `DaoPreProposeModule` object types. All fields are combined with a logical ‘and.’
+"""
+input DaoPreProposeModuleFilter {
+  """Filter by the object’s `address` field."""
+  address: StringFilter
+
+  """Filter by the object’s `proposalModule` field."""
+  proposalModule: StringFilter
+
+  """Filter by the object’s `depositInfo` field."""
+  depositInfo: JSONFilter
+
+  """Filter by the object’s `openProposalSubmission` field."""
+  openProposalSubmission: BooleanFilter
+
+  """Filter by the object’s `createdAt` field."""
+  createdAt: DatetimeFilter
+
+  """Filter by the object’s `blockHeight` field."""
+  blockHeight: IntFilter
+
+  """
+  Filter by the object’s `daoProposalModulesByPreProposeModule` relation.
+  """
+  daoProposalModulesByPreProposeModule: DaoPreProposeModuleToManyDaoProposalModuleFilter
+
+  """Some related `daoProposalModulesByPreProposeModule` exist."""
+  daoProposalModulesByPreProposeModuleExist: Boolean
+
+  """Checks for all expressions in this list."""
+  and: [DaoPreProposeModuleFilter!]
+
+  """Checks for any expressions in this list."""
+  or: [DaoPreProposeModuleFilter!]
+
+  """Negates the expression."""
+  not: DaoPreProposeModuleFilter
+}
+
+"""
+A filter to be used against many `DaoProposalModule` object types. All fields are combined with a logical ‘and.’
+"""
+input DaoPreProposeModuleToManyDaoProposalModuleFilter {
+  """
+  Every related `DaoProposalModule` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  every: DaoProposalModuleFilter
+
+  """
+  Some related `DaoProposalModule` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  some: DaoProposalModuleFilter
+
+  """
+  No related `DaoProposalModule` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  none: DaoProposalModuleFilter
+}
+
+"""
+A filter to be used against many `DaoCw721Staker` object types. All fields are combined with a logical ‘and.’
+"""
+input DaoVotingModuleToManyDaoCw721StakerFilter {
+  """
+  Every related `DaoCw721Staker` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  every: DaoCw721StakerFilter
+
+  """
+  Some related `DaoCw721Staker` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  some: DaoCw721StakerFilter
+
+  """
+  No related `DaoCw721Staker` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  none: DaoCw721StakerFilter
+}
+
+"""
+A filter to be used against `DaoCw721Staker` object types. All fields are combined with a logical ‘and.’
+"""
+input DaoCw721StakerFilter {
+  """Filter by the object’s `votingModuleAddress` field."""
+  votingModuleAddress: StringFilter
+
+  """Filter by the object’s `stakerAddress` field."""
+  stakerAddress: StringFilter
+
+  """Filter by the object’s `tokenId` field."""
+  tokenId: StringFilter
+
+  """
+  Filter by the object’s `daoVotingModuleByVotingModuleAddress` relation.
+  """
+  daoVotingModuleByVotingModuleAddress: DaoVotingModuleFilter
+
+  """Checks for all expressions in this list."""
+  and: [DaoCw721StakerFilter!]
+
+  """Checks for any expressions in this list."""
+  or: [DaoCw721StakerFilter!]
+
+  """Negates the expression."""
+  not: DaoCw721StakerFilter
+}
+
+"""
+A filter to be used against many `DaoNativeStaker` object types. All fields are combined with a logical ‘and.’
+"""
+input DaoVotingModuleToManyDaoNativeStakerFilter {
+  """
+  Every related `DaoNativeStaker` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  every: DaoNativeStakerFilter
+
+  """
+  Some related `DaoNativeStaker` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  some: DaoNativeStakerFilter
+
+  """
+  No related `DaoNativeStaker` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  none: DaoNativeStakerFilter
+}
+
+"""
+A filter to be used against `DaoNativeStaker` object types. All fields are combined with a logical ‘and.’
+"""
+input DaoNativeStakerFilter {
+  """Filter by the object’s `votingModuleAddress` field."""
+  votingModuleAddress: StringFilter
+
+  """Filter by the object’s `stakerAddress` field."""
+  stakerAddress: StringFilter
+
+  """Filter by the object’s `stakedAmount` field."""
+  stakedAmount: BigFloatFilter
+
+  """
+  Filter by the object’s `daoVotingModuleByVotingModuleAddress` relation.
+  """
+  daoVotingModuleByVotingModuleAddress: DaoVotingModuleFilter
+
+  """Checks for all expressions in this list."""
+  and: [DaoNativeStakerFilter!]
+
+  """Checks for any expressions in this list."""
+  or: [DaoNativeStakerFilter!]
+
+  """Negates the expression."""
+  not: DaoNativeStakerFilter
+}
+
+"""
+A filter to be used against `DaoCw20StakingContract` object types. All fields are combined with a logical ‘and.’
+"""
+input DaoCw20StakingContractFilter {
+  """Filter by the object’s `address` field."""
+  address: StringFilter
+
+  """Filter by the object’s `daoVotingModulesByStakingContract` relation."""
+  daoVotingModulesByStakingContract: DaoCw20StakingContractToManyDaoVotingModuleFilter
+
+  """Some related `daoVotingModulesByStakingContract` exist."""
+  daoVotingModulesByStakingContractExist: Boolean
+
+  """Filter by the object’s `daoCw20StakersByStakingContract` relation."""
+  daoCw20StakersByStakingContract: DaoCw20StakingContractToManyDaoCw20StakerFilter
+
+  """Some related `daoCw20StakersByStakingContract` exist."""
+  daoCw20StakersByStakingContractExist: Boolean
+
+  """Checks for all expressions in this list."""
+  and: [DaoCw20StakingContractFilter!]
+
+  """Checks for any expressions in this list."""
+  or: [DaoCw20StakingContractFilter!]
+
+  """Negates the expression."""
+  not: DaoCw20StakingContractFilter
+}
+
+"""
+A filter to be used against many `DaoVotingModule` object types. All fields are combined with a logical ‘and.’
+"""
+input DaoCw20StakingContractToManyDaoVotingModuleFilter {
+  """
+  Every related `DaoVotingModule` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  every: DaoVotingModuleFilter
+
+  """
+  Some related `DaoVotingModule` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  some: DaoVotingModuleFilter
+
+  """
+  No related `DaoVotingModule` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  none: DaoVotingModuleFilter
+}
+
+"""
+A filter to be used against many `DaoCw20Staker` object types. All fields are combined with a logical ‘and.’
+"""
+input DaoCw20StakingContractToManyDaoCw20StakerFilter {
+  """
+  Every related `DaoCw20Staker` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  every: DaoCw20StakerFilter
+
+  """
+  Some related `DaoCw20Staker` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  some: DaoCw20StakerFilter
+
+  """
+  No related `DaoCw20Staker` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  none: DaoCw20StakerFilter
+}
+
+"""
+A filter to be used against `DaoCw20Staker` object types. All fields are combined with a logical ‘and.’
+"""
+input DaoCw20StakerFilter {
+  """Filter by the object’s `stakingContract` field."""
+  stakingContract: StringFilter
+
+  """Filter by the object’s `stakerAddress` field."""
+  stakerAddress: StringFilter
+
+  """Filter by the object’s `stakedAmount` field."""
+  stakedAmount: BigFloatFilter
+
+  """
+  Filter by the object’s `daoCw20StakingContractByStakingContract` relation.
+  """
+  daoCw20StakingContractByStakingContract: DaoCw20StakingContractFilter
+
+  """Checks for all expressions in this list."""
+  and: [DaoCw20StakerFilter!]
+
+  """Checks for any expressions in this list."""
+  or: [DaoCw20StakerFilter!]
+
+  """Negates the expression."""
+  not: DaoCw20StakerFilter
+}
+
+"""
+A filter to be used against `DaoCw4GroupContract` object types. All fields are combined with a logical ‘and.’
+"""
+input DaoCw4GroupContractFilter {
+  """Filter by the object’s `address` field."""
+  address: StringFilter
+
+  """
+  Filter by the object’s `daoVotingModulesByGroupContractAddress` relation.
+  """
+  daoVotingModulesByGroupContractAddress: DaoCw4GroupContractToManyDaoVotingModuleFilter
+
+  """Some related `daoVotingModulesByGroupContractAddress` exist."""
+  daoVotingModulesByGroupContractAddressExist: Boolean
+
+  """Filter by the object’s `daoCw4MembersByGroupContractAddress` relation."""
+  daoCw4MembersByGroupContractAddress: DaoCw4GroupContractToManyDaoCw4MemberFilter
+
+  """Some related `daoCw4MembersByGroupContractAddress` exist."""
+  daoCw4MembersByGroupContractAddressExist: Boolean
+
+  """Checks for all expressions in this list."""
+  and: [DaoCw4GroupContractFilter!]
+
+  """Checks for any expressions in this list."""
+  or: [DaoCw4GroupContractFilter!]
+
+  """Negates the expression."""
+  not: DaoCw4GroupContractFilter
+}
+
+"""
+A filter to be used against many `DaoVotingModule` object types. All fields are combined with a logical ‘and.’
+"""
+input DaoCw4GroupContractToManyDaoVotingModuleFilter {
+  """
+  Every related `DaoVotingModule` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  every: DaoVotingModuleFilter
+
+  """
+  Some related `DaoVotingModule` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  some: DaoVotingModuleFilter
+
+  """
+  No related `DaoVotingModule` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  none: DaoVotingModuleFilter
+}
+
+"""
+A filter to be used against many `DaoCw4Member` object types. All fields are combined with a logical ‘and.’
+"""
+input DaoCw4GroupContractToManyDaoCw4MemberFilter {
+  """
+  Every related `DaoCw4Member` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  every: DaoCw4MemberFilter
+
+  """
+  Some related `DaoCw4Member` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  some: DaoCw4MemberFilter
+
+  """
+  No related `DaoCw4Member` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  none: DaoCw4MemberFilter
+}
+
+"""
+A filter to be used against `DaoCw4Member` object types. All fields are combined with a logical ‘and.’
+"""
+input DaoCw4MemberFilter {
+  """Filter by the object’s `groupContractAddress` field."""
+  groupContractAddress: StringFilter
+
+  """Filter by the object’s `memberAddress` field."""
+  memberAddress: StringFilter
+
+  """Filter by the object’s `weight` field."""
+  weight: IntFilter
+
+  """
+  Filter by the object’s `daoCw4GroupContractByGroupContractAddress` relation.
+  """
+  daoCw4GroupContractByGroupContractAddress: DaoCw4GroupContractFilter
+
+  """Checks for all expressions in this list."""
+  and: [DaoCw4MemberFilter!]
+
+  """Checks for any expressions in this list."""
+  or: [DaoCw4MemberFilter!]
+
+  """Negates the expression."""
+  not: DaoCw4MemberFilter
+}
+
+"""A connection to a list of `DaoCw20Staker` values."""
+type DaoCw20StakersConnection {
+  """A list of `DaoCw20Staker` objects."""
+  nodes: [DaoCw20Staker!]!
+
+  """
+  A list of edges which contains the `DaoCw20Staker` and cursor to aid in pagination.
+  """
+  edges: [DaoCw20StakersEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `DaoCw20Staker` you could get from the connection."""
+  totalCount: Int!
+}
+
+type DaoCw20Staker implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  stakingContract: String!
+  stakerAddress: String!
+  stakedAmount: BigFloat!
+
+  """
+  Reads a single `DaoCw20StakingContract` that is related to this `DaoCw20Staker`.
+  """
+  daoCw20StakingContractByStakingContract: DaoCw20StakingContract
+}
+
+"""A `DaoCw20Staker` edge in the connection."""
+type DaoCw20StakersEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `DaoCw20Staker` at the end of the edge."""
+  node: DaoCw20Staker!
+}
+
+"""Methods to use when ordering `DaoCw20Staker`."""
+enum DaoCw20StakersOrderBy {
+  NATURAL
+  STAKING_CONTRACT_ASC
+  STAKING_CONTRACT_DESC
+  STAKER_ADDRESS_ASC
+  STAKER_ADDRESS_DESC
+  STAKED_AMOUNT_ASC
+  STAKED_AMOUNT_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `DaoCw20Staker` object types. All fields are
+tested for equality and combined with a logical ‘and.’
+"""
+input DaoCw20StakerCondition {
+  """Checks for equality with the object’s `stakingContract` field."""
+  stakingContract: String
+
+  """Checks for equality with the object’s `stakerAddress` field."""
+  stakerAddress: String
+
+  """Checks for equality with the object’s `stakedAmount` field."""
+  stakedAmount: BigFloat
+}
+
+type DaoCw4GroupContract implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  address: String!
+
+  """Reads and enables pagination through a set of `DaoVotingModule`."""
+  daoVotingModulesByGroupContractAddress(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `DaoVotingModule`."""
+    orderBy: [DaoVotingModulesOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: DaoVotingModuleCondition
+
+    """
+    A filter to be used in determining which values should be returned by the collection.
+    """
+    filter: DaoVotingModuleFilter
+  ): DaoVotingModulesConnection!
+
+  """Reads and enables pagination through a set of `DaoCw4Member`."""
+  daoCw4MembersByGroupContractAddress(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `DaoCw4Member`."""
+    orderBy: [DaoCw4MembersOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: DaoCw4MemberCondition
+
+    """
+    A filter to be used in determining which values should be returned by the collection.
+    """
+    filter: DaoCw4MemberFilter
+  ): DaoCw4MembersConnection!
+}
+
+"""A connection to a list of `DaoCw4Member` values."""
+type DaoCw4MembersConnection {
+  """A list of `DaoCw4Member` objects."""
+  nodes: [DaoCw4Member!]!
+
+  """
+  A list of edges which contains the `DaoCw4Member` and cursor to aid in pagination.
+  """
+  edges: [DaoCw4MembersEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `DaoCw4Member` you could get from the connection."""
+  totalCount: Int!
+}
+
+type DaoCw4Member implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  groupContractAddress: String!
+  memberAddress: String!
+  weight: Int!
+
+  """
+  Reads a single `DaoCw4GroupContract` that is related to this `DaoCw4Member`.
+  """
+  daoCw4GroupContractByGroupContractAddress: DaoCw4GroupContract
+}
+
+"""A `DaoCw4Member` edge in the connection."""
+type DaoCw4MembersEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `DaoCw4Member` at the end of the edge."""
+  node: DaoCw4Member!
+}
+
+"""Methods to use when ordering `DaoCw4Member`."""
+enum DaoCw4MembersOrderBy {
+  NATURAL
+  GROUP_CONTRACT_ADDRESS_ASC
+  GROUP_CONTRACT_ADDRESS_DESC
+  MEMBER_ADDRESS_ASC
+  MEMBER_ADDRESS_DESC
+  WEIGHT_ASC
+  WEIGHT_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `DaoCw4Member` object types. All fields are
+tested for equality and combined with a logical ‘and.’
+"""
+input DaoCw4MemberCondition {
+  """Checks for equality with the object’s `groupContractAddress` field."""
+  groupContractAddress: String
+
+  """Checks for equality with the object’s `memberAddress` field."""
+  memberAddress: String
+
+  """Checks for equality with the object’s `weight` field."""
+  weight: Int
+}
+
+"""Methods to use when ordering `DaoCore`."""
+enum DaoCoresOrderBy {
+  NATURAL
+  ADDRESS_ASC
+  ADDRESS_DESC
+  NAME_ASC
+  NAME_DESC
+  DESCRIPTION_ASC
+  DESCRIPTION_DESC
+  IMAGE_URL_ASC
+  IMAGE_URL_DESC
+  AUTOMATICALLY_ADD_CW20S_ASC
+  AUTOMATICALLY_ADD_CW20S_DESC
+  AUTOMATICALLY_ADD_CW721S_ASC
+  AUTOMATICALLY_ADD_CW721S_DESC
+  DAO_URI_ASC
+  DAO_URI_DESC
+  ADMIN_ADDRESS_ASC
+  ADMIN_ADDRESS_DESC
+  CREATED_AT_ASC
+  CREATED_AT_DESC
+  BLOCK_HEIGHT_ASC
+  BLOCK_HEIGHT_DESC
+  VOTING_MODULE_ASC
+  VOTING_MODULE_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `DaoCore` object types. All fields are tested for equality and combined with a logical ‘and.’
+"""
+input DaoCoreCondition {
+  """Checks for equality with the object’s `address` field."""
+  address: String
+
+  """Checks for equality with the object’s `name` field."""
+  name: String
+
+  """Checks for equality with the object’s `description` field."""
+  description: String
+
+  """Checks for equality with the object’s `imageUrl` field."""
+  imageUrl: String
+
+  """Checks for equality with the object’s `automaticallyAddCw20s` field."""
+  automaticallyAddCw20s: Boolean
+
+  """Checks for equality with the object’s `automaticallyAddCw721s` field."""
+  automaticallyAddCw721s: Boolean
+
+  """Checks for equality with the object’s `daoUri` field."""
+  daoUri: String
+
+  """Checks for equality with the object’s `adminAddress` field."""
+  adminAddress: String
+
+  """Checks for equality with the object’s `createdAt` field."""
+  createdAt: Datetime
+
+  """Checks for equality with the object’s `blockHeight` field."""
+  blockHeight: Int
+
+  """Checks for equality with the object’s `votingModule` field."""
+  votingModule: String
+}
+
+"""A connection to a list of `DaoCw721Staker` values."""
+type DaoCw721StakersConnection {
+  """A list of `DaoCw721Staker` objects."""
+  nodes: [DaoCw721Staker!]!
+
+  """
+  A list of edges which contains the `DaoCw721Staker` and cursor to aid in pagination.
+  """
+  edges: [DaoCw721StakersEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `DaoCw721Staker` you could get from the connection."""
+  totalCount: Int!
+}
+
+type DaoCw721Staker implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  votingModuleAddress: String!
+  stakerAddress: String!
+  tokenId: String!
+
+  """
+  Reads a single `DaoVotingModule` that is related to this `DaoCw721Staker`.
+  """
+  daoVotingModuleByVotingModuleAddress: DaoVotingModule
+}
+
+"""A `DaoCw721Staker` edge in the connection."""
+type DaoCw721StakersEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `DaoCw721Staker` at the end of the edge."""
+  node: DaoCw721Staker!
+}
+
+"""Methods to use when ordering `DaoCw721Staker`."""
+enum DaoCw721StakersOrderBy {
+  NATURAL
+  VOTING_MODULE_ADDRESS_ASC
+  VOTING_MODULE_ADDRESS_DESC
+  STAKER_ADDRESS_ASC
+  STAKER_ADDRESS_DESC
+  TOKEN_ID_ASC
+  TOKEN_ID_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `DaoCw721Staker` object types. All fields are
+tested for equality and combined with a logical ‘and.’
+"""
+input DaoCw721StakerCondition {
+  """Checks for equality with the object’s `votingModuleAddress` field."""
+  votingModuleAddress: String
+
+  """Checks for equality with the object’s `stakerAddress` field."""
+  stakerAddress: String
+
+  """Checks for equality with the object’s `tokenId` field."""
+  tokenId: String
+}
+
+"""A connection to a list of `DaoNativeStaker` values."""
+type DaoNativeStakersConnection {
+  """A list of `DaoNativeStaker` objects."""
+  nodes: [DaoNativeStaker!]!
+
+  """
+  A list of edges which contains the `DaoNativeStaker` and cursor to aid in pagination.
+  """
+  edges: [DaoNativeStakersEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  The count of *all* `DaoNativeStaker` you could get from the connection.
+  """
+  totalCount: Int!
+}
+
+type DaoNativeStaker implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  votingModuleAddress: String!
+  stakerAddress: String!
+  stakedAmount: BigFloat!
+
+  """
+  Reads a single `DaoVotingModule` that is related to this `DaoNativeStaker`.
+  """
+  daoVotingModuleByVotingModuleAddress: DaoVotingModule
+}
+
+"""A `DaoNativeStaker` edge in the connection."""
+type DaoNativeStakersEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `DaoNativeStaker` at the end of the edge."""
+  node: DaoNativeStaker!
+}
+
+"""Methods to use when ordering `DaoNativeStaker`."""
+enum DaoNativeStakersOrderBy {
+  NATURAL
+  VOTING_MODULE_ADDRESS_ASC
+  VOTING_MODULE_ADDRESS_DESC
+  STAKER_ADDRESS_ASC
+  STAKER_ADDRESS_DESC
+  STAKED_AMOUNT_ASC
+  STAKED_AMOUNT_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `DaoNativeStaker` object types. All fields are
+tested for equality and combined with a logical ‘and.’
+"""
+input DaoNativeStakerCondition {
+  """Checks for equality with the object’s `votingModuleAddress` field."""
+  votingModuleAddress: String
+
+  """Checks for equality with the object’s `stakerAddress` field."""
+  stakerAddress: String
+
+  """Checks for equality with the object’s `stakedAmount` field."""
+  stakedAmount: BigFloat
+}
+
+"""A connection to a list of `DaoProposalModule` values."""
+type DaoProposalModulesConnection {
+  """A list of `DaoProposalModule` objects."""
+  nodes: [DaoProposalModule!]!
+
+  """
+  A list of edges which contains the `DaoProposalModule` and cursor to aid in pagination.
+  """
+  edges: [DaoProposalModulesEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  The count of *all* `DaoProposalModule` you could get from the connection.
+  """
+  totalCount: Int!
+}
+
+type DaoProposalModule implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  address: String!
+  daoAddress: String
+  moduleType: String
+  createdAt: Datetime!
+  blockHeight: Int!
+  preProposeModule: String
+  proposalCreationPolicy: JSON
+  config: JSON
+
+  """Reads a single `DaoCore` that is related to this `DaoProposalModule`."""
+  daoCoreByDaoAddress: DaoCore
+
+  """
+  Reads a single `DaoPreProposeModule` that is related to this `DaoProposalModule`.
+  """
+  daoPreProposeModuleByPreProposeModule: DaoPreProposeModule
+
+  """Reads and enables pagination through a set of `DaoProposal`."""
+  daoProposalsByProposalModule(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `DaoProposal`."""
+    orderBy: [DaoProposalsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: DaoProposalCondition
+
+    """
+    A filter to be used in determining which values should be returned by the collection.
+    """
+    filter: DaoProposalFilter
+  ): DaoProposalsConnection!
+}
+
+type DaoPreProposeModule implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  address: String!
+  proposalModule: String
+  depositInfo: JSON
+  openProposalSubmission: Boolean
+  createdAt: Datetime!
+  blockHeight: Int!
+
+  """Reads and enables pagination through a set of `DaoProposalModule`."""
+  daoProposalModulesByPreProposeModule(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `DaoProposalModule`."""
+    orderBy: [DaoProposalModulesOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: DaoProposalModuleCondition
+
+    """
+    A filter to be used in determining which values should be returned by the collection.
+    """
+    filter: DaoProposalModuleFilter
+  ): DaoProposalModulesConnection!
+}
+
+"""Methods to use when ordering `DaoProposalModule`."""
+enum DaoProposalModulesOrderBy {
+  NATURAL
+  ADDRESS_ASC
+  ADDRESS_DESC
+  DAO_ADDRESS_ASC
+  DAO_ADDRESS_DESC
+  MODULE_TYPE_ASC
+  MODULE_TYPE_DESC
+  CREATED_AT_ASC
+  CREATED_AT_DESC
+  BLOCK_HEIGHT_ASC
+  BLOCK_HEIGHT_DESC
+  PRE_PROPOSE_MODULE_ASC
+  PRE_PROPOSE_MODULE_DESC
+  PROPOSAL_CREATION_POLICY_ASC
+  PROPOSAL_CREATION_POLICY_DESC
+  CONFIG_ASC
+  CONFIG_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `DaoProposalModule` object types. All fields are
+tested for equality and combined with a logical ‘and.’
+"""
+input DaoProposalModuleCondition {
+  """Checks for equality with the object’s `address` field."""
+  address: String
+
+  """Checks for equality with the object’s `daoAddress` field."""
+  daoAddress: String
+
+  """Checks for equality with the object’s `moduleType` field."""
+  moduleType: String
+
+  """Checks for equality with the object’s `createdAt` field."""
+  createdAt: Datetime
+
+  """Checks for equality with the object’s `blockHeight` field."""
+  blockHeight: Int
+
+  """Checks for equality with the object’s `preProposeModule` field."""
+  preProposeModule: String
+
+  """Checks for equality with the object’s `proposalCreationPolicy` field."""
+  proposalCreationPolicy: JSON
+
+  """Checks for equality with the object’s `config` field."""
+  config: JSON
+}
+
+"""A connection to a list of `DaoProposal` values."""
+type DaoProposalsConnection {
+  """A list of `DaoProposal` objects."""
+  nodes: [DaoProposal!]!
+
+  """
+  A list of edges which contains the `DaoProposal` and cursor to aid in pagination.
+  """
+  edges: [DaoProposalsEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `DaoProposal` you could get from the connection."""
+  totalCount: Int!
+}
+
+type DaoProposal implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: BigInt!
+  proposalModule: String!
+  title: String
+  description: String
+  proposer: String
+  startHeight: Int
+  minVotingPeriod: JSON
+  expiration: JSON
+  threshold: JSON
+  totalPower: String
+  allowRevoting: Boolean
+  msgs: JSON
+  status: String
+  votes: JSON
+  createdAt: Datetime!
+  blockHeight: Int!
+
+  """
+  Reads a single `DaoProposalModule` that is related to this `DaoProposal`.
+  """
+  daoProposalModuleByProposalModule: DaoProposalModule
+
+  """Reads and enables pagination through a set of `DaoVote`."""
+  daoVotesByProposalModuleAndProposalId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `DaoVote`."""
+    orderBy: [DaoVotesOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: DaoVoteCondition
+
+    """
+    A filter to be used in determining which values should be returned by the collection.
+    """
+    filter: DaoVoteFilter
+  ): DaoVotesConnection!
+}
+
+"""A connection to a list of `DaoVote` values."""
+type DaoVotesConnection {
+  """A list of `DaoVote` objects."""
+  nodes: [DaoVote!]!
+
+  """
+  A list of edges which contains the `DaoVote` and cursor to aid in pagination.
+  """
+  edges: [DaoVotesEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `DaoVote` you could get from the connection."""
+  totalCount: Int!
+}
+
+type DaoVote implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  proposalModule: String!
+  proposalId: BigInt!
+  voter: String!
+  vote: String
+  power: BigFloat
+  rationale: String
+  votedAt: Datetime!
+  blockHeight: Int!
+
+  """Reads a single `DaoProposal` that is related to this `DaoVote`."""
+  daoProposalByProposalModuleAndProposalId: DaoProposal
+}
+
+"""A `DaoVote` edge in the connection."""
+type DaoVotesEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `DaoVote` at the end of the edge."""
+  node: DaoVote!
+}
+
+"""Methods to use when ordering `DaoVote`."""
+enum DaoVotesOrderBy {
+  NATURAL
+  PROPOSAL_MODULE_ASC
+  PROPOSAL_MODULE_DESC
+  PROPOSAL_ID_ASC
+  PROPOSAL_ID_DESC
+  VOTER_ASC
+  VOTER_DESC
+  VOTE_ASC
+  VOTE_DESC
+  POWER_ASC
+  POWER_DESC
+  RATIONALE_ASC
+  RATIONALE_DESC
+  VOTED_AT_ASC
+  VOTED_AT_DESC
+  BLOCK_HEIGHT_ASC
+  BLOCK_HEIGHT_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `DaoVote` object types. All fields are tested for equality and combined with a logical ‘and.’
+"""
+input DaoVoteCondition {
+  """Checks for equality with the object’s `proposalModule` field."""
+  proposalModule: String
+
+  """Checks for equality with the object’s `proposalId` field."""
+  proposalId: BigInt
+
+  """Checks for equality with the object’s `voter` field."""
+  voter: String
+
+  """Checks for equality with the object’s `vote` field."""
+  vote: String
+
+  """Checks for equality with the object’s `power` field."""
+  power: BigFloat
+
+  """Checks for equality with the object’s `rationale` field."""
+  rationale: String
+
+  """Checks for equality with the object’s `votedAt` field."""
+  votedAt: Datetime
+
+  """Checks for equality with the object’s `blockHeight` field."""
+  blockHeight: Int
+}
+
+"""A `DaoProposal` edge in the connection."""
+type DaoProposalsEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `DaoProposal` at the end of the edge."""
+  node: DaoProposal!
+}
+
+"""Methods to use when ordering `DaoProposal`."""
+enum DaoProposalsOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  PROPOSAL_MODULE_ASC
+  PROPOSAL_MODULE_DESC
+  TITLE_ASC
+  TITLE_DESC
+  DESCRIPTION_ASC
+  DESCRIPTION_DESC
+  PROPOSER_ASC
+  PROPOSER_DESC
+  START_HEIGHT_ASC
+  START_HEIGHT_DESC
+  MIN_VOTING_PERIOD_ASC
+  MIN_VOTING_PERIOD_DESC
+  EXPIRATION_ASC
+  EXPIRATION_DESC
+  THRESHOLD_ASC
+  THRESHOLD_DESC
+  TOTAL_POWER_ASC
+  TOTAL_POWER_DESC
+  ALLOW_REVOTING_ASC
+  ALLOW_REVOTING_DESC
+  MSGS_ASC
+  MSGS_DESC
+  STATUS_ASC
+  STATUS_DESC
+  VOTES_ASC
+  VOTES_DESC
+  CREATED_AT_ASC
+  CREATED_AT_DESC
+  BLOCK_HEIGHT_ASC
+  BLOCK_HEIGHT_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `DaoProposal` object types. All fields are tested
+for equality and combined with a logical ‘and.’
+"""
+input DaoProposalCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: BigInt
+
+  """Checks for equality with the object’s `proposalModule` field."""
+  proposalModule: String
+
+  """Checks for equality with the object’s `title` field."""
+  title: String
+
+  """Checks for equality with the object’s `description` field."""
+  description: String
+
+  """Checks for equality with the object’s `proposer` field."""
+  proposer: String
+
+  """Checks for equality with the object’s `startHeight` field."""
+  startHeight: Int
+
+  """Checks for equality with the object’s `minVotingPeriod` field."""
+  minVotingPeriod: JSON
+
+  """Checks for equality with the object’s `expiration` field."""
+  expiration: JSON
+
+  """Checks for equality with the object’s `threshold` field."""
+  threshold: JSON
+
+  """Checks for equality with the object’s `totalPower` field."""
+  totalPower: String
+
+  """Checks for equality with the object’s `allowRevoting` field."""
+  allowRevoting: Boolean
+
+  """Checks for equality with the object’s `msgs` field."""
+  msgs: JSON
+
+  """Checks for equality with the object’s `status` field."""
+  status: String
+
+  """Checks for equality with the object’s `votes` field."""
+  votes: JSON
+
+  """Checks for equality with the object’s `createdAt` field."""
+  createdAt: Datetime
+
+  """Checks for equality with the object’s `blockHeight` field."""
+  blockHeight: Int
+}
+
+"""A `DaoProposalModule` edge in the connection."""
+type DaoProposalModulesEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `DaoProposalModule` at the end of the edge."""
+  node: DaoProposalModule!
+}
+
+"""A `DaoCore` edge in the connection."""
+type DaoCoresEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `DaoCore` at the end of the edge."""
+  node: DaoCore!
+}
+
+"""A connection to a list of `DaoCw20StakingContract` values."""
+type DaoCw20StakingContractsConnection {
+  """A list of `DaoCw20StakingContract` objects."""
+  nodes: [DaoCw20StakingContract!]!
+
+  """
+  A list of edges which contains the `DaoCw20StakingContract` and cursor to aid in pagination.
+  """
+  edges: [DaoCw20StakingContractsEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  The count of *all* `DaoCw20StakingContract` you could get from the connection.
+  """
+  totalCount: Int!
+}
+
+"""A `DaoCw20StakingContract` edge in the connection."""
+type DaoCw20StakingContractsEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `DaoCw20StakingContract` at the end of the edge."""
+  node: DaoCw20StakingContract!
+}
+
+"""Methods to use when ordering `DaoCw20StakingContract`."""
+enum DaoCw20StakingContractsOrderBy {
+  NATURAL
+  ADDRESS_ASC
+  ADDRESS_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `DaoCw20StakingContract` object types. All fields
+are tested for equality and combined with a logical ‘and.’
+"""
+input DaoCw20StakingContractCondition {
+  """Checks for equality with the object’s `address` field."""
+  address: String
+}
+
+"""A connection to a list of `DaoCw4GroupContract` values."""
+type DaoCw4GroupContractsConnection {
+  """A list of `DaoCw4GroupContract` objects."""
+  nodes: [DaoCw4GroupContract!]!
+
+  """
+  A list of edges which contains the `DaoCw4GroupContract` and cursor to aid in pagination.
+  """
+  edges: [DaoCw4GroupContractsEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  The count of *all* `DaoCw4GroupContract` you could get from the connection.
+  """
+  totalCount: Int!
+}
+
+"""A `DaoCw4GroupContract` edge in the connection."""
+type DaoCw4GroupContractsEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `DaoCw4GroupContract` at the end of the edge."""
+  node: DaoCw4GroupContract!
+}
+
+"""Methods to use when ordering `DaoCw4GroupContract`."""
+enum DaoCw4GroupContractsOrderBy {
+  NATURAL
+  ADDRESS_ASC
+  ADDRESS_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `DaoCw4GroupContract` object types. All fields
+are tested for equality and combined with a logical ‘and.’
+"""
+input DaoCw4GroupContractCondition {
+  """Checks for equality with the object’s `address` field."""
+  address: String
+}
+
+"""A connection to a list of `DaoPreProposeModule` values."""
+type DaoPreProposeModulesConnection {
+  """A list of `DaoPreProposeModule` objects."""
+  nodes: [DaoPreProposeModule!]!
+
+  """
+  A list of edges which contains the `DaoPreProposeModule` and cursor to aid in pagination.
+  """
+  edges: [DaoPreProposeModulesEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  The count of *all* `DaoPreProposeModule` you could get from the connection.
+  """
+  totalCount: Int!
+}
+
+"""A `DaoPreProposeModule` edge in the connection."""
+type DaoPreProposeModulesEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `DaoPreProposeModule` at the end of the edge."""
+  node: DaoPreProposeModule!
+}
+
+"""Methods to use when ordering `DaoPreProposeModule`."""
+enum DaoPreProposeModulesOrderBy {
+  NATURAL
+  ADDRESS_ASC
+  ADDRESS_DESC
+  PROPOSAL_MODULE_ASC
+  PROPOSAL_MODULE_DESC
+  DEPOSIT_INFO_ASC
+  DEPOSIT_INFO_DESC
+  OPEN_PROPOSAL_SUBMISSION_ASC
+  OPEN_PROPOSAL_SUBMISSION_DESC
+  CREATED_AT_ASC
+  CREATED_AT_DESC
+  BLOCK_HEIGHT_ASC
+  BLOCK_HEIGHT_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `DaoPreProposeModule` object types. All fields
+are tested for equality and combined with a logical ‘and.’
+"""
+input DaoPreProposeModuleCondition {
+  """Checks for equality with the object’s `address` field."""
+  address: String
+
+  """Checks for equality with the object’s `proposalModule` field."""
+  proposalModule: String
+
+  """Checks for equality with the object’s `depositInfo` field."""
+  depositInfo: JSON
+
+  """Checks for equality with the object’s `openProposalSubmission` field."""
+  openProposalSubmission: Boolean
+
+  """Checks for equality with the object’s `createdAt` field."""
+  createdAt: Datetime
+
+  """Checks for equality with the object’s `blockHeight` field."""
+  blockHeight: Int
+}
+
+"""A connection to a list of `Epoch` values."""
+type EpochesConnection {
+  """A list of `Epoch` objects."""
+  nodes: [Epoch!]!
+
+  """
+  A list of edges which contains the `Epoch` and cursor to aid in pagination.
+  """
+  edges: [EpochesEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `Epoch` you could get from the connection."""
+  totalCount: Int!
+}
+
+type Epoch implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  identifier: String!
+  startTime: Datetime!
+  duration: String!
+  currentEpoch: Int
+  currentEpochStartTime: Datetime
+  epochCountingStarted: Boolean!
+  currentEpochStartHeight: Int
+
+  """Reads and enables pagination through a set of `EpochEvent`."""
+  epochEventsByEpochIdentifier(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `EpochEvent`."""
+    orderBy: [EpochEventsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: EpochEventCondition
+
+    """
+    A filter to be used in determining which values should be returned by the collection.
+    """
+    filter: EpochEventFilter
+  ): EpochEventsConnection!
+}
+
+"""A connection to a list of `EpochEvent` values."""
+type EpochEventsConnection {
+  """A list of `EpochEvent` objects."""
+  nodes: [EpochEvent!]!
+
+  """
+  A list of edges which contains the `EpochEvent` and cursor to aid in pagination.
+  """
+  edges: [EpochEventsEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `EpochEvent` you could get from the connection."""
+  totalCount: Int!
+}
+
+type EpochEvent implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: Int!
+  epochNumber: Int!
+  epochIdentifier: String!
+  startHeight: Int!
+  endHeight: Int
+  startTime: Datetime!
+  endTime: Datetime
+
+  """Reads a single `Epoch` that is related to this `EpochEvent`."""
+  epochByEpochIdentifier: Epoch
+}
+
+"""A `EpochEvent` edge in the connection."""
+type EpochEventsEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `EpochEvent` at the end of the edge."""
+  node: EpochEvent!
+}
+
+"""Methods to use when ordering `EpochEvent`."""
+enum EpochEventsOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  EPOCH_NUMBER_ASC
+  EPOCH_NUMBER_DESC
+  EPOCH_IDENTIFIER_ASC
+  EPOCH_IDENTIFIER_DESC
+  START_HEIGHT_ASC
+  START_HEIGHT_DESC
+  END_HEIGHT_ASC
+  END_HEIGHT_DESC
+  START_TIME_ASC
+  START_TIME_DESC
+  END_TIME_ASC
+  END_TIME_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `EpochEvent` object types. All fields are tested
+for equality and combined with a logical ‘and.’
+"""
+input EpochEventCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: Int
+
+  """Checks for equality with the object’s `epochNumber` field."""
+  epochNumber: Int
+
+  """Checks for equality with the object’s `epochIdentifier` field."""
+  epochIdentifier: String
+
+  """Checks for equality with the object’s `startHeight` field."""
+  startHeight: Int
+
+  """Checks for equality with the object’s `endHeight` field."""
+  endHeight: Int
+
+  """Checks for equality with the object’s `startTime` field."""
+  startTime: Datetime
+
+  """Checks for equality with the object’s `endTime` field."""
+  endTime: Datetime
+}
+
+"""
+A filter to be used against `EpochEvent` object types. All fields are combined with a logical ‘and.’
+"""
+input EpochEventFilter {
+  """Filter by the object’s `id` field."""
+  id: IntFilter
+
+  """Filter by the object’s `epochNumber` field."""
+  epochNumber: IntFilter
+
+  """Filter by the object’s `epochIdentifier` field."""
+  epochIdentifier: StringFilter
+
+  """Filter by the object’s `startHeight` field."""
+  startHeight: IntFilter
+
+  """Filter by the object’s `endHeight` field."""
+  endHeight: IntFilter
+
+  """Filter by the object’s `startTime` field."""
+  startTime: DatetimeFilter
+
+  """Filter by the object’s `endTime` field."""
+  endTime: DatetimeFilter
+
+  """Filter by the object’s `epochByEpochIdentifier` relation."""
+  epochByEpochIdentifier: EpochFilter
+
+  """Checks for all expressions in this list."""
+  and: [EpochEventFilter!]
+
+  """Checks for any expressions in this list."""
+  or: [EpochEventFilter!]
+
+  """Negates the expression."""
+  not: EpochEventFilter
+}
+
+"""
+A filter to be used against `Epoch` object types. All fields are combined with a logical ‘and.’
+"""
+input EpochFilter {
+  """Filter by the object’s `identifier` field."""
+  identifier: StringFilter
+
+  """Filter by the object’s `startTime` field."""
+  startTime: DatetimeFilter
+
+  """Filter by the object’s `duration` field."""
+  duration: StringFilter
+
+  """Filter by the object’s `currentEpoch` field."""
+  currentEpoch: IntFilter
+
+  """Filter by the object’s `currentEpochStartTime` field."""
+  currentEpochStartTime: DatetimeFilter
+
+  """Filter by the object’s `epochCountingStarted` field."""
+  epochCountingStarted: BooleanFilter
+
+  """Filter by the object’s `currentEpochStartHeight` field."""
+  currentEpochStartHeight: IntFilter
+
+  """Filter by the object’s `epochEventsByEpochIdentifier` relation."""
+  epochEventsByEpochIdentifier: EpochToManyEpochEventFilter
+
+  """Some related `epochEventsByEpochIdentifier` exist."""
+  epochEventsByEpochIdentifierExist: Boolean
+
+  """Checks for all expressions in this list."""
+  and: [EpochFilter!]
+
+  """Checks for any expressions in this list."""
+  or: [EpochFilter!]
+
+  """Negates the expression."""
+  not: EpochFilter
+}
+
+"""
+A filter to be used against many `EpochEvent` object types. All fields are combined with a logical ‘and.’
+"""
+input EpochToManyEpochEventFilter {
+  """
+  Every related `EpochEvent` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  every: EpochEventFilter
+
+  """
+  Some related `EpochEvent` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  some: EpochEventFilter
+
+  """
+  No related `EpochEvent` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  none: EpochEventFilter
+}
+
+"""A `Epoch` edge in the connection."""
+type EpochesEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `Epoch` at the end of the edge."""
+  node: Epoch!
+}
+
+"""Methods to use when ordering `Epoch`."""
+enum EpochesOrderBy {
+  NATURAL
+  IDENTIFIER_ASC
+  IDENTIFIER_DESC
+  START_TIME_ASC
+  START_TIME_DESC
+  DURATION_ASC
+  DURATION_DESC
+  CURRENT_EPOCH_ASC
+  CURRENT_EPOCH_DESC
+  CURRENT_EPOCH_START_TIME_ASC
+  CURRENT_EPOCH_START_TIME_DESC
+  EPOCH_COUNTING_STARTED_ASC
+  EPOCH_COUNTING_STARTED_DESC
+  CURRENT_EPOCH_START_HEIGHT_ASC
+  CURRENT_EPOCH_START_HEIGHT_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `Epoch` object types. All fields are tested for equality and combined with a logical ‘and.’
+"""
+input EpochCondition {
+  """Checks for equality with the object’s `identifier` field."""
+  identifier: String
+
+  """Checks for equality with the object’s `startTime` field."""
+  startTime: Datetime
+
+  """Checks for equality with the object’s `duration` field."""
+  duration: String
+
+  """Checks for equality with the object’s `currentEpoch` field."""
+  currentEpoch: Int
+
+  """Checks for equality with the object’s `currentEpochStartTime` field."""
+  currentEpochStartTime: Datetime
+
+  """Checks for equality with the object’s `epochCountingStarted` field."""
+  epochCountingStarted: Boolean
+
+  """Checks for equality with the object’s `currentEpochStartHeight` field."""
+  currentEpochStartHeight: Int
 }
 
 """A connection to a list of `IxoSwap` values."""
@@ -8171,4 +11322,111 @@ input SmartAccountAuthenticatorFilter {
 
   """Negates the expression."""
   not: SmartAccountAuthenticatorFilter
+}
+
+"""A connection to a list of `WasmInstantiate` values."""
+type WasmInstantiatesConnection {
+  """A list of `WasmInstantiate` objects."""
+  nodes: [WasmInstantiate!]!
+
+  """
+  A list of edges which contains the `WasmInstantiate` and cursor to aid in pagination.
+  """
+  edges: [WasmInstantiatesEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  The count of *all* `WasmInstantiate` you could get from the connection.
+  """
+  totalCount: Int!
+}
+
+type WasmInstantiate implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  address: String!
+  codeId: Int
+  createdAt: Datetime!
+  blockHeight: Int!
+  msgIndex: Int
+}
+
+"""A `WasmInstantiate` edge in the connection."""
+type WasmInstantiatesEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `WasmInstantiate` at the end of the edge."""
+  node: WasmInstantiate!
+}
+
+"""Methods to use when ordering `WasmInstantiate`."""
+enum WasmInstantiatesOrderBy {
+  NATURAL
+  ADDRESS_ASC
+  ADDRESS_DESC
+  CODE_ID_ASC
+  CODE_ID_DESC
+  CREATED_AT_ASC
+  CREATED_AT_DESC
+  BLOCK_HEIGHT_ASC
+  BLOCK_HEIGHT_DESC
+  MSG_INDEX_ASC
+  MSG_INDEX_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `WasmInstantiate` object types. All fields are
+tested for equality and combined with a logical ‘and.’
+"""
+input WasmInstantiateCondition {
+  """Checks for equality with the object’s `address` field."""
+  address: String
+
+  """Checks for equality with the object’s `codeId` field."""
+  codeId: Int
+
+  """Checks for equality with the object’s `createdAt` field."""
+  createdAt: Datetime
+
+  """Checks for equality with the object’s `blockHeight` field."""
+  blockHeight: Int
+
+  """Checks for equality with the object’s `msgIndex` field."""
+  msgIndex: Int
+}
+
+"""
+A filter to be used against `WasmInstantiate` object types. All fields are combined with a logical ‘and.’
+"""
+input WasmInstantiateFilter {
+  """Filter by the object’s `address` field."""
+  address: StringFilter
+
+  """Filter by the object’s `codeId` field."""
+  codeId: IntFilter
+
+  """Filter by the object’s `createdAt` field."""
+  createdAt: DatetimeFilter
+
+  """Filter by the object’s `blockHeight` field."""
+  blockHeight: IntFilter
+
+  """Filter by the object’s `msgIndex` field."""
+  msgIndex: IntFilter
+
+  """Checks for all expressions in this list."""
+  and: [WasmInstantiateFilter!]
+
+  """Checks for any expressions in this list."""
+  or: [WasmInstantiateFilter!]
+
+  """Negates the expression."""
+  not: WasmInstantiateFilter
 }

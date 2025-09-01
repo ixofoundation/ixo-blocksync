@@ -12,11 +12,7 @@ export const addAuthenticator = async (
   config?: any,
   key_id?: string
 ): Promise<void> => {
-  try {
-    await pool.query(addAuthenticatorSql, [id, type, address, config, key_id]);
-  } catch (error) {
-    throw error;
-  }
+  await pool.query(addAuthenticatorSql, [id, type, address, config, key_id]);
 };
 
 const removeAuthenticatorSql = `
@@ -27,9 +23,5 @@ export const removeAuthenticator = async (
   id: string,
   address: string
 ): Promise<void> => {
-  try {
-    await pool.query(removeAuthenticatorSql, [id, address]);
-  } catch (error) {
-    throw error;
-  }
+  await pool.query(removeAuthenticatorSql, [id, address]);
 };

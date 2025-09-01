@@ -4,12 +4,8 @@ const getTokenNameSql = `
 SELECT name FROM "Token" WHERE id = $1;
 `;
 export const getTokenName = async (id: string): Promise<string | undefined> => {
-  try {
-    const res = await pool.query(getTokenNameSql, [id]);
-    return res.rows[0]?.name;
-  } catch (error) {
-    throw error;
-  }
+  const res = await pool.query(getTokenNameSql, [id]);
+  return res.rows[0]?.name;
 };
 
 export type TokenTransaction = {
@@ -25,16 +21,7 @@ INSERT INTO "TokenTransaction" ("from", "to", amount, "tokenId") VALUES ($1, $2,
 export const createTokenTransaction = async (
   t: TokenTransaction
 ): Promise<void> => {
-  try {
-    await dbQuery(createTokenTransactionSql, [
-      t.from,
-      t.to,
-      t.amount,
-      t.tokenId,
-    ]);
-  } catch (error) {
-    throw error;
-  }
+  await dbQuery(createTokenTransactionSql, [t.from, t.to, t.amount, t.tokenId]);
 };
 
 const getTokenClassContractAddressSql = `
@@ -43,14 +30,10 @@ SELECT "contractAddress" FROM "TokenClass" WHERE "contractAddress" = $1;
 export const getTokenClassContractAddress = async (
   contractAddress: string
 ): Promise<string | undefined> => {
-  try {
-    const res = await pool.query(getTokenClassContractAddressSql, [
-      contractAddress,
-    ]);
-    return res.rows[0]?.contractAddress;
-  } catch (error) {
-    throw error;
-  }
+  const res = await pool.query(getTokenClassContractAddressSql, [
+    contractAddress,
+  ]);
+  return res.rows[0]?.contractAddress;
 };
 
 export type TokenClass = {
@@ -74,23 +57,19 @@ INSERT INTO "public"."TokenClass" ( "contractAddress", "minter", "class", "name"
 VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11 );
 `;
 export const createTokenClass = async (p: TokenClass): Promise<void> => {
-  try {
-    await dbQuery(createTokenClassSql, [
-      p.contractAddress,
-      p.minter,
-      p.class,
-      p.name,
-      p.description,
-      p.image,
-      p.type,
-      p.cap,
-      p.supply,
-      p.paused,
-      p.stopped,
-    ]);
-  } catch (error) {
-    throw error;
-  }
+  await dbQuery(createTokenClassSql, [
+    p.contractAddress,
+    p.minter,
+    p.class,
+    p.name,
+    p.description,
+    p.image,
+    p.type,
+    p.cap,
+    p.supply,
+    p.paused,
+    p.stopped,
+  ]);
 };
 
 const updateTokenClassSql = `
@@ -110,35 +89,31 @@ WHERE
 `;
 // TODO: UPDATE to maybe use other events from chain for updating retired and cancelled, as this very inefficient
 export const updateTokenClass = async (p: TokenClass): Promise<void> => {
-  try {
-    await dbQuery(updateTokenClassSql, [
-      p.minter,
-      p.class,
+  await dbQuery(updateTokenClassSql, [
+    p.minter,
+    p.class,
+    p.name,
+    p.description,
+    p.image,
+    p.type,
+    p.cap,
+    p.supply,
+    p.paused,
+    p.stopped,
+    p.contractAddress,
+  ]);
+
+  if (p.retired?.length) {
+    await dbQuery(deleteTokenRetiredSql, [p.name]);
+    await dbQuery(createTokenRetiredSql, [JSON.stringify(p.retired), p.name]);
+  }
+
+  if (p.cancelled?.length) {
+    await dbQuery(deleteTokenCancelledSql, [p.name]);
+    await dbQuery(createTokenCancelledSql, [
+      JSON.stringify(p.cancelled),
       p.name,
-      p.description,
-      p.image,
-      p.type,
-      p.cap,
-      p.supply,
-      p.paused,
-      p.stopped,
-      p.contractAddress,
     ]);
-
-    if (p.retired?.length) {
-      await dbQuery(deleteTokenRetiredSql, [p.name]);
-      await dbQuery(createTokenRetiredSql, [JSON.stringify(p.retired), p.name]);
-    }
-
-    if (p.cancelled?.length) {
-      await dbQuery(deleteTokenCancelledSql, [p.name]);
-      await dbQuery(createTokenCancelledSql, [
-        JSON.stringify(p.cancelled),
-        p.name,
-      ]);
-    }
-  } catch (error) {
-    throw error;
   }
 };
 
@@ -188,14 +163,10 @@ INSERT INTO "public"."Token" ( "id", "index", "name", "collection")
 VALUES ( $1, $2, $3, $4 );
 `;
 export const createToken = async (p: Token): Promise<void> => {
-  try {
-    await dbQuery(createTokenSql, [p.id, p.index, p.name, p.collection]);
+  await dbQuery(createTokenSql, [p.id, p.index, p.name, p.collection]);
 
-    if (p.tokenData?.length) {
-      await dbQuery(createTokenDataSql, [JSON.stringify(p.tokenData), p.id]);
-    }
-  } catch (error) {
-    throw error;
+  if (p.tokenData?.length) {
+    await dbQuery(createTokenDataSql, [JSON.stringify(p.tokenData), p.id]);
   }
 };
 
@@ -230,16 +201,12 @@ export const getTokenTransaction = async (
   address: string,
   name?: string
 ): Promise<TokenTransactionWithToken[]> => {
-  try {
-    // const start = Date.now();
-    const res = await pool.query(getTokenTransactionSql, [address, name]);
-    // console.log("executed getTokenTransaction query", {
-    //   duration: Date.now() - start,
-    // });
-    return res.rows;
-  } catch (error) {
-    throw error;
-  }
+  // const start = Date.now();
+  const res = await pool.query(getTokenTransactionSql, [address, name]);
+  // console.log("executed getTokenTransaction query", {
+  //   duration: Date.now() - start,
+  // });
+  return res.rows;
 };
 
 // TODO: check performance for IN vs ANY
@@ -252,12 +219,8 @@ GROUP BY "id";
 export const getTokenRetiredAmountSUM = async (
   ids: string[]
 ): Promise<{ id: string; amount: bigint }[]> => {
-  try {
-    const res = await pool.query(getTokenRetiredAmountSql, [ids]);
-    return res.rows;
-  } catch (error) {
-    throw error;
-  }
+  const res = await pool.query(getTokenRetiredAmountSql, [ids]);
+  return res.rows;
 };
 
 const getTokenClassSql = `
@@ -266,12 +229,8 @@ FROM "TokenClass"
 WHERE "name" = $1;
 `;
 export const getTokenClass = async (name: string): Promise<TokenClass> => {
-  try {
-    const res = await pool.query(getTokenClassSql, [name]);
-    return res.rows[0];
-  } catch (error) {
-    throw error;
-  }
+  const res = await pool.query(getTokenClassSql, [name]);
+  return res.rows[0];
 };
 
 const getAccountTokensSql = `
@@ -308,18 +267,14 @@ export const getAccountTokensFromDb = async (
   name?: string,
   allEntityRetired?: boolean
 ): Promise<any[]> => {
-  try {
-    const start = Date.now();
-    const res = await pool.query(getAccountTokensSql, [
-      address,
-      name,
-      allEntityRetired,
-    ]);
-    console.log("executed getAccountTokensFromDb query", {
-      duration: Date.now() - start,
-    });
-    return res.rows;
-  } catch (error) {
-    throw error;
-  }
+  const start = Date.now();
+  const res = await pool.query(getAccountTokensSql, [
+    address,
+    name,
+    allEntityRetired,
+  ]);
+  console.log("executed getAccountTokensFromDb query", {
+    duration: Date.now() - start,
+  });
+  return res.rows;
 };

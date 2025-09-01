@@ -18,7 +18,7 @@ import {
   SellOrderSDKType,
   SwapOrderSDKType,
 } from "@ixo/impactxclient-sdk/types/codegen/ixo/bonds/v1beta1/bonds";
-import { EventCore } from "../postgres/blocksync_core/block";
+import { BlockCore, EventCore } from "../postgres/blocksync_core/block";
 import { createIid, updateIid } from "../postgres/iid";
 import { createEntity, updateEntity } from "../postgres/entity";
 import {
@@ -50,12 +50,9 @@ import {
 } from "../postgres/smart_account";
 import { queryClient } from "../sync/sync_chain";
 import Long from "long";
+import { epochStartedOrEnded } from "../postgres/epoch";
 
-export const syncEventData = async (
-  event: EventCore,
-  blockHeight: number,
-  timestamp: Date
-) => {
+export const syncEventData = async (event: EventCore, block: BlockCore) => {
   try {
     switch (event.type) {
       // ==========================================================
@@ -396,8 +393,8 @@ export const syncEventData = async (
           bondDid: getValueFromAttributes(event.attributes, "bond_did"),
           alpha: getValueFromAttributes(event.attributes, "next_alpha"),
           oracleDid: getValueFromAttributes(event.attributes, "signer"),
-          height: blockHeight,
-          timestamp: timestamp,
+          height: block.height,
+          timestamp: block.time,
         });
         break;
       case EventTypes.buyOrderBond:
@@ -410,8 +407,8 @@ export const syncEventData = async (
           accountDid: buyOrder.base_order!.account_did,
           amount: buyOrder.base_order!.amount,
           maxPrices: buyOrder.max_prices,
-          height: blockHeight,
-          timestamp: timestamp,
+          height: block.height,
+          timestamp: block.time,
         });
         break;
       case EventTypes.sellOrderBond:
@@ -423,8 +420,8 @@ export const syncEventData = async (
           bondDid: getValueFromAttributes(event.attributes, "bond_did"),
           accountDid: sellOrder.base_order!.account_did,
           amount: sellOrder.base_order!.amount,
-          height: blockHeight,
-          timestamp: timestamp,
+          height: block.height,
+          timestamp: block.time,
         });
         break;
       case EventTypes.swapOrderBond:
@@ -437,8 +434,8 @@ export const syncEventData = async (
           accountDid: swapOrder.base_order!.account_did,
           amount: swapOrder.base_order!.amount,
           toToken: swapOrder.to_token,
-          height: blockHeight,
-          timestamp: timestamp,
+          height: block.height,
+          timestamp: block.time,
         });
         break;
       case EventTypes.outcomePaymentBond:
@@ -450,8 +447,8 @@ export const syncEventData = async (
             "sender_address"
           ),
           amount: getValueFromAttributes(event.attributes, "outcome_payment"),
-          height: blockHeight,
-          timestamp: timestamp,
+          height: block.height,
+          timestamp: block.time,
         });
         break;
       case EventTypes.shareWithdrawalBond:
@@ -466,8 +463,8 @@ export const syncEventData = async (
             "recipient_address"
           ),
           amount: getValueFromAttributes(event.attributes, "withdraw_payment"),
-          height: blockHeight,
-          timestamp: timestamp,
+          height: block.height,
+          timestamp: block.time,
         });
         break;
       case EventTypes.reserveWithdrawalBond:
@@ -486,8 +483,8 @@ export const syncEventData = async (
             event.attributes,
             "reserve_withdrawal_address"
           ),
-          height: blockHeight,
-          timestamp: timestamp,
+          height: block.height,
+          timestamp: block.time,
         });
         break;
 
@@ -538,11 +535,37 @@ export const syncEventData = async (
         );
         break;
       }
+
+      // ==========================================================
+      // EPOCHS
+      // ==========================================================
+      case "ixo.epochs.v1beta1.EpochStartEvent": {
+        await epochStartedOrEnded({
+          epoch_number: Number(
+            getValueFromAttributes(event.attributes, "epoch_number")
+          ),
+          time: getValueFromAttributes(event.attributes, "start_time"),
+          height: block.height,
+          is_started: true,
+        });
+        break;
+      }
+      case "ixo.epochs.v1beta1.EpochEndEvent": {
+        await epochStartedOrEnded({
+          epoch_number: Number(
+            getValueFromAttributes(event.attributes, "epoch_number")
+          ),
+          time: block.time,
+          height: block.height,
+          is_started: false,
+        });
+      }
+
       default:
         break;
     }
   } catch (error) {
     console.error("ERROR::syncEventData:: ", error);
-    // throw error;
+    throw error;
   }
 };

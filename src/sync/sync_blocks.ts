@@ -1,6 +1,6 @@
 import { sleep } from "../util/sleep";
-import * as TransactionSyncHandler from "../sync_handlers/transaction_sync_handler";
-import * as EventSyncHandler from "../sync_handlers/event_sync_handler";
+import * as TransactionSyncHandler from "../sync_handlers/transaction_sync";
+import * as EventSyncHandler from "../sync_handlers/event_sync";
 import { currentChain } from "./sync_chain";
 import { getCoreBlock } from "../postgres/blocksync_core/block";
 import { getChain, updateChain } from "../postgres/chain";
@@ -43,12 +43,8 @@ export const startSync = async () => {
         await withTransaction(async (client) => {
           currentPool = client;
           await Promise.all([
-            EventSyncHandler.syncEvents(block.events, block.height, block.time),
-            TransactionSyncHandler.syncTransactions(
-              block.transactions,
-              block.height,
-              block.time
-            ),
+            EventSyncHandler.syncEvents(block),
+            TransactionSyncHandler.syncTransactions(block),
             updateChain({
               chainId: currentChain.chainId,
               blockHeight: block.height,
@@ -78,7 +74,6 @@ export const startSync = async () => {
         }
         await sleep(1000);
       }
-      errorCount = 0;
     } catch (error) {
       count = 0;
       errorCount++;

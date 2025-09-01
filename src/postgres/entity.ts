@@ -21,24 +21,20 @@ INSERT INTO "Entity" ( "id", "type", "startDate", "endDate", "status", "relayerN
 VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12 );
 `;
 export const createEntity = async (p: Entity): Promise<void> => {
-  try {
-    await dbQuery(createEntitySql, [
-      p.id,
-      p.type,
-      p.startDate,
-      p.endDate,
-      p.status,
-      p.relayerNode,
-      p.credentials,
-      p.entityVerified,
-      JSON.stringify(p.metadata),
-      JSON.stringify(p.accounts),
-      p.externalId,
-      p.owner,
-    ]);
-  } catch (error) {
-    throw error;
-  }
+  await dbQuery(createEntitySql, [
+    p.id,
+    p.type,
+    p.startDate,
+    p.endDate,
+    p.status,
+    p.relayerNode,
+    p.credentials,
+    p.entityVerified,
+    JSON.stringify(p.metadata),
+    JSON.stringify(p.accounts),
+    p.externalId,
+    p.owner,
+  ]);
 };
 
 const updateEntitySql = `
@@ -56,22 +52,18 @@ WHERE
 	            "id" = $10;
 `;
 export const updateEntity = async (p: Entity): Promise<void> => {
-  try {
-    await dbQuery(updateEntitySql, [
-      p.type,
-      p.startDate,
-      p.endDate,
-      p.status,
-      p.relayerNode,
-      p.credentials,
-      p.entityVerified,
-      JSON.stringify(p.metadata),
-      JSON.stringify(p.accounts),
-      p.id,
-    ]);
-  } catch (error) {
-    throw error;
-  }
+  await dbQuery(updateEntitySql, [
+    p.type,
+    p.startDate,
+    p.endDate,
+    p.status,
+    p.relayerNode,
+    p.credentials,
+    p.entityVerified,
+    JSON.stringify(p.metadata),
+    JSON.stringify(p.accounts),
+    p.id,
+  ]);
 };
 
 const updateEntityOwnerSql = `
@@ -81,11 +73,7 @@ export const updateEntityOwner = async (e: {
   id: string;
   owner: string;
 }): Promise<void> => {
-  try {
-    await dbQuery(updateEntityOwnerSql, [e.id, e.owner]);
-  } catch (error) {
-    throw error;
-  }
+  await dbQuery(updateEntityOwnerSql, [e.id, e.owner]);
 };
 
 const updateEntityExternalIdSql = `
@@ -95,11 +83,7 @@ export const updateEntityExternalId = async (e: {
   id: string;
   externalId: string;
 }): Promise<void> => {
-  try {
-    await dbQuery(updateEntityExternalIdSql, [e.id, e.externalId]);
-  } catch (error) {
-    throw error;
-  }
+  await dbQuery(updateEntityExternalIdSql, [e.id, e.externalId]);
 };
 
 const getEntityDeviceAndNoExternalIdSql = `
@@ -117,12 +101,8 @@ export const getEntityDeviceAndNoExternalId = async (
     linkedResource: any;
   }[]
 > => {
-  try {
-    const res = await pool.query(getEntityDeviceAndNoExternalIdSql, [length]);
-    return res.rows;
-  } catch (error) {
-    throw error;
-  }
+  const res = await pool.query(getEntityDeviceAndNoExternalIdSql, [length]);
+  return res.rows;
 };
 
 const getEntityServiceSql = `
@@ -131,12 +111,8 @@ FROM "IID" AS i
 WHERE i.id = $1;
 `;
 export const getEntityService = async (id: string): Promise<any> => {
-  try {
-    const res = await pool.query(getEntityServiceSql, [id]);
-    return res.rows[0];
-  } catch (error) {
-    throw error;
-  }
+  const res = await pool.query(getEntityServiceSql, [id]);
+  return res.rows[0];
 };
 
 const getEntityParentIidSql = `
@@ -156,12 +132,8 @@ export const getEntityParentIid = async (
     }
   | undefined
 > => {
-  try {
-    const res = await pool.query(getEntityParentIidSql, [id]);
-    return res.rows[0];
-  } catch (error) {
-    throw error;
-  }
+  const res = await pool.query(getEntityParentIidSql, [id]);
+  return res.rows[0];
 };
 
 export type EntityAndIid = Entity & Iid;
@@ -190,12 +162,8 @@ WHERE e.id = $1;
 export const getEntityAndIid = async (
   id: string
 ): Promise<EntityAndIid | undefined> => {
-  try {
-    const res = await pool.query(getEntityAndIidSql, [id]);
-    return res.rows[0];
-  } catch (error) {
-    throw error;
-  }
+  const res = await pool.query(getEntityAndIidSql, [id]);
+  return res.rows[0];
 };
 
 const getEntityDeviceAccountsSql = `
@@ -206,12 +174,8 @@ WHERE e."owner" = $1 AND e."type" = 'asset/device';
 export const getEntityDeviceAccounts = async (
   owner: string
 ): Promise<{ id: string; accounts: any }[]> => {
-  try {
-    const res = await pool.query(getEntityDeviceAccountsSql, [owner]);
-    return res.rows;
-  } catch (error) {
-    throw error;
-  }
+  const res = await pool.query(getEntityDeviceAccountsSql, [owner]);
+  return res.rows;
 };
 
 const getEntityAccountsByIidContextSql = `
@@ -223,10 +187,6 @@ WHERE i."context" @> $1;
 export const getEntityAccountsByIidContext = async (
   context: any
 ): Promise<{ id: string; accounts: any }[]> => {
-  try {
-    const res = await pool.query(getEntityAccountsByIidContextSql, [context]);
-    return res.rows;
-  } catch (error) {
-    throw error;
-  }
+  const res = await pool.query(getEntityAccountsByIidContextSql, [context]);
+  return res.rows;
 };

@@ -1,4 +1,4 @@
-import { dbQuery, pool, withTransaction } from "./client";
+import { dbQuery, pool } from "./client";
 
 export type ClaimCollection = {
   id: string;
@@ -25,27 +25,23 @@ VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15 );
 export const createClaimCollection = async (
   p: ClaimCollection
 ): Promise<void> => {
-  try {
-    await dbQuery(createClaimCollectionSql, [
-      p.id,
-      p.entity,
-      p.admin,
-      p.protocol,
-      p.startDate,
-      p.endDate,
-      p.quota,
-      p.count,
-      p.evaluated,
-      p.approved,
-      p.rejected,
-      p.disputed,
-      p.invalidated,
-      p.state,
-      JSON.stringify(p.payments),
-    ]);
-  } catch (error) {
-    throw error;
-  }
+  await dbQuery(createClaimCollectionSql, [
+    p.id,
+    p.entity,
+    p.admin,
+    p.protocol,
+    p.startDate,
+    p.endDate,
+    p.quota,
+    p.count,
+    p.evaluated,
+    p.approved,
+    p.rejected,
+    p.disputed,
+    p.invalidated,
+    p.state,
+    JSON.stringify(p.payments),
+  ]);
 };
 
 const updateClaimCollectionSql = `
@@ -70,27 +66,23 @@ WHERE
 export const updateClaimCollection = async (
   p: ClaimCollection
 ): Promise<void> => {
-  try {
-    await dbQuery(updateClaimCollectionSql, [
-      p.entity,
-      p.admin,
-      p.protocol,
-      p.startDate,
-      p.endDate,
-      p.quota,
-      p.count,
-      p.evaluated,
-      p.approved,
-      p.rejected,
-      p.disputed,
-      p.invalidated,
-      p.state,
-      JSON.stringify(p.payments),
-      p.id,
-    ]);
-  } catch (error) {
-    throw error;
-  }
+  await dbQuery(updateClaimCollectionSql, [
+    p.entity,
+    p.admin,
+    p.protocol,
+    p.startDate,
+    p.endDate,
+    p.quota,
+    p.count,
+    p.evaluated,
+    p.approved,
+    p.rejected,
+    p.disputed,
+    p.invalidated,
+    p.state,
+    JSON.stringify(p.payments),
+    p.id,
+  ]);
 };
 
 export type Claim = {
@@ -109,19 +101,15 @@ INSERT INTO "public"."Claim" ( "claimId", "agentDid", "agentAddress", "submissio
 VALUES ( $1, $2, $3, $4, $5, $6, $7 );
 `;
 export const createClaim = async (p: Claim): Promise<void> => {
-  try {
-    await dbQuery(createClaimSql, [
-      p.claimId,
-      p.agentDid,
-      p.agentAddress,
-      p.submissionDate,
-      JSON.stringify(p.paymentsStatus),
-      p.schemaType,
-      p.collectionId,
-    ]);
-  } catch (error) {
-    throw error;
-  }
+  await dbQuery(createClaimSql, [
+    p.claimId,
+    p.agentDid,
+    p.agentAddress,
+    p.submissionDate,
+    JSON.stringify(p.paymentsStatus),
+    p.schemaType,
+    p.collectionId,
+  ]);
 };
 
 const updateClaimSql = `
@@ -136,33 +124,29 @@ WHERE
 	       "claimId" = $7;
 `;
 export const updateClaim = async (p: Claim): Promise<void> => {
-  try {
-    await dbQuery(updateClaimSql, [
-      p.agentDid,
-      p.agentAddress,
-      p.submissionDate,
-      JSON.stringify(p.paymentsStatus),
-      p.schemaType,
-      p.collectionId,
-      p.claimId,
-    ]);
+  await dbQuery(updateClaimSql, [
+    p.agentDid,
+    p.agentAddress,
+    p.submissionDate,
+    JSON.stringify(p.paymentsStatus),
+    p.schemaType,
+    p.collectionId,
+    p.claimId,
+  ]);
 
-    if (p.evaluation) {
-      await dbQuery(upsertEvaluationSql, [
-        p.evaluation.collectionId,
-        p.evaluation.oracle,
-        p.evaluation.agentDid,
-        p.evaluation.agentAddress,
-        p.evaluation.status,
-        p.evaluation.reason,
-        p.evaluation.verificationProof,
-        JSON.stringify(p.evaluation.amount),
-        p.evaluation.evaluationDate,
-        p.evaluation.claimId,
-      ]);
-    }
-  } catch (error) {
-    throw error;
+  if (p.evaluation) {
+    await dbQuery(upsertEvaluationSql, [
+      p.evaluation.collectionId,
+      p.evaluation.oracle,
+      p.evaluation.agentDid,
+      p.evaluation.agentAddress,
+      p.evaluation.status,
+      p.evaluation.reason,
+      p.evaluation.verificationProof,
+      JSON.stringify(p.evaluation.amount),
+      p.evaluation.evaluationDate,
+      p.evaluation.claimId,
+    ]);
   }
 };
 
@@ -207,16 +191,12 @@ INSERT INTO "public"."Dispute" ( "proof", "subjectId", "type", "data")
 VALUES ( $1, $2, $3, $4 );
 `;
 export const createDispute = async (p: Dispute): Promise<void> => {
-  try {
-    await dbQuery(createDisputeSql, [
-      p.proof,
-      p.subjectId,
-      p.type,
-      JSON.stringify(p.data),
-    ]);
-  } catch (error) {
-    throw error;
-  }
+  await dbQuery(createDisputeSql, [
+    p.proof,
+    p.subjectId,
+    p.type,
+    JSON.stringify(p.data),
+  ]);
 };
 
 const getCollectionsClaimTypeNullSql = `
@@ -229,12 +209,8 @@ GROUP BY cc.id;
 export const getCollectionsClaimTypeNull = async (): Promise<
   { id: string }[]
 > => {
-  try {
-    const res = await pool.query(getCollectionsClaimTypeNullSql);
-    return res.rows;
-  } catch (error) {
-    throw error;
-  }
+  const res = await pool.query(getCollectionsClaimTypeNullSql);
+  return res.rows;
 };
 
 const getCollectionEntitySql = `
@@ -250,12 +226,8 @@ export const getCollectionEntity = async (
     }
   | undefined
 > => {
-  try {
-    const res = await pool.query(getCollectionEntitySql, [collectionId]);
-    return res.rows[0];
-  } catch (error) {
-    throw error;
-  }
+  const res = await pool.query(getCollectionEntitySql, [collectionId]);
+  return res.rows[0];
 };
 
 const getCollectionClaimsTypeNullSql = `
@@ -273,15 +245,11 @@ export const getCollectionClaimsTypeNull = async (
     claimId: string;
   }[]
 > => {
-  try {
-    const res = await pool.query(getCollectionClaimsTypeNullSql, [
-      collectionId,
-      length,
-    ]);
-    return res.rows;
-  } catch (error) {
-    throw error;
-  }
+  const res = await pool.query(getCollectionClaimsTypeNullSql, [
+    collectionId,
+    length,
+  ]);
+  return res.rows;
 };
 
 const updateClaimSchemaSql = `
@@ -292,11 +260,7 @@ export const updateClaimSchema = async (
   claimId: string,
   schemaType: string
 ): Promise<void> => {
-  try {
-    await pool.query(updateClaimSchemaSql, [claimId, schemaType]);
-  } catch (error) {
-    throw error;
-  }
+  await pool.query(updateClaimSchemaSql, [claimId, schemaType]);
 };
 
 // cant have asc or desc as query parameter, so use direct string interpolation to generate query
@@ -356,19 +320,15 @@ export const getCollectionClaimsByType = async (p: {
   take: number;
   cursor: string | null;
 }): Promise<Claim[]> => {
-  try {
-    const res = await pool.query(getCollectionClaimsByTypeSql(p.orderBy), [
-      p.collectionId,
-      p.includeType || null,
-      p.type,
-      p.includeStatus || null,
-      p.status,
-      p.orderBy,
-      p.take,
-      p.cursor,
-    ]);
-    return res.rows;
-  } catch (error) {
-    throw error;
-  }
+  const res = await pool.query(getCollectionClaimsByTypeSql(p.orderBy), [
+    p.collectionId,
+    p.includeType || null,
+    p.type,
+    p.includeStatus || null,
+    p.status,
+    p.orderBy,
+    p.take,
+    p.cursor,
+  ]);
+  return res.rows;
 };

@@ -1,20 +1,16 @@
 import { decodeMessage } from "../util/proto";
-import { TransactionCore } from "../postgres/blocksync_core/block";
+import { BlockCore, MessageCore } from "../postgres/blocksync_core/block";
 import { insertBlock, Message, Transaction } from "../postgres/transaction";
 import { getTokenName } from "../postgres/token";
 
-export const syncTransactions = async (
-  transactions: TransactionCore[],
-  blockHeight: number,
-  timestamp: Date
-) => {
-  if (transactions.length === 0) return;
+export const syncTransactions = async (block: BlockCore) => {
+  if (block.transactions.length === 0) return;
 
   const allMessages: Message[] = [];
   const allTransactions: Transaction[] = [];
 
   // NOTE: consider concurrency here but might affect memory usage.
-  for (const transaction of transactions) {
+  for (const transaction of block.transactions) {
     // Extract and map messages to their decoded form
     for (const m of transaction.messages) {
       const value = await decodeAndProcessMessage(m, transaction.hash);
@@ -36,8 +32,8 @@ export const syncTransactions = async (
 
   try {
     await insertBlock({
-      height: blockHeight,
-      time: timestamp,
+      height: block.height,
+      time: block.time,
       transactions: allTransactions,
       messages: allMessages,
     });
@@ -47,7 +43,7 @@ export const syncTransactions = async (
 };
 
 const decodeAndProcessMessage = async (
-  message: any,
+  message: MessageCore,
   transactionHash: string
 ): Promise<Message | null> => {
   const value = message.value;
@@ -86,6 +82,7 @@ const decodeAndProcessMessage = async (
     denoms,
     tokenNames,
     transactionHash,
+    index: message.index,
   };
 };
 
