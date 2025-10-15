@@ -50,6 +50,7 @@ import {
 } from "../postgres/smart_account";
 import { queryClient } from "../sync/sync_chain";
 import Long from "long";
+import { queueBroadcast } from "../websocket/broadcast_queue";
 
 export const syncEventData = async (
   event: EventCore,
@@ -84,6 +85,7 @@ export const syncEventData = async (
           accordedRight: cIid.accordedRight,
           linkedEntity: cIid.linkedEntity,
         });
+        queueBroadcast("iid:created", { id: cIid.id, blockHeight });
         break;
       case EventTypes.updateIid:
         const uIid: IidDocumentSDKType = getDocFromAttributes(
@@ -108,6 +110,7 @@ export const syncEventData = async (
           accordedRight: uIid.accordedRight,
           linkedEntity: uIid.linkedEntity,
         });
+        queueBroadcast("iid:updated", { id: uIid.id, blockHeight });
         break;
 
       // ==========================================================
@@ -130,6 +133,7 @@ export const syncEventData = async (
           metadata: cEntity.metadata,
           accounts: cEntity.accounts,
         });
+        queueBroadcast("entity:created", { id: cEntity.id, blockHeight });
         break;
       case EventTypes.updateEntity:
         const uEntity: EntitySDKType = getDocFromAttributes(
@@ -148,6 +152,7 @@ export const syncEventData = async (
           metadata: uEntity.metadata,
           accounts: uEntity.accounts,
         });
+        queueBroadcast("entity:updated", { id: uEntity.id, blockHeight });
         break;
 
       // ==========================================================

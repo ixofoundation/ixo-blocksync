@@ -8,6 +8,7 @@ import * as SyncBlocks from "./sync/sync_blocks";
 import { DATABASE_URL, PORT, MIGRATE_DB_PROGRAMATICALLY } from "./util/secrets";
 import * as SyncChain from "./sync/sync_chain";
 import { postgresMigrate } from "./postgres/migrations";
+import { initWebSocketServer } from "./websocket/server";
 
 (async () => {
   // first apply db migrations if env var set, for prod dbs where no access to shell
@@ -22,6 +23,9 @@ import { postgresMigrate } from "./postgres/migrations";
   const server = http.createServer(app);
   // server.keepAliveTimeout = 76000; // Set the keepalive timeout to 76 seconds
   // server.headersTimeout = 77000; // Set the headers timeout to 77 seconds
+
+  // Initialize WebSocket server on the same HTTP server
+  initWebSocketServer(server);
 
   server.listen(PORT, () => console.log(`Listening on ${PORT}`));
 })();
