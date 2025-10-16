@@ -6,6 +6,7 @@ import { getCoreBlock } from "../postgres/blocksync_core/block";
 import { getChain, updateChain } from "../postgres/chain";
 import { withTransaction } from "../postgres/client";
 import { PoolClient } from "pg";
+import { flushWebhooks, clearQueue } from "../webhooks/webhook_queue";
 
 let syncing: boolean;
 
@@ -57,6 +58,9 @@ export const startSync = async () => {
           currentPool = undefined;
         });
 
+        // Flush all queued webhooks after successful transaction (non-blocking)
+        flushWebhooks(block.height, currentChain.chainId, block.time);
+
         if (currentBlock % 1000 === 0) {
           console.log(`Synced Block ${currentBlock}`);
           if (logSync1000Time) console.timeLog("sync");
@@ -82,6 +86,9 @@ export const startSync = async () => {
     } catch (error) {
       count = 0;
       errorCount++;
+
+      // Clear queued webhooks on transaction failure
+      clearQueue();
 
       // if error, log error and sleep for 2 seconds, to attempt self healing and retry
       console.error(`ERROR::Adding Block ${currentBlock}:: ${error}`);

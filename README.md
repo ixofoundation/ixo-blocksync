@@ -69,3 +69,14 @@ The server exposes a Graphql api endpoint at `/graphql` which is set up using [P
 A graphiql playground gets exposed at the endpoint `/graphiql` where you can play around, test queries and see the schemas.
 
 We also generate and expose the full graphql schema file (schema.graphql) under the endpoint `/api/graphql_schema` if you need it to generate clients.
+
+## Webhook Notifications
+
+The server supports webhook notifications for real-time blockchain event updates. Configure webhook URLs in your `.env` file to receive POST requests with batched events after each successful block sync.
+
+Supported event types:
+
+- Entity created/updated
+- IID document created/updated
+
+See [WEBHOOKS.md](WEBHOOKS.md) for complete documentation on setup, payload format, and usage examples.

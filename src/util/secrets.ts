@@ -12,3 +12,10 @@ export const IPFS_SERVICE_MAPPING = process.env.IPFS_SERVICE_MAPPING || "";
 export const DATABASE_USE_SSL =
   Number(process.env.DATABASE_USE_SSL ?? "0") || 0;
 export const STATIC_CHAIN_ID = process.env.STATIC_CHAIN_ID;
+
+// Webhook configuration
+const webhookUrlsEnv = process.env.WEBHOOK_URLS || "";
+export const WEBHOOK_URLS = webhookUrlsEnv
+  .split(",")
+  .map((url) => url.trim())
+  .filter((url) => url.length > 0);
