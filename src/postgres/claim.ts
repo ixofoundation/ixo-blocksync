@@ -16,11 +16,13 @@ export type ClaimCollection = {
   invalidated: number;
   state: number;
   payments: any; // JSON
+  escrowAccount?: string;
+  intents?: number;
 };
 
 const createClaimCollectionSql = `
-INSERT INTO "public"."ClaimCollection" ( "id", "entity", "admin", "protocol", "startDate", "endDate", "quota", "count", "evaluated", "approved", "rejected", "disputed", "invalidated", "state", "payments")
-VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15 );
+INSERT INTO "public"."ClaimCollection" ( "id", "entity", "admin", "protocol", "startDate", "endDate", "quota", "count", "evaluated", "approved", "rejected", "disputed", "invalidated", "state", "payments", "escrowAccount", "intents")
+VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17 );
 `;
 export const createClaimCollection = async (
   p: ClaimCollection
@@ -41,6 +43,8 @@ export const createClaimCollection = async (
     p.invalidated,
     p.state,
     JSON.stringify(p.payments),
+    p.escrowAccount,
+    p.intents,
   ]);
 };
 
@@ -59,9 +63,11 @@ UPDATE "public"."ClaimCollection" SET
 	   "disputed" = $11,
 	"invalidated" = $12,
 	      "state" = $13,
-	   "payments" = $14
+	   "payments" = $14,
+	"escrowAccount" = $15,
+	    "intents" = $16
 WHERE
-	         "id" = $15;
+	         "id" = $17;
 `;
 export const updateClaimCollection = async (
   p: ClaimCollection
@@ -81,6 +87,8 @@ export const updateClaimCollection = async (
     p.invalidated,
     p.state,
     JSON.stringify(p.payments),
+    p.escrowAccount,
+    p.intents,
     p.id,
   ]);
 };
@@ -94,11 +102,16 @@ export type Claim = {
   schemaType?: string;
   collectionId: string;
   evaluation?: Evaluation;
+  useIntent?: boolean;
+  amount?: any; // JSON
+  cw20Payment?: any; // JSON
+  cw1155Payment?: any; // JSON
+  cw1155IntentPayment?: any; // JSON
 };
 
 const createClaimSql = `
-INSERT INTO "public"."Claim" ( "claimId", "agentDid", "agentAddress", "submissionDate", "paymentsStatus", "schemaType", "collectionId")
-VALUES ( $1, $2, $3, $4, $5, $6, $7 );
+INSERT INTO "public"."Claim" ( "claimId", "agentDid", "agentAddress", "submissionDate", "paymentsStatus", "schemaType", "collectionId", "useIntent", "amount", "cw20Payment", "cw1155Payment", "cw1155IntentPayment")
+VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12 );
 `;
 export const createClaim = async (p: Claim): Promise<void> => {
   await dbQuery(createClaimSql, [
@@ -109,6 +122,11 @@ export const createClaim = async (p: Claim): Promise<void> => {
     JSON.stringify(p.paymentsStatus),
     p.schemaType,
     p.collectionId,
+    p.useIntent,
+    p.amount ? JSON.stringify(p.amount) : null,
+    p.cw20Payment ? JSON.stringify(p.cw20Payment) : null,
+    p.cw1155Payment ? JSON.stringify(p.cw1155Payment) : null,
+    p.cw1155IntentPayment ? JSON.stringify(p.cw1155IntentPayment) : null,
   ]);
 };
 
@@ -119,9 +137,14 @@ UPDATE "public"."Claim" SET
 	"submissionDate" = $3,
 	"paymentsStatus" = $4,
 	    "schemaType" = $5,
-	  "collectionId" = $6
+	  "collectionId" = $6,
+	    "useIntent" = $7,
+	       "amount" = $8,
+	   "cw20Payment" = $9,
+	 "cw1155Payment" = $10,
+	"cw1155IntentPayment" = $11
 WHERE
-	       "claimId" = $7;
+	       "claimId" = $12;
 `;
 export const updateClaim = async (p: Claim): Promise<void> => {
   await dbQuery(updateClaimSql, [
@@ -131,6 +154,11 @@ export const updateClaim = async (p: Claim): Promise<void> => {
     JSON.stringify(p.paymentsStatus),
     p.schemaType,
     p.collectionId,
+    p.useIntent,
+    p.amount ? JSON.stringify(p.amount) : null,
+    p.cw20Payment ? JSON.stringify(p.cw20Payment) : null,
+    p.cw1155Payment ? JSON.stringify(p.cw1155Payment) : null,
+    p.cw1155IntentPayment ? JSON.stringify(p.cw1155IntentPayment) : null,
     p.claimId,
   ]);
 
@@ -146,6 +174,15 @@ export const updateClaim = async (p: Claim): Promise<void> => {
       JSON.stringify(p.evaluation.amount),
       p.evaluation.evaluationDate,
       p.evaluation.claimId,
+      p.evaluation.cw20Payment
+        ? JSON.stringify(p.evaluation.cw20Payment)
+        : null,
+      p.evaluation.cw1155Payment
+        ? JSON.stringify(p.evaluation.cw1155Payment)
+        : null,
+      p.evaluation.cw1155IntentPayment
+        ? JSON.stringify(p.evaluation.cw1155IntentPayment)
+        : null,
     ]);
   }
 };
@@ -161,11 +198,14 @@ export type Evaluation = {
   amount: any; // JSON
   evaluationDate: Date;
   claimId: string;
+  cw20Payment?: any; // JSON
+  cw1155Payment?: any; // JSON
+  cw1155IntentPayment?: any; // JSON
 };
 
 const upsertEvaluationSql = `
-INSERT INTO "public"."Evaluation" ( "collectionId", "oracle", "agentDid", "agentAddress", "status", "reason", "verificationProof", "amount", "evaluationDate", "claimId")
-VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10 )
+INSERT INTO "public"."Evaluation" ( "collectionId", "oracle", "agentDid", "agentAddress", "status", "reason", "verificationProof", "amount", "evaluationDate", "claimId", "cw20Payment", "cw1155Payment", "cw1155IntentPayment")
+VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13 )
 ON CONFLICT("claimId") DO UPDATE SET
   "collectionId" = EXCLUDED."collectionId",
   "oracle" = EXCLUDED."oracle",
@@ -175,7 +215,10 @@ ON CONFLICT("claimId") DO UPDATE SET
   "reason" = EXCLUDED."reason",
   "verificationProof" = EXCLUDED."verificationProof",
   "amount" = EXCLUDED."amount",
-  "evaluationDate" = EXCLUDED."evaluationDate"
+  "evaluationDate" = EXCLUDED."evaluationDate",
+  "cw20Payment" = EXCLUDED."cw20Payment",
+  "cw1155Payment" = EXCLUDED."cw1155Payment",
+  "cw1155IntentPayment" = EXCLUDED."cw1155IntentPayment"
 WHERE "Evaluation"."claimId" = EXCLUDED."claimId";
 `;
 

@@ -53,6 +53,7 @@ import { smartAccountAuthenticatorQuery } from "../util/archive-queries";
 import { queueBroadcast } from "../websocket/broadcast_queue";
 
 export const syncEventData = async (event: EventCore, block: BlockCore) => {
+  const blockHeight = block.height;
   try {
     switch (event.type) {
       // ==========================================================
@@ -175,6 +176,13 @@ export const syncEventData = async (event: EventCore, block: BlockCore) => {
           invalidated: Number(cCollection.invalidated ?? 0),
           state: ixo.claims.v1beta1.collectionStateFromJSON(cCollection.state),
           payments: cCollection.payments,
+          escrowAccount: cCollection.escrow_account ?? undefined,
+          intents:
+            cCollection.intents != null
+              ? ixo.claims.v1beta1.collectionIntentOptionsFromJSON(
+                  cCollection.intents
+                )
+              : undefined,
         });
         break;
       case EventTypes.updateCollection:
@@ -198,6 +206,13 @@ export const syncEventData = async (event: EventCore, block: BlockCore) => {
           invalidated: Number(uCollection.invalidated ?? 0),
           state: ixo.claims.v1beta1.collectionStateFromJSON(uCollection.state),
           payments: uCollection.payments,
+          escrowAccount: uCollection.escrow_account ?? undefined,
+          intents:
+            uCollection.intents != null
+              ? ixo.claims.v1beta1.collectionIntentOptionsFromJSON(
+                  uCollection.intents
+                )
+              : undefined,
         });
         break;
       case EventTypes.submitClaim:
@@ -212,6 +227,11 @@ export const syncEventData = async (event: EventCore, block: BlockCore) => {
           agentAddress: cClaim.agent_address,
           submissionDate: cClaim.submission_date as any,
           paymentsStatus: cClaim.payments_status,
+          useIntent: cClaim.use_intent ?? undefined,
+          amount: cClaim.amount?.length ? cClaim.amount : undefined,
+          cw20Payment: cClaim.cw20_payment,
+          cw1155Payment: cClaim.cw1155_payment,
+          cw1155IntentPayment: cClaim.cw1155_intent_payment,
         });
         break;
       case EventTypes.updateClaim:
@@ -233,6 +253,9 @@ export const syncEventData = async (event: EventCore, block: BlockCore) => {
               evaluationDate: uClaim.evaluation!.evaluation_date as any,
               amount: uClaim.evaluation!.amount,
               claimId: uClaim.claim_id,
+              cw20Payment: uClaim.evaluation?.cw20_payment,
+              cw1155Payment: uClaim.evaluation?.cw1155_payment,
+              cw1155IntentPayment: uClaim.evaluation?.cw1155_intent_payment,
             }
           : undefined;
         await updateClaim({
@@ -243,6 +266,11 @@ export const syncEventData = async (event: EventCore, block: BlockCore) => {
           submissionDate: uClaim.submission_date as any,
           paymentsStatus: uClaim.payments_status,
           evaluation,
+          useIntent: uClaim.use_intent ?? undefined,
+          amount: uClaim.amount?.length ? uClaim.amount : undefined,
+          cw20Payment: uClaim.cw20_payment,
+          cw1155Payment: uClaim.cw1155_payment,
+          cw1155IntentPayment: uClaim.cw1155_intent_payment,
         });
         break;
       case EventTypes.disputeClaim:
