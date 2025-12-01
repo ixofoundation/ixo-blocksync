@@ -48,9 +48,8 @@ import {
   addAuthenticator,
   removeAuthenticator,
 } from "../postgres/smart_account";
-import { queryClient } from "../sync/sync_chain";
-import Long from "long";
 import { epochStartedOrEnded } from "../postgres/epoch";
+import { smartAccountAuthenticatorQuery } from "../util/archive-queries";
 
 export const syncEventData = async (event: EventCore, block: BlockCore) => {
   try {
@@ -501,28 +500,49 @@ export const syncEventData = async (event: EventCore, block: BlockCore) => {
           "authenticator_id"
         );
         const account = getValueFromAttributes(event.attributes, "sender");
-        // if AuthnVerification then we need to fetch the config from chain directly
+
         let config: any;
+
+        // Only fetch config for types that need it
         if (
           authenticatorType === "AuthnVerification" ||
           authenticatorType === "SignatureVerification"
         ) {
-          // TODO: use archive_api to get the config at that block height
-          const authenticator =
-            await queryClient.ixo.smartaccount.v1beta1.getAuthenticator({
-              account: account,
-              authenticatorId: Long.fromString(authenticatorId),
-            });
-          if (!authenticator?.accountAuthenticator?.config) {
-            throw new Error(
-              "No config found for authenticator, this should not happen"
+          try {
+            // Use archive API to get the config at the same block height
+            const authenticator = await smartAccountAuthenticatorQuery(
+              block.height,
+              account,
+              authenticatorId
             );
+
+            if (!authenticator?.config) {
+              throw new Error(
+                `No config found for authenticator ${authenticatorId} for account ${account}`
+              );
+            }
+
+            // Handle different config formats based on authenticator type
+            if (authenticatorType === "AuthnVerification") {
+              // AuthnVerification config is protobuf-encoded AuthnPubKey
+              const configBytes = new Uint8Array(
+                Buffer.from(authenticator.config, "base64")
+              );
+              config = ixo.smartaccount.crypto.AuthnPubKey.decode(configBytes);
+            } else if (authenticatorType === "SignatureVerification") {
+              // SignatureVerification config is raw secp256k1 public key bytes (not protobuf)
+              // Store as hex string for easier querying/display
+              const configBytes = Buffer.from(authenticator.config, "base64");
+              config = { key: "0x" + configBytes.toString("hex") };
+            }
+          } catch (error) {
+            console.warn(
+              `Failed to fetch authenticator ${authenticatorId} for account ${account} at block height ${block.height}: ${error.message}`
+            );
+            // Continue without config
           }
-          // Decode the authenticator data to get public key info
-          config = ixo.smartaccount.crypto.AuthnPubKey.decode(
-            authenticator.accountAuthenticator.config
-          );
         }
+
         await addAuthenticator(
           authenticatorId,
           authenticatorType,

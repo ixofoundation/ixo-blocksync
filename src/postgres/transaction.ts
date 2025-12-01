@@ -5,6 +5,7 @@ export type Block = {
   time: Date;
   transactions: Transaction[];
   messages: Message[];
+  signers: TransactionSigner[];
 };
 
 export type Transaction = {
@@ -14,6 +15,7 @@ export type Transaction = {
   gasUsed: string;
   gasWanted: string;
   memo: string;
+  feePayer?: string;
 };
 
 export type Message = {
@@ -27,16 +29,30 @@ export type Message = {
   index: number;
 };
 
+export type TransactionSigner = {
+  transactionHash: string;
+  signerAddress: string;
+  messageIndex: number;
+  authenticatorId?: string;
+  sequence?: number;
+};
+
 const insertTransactionSql = `
-INSERT INTO "Transaction" (hash, code, fee, "gasUsed", "gasWanted", memo, "time", height)
-SELECT tr.hash, tr.code, tr.fee, tr."gasUsed", tr."gasWanted", tr.memo, $2, $3
-FROM jsonb_to_recordset($1) AS tr(hash text, code int, fee jsonb, "gasUsed" text, "gasWanted" text, memo text);
+INSERT INTO "Transaction" (hash, code, fee, "gasUsed", "gasWanted", memo, "time", height, "feePayer")
+SELECT tr.hash, tr.code, tr.fee, tr."gasUsed", tr."gasWanted", tr.memo, $2, $3, tr."feePayer"
+FROM jsonb_to_recordset($1) AS tr(hash text, code int, fee jsonb, "gasUsed" text, "gasWanted" text, memo text, "feePayer" text);
 `;
 const insertMessageSql = `
 INSERT INTO "Message" ("typeUrl", value, "transactionHash", "from", "to", denoms, "tokenNames", "index")
 SELECT msg."typeUrl", msg.value, msg."transactionHash", msg."from", msg."to", msg.denoms, msg."tokenNames", msg."index"
 FROM jsonb_to_recordset($1) AS msg("typeUrl" text, value jsonb, "transactionHash" text, "from" text, "to" text, denoms text[], "tokenNames" text[], "index" int);
 `;
+const insertSignerSql = `
+INSERT INTO "TransactionSigner" ("transactionHash", "signerAddress", "messageIndex", "authenticatorId", "sequence")
+SELECT s."transactionHash", s."signerAddress", s."messageIndex", s."authenticatorId", s."sequence"
+FROM jsonb_to_recordset($1) AS s("transactionHash" text, "signerAddress" text, "messageIndex" int, "authenticatorId" text, "sequence" int);
+`;
+
 export const insertBlock = async (block: Block): Promise<void> => {
   // do all the insertions in a single transaction
   if (block.transactions.length) {
@@ -48,5 +64,8 @@ export const insertBlock = async (block: Block): Promise<void> => {
   }
   if (block.messages.length) {
     await dbQuery(insertMessageSql, [JSON.stringify(block.messages)]);
+  }
+  if (block.signers.length) {
+    await dbQuery(insertSignerSql, [JSON.stringify(block.signers)]);
   }
 };

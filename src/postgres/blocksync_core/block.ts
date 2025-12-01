@@ -14,6 +14,9 @@ export type TransactionCore = {
   gasUsed: string;
   gasWanted: string;
   memo: string;
+  feePayer?: string;
+  signerInfos?: any; // JSON - raw signer info array from authInfo
+  nonCriticalExtensionOptions?: any; // JSON - raw extension options (contains TxExtension for smart accounts)
   messages: MessageCore[];
 };
 
@@ -37,6 +40,9 @@ SELECT
   t."gasUsed",
   t."gasWanted",
   t."memo",
+  t."feePayer",
+  t."signerInfos",
+  t."nonCriticalExtensionOptions",
   json_agg(json_build_object('typeUrl', "m"."typeUrl", 'value', m.value, 'index', m."index")) AS messages
 FROM "TransactionCore" as t
 LEFT OUTER JOIN "MessageCore" as m ON t.hash = m."transactionHash"
@@ -58,22 +64,29 @@ LEFT OUTER JOIN (
 WHERE b.height = $1
 GROUP BY b.height, b."time"
 `;
+
 export const getCoreBlock = async (
   blockHeight: number
 ): Promise<BlockCore | null> => {
   let blockAndEvents: any = await corePool.query(sqlEvents, [blockHeight]);
   // If no block is found, return null before querying transactions
   if (blockAndEvents.rows.length === 0) return null;
-  let transactions: any = await corePool.query(sqlTransactions, [blockHeight]);
+
+  const transactionsResult = await corePool.query(sqlTransactions, [
+    blockHeight,
+  ]);
 
   blockAndEvents = blockAndEvents.rows[0];
-  transactions = transactions.rows.map((row: any) => ({
+  const transactions = transactionsResult.rows.map((row: any) => ({
     hash: row.hash,
     code: row.code,
     fee: row.fee,
     gasUsed: row.gasUsed,
     gasWanted: row.gasWanted,
     memo: row.memo,
+    feePayer: row.feePayer,
+    signerInfos: row.signerInfos,
+    nonCriticalExtensionOptions: row.nonCriticalExtensionOptions,
     messages: row.messages,
   }));
 

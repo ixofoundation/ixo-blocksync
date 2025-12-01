@@ -1,20 +1,53 @@
 import { decodeMessage } from "../util/proto";
-import { BlockCore, MessageCore } from "../postgres/blocksync_core/block";
-import { insertBlock, Message, Transaction } from "../postgres/transaction";
+import {
+  BlockCore,
+  MessageCore,
+  TransactionCore,
+} from "../postgres/blocksync_core/block";
+import {
+  insertBlock,
+  Message,
+  Transaction,
+  TransactionSigner,
+} from "../postgres/transaction";
 import { getTokenName } from "../postgres/token";
+import { ixo } from "@ixo/impactxclient-sdk";
+
+const TX_EXTENSION_TYPE_URL = "/ixo.smartaccount.v1beta1.TxExtension";
 
 export const syncTransactions = async (block: BlockCore) => {
   if (block.transactions.length === 0) return;
 
   const allMessages: Message[] = [];
   const allTransactions: Transaction[] = [];
+  const allSigners: TransactionSigner[] = [];
 
   // NOTE: consider concurrency here but might affect memory usage.
   for (const transaction of block.transactions) {
+    const selectedAuthenticators = extractSelectedAuthenticators(transaction);
+    // Get sequence from signerInfos (usually first signer for fee payer)
+    const sequence = transaction.signerInfos?.[0]?.sequence;
+
     // Extract and map messages to their decoded form
     for (const m of transaction.messages) {
       const value = await decodeAndProcessMessage(m, transaction.hash);
-      if (value) allMessages.push(value);
+      if (value) {
+        allMessages.push(value);
+
+        const signerAddress = extractSignerFromMessage(value.value);
+        if (signerAddress) {
+          // Get authenticatorId for this message index if using smart accounts
+          const authenticatorId = selectedAuthenticators?.[m.index]?.toString();
+
+          allSigners.push({
+            transactionHash: transaction.hash,
+            signerAddress,
+            messageIndex: m.index,
+            authenticatorId,
+            sequence,
+          });
+        }
+      }
     }
 
     allTransactions.push({
@@ -24,6 +57,7 @@ export const syncTransactions = async (block: BlockCore) => {
       memo: transaction.memo,
       gasUsed: transaction.gasUsed,
       gasWanted: transaction.gasWanted,
+      feePayer: transaction.feePayer,
     });
   }
 
@@ -36,10 +70,80 @@ export const syncTransactions = async (block: BlockCore) => {
       time: block.time,
       transactions: allTransactions,
       messages: allMessages,
+      signers: allSigners,
     });
   } catch (error) {
     console.error("ERROR::syncTransactions:: ", error.message);
   }
+};
+
+/**
+ * Extract selected authenticators from nonCriticalExtensionOptions.
+ * Decodes TxExtension to get selected_authenticators array.
+ * Returns array of authenticator IDs (one per message) or undefined if not a smart account tx.
+ */
+const extractSelectedAuthenticators = (
+  transaction: TransactionCore
+): number[] | undefined => {
+  const extensions = transaction.nonCriticalExtensionOptions;
+  if (!extensions || extensions.length === 0) return undefined;
+
+  for (const ext of extensions) {
+    if (ext.typeUrl === TX_EXTENSION_TYPE_URL) {
+      try {
+        // The value is stored as base64, decode it
+        const valueBytes =
+          typeof ext.value === "string"
+            ? Buffer.from(ext.value, "base64")
+            : ext.value;
+
+        // Decode the TxExtension to get selected_authenticators
+        const txExtension =
+          ixo.smartaccount.v1beta1.TxExtension.decode(valueBytes);
+        if (
+          txExtension.selectedAuthenticators &&
+          txExtension.selectedAuthenticators.length > 0
+        ) {
+          // Convert Long to number
+          return txExtension.selectedAuthenticators.map((id) =>
+            typeof id === "number" ? id : Number(id)
+          );
+        }
+      } catch (error) {
+        console.error("Error decoding TxExtension:", error);
+      }
+    }
+  }
+  return undefined;
+};
+
+/**
+ * Extract the signer address from decoded message content.
+ * Tries common field names used across different message types.
+ * Can see the blockchain proto files for more details.
+ */
+const extractSignerFromMessage = (value: any): string | undefined => {
+  // Handle authz exec messages - get signer from the wrapped message
+  if (Array.isArray(value) && value.length > 0 && value[0]?.value) {
+    return extractSignerFromMessage(value[0].value);
+  }
+
+  return (
+    value.sender ||
+    value.fromAddress ||
+    value.owner ||
+    value.ownerAddress ||
+    value.delegatorAddress ||
+    value.voterAddress ||
+    value.proposer ||
+    value.grantee ||
+    value.granter ||
+    value.admin ||
+    value.creator ||
+    value.authority ||
+    value.signer ||
+    value.ownerDid
+  );
 };
 
 const decodeAndProcessMessage = async (
@@ -51,7 +155,7 @@ const decodeAndProcessMessage = async (
 
   let authZExecMsgs: any[] = [];
   if (message.typeUrl === "/cosmos.authz.v1beta1.MsgExec") {
-    value.msgs.forEach((m) => {
+    value.msgs.forEach((m: any) => {
       const decodedValue = decodeMessage({
         typeUrl: m.typeUrl,
         value: Object.values(m.value),

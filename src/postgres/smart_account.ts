@@ -16,7 +16,8 @@ export const addAuthenticator = async (
 };
 
 const removeAuthenticatorSql = `
-DELETE FROM "public"."smart_account_authenticator"
+UPDATE "public"."smart_account_authenticator"
+SET "removed" = true
 WHERE "id" = $1 AND "address" = $2;
 `;
 export const removeAuthenticator = async (

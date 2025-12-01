@@ -437,3 +437,47 @@ export const cw721StakeStakedNftsQuery = async (
   // }
   return nfts.map((nft) => ({ token_id: nft }));
 };
+
+// ==========================================================================================
+// Smart Account Queries
+// ==========================================================================================
+export const smartAccountAuthenticatorQuery = async (
+  height: number,
+  account: string,
+  authenticatorId: string
+) => {
+  const result = await queryArchiveApi(
+    `/ixo/smartaccount/authenticator/${account}/${authenticatorId}`,
+    height
+  );
+  // Example return
+  // {
+  //     "account_authenticator": {
+  //         "id": "1",
+  //         "type": "SignatureVerification",
+  //         "config": "base64encodedconfig..."
+  //     }
+  // }
+  return result?.account_authenticator;
+};
+
+export const smartAccountAuthenticatorsQuery = async (
+  height: number,
+  account: string
+) => {
+  const result = await queryArchiveApi(
+    `/ixo/smartaccount/authenticators/${account}`,
+    height
+  );
+  // Example return
+  // {
+  //     "account_authenticators": [
+  //         {
+  //             "id": "1",
+  //             "type": "SignatureVerification",
+  //             "config": "base64encodedconfig..."
+  //         }
+  //     ]
+  // }
+  return result?.account_authenticators;
+};
