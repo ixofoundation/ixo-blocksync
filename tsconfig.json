@@ -27,6 +27,7 @@
     "docs",
     "src/seed",
     "test.js",
-    "llm_text_transcripts"
+    "llm_text_transcripts",
+    "src/websocket/websocket-client-example.js"
   ]
 }
