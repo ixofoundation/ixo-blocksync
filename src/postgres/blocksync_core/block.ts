@@ -37,9 +37,9 @@ SELECT
   t."memo",
   json_agg(json_build_object('typeUrl', "m"."typeUrl", 'value', m.value)) AS messages
 FROM "TransactionCore" as t
-LEFT OUTER JOIN "MessageCore" as m ON t.hash = m."transactionHash" 
+LEFT OUTER JOIN "MessageCore" as m ON m."transactionId" = t.id
 WHERE t."blockHeight" = $1
-Group By t.hash;
+Group By t.id, t.hash;
 `;
 const sqlEvents = `
 SELECT

@@ -14,10 +14,11 @@ export const syncTransactions = async (
   const allTransactions: Transaction[] = [];
 
   // NOTE: consider concurrency here but might affect memory usage.
-  for (const transaction of transactions) {
+  for (let txIndex = 0; txIndex < transactions.length; txIndex++) {
+    const transaction = transactions[txIndex];
     // Extract and map messages to their decoded form
     for (const m of transaction.messages) {
-      const value = await decodeAndProcessMessage(m, transaction.hash);
+      const value = await decodeAndProcessMessage(m, transaction.hash, txIndex);
       if (value) allMessages.push(value);
     }
 
@@ -28,6 +29,7 @@ export const syncTransactions = async (
       memo: transaction.memo,
       gasUsed: transaction.gasUsed,
       gasWanted: transaction.gasWanted,
+      txIndex,
     });
   }
 
@@ -48,7 +50,8 @@ export const syncTransactions = async (
 
 const decodeAndProcessMessage = async (
   message: any,
-  transactionHash: string
+  transactionHash: string,
+  txIndex: number
 ): Promise<Message | null> => {
   const value = message.value;
   if (!value) return null;
@@ -86,6 +89,7 @@ const decodeAndProcessMessage = async (
     denoms,
     tokenNames,
     transactionHash,
+    txIndex,
   };
 };
 
