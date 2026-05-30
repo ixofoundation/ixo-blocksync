@@ -25,6 +25,7 @@
     "node_modules",
     "build",
     "docs",
+    "scripts",
     "src/seed",
     "test.js",
     "llm_text_transcripts",
