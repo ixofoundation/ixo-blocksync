@@ -22,7 +22,7 @@ export const pool = new Pool({
 // helper function that manages connection transaction start and commit and rollback
 // on fail, user can just pass a function that takes a client as argument
 export const withTransaction = async (
-  fn: (client: PoolClient) => Promise<any>
+  fn: (client: PoolClient) => Promise<any>,
 ) => {
   const client = await pool.connect();
   try {

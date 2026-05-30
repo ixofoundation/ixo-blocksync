@@ -39,6 +39,31 @@ export const SmartTagsPlugin = makeJSONPgSmartTagsPlugin({
           foreignFieldName: "messagesByTransactionHash",
         },
       },
+      // v7 turned Evaluation into 1:N (history) — to keep the pre-v7
+      // GraphQL shape working, Claim has a forward FK
+      // `currentEvaluationId → Evaluation(id)`. By default Postgraphile
+      // would expose that as `Claim.currentEvaluation`; this tag renames
+      // the field back to `Claim.evaluation` so existing clients don't
+      // notice the change. The 1:N backward relation is still exposed
+      // alongside it as the evaluations connection on Claim.
+      "public.Claim.Claim_currentEvaluationId_fkey": {
+        tags: {
+          fieldName: "evaluation",
+        },
+      },
+      // DisputeResolution is 1:1 with Dispute (disputeId is both PK and FK).
+      // Postgraphile would auto-expose the backward singular field on
+      // Dispute as `disputeResolutionByDisputeId` (or `disputeResolution`
+      // after the simplify inflector); rename it to plain `resolution` so
+      // queries read naturally: `dispute { resolution { winnerAddress } }`.
+      //   `foreignFieldName` here = field name on the FOREIGN (Dispute) side
+      //   `fieldName`        = field name on the LOCAL (DisputeResolution) side
+      "public.DisputeResolution.DisputeResolution_disputeId_fkey": {
+        tags: {
+          fieldName: "dispute",
+          foreignFieldName: "resolution",
+        },
+      },
     },
   },
 });

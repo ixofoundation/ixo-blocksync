@@ -89,6 +89,143 @@ export const daoCoreDumpStateQuery = async (
   return config?.data;
 };
 
+// ==========================================================================
+// V7 chain-upgrade snapshot helpers
+// ==========================================================================
+// These query liquidstake + claims state at the v7 upgrade height so the
+// indexer can mirror the silent state writes performed by the v7 chain
+// migrations (see src/constants/v7_upgrade.ts).
+
+// liquidstake `ModuleParams` query — single global record.
+export const liquidStakeModuleParamsQuery = async (
+  height: number
+): Promise<
+  | { min_liquid_stake_amount: string; module_paused: boolean }
+  | undefined
+> => {
+  const r = await queryArchiveApi(
+    "/ixo/liquidstake/v1beta1/module_params",
+    height
+  );
+  // Response shape: { module_params: { min_liquid_stake_amount, module_paused } }
+  return r?.module_params;
+};
+
+// liquidstake `Pools` query — paginated list of every pool.
+export const liquidStakePoolsQuery = async (
+  height: number
+): Promise<
+  Array<{
+    pool_id: string;
+    liquid_bond_denom: string;
+    proxy_account_address: string;
+    whitelisted_validators: Array<any>;
+    unstake_fee_rate: string;
+    fee_account_address: string;
+    autocompound_fee_rate: string;
+    whitelist_admin_address: string;
+    paused: boolean;
+    weighted_rewards_receivers: Array<any>;
+  }>
+> => {
+  const limit = 100;
+  let nextKey: string | undefined = undefined;
+  const pools: any[] = [];
+  while (true) {
+    const path =
+      "/ixo/liquidstake/v1beta1/pools" +
+      `?pagination.limit=${limit}` +
+      (nextKey ? `&pagination.key=${encodeURIComponent(nextKey)}` : "");
+    const r = await queryArchiveApi(path, height);
+    const batch = (r?.pools ?? []) as any[];
+    pools.push(...batch);
+    nextKey = r?.pagination?.next_key ?? undefined;
+    if (!nextKey || batch.length === 0) break;
+  }
+  return pools;
+};
+
+// claims `Collection` query — fetch a single collection's full state. The
+// v7 snapshot uses this to refresh new-in-v7 columns (flagged counters,
+// deposit requirements, adjudicators, etc.) on every existing collection
+// row. Pre-v7 chain state defaults those fields to zero/empty, so on the
+// upgrade block they read back as defaults — but we re-issue the upsert
+// to be deterministic about the snapshot's end state.
+export const claimsCollectionQuery = async (
+  height: number,
+  collectionId: string
+) => {
+  const r = await queryArchiveApi(
+    `/ixo/claims/v1beta1/collection/${collectionId}`,
+    height
+  );
+  return r?.collection;
+};
+
+// claims `DisputeList` query — paginated list of every dispute on chain
+// at a given height. Snapshot uses this to confirm pre-v7 disputes are
+// stamped DISMISSED (target_role=UNSPECIFIED → status=DISMISSED), which
+// the chain migration does silently.
+export const claimsDisputeListQuery = async (
+  height: number
+): Promise<Array<any>> => {
+  const limit = 100;
+  let nextKey: string | undefined = undefined;
+  const out: any[] = [];
+  while (true) {
+    const path =
+      "/ixo/claims/v1beta1/dispute_list" +
+      `?pagination.limit=${limit}` +
+      (nextKey ? `&pagination.key=${encodeURIComponent(nextKey)}` : "");
+    const r = await queryArchiveApi(path, height);
+    const batch = (r?.disputes ?? []) as any[];
+    out.push(...batch);
+    nextKey = r?.pagination?.next_key ?? undefined;
+    if (!nextKey || batch.length === 0) break;
+  }
+  return out;
+};
+
+// Query a single pending proposal on the approval-single pre-propose
+// module. The `proposer` field is populated server-side from the message
+// sender, so we can't read it from the wasm event attributes — those
+// only carry `method`, `id`, `_contract_address`.
+export const daoPrePropseApprovalPendingQuery = async (
+  height: number,
+  contractAddress: string,
+  id: number
+) => {
+  const query = jsonToBase64({
+    query_extension: { msg: { pending_proposal: { id } } },
+  });
+  const result = await queryArchiveApi(
+    `/cosmwasm/wasm/v1/contract/${contractAddress}/smart/${query}`,
+    height
+  );
+  // Returns: { data: { approval_id, proposer, msg, deposit } }
+  return result?.data as
+    | { approval_id: number; proposer: string }
+    | undefined;
+};
+
+// List sub-DAOs registered on this DAO. We need a separate query rather
+// than pulling from dump_state because dump_state doesn't include subDAOs
+// — they have their own paginated endpoint. We pull a single page large
+// enough that production DAOs won't outgrow it; if they ever do, we'd
+// need to paginate but that's out of scope here.
+export const daoCoreListSubDaosQuery = async (
+  height: number,
+  contractAddress: string
+) => {
+  const query = jsonToBase64({ list_sub_daos: { limit: 100 } });
+  const result = await queryArchiveApi(
+    `/cosmwasm/wasm/v1/contract/${contractAddress}/smart/${query}`,
+    height
+  );
+  // Returns: { data: [ { addr: "ixo1...", charter: null | "..." }, ... ] }
+  return (result?.data ?? []) as Array<{ addr: string; charter?: string | null }>;
+};
+
 // ======================================
 // DAODAO Proposal Module Queries
 // ======================================
@@ -397,6 +534,109 @@ export const cw721StakeConfigQuery = async (
   //     }
   // }
   return result?.data;
+};
+
+// ======================================
+// Snapshot helpers
+// ======================================
+// Walks a paginated `list_stakers` / `ListStakers` query (used by both
+// cw20-stake and dao-voting-native-staked — they share the same
+// request/response shape).
+export const stakingListStakersQuery = async (
+  height: number,
+  contractAddress: string
+): Promise<Array<{ address: string; balance: string }>> => {
+  const limit = 100;
+  let startAfter: string | undefined = undefined;
+  const stakers: Array<{ address: string; balance: string }> = [];
+  while (true) {
+    const query = jsonToBase64({
+      list_stakers: { start_after: startAfter, limit },
+    });
+    const result = await queryArchiveApi(
+      `/cosmwasm/wasm/v1/contract/${contractAddress}/smart/${query}`,
+      height
+    );
+    const batch = (result?.data?.stakers ?? []) as Array<{
+      address: string;
+      balance: string;
+    }>;
+    if (!batch.length) break;
+    stakers.push(...batch);
+    if (batch.length < limit) break;
+    startAfter = batch[batch.length - 1].address;
+  }
+  return stakers;
+};
+
+// Walks a paginated `list_proposals` on a dao-proposal-{single,multiple,
+// condorcet} module. We use ascending traversal so callers don't have to
+// reverse — proposals are typically iterated oldest-first when backfilling.
+export const proposalModuleListProposalsQuery = async (
+  height: number,
+  contractAddress: string
+): Promise<Array<{ id: number; proposal: any }>> => {
+  const limit = 30;
+  let startAfter: number | undefined = undefined;
+  const out: Array<{ id: number; proposal: any }> = [];
+  while (true) {
+    const query = jsonToBase64({
+      list_proposals: { start_after: startAfter, limit },
+    });
+    const result = await queryArchiveApi(
+      `/cosmwasm/wasm/v1/contract/${contractAddress}/smart/${query}`,
+      height
+    );
+    const batch = (result?.data?.proposals ?? []) as Array<{
+      id: number;
+      proposal: any;
+    }>;
+    if (!batch.length) break;
+    out.push(...batch);
+    if (batch.length < limit) break;
+    startAfter = batch[batch.length - 1].id;
+  }
+  return out;
+};
+
+// ======================================
+// Staking Claims Queries
+// ======================================
+// cw_controllers::Claims::query_claims returns:
+//   { claims: [{ amount: "100", release_at: { at_time: "<ns>" } | { at_height: N } }] }
+// Used by cw20-stake and dao-voting-native-staked.
+export const cwStakingClaimsQuery = async (
+  height: number,
+  contractAddress: string,
+  address: string
+) => {
+  const query = jsonToBase64({ claims: { address } });
+  const result = await queryArchiveApi(
+    `/cosmwasm/wasm/v1/contract/${contractAddress}/smart/${query}`,
+    height
+  );
+  return (result?.data?.claims ?? []) as Array<{
+    amount: string;
+    release_at: { at_time?: string; at_height?: number };
+  }>;
+};
+
+// dao-voting-cw721-staked uses cw721_controllers::NftClaims:
+//   { nft_claims: [{ token_id, release_at: ... }] }
+export const cw721NftClaimsQuery = async (
+  height: number,
+  contractAddress: string,
+  address: string
+) => {
+  const query = jsonToBase64({ nft_claims: { address } });
+  const result = await queryArchiveApi(
+    `/cosmwasm/wasm/v1/contract/${contractAddress}/smart/${query}`,
+    height
+  );
+  return (result?.data?.nft_claims ?? []) as Array<{
+    token_id: string;
+    release_at: { at_time?: string; at_height?: number };
+  }>;
 };
 
 export const cw721StakeStakedNftsQuery = async (
