@@ -101,6 +101,61 @@ export const updateDaoCoreVotingModule = async (data: {
 };
 
 // =============================================
+// DAO Core Items (key/value metadata set by DAO governance via
+// execute_set_item / execute_remove_item)
+// =============================================
+
+const upsertDaoCoreItemSql = `
+INSERT INTO dao_core_item (dao_address, key, value, updated_at, block_height)
+VALUES ($1, $2, $3, $4, $5)
+ON CONFLICT (dao_address, key) DO UPDATE SET
+  value = EXCLUDED.value,
+  updated_at = EXCLUDED.updated_at,
+  block_height = EXCLUDED.block_height;
+`;
+export const upsertDaoCoreItem = async (data: {
+  dao_address: string;
+  key: string;
+  value: string;
+  updated_at: Date;
+  block_height: number;
+}): Promise<void> => {
+  await dbQuery(upsertDaoCoreItemSql, [
+    data.dao_address,
+    data.key,
+    data.value,
+    data.updated_at,
+    data.block_height,
+  ]);
+};
+
+const deleteDaoCoreItemSql = `
+DELETE FROM dao_core_item WHERE dao_address = $1 AND key = $2;
+`;
+export const deleteDaoCoreItem = async (
+  dao_address: string,
+  key: string
+): Promise<void> => {
+  await dbQuery(deleteDaoCoreItemSql, [dao_address, key]);
+};
+
+// =============================================
+// Bulk-refresh proposal-modules statuses from dao_core dump_state. Called
+// after execute_update_proposal_modules — a passed proposal can add new
+// proposal modules to a DAO and/or mark existing ones as 'disabled'.
+// =============================================
+export const refreshDaoProposalModulesFromDumpState = async (
+  proposal_modules: Array<{ address: string; prefix?: string; status?: string }>
+): Promise<void> => {
+  for (const m of proposal_modules) {
+    await dbQuery(
+      "UPDATE dao_proposal_module SET prefix = $2, status = $3 WHERE address = $1;",
+      [m.address, m.prefix ?? null, m.status ?? null]
+    );
+  }
+};
+
+// =============================================
 // DAO Proposal Operations
 // =============================================
 
@@ -245,9 +300,10 @@ export type DaoProposalModule = {
 
 const createDaoProposalModuleSql = `
 INSERT INTO dao_proposal_module (
-  address, dao_address, module_type, created_at, block_height,
+  address, dao_address, module_type, prefix, status, created_at, block_height,
   proposal_creation_policy, config
-) VALUES ($1, $2, $3, $4, $5, $6, $7);
+) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+ON CONFLICT (address) DO NOTHING;
 `;
 
 export const createDaoProposalModule = async (
@@ -257,6 +313,8 @@ export const createDaoProposalModule = async (
     data.address,
     data.dao_address,
     data.module_type,
+    data.prefix ?? null,
+    data.status ?? null,
     data.created_at,
     data.block_height,
     data.proposal_creation_policy
@@ -266,13 +324,33 @@ export const createDaoProposalModule = async (
   ]);
 };
 
+// Refresh prefix/status from the parent DAO's proposal_modules list.
+// Called on update_proposal_modules events (and could be called proactively
+// when a sibling module changes status).
+const updateDaoProposalModulePrefixStatusSql = `
+UPDATE dao_proposal_module SET prefix = $2, status = $3 WHERE address = $1;
+`;
+export const updateDaoProposalModulePrefixStatus = async (data: {
+  address: string;
+  prefix?: string;
+  status?: string;
+}): Promise<void> => {
+  await dbQuery(updateDaoProposalModulePrefixStatusSql, [
+    data.address,
+    data.prefix ?? null,
+    data.status ?? null,
+  ]);
+};
+
 const updateDaoProposalModulePreProposeModuleSql = `
 UPDATE dao_proposal_module SET pre_propose_module = $2 WHERE address = $1;
 `;
 
 export const updateDaoProposalModulePreProposeModule = async (data: {
   address: string;
-  pre_propose_module: string;
+  // Nullable so we can clear the pointer when the proposal_creation_policy
+  // is switched to AnyoneMayPropose (no pre-propose module).
+  pre_propose_module: string | null;
 }): Promise<void> => {
   await dbQuery(updateDaoProposalModulePreProposeModuleSql, [
     data.address,
@@ -762,5 +840,302 @@ export const deleteDaoNativeStaker = async (
   await dbQuery(
     "DELETE FROM dao_native_staker WHERE voting_module_address = $1 AND staker_address = $2;",
     [voting_module_address, staker_address]
+  );
+};
+
+// =============================================
+// DAO Core: pause state
+// =============================================
+export const updateDaoCorePausedUntil = async (data: {
+  address: string;
+  paused_until: Date | null;
+}): Promise<void> => {
+  await dbQuery(
+    "UPDATE dao_core SET paused_until = $2 WHERE address = $1;",
+    [data.address, data.paused_until]
+  );
+};
+
+// =============================================
+// DAO Sub-DAOs
+// =============================================
+// Reconcile the full sub-DAO list against on-chain state. The chain stores
+// it as a Map<Addr, Option<charter>> and the execute event doesn't tell us
+// the *delta* — we re-query ListSubDaos to be authoritative.
+export const replaceDaoSubDaos = async (
+  dao_address: string,
+  sub_daos: Array<{ addr: string; charter?: string | null }>,
+  updated_at: Date,
+  block_height: number
+): Promise<void> => {
+  // Wipe + insert in one transaction-ish flow; the table is small and
+  // governance-paced, so a full replace is simpler than diffing.
+  await dbQuery("DELETE FROM dao_sub_dao WHERE dao_address = $1;", [
+    dao_address,
+  ]);
+  for (const s of sub_daos) {
+    await dbQuery(
+      `INSERT INTO dao_sub_dao
+         (dao_address, sub_dao_address, charter, updated_at, block_height)
+       VALUES ($1, $2, $3, $4, $5);`,
+      [dao_address, s.addr, s.charter ?? null, updated_at, block_height]
+    );
+  }
+};
+
+// =============================================
+// Proposal Hooks / Vote Hooks
+// =============================================
+export const addDaoProposalHook = async (data: {
+  proposal_module: string;
+  hook_address: string;
+  created_at: Date;
+  block_height: number;
+}): Promise<void> => {
+  await dbQuery(
+    `INSERT INTO dao_proposal_hook
+       (proposal_module, hook_address, created_at, block_height)
+     VALUES ($1, $2, $3, $4)
+     ON CONFLICT (proposal_module, hook_address) DO NOTHING;`,
+    [data.proposal_module, data.hook_address, data.created_at, data.block_height]
+  );
+};
+
+export const removeDaoProposalHook = async (
+  proposal_module: string,
+  hook_address: string
+): Promise<void> => {
+  await dbQuery(
+    "DELETE FROM dao_proposal_hook WHERE proposal_module = $1 AND hook_address = $2;",
+    [proposal_module, hook_address]
+  );
+};
+
+export const addDaoVoteHook = async (data: {
+  proposal_module: string;
+  hook_address: string;
+  created_at: Date;
+  block_height: number;
+}): Promise<void> => {
+  await dbQuery(
+    `INSERT INTO dao_vote_hook
+       (proposal_module, hook_address, created_at, block_height)
+     VALUES ($1, $2, $3, $4)
+     ON CONFLICT (proposal_module, hook_address) DO NOTHING;`,
+    [data.proposal_module, data.hook_address, data.created_at, data.block_height]
+  );
+};
+
+export const removeDaoVoteHook = async (
+  proposal_module: string,
+  hook_address: string
+): Promise<void> => {
+  await dbQuery(
+    "DELETE FROM dao_vote_hook WHERE proposal_module = $1 AND hook_address = $2;",
+    [proposal_module, hook_address]
+  );
+};
+
+// =============================================
+// Staking Claims (cw20-stake / native-stake / cw721-stake)
+// =============================================
+export type DaoStakingClaimKind = "cw20" | "native" | "cw721";
+
+export const insertDaoStakingClaim = async (data: {
+  kind: DaoStakingClaimKind;
+  staking_contract: string;
+  staker_address: string;
+  amount?: string | null;
+  token_id?: string | null;
+  release_at?: Date | null;
+  unstaked_at_height: number;
+}): Promise<void> => {
+  await dbQuery(
+    `INSERT INTO dao_staking_claim
+       (kind, staking_contract, staker_address, amount, token_id,
+        release_at, unstaked_at_height)
+     VALUES ($1, $2, $3, $4, $5, $6, $7);`,
+    [
+      data.kind,
+      data.staking_contract,
+      data.staker_address,
+      data.amount ?? null,
+      data.token_id ?? null,
+      data.release_at ?? null,
+      data.unstaked_at_height,
+    ]
+  );
+};
+
+// Consume all pending claims for this (contract, staker) up to the given
+// block time. The contract's execute_claim drains the entire eligible
+// queue in one call, so we mark every matching pending row as claimed
+// rather than trying to match the specific amounts (which would be
+// fragile — claim amounts are aggregated on-chain).
+export const markDaoStakingClaimsClaimed = async (
+  kind: DaoStakingClaimKind,
+  staking_contract: string,
+  staker_address: string,
+  claimed_at: Date,
+  claimed_at_height: number
+): Promise<void> => {
+  await dbQuery(
+    `UPDATE dao_staking_claim
+       SET claimed_at = $4, claimed_at_height = $5
+     WHERE kind = $1
+       AND staking_contract = $2
+       AND staker_address = $3
+       AND claimed_at IS NULL
+       AND (release_at IS NULL OR release_at <= $4);`,
+    [kind, staking_contract, staker_address, claimed_at, claimed_at_height]
+  );
+};
+
+// =============================================
+// Pre-Propose Approval lifecycle
+// =============================================
+export const createDaoPrePropseApproval = async (data: {
+  pre_propose_module: string;
+  approval_id: number | string;
+  proposer: string;
+  submitted_at: Date;
+  submitted_at_height: number;
+}): Promise<void> => {
+  await dbQuery(
+    `INSERT INTO dao_pre_propose_approval
+       (pre_propose_module, approval_id, proposer, status,
+        submitted_at, submitted_at_height)
+     VALUES ($1, $2, $3, 'pending', $4, $5)
+     ON CONFLICT (pre_propose_module, approval_id) DO NOTHING;`,
+    [
+      data.pre_propose_module,
+      data.approval_id,
+      data.proposer,
+      data.submitted_at,
+      data.submitted_at_height,
+    ]
+  );
+};
+
+// =============================================
+// DAODAO snapshot state (single-row table)
+// =============================================
+export const getDaodaoSnapshotState = async (): Promise<
+  | {
+      network: string;
+      cutoff_height: number;
+      snapshot_height: number;
+      started_at: Date;
+      completed_at: Date | null;
+    }
+  | null
+> => {
+  const r = await dbQuery(
+    "SELECT network, cutoff_height, snapshot_height, started_at, completed_at FROM daodao_snapshot_state WHERE id = 1;"
+  );
+  return (r.rows[0] as any) ?? null;
+};
+
+export const startDaodaoSnapshot = async (data: {
+  network: string;
+  cutoff_height: number;
+  snapshot_height: number;
+}): Promise<void> => {
+  await dbQuery(
+    `INSERT INTO daodao_snapshot_state
+       (id, network, cutoff_height, snapshot_height, started_at)
+     VALUES (1, $1, $2, $3, NOW())
+     ON CONFLICT (id) DO UPDATE SET
+       network = EXCLUDED.network,
+       cutoff_height = EXCLUDED.cutoff_height,
+       snapshot_height = EXCLUDED.snapshot_height,
+       started_at = NOW(),
+       completed_at = NULL;`,
+    [data.network, data.cutoff_height, data.snapshot_height]
+  );
+};
+
+export const finishDaodaoSnapshot = async (counts: {
+  dao_core_count: number;
+  voting_module_count: number;
+  proposal_module_count: number;
+  proposals_count: number;
+}): Promise<void> => {
+  await dbQuery(
+    `UPDATE daodao_snapshot_state SET
+       completed_at = NOW(),
+       dao_core_count = $1,
+       voting_module_count = $2,
+       proposal_module_count = $3,
+       proposals_count = $4
+     WHERE id = 1;`,
+    [
+      counts.dao_core_count,
+      counts.voting_module_count,
+      counts.proposal_module_count,
+      counts.proposals_count,
+    ]
+  );
+};
+
+// =============================================
+// Snapshot helpers: list daodao contracts from wasm_instantiate
+// =============================================
+// Returns addresses grouped by contract_type for the snapshot routine to
+// walk. Filters to only the daodao code_ids passed in (the caller derives
+// these from DAODAO_CONTRACT_CODE_IDS).
+export const listDaodaoContractsByType = async (
+  codeIdToType: Map<number, string>
+): Promise<Array<{ address: string; code_id: number; contract_type: string }>> => {
+  const codeIds = Array.from(codeIdToType.keys());
+  if (codeIds.length === 0) return [];
+  const result = await dbQuery(
+    "SELECT address, code_id FROM wasm_instantiate WHERE code_id = ANY($1::int[]) ORDER BY block_height ASC, address ASC;",
+    [codeIds]
+  );
+  return result.rows.map((r: any) => ({
+    address: r.address,
+    code_id: r.code_id,
+    contract_type: codeIdToType.get(r.code_id) ?? "",
+  }));
+};
+
+// Has this proposal already been indexed? Used to dedupe in the snapshot
+// (some proposals may have been created post-cutoff already by the live
+// indexer if it ran beyond cutoff at some prior deployment).
+export const hasDaoProposal = async (
+  proposal_module: string,
+  id: number | string
+): Promise<boolean> => {
+  const r = await dbQuery(
+    "SELECT 1 FROM dao_proposal WHERE proposal_module = $1 AND id = $2;",
+    [proposal_module, id]
+  );
+  return r.rows.length > 0;
+};
+
+export const resolveDaoPrePropseApproval = async (data: {
+  pre_propose_module: string;
+  approval_id: number | string;
+  status: "approved" | "rejected";
+  proposal_id?: number | string | null;
+  resolved_at: Date;
+  resolved_at_height: number;
+}): Promise<void> => {
+  await dbQuery(
+    `UPDATE dao_pre_propose_approval
+       SET status = $3,
+           proposal_id = $4,
+           resolved_at = $5,
+           resolved_at_height = $6
+     WHERE pre_propose_module = $1 AND approval_id = $2;`,
+    [
+      data.pre_propose_module,
+      data.approval_id,
+      data.status,
+      data.proposal_id ?? null,
+      data.resolved_at,
+      data.resolved_at_height,
+    ]
   );
 };

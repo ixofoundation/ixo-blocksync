@@ -23,14 +23,15 @@ export const syncTransactions = async (block: BlockCore) => {
   const allSigners: TransactionSigner[] = [];
 
   // NOTE: consider concurrency here but might affect memory usage.
-  for (const transaction of block.transactions) {
+  for (let txIndex = 0; txIndex < block.transactions.length; txIndex++) {
+    const transaction = block.transactions[txIndex];
     const selectedAuthenticators = extractSelectedAuthenticators(transaction);
     // Get sequence from signerInfos (usually first signer for fee payer)
     const sequence = transaction.signerInfos?.[0]?.sequence;
 
     // Extract and map messages to their decoded form
     for (const m of transaction.messages) {
-      const value = await decodeAndProcessMessage(m, transaction.hash);
+      const value = await decodeAndProcessMessage(m, transaction.hash, txIndex);
       if (value) {
         allMessages.push(value);
 
@@ -45,6 +46,7 @@ export const syncTransactions = async (block: BlockCore) => {
             messageIndex: m.index,
             authenticatorId,
             sequence,
+            txIndex,
           });
         }
       }
@@ -58,6 +60,7 @@ export const syncTransactions = async (block: BlockCore) => {
       gasUsed: transaction.gasUsed,
       gasWanted: transaction.gasWanted,
       feePayer: transaction.feePayer,
+      txIndex,
     });
   }
 
@@ -148,7 +151,8 @@ const extractSignerFromMessage = (value: any): string | undefined => {
 
 const decodeAndProcessMessage = async (
   message: MessageCore,
-  transactionHash: string
+  transactionHash: string,
+  txIndex: number
 ): Promise<Message | null> => {
   const value = message.value;
   if (!value) return null;
@@ -187,6 +191,7 @@ const decodeAndProcessMessage = async (
     tokenNames,
     transactionHash,
     index: message.index,
+    txIndex,
   };
 };
 

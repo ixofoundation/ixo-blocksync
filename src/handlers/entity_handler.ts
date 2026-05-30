@@ -144,8 +144,21 @@ export const getEntitiesExternalId = async (amount: number) => {
         if (!externalId) return;
         await updateEntityExternalId({ id: e.id, externalId: externalId });
       } catch (error) {
-        // if isCron the fail silently
-        console.error(error);
+        // Permanent-looking gateway errors (404 not found, 502/504 the
+        // gateway can't reach the underlying IPFS block) → mark as
+        // "unavailable" so the cron stops retrying these every minute.
+        // Transient errors (timeouts without a status, 5xx other than
+        // 502/504, network blips) are left null so the next cron run
+        // picks them up again.
+        const msg = (error as Error)?.message ?? "";
+        if (/\[(404|502|504)\]/.test(msg)) {
+          await updateEntityExternalId({
+            id: e.id,
+            externalId: "unavailable",
+          });
+        } else {
+          console.error(error);
+        }
       }
     });
 

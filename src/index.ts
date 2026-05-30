@@ -2,7 +2,6 @@ require("log-timestamp");
 require("dotenv").config();
 
 import "./util/long";
-import { app } from "./app";
 import http from "http";
 import * as SyncBlocks from "./sync/sync_blocks";
 import { DATABASE_URL, PORT, MIGRATE_DB_PROGRAMATICALLY } from "./util/secrets";
@@ -16,6 +15,14 @@ import { initWebSocketServer } from "./websocket/server";
     console.log("MIGRATE_DB_PROGRAMATICALLY: ", MIGRATE_DB_PROGRAMATICALLY);
     await postgresMigrate(DATABASE_URL || "");
   }
+
+  // Dynamic import of `./app` so Postgraphile's eager schema introspection
+  // happens AFTER migrations have run. Static `import { app }` at the top
+  // of the file would resolve before this async function fires, leaving
+  // Postgraphile's GraphQL schema cached against a pre-migration (empty)
+  // DB on a fresh boot. See:
+  // https://github.com/graphile/postgraphile/issues/919
+  const { app } = await import("./app");
 
   // server setup and start logic
   SyncChain.syncChain().then(() => SyncBlocks.startSync());

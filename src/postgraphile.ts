@@ -25,7 +25,7 @@ export const Postgraphile = postgraphile(
     connectionString: DATABASE_URL,
     // maximum number of clients the pool should contain
     // by default this is set to 10.
-    max: 30,
+    max: 100,
     // min: 3,
     // number of milliseconds a client must sit idle in the pool and not be checked out
     // before it is disconnected from the backend and discarded
@@ -33,7 +33,7 @@ export const Postgraphile = postgraphile(
     // idleTimeoutMillis: 10000,
     // number of milliseconds to wait before timing out when connecting a new client
     // by default this is 0 which means no timeout
-    connectionTimeoutMillis: 4000,
+    connectionTimeoutMillis: 8000,
     ...(DATABASE_USE_SSL && { ssl: { rejectUnauthorized: false } }), // Use SSL (recommended
   },
   "public",

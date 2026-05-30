@@ -1,6 +1,7 @@
 import { getWasmAttr } from "../util/helpers";
 import { DelayedFunction } from "./event_sync";
 import { EventCore } from "../postgres/blocksync_core/block";
+import { isDaodaoIndexable } from "../constants/daodao_cutoff";
 import {
   createDaoCore,
   updateDaoCore,
@@ -40,9 +41,23 @@ import {
   getDaoCw20StakersSumStakedForContract,
   updateDaoAllVotingModulesTotalWeightForGroupContract,
   getDaoCw4SumWeightForGroupContract,
+  upsertDaoCoreItem,
+  deleteDaoCoreItem,
+  refreshDaoProposalModulesFromDumpState,
+  updateDaoCorePausedUntil,
+  replaceDaoSubDaos,
+  addDaoProposalHook,
+  removeDaoProposalHook,
+  addDaoVoteHook,
+  removeDaoVoteHook,
+  insertDaoStakingClaim,
+  markDaoStakingClaimsClaimed,
+  createDaoPrePropseApproval,
+  resolveDaoPrePropseApproval,
 } from "../postgres/dao";
 import {
   daoCoreDumpStateQuery,
+  daoCoreListSubDaosQuery,
   daoPreProposalModuleConfigQuery,
   daoProposalModuleConfigQuery,
   daoProposalModuleProposalCreationPolicyQuery,
@@ -54,7 +69,27 @@ import {
   cw721StakeConfigQuery,
   cw721StakeStakedNftsQuery,
   nativeStakeConfigQuery,
+  cwStakingClaimsQuery,
+  cw721NftClaimsQuery,
+  daoPrePropseApprovalPendingQuery,
 } from "../util/archive-queries";
+
+// =============================================
+// Staking claim release_at helper
+// =============================================
+// cw_controllers::Claim.release_at is `Expiration` which CosmWasm
+// serializes as `{ "at_time": "<ns-since-epoch>" }` or
+// `{ "at_height": <block> }`. We can only translate at_time to a
+// wall-clock — at_height we'd need to project future block timing.
+const releaseAtToDate = (
+  releaseAt: { at_time?: string; at_height?: number } | undefined
+): Date | null => {
+  if (!releaseAt) return null;
+  if (releaseAt.at_time) {
+    return new Date(Math.floor(Number(releaseAt.at_time) / 1_000_000));
+  }
+  return null;
+};
 
 type ProcessDaoEventParams = {
   event: EventCore;
@@ -65,8 +100,13 @@ type ProcessDaoEventParams = {
 };
 
 export const processDaoEvent = async (
-  p: ProcessDaoEventParams
+  p: ProcessDaoEventParams,
 ): Promise<void | DelayedFunction> => {
+  // Pre-cutoff guard: cosmwasm smart-queries panic for blocks before the
+  // chain's wasm upgrade height. Skip the daodao handlers entirely so we
+  // don't bring down the indexer; the post-cutoff snapshot run will
+  // backfill the affected DAOs' state from chain at the cutoff height.
+  if (!isDaodaoIndexable(p.blockHeight)) return;
   try {
     switch (p.contractInfo.contractType) {
       case "dao_core":
@@ -166,7 +206,97 @@ const processDaoCoreEvent = async ({
       });
       break;
 
-    // Handle other DAO core events...
+    case "execute_set_item": {
+      // dao-core emits { action, key, addr } where `addr` carries the
+      // value (named that way historically because the original use case
+      // was storing contract addresses on the DAO). Stored verbatim.
+      const key = getWasmAttr(event.attributes, "key", true);
+      const value = getWasmAttr(event.attributes, "addr", true);
+      if (key) {
+        await upsertDaoCoreItem({
+          dao_address: contractAddress,
+          key,
+          value: value ?? "",
+          updated_at: timestamp,
+          block_height: blockHeight,
+        });
+      }
+      break;
+    }
+
+    case "execute_remove_item": {
+      // dao-core emits { action, key } only — drop the row.
+      const key = getWasmAttr(event.attributes, "key", true);
+      if (key) {
+        await deleteDaoCoreItem(contractAddress, key);
+      }
+      break;
+    }
+
+    case "execute_update_proposal_modules": {
+      // Governance added/disabled proposal modules. Re-query dump_state
+      // and patch the prefix+status of every module the DAO now reports.
+      // Brand-new modules will get their own instantiate event later in
+      // the same tx → handled by processDaoProposalEvent.instantiate.
+      const conf = await daoCoreDumpStateQuery(blockHeight, contractAddress);
+      const mods = (conf?.proposal_modules ?? []) as Array<{
+        address: string;
+        prefix?: string;
+        status?: string;
+      }>;
+      if (mods.length) {
+        await refreshDaoProposalModulesFromDumpState(mods);
+      }
+      break;
+    }
+
+    case "execute_pause": {
+      // dao-core emits attrs { until: "<expiration>" } where expiration is
+      // either "expiration: AtTime <ns>" or "expiration: AtHeight <h>" via
+      // cw_utils::Expiration::Display. Re-querying dump_state.pause_info
+      // gives us the structured form which is easier to interpret —
+      // pause_info is either { unpaused: {} } or
+      // { paused: { expiration: { at_time: "<ns>" } | { at_height: N } } }.
+      const conf = await daoCoreDumpStateQuery(blockHeight, contractAddress);
+      const pauseInfo = conf?.pause_info;
+      let pausedUntil: Date | null = null;
+      const atTimeNs = pauseInfo?.paused?.expiration?.at_time;
+      if (atTimeNs) {
+        // Cosmos AtTime expiration is nanoseconds-since-unix-epoch.
+        pausedUntil = new Date(Math.floor(Number(atTimeNs) / 1_000_000));
+      }
+      // at_height we can't translate to a wall-clock time without
+      // knowing future block timing; we leave pausedUntil NULL in that
+      // case and the next dump_state on unpause will clear it anyway.
+      await updateDaoCorePausedUntil({
+        address: contractAddress,
+        paused_until: pausedUntil,
+      });
+      break;
+    }
+
+    case "execute_withdraw_admin_nomination": {
+      // The pending admin nomination is dropped on the chain (removed
+      // from NOMINATED_ADMIN storage). We don't model the nomination as
+      // its own table today, so there's nothing to update — but we
+      // intentionally branch here so the action isn't silently dropped
+      // by the default fall-through (and so future tracking of nominee
+      // state has an obvious home).
+      break;
+    }
+
+    case "execute_update_sub_daos_list": {
+      // The event doesn't carry the to_add/to_remove lists, so we
+      // re-query list_sub_daos and replace the row set. Governance-paced
+      // so the full-replace is cheaper than diffing.
+      const subDaos = await daoCoreListSubDaosQuery(blockHeight, contractAddress);
+      await replaceDaoSubDaos(contractAddress, subDaos, timestamp, blockHeight);
+      break;
+    }
+
+    // Other dao-core actions we don't currently model (execute_admin_msgs,
+    // execute_proposal_hook, update_cw20_list, update_cw721_list,
+    // receive_cw20, receive_cw721, etc.) are intentionally dropped.
   }
 
   // Non action updates:
@@ -204,16 +334,40 @@ const processDaoProposalEvent = async ({
     case "instantiate":
       const conf1 = await daoProposalModuleConfigQuery(
         blockHeight,
-        contractAddress
+        contractAddress,
       );
       const conf2 = await daoProposalModuleProposalCreationPolicyQuery(
         blockHeight,
-        contractAddress
+        contractAddress,
       );
+      // Look up this module's prefix + status in the parent dao_core's
+      // dump_state.proposal_modules list. The dao_core registers each
+      // proposal module before dispatching the instantiate sub-msg, so by
+      // the time we run the query at end-of-block the entry is there.
+      // Single-module DAOs always come back as prefix="A", status="enabled";
+      // multi-module DAOs get distinct prefixes and may have entries
+      // marked "disabled" once execute_update_proposal_modules is wired.
+      const daoAddr = getWasmAttr(event.attributes, "dao", true);
+      let prefix: string | undefined;
+      let status: string | undefined;
+      if (daoAddr) {
+        try {
+          const dump = await daoCoreDumpStateQuery(blockHeight, daoAddr);
+          const mod = (dump?.proposal_modules ?? []).find(
+            (m: any) => m.address === contractAddress,
+          );
+          prefix = mod?.prefix;
+          status = mod?.status;
+        } catch (e) {
+          // dao_core lookup failure is non-fatal — leave columns null.
+        }
+      }
       await createDaoProposalModule({
         address: contractAddress,
         module_type: contractInfo.contractType,
-        dao_address: getWasmAttr(event.attributes, "dao", true),
+        dao_address: daoAddr,
+        prefix,
+        status,
         created_at: timestamp,
         block_height: blockHeight,
         config: conf1,
@@ -224,7 +378,7 @@ const processDaoProposalEvent = async ({
     case "update_config":
       const conf = await daoProposalModuleConfigQuery(
         blockHeight,
-        contractAddress
+        contractAddress,
       );
       await updateDaoProposalModuleConfig({
         address: contractAddress,
@@ -234,11 +388,22 @@ const processDaoProposalEvent = async ({
     case "update_proposal_creation_policy":
       const conf3 = await daoProposalModuleProposalCreationPolicyQuery(
         blockHeight,
-        contractAddress
+        contractAddress,
       );
       await updateDaoProposalModuleProposalCreationPolicy({
         address: contractAddress,
         proposal_creation_policy: conf3,
+      });
+      // Keep pre_propose_module column in sync with the new policy.
+      //   { module: { addr: X } } → set to X
+      //   { anyone: {} }          → set to NULL (no pre-propose module)
+      // When switching to a *new* Module(...), a subsequent wasm event with
+      // `update_pre_propose_module=<new_addr>` also fires from the proposal
+      // module's reply handler, so the no-action update path further down
+      // re-confirms the new address. Both code paths are idempotent.
+      await updateDaoProposalModulePreProposeModule({
+        address: contractAddress,
+        pre_propose_module: conf3?.module?.addr ?? null,
       });
       break;
 
@@ -247,7 +412,7 @@ const processDaoProposalEvent = async ({
       const prop = await daoProposalInfoQuery(
         blockHeight,
         contractAddress,
-        parseInt(id)
+        parseInt(id),
       );
       await createDaoProposal({
         id: id,
@@ -275,13 +440,24 @@ const processDaoProposalEvent = async ({
         blockHeight,
         contractAddress,
         parseInt(getWasmAttr(event.attributes, "proposal_id", true)),
-        getWasmAttr(event.attributes, "sender", true)
+        getWasmAttr(event.attributes, "sender", true),
       );
+      // dao-proposal-single returns vote.vote as a plain string
+      // ("yes"|"no"|"abstain"). dao-proposal-multiple / -condorcet return
+      // a `MultipleChoiceVote { option_id: u32 }` object. Normalize to a
+      // string so the TEXT column stays human-readable in both cases.
+      // The action attribute `position` on multi-choice vote events also
+      // carries the option_id as a string, so this lines up with what the
+      // contract logs.
+      const voteValue =
+        vote && typeof vote.vote === "object" && vote.vote !== null
+          ? String(vote.vote.option_id ?? "")
+          : vote?.vote;
       await createDaoVote({
         proposal_module: contractAddress,
         proposal_id: getWasmAttr(event.attributes, "proposal_id", true),
         voter: vote.voter,
-        vote: vote.vote,
+        vote: voteValue,
         rationale: vote.rationale,
         voted_at: timestamp,
         block_height: blockHeight,
@@ -294,7 +470,7 @@ const processDaoProposalEvent = async ({
         const prop1 = await daoProposalInfoQuery(
           blockHeight,
           contractAddress,
-          parseInt(getWasmAttr(event.attributes, "proposal_id", true))
+          parseInt(getWasmAttr(event.attributes, "proposal_id", true)),
         );
         await updateDaoProposalStatusAndVotes({
           proposal_module: contractAddress,
@@ -310,7 +486,7 @@ const processDaoProposalEvent = async ({
       const prop2 = await daoProposalInfoQuery(
         blockHeight,
         contractAddress,
-        parseInt(getWasmAttr(event.attributes, "proposal_id", true))
+        parseInt(getWasmAttr(event.attributes, "proposal_id", true)),
       );
       await updateDaoProposalStatus({
         proposal_module: contractAddress,
@@ -318,6 +494,48 @@ const processDaoProposalEvent = async ({
         status: prop2.status,
       });
       break;
+
+    case "add_proposal_hook": {
+      const hookAddress = getWasmAttr(event.attributes, "address", true);
+      if (hookAddress) {
+        await addDaoProposalHook({
+          proposal_module: contractAddress,
+          hook_address: hookAddress,
+          created_at: timestamp,
+          block_height: blockHeight,
+        });
+      }
+      break;
+    }
+
+    case "remove_proposal_hook": {
+      const hookAddress = getWasmAttr(event.attributes, "address", true);
+      if (hookAddress) {
+        await removeDaoProposalHook(contractAddress, hookAddress);
+      }
+      break;
+    }
+
+    case "add_vote_hook": {
+      const hookAddress = getWasmAttr(event.attributes, "address", true);
+      if (hookAddress) {
+        await addDaoVoteHook({
+          proposal_module: contractAddress,
+          hook_address: hookAddress,
+          created_at: timestamp,
+          block_height: blockHeight,
+        });
+      }
+      break;
+    }
+
+    case "remove_vote_hook": {
+      const hookAddress = getWasmAttr(event.attributes, "address", true);
+      if (hookAddress) {
+        await removeDaoVoteHook(contractAddress, hookAddress);
+      }
+      break;
+    }
 
     // Handle other proposal events...
   }
@@ -328,13 +546,13 @@ const processDaoProposalEvent = async ({
   const preProposeModule = getWasmAttr(
     event.attributes,
     "update_pre_propose_module",
-    true
+    true,
   );
   if (preProposeModule) {
     // First update the proposal_creation_policy
     const conf3 = await daoProposalModuleProposalCreationPolicyQuery(
       blockHeight,
-      contractAddress
+      contractAddress,
     );
     await updateDaoProposalModuleProposalCreationPolicy({
       address: contractAddress,
@@ -371,20 +589,20 @@ const processDaoVotingEvent = async ({
       if (contractInfo.contractType === "dao_voting_cw20_staked") {
         activeThreshold = await daoVotingModuleActiveThresholdQuery(
           blockHeight,
-          contractAddress
+          contractAddress,
         );
       }
       if (contractInfo.contractType === "dao_voting_cw721_staked") {
         const cw721Config = await cw721StakeConfigQuery(
           blockHeight,
-          contractAddress
+          contractAddress,
         );
         unstakingDuration = cw721Config?.unstaking_duration;
       }
       if (contractInfo.contractType === "dao_voting_native_staked") {
         const nativeConfig = await nativeStakeConfigQuery(
           blockHeight,
-          contractAddress
+          contractAddress,
         );
         nativeDenom = nativeConfig?.denom;
         unstakingDuration = nativeConfig?.unstaking_duration;
@@ -406,7 +624,7 @@ const processDaoVotingEvent = async ({
       if (contractInfo.contractType === "dao_voting_cw20_staked") {
         const activeThreshold = await daoVotingModuleActiveThresholdQuery(
           blockHeight,
-          contractAddress
+          contractAddress,
         );
         await updateDaoVotingModuleThreshold({
           address: contractAddress,
@@ -419,7 +637,7 @@ const processDaoVotingEvent = async ({
       if (contractInfo.contractType === "dao_voting_cw721_staked") {
         const cw721Config = await cw721StakeConfigQuery(
           blockHeight,
-          contractAddress
+          contractAddress,
         );
         await updateDaoVotingModuleUnstakingDuration({
           address: contractAddress,
@@ -429,7 +647,7 @@ const processDaoVotingEvent = async ({
       if (contractInfo.contractType === "dao_voting_native_staked") {
         const nativeConfig = await nativeStakeConfigQuery(
           blockHeight,
-          contractAddress
+          contractAddress,
         );
         await updateDaoVotingModuleUnstakingDuration({
           address: contractAddress,
@@ -444,7 +662,7 @@ const processDaoVotingEvent = async ({
         const stakedNfts = await cw721StakeStakedNftsQuery(
           blockHeight,
           contractAddress,
-          from
+          from,
         );
         await batchInsertDaoCw721Stakers({
           voting_module_address: contractAddress,
@@ -463,7 +681,7 @@ const processDaoVotingEvent = async ({
         const from = getWasmAttr(event.attributes, "from", true);
         const amount = parseInt(getWasmAttr(event.attributes, "amount", true));
         const stakedAmount1 = parseInt(
-          await getDaoNativeStakerStakedAmount(contractAddress, from)
+          await getDaoNativeStakerStakedAmount(contractAddress, from),
         );
         await upsertDaoNativeStaker({
           voting_module_address: contractAddress,
@@ -471,9 +689,8 @@ const processDaoVotingEvent = async ({
           staked_amount: (stakedAmount1 + amount).toString(),
         });
         // Then update total_weight in dao_voting_module table
-        const oldTotalWeight = await getDaoVotingModuleTotalWeight(
-          contractAddress
-        );
+        const oldTotalWeight =
+          await getDaoVotingModuleTotalWeight(contractAddress);
         const newTotalWeight = oldTotalWeight + amount;
         await updateDaoVotingModuleTotalWeight({
           address: contractAddress,
@@ -488,7 +705,7 @@ const processDaoVotingEvent = async ({
         const stakedNfts = await cw721StakeStakedNftsQuery(
           blockHeight,
           contractAddress,
-          from
+          from,
         );
         await batchInsertDaoCw721Stakers({
           voting_module_address: contractAddress,
@@ -502,12 +719,41 @@ const processDaoVotingEvent = async ({
           address: contractAddress,
           total_weight: totalNftsStaked.toString(),
         });
+        // Record the queued NFT claims. cw721 NftClaims is per-token, so a
+        // single unstake of N tokens enqueues N entries — we re-query the
+        // claims list and insert any not-yet-recorded entries.
+        const claimDuration = getWasmAttr(
+          event.attributes,
+          "claim_duration",
+          true,
+        );
+        if (claimDuration && claimDuration !== "None") {
+          const nftClaims = await cw721NftClaimsQuery(
+            blockHeight,
+            contractAddress,
+            from,
+          );
+          // Any claims with the latest release_at belong to this unstake.
+          // We over-insert defensively with ON-DOES-NOT-MATTER semantics —
+          // there's no unique key beyond the synthetic id, so dedupe by
+          // looking at this height + staker + token_id when querying.
+          for (const c of nftClaims) {
+            await insertDaoStakingClaim({
+              kind: "cw721",
+              staking_contract: contractAddress,
+              staker_address: from,
+              token_id: c.token_id,
+              release_at: releaseAtToDate(c.release_at),
+              unstaked_at_height: blockHeight,
+            });
+          }
+        }
       }
       if (contractInfo.contractType === "dao_voting_native_staked") {
         const from = getWasmAttr(event.attributes, "from", true);
         const amount = parseInt(getWasmAttr(event.attributes, "amount", true));
         const stakedAmount1 = parseInt(
-          await getDaoNativeStakerStakedAmount(contractAddress, from)
+          await getDaoNativeStakerStakedAmount(contractAddress, from),
         );
         const newStakedAmount = stakedAmount1 - amount;
         if (!newStakedAmount) {
@@ -520,85 +766,156 @@ const processDaoVotingEvent = async ({
           });
         }
         // Then update total_weight in dao_voting_module table
-        const oldTotalWeight = await getDaoVotingModuleTotalWeight(
-          contractAddress
-        );
+        const oldTotalWeight =
+          await getDaoVotingModuleTotalWeight(contractAddress);
         const newTotalWeight = oldTotalWeight - amount;
         await updateDaoVotingModuleTotalWeight({
           address: contractAddress,
           total_weight: newTotalWeight.toString(),
         });
+        // Queue an entry into the claims table if the contract has a
+        // non-None unstaking_duration. Identical pattern to cw20-stake.
+        const claimDuration = getWasmAttr(
+          event.attributes,
+          "claim_duration",
+          true,
+        );
+        if (claimDuration && claimDuration !== "None") {
+          const claims = await cwStakingClaimsQuery(
+            blockHeight,
+            contractAddress,
+            from,
+          );
+          const newest = claims[claims.length - 1];
+          if (newest) {
+            await insertDaoStakingClaim({
+              kind: "native",
+              staking_contract: contractAddress,
+              staker_address: from,
+              amount: newest.amount,
+              release_at: releaseAtToDate(newest.release_at),
+              unstaked_at_height: blockHeight,
+            });
+          }
+        }
       }
       break;
+
+    case "claim": {
+      // dao-voting-native-staked emits `claim` with { from, amount }.
+      // cw20-stake also uses this action but is handled in
+      // processCw20StakeEvent (different dispatch path because the
+      // cw20-stake contract is its own contract-type).
+      if (contractInfo.contractType === "dao_voting_native_staked") {
+        const from = getWasmAttr(event.attributes, "from", true);
+        if (from) {
+          await markDaoStakingClaimsClaimed(
+            "native",
+            contractAddress,
+            from,
+            timestamp,
+            blockHeight,
+          );
+        }
+      }
+      break;
+    }
+
+    case "claim_nfts": {
+      // dao-voting-cw721-staked emits this on NFT claim drain.
+      if (contractInfo.contractType === "dao_voting_cw721_staked") {
+        const from = getWasmAttr(event.attributes, "from", true);
+        if (from) {
+          await markDaoStakingClaimsClaimed(
+            "cw721",
+            contractAddress,
+            from,
+            timestamp,
+            blockHeight,
+          );
+        }
+      }
+      break;
+    }
 
     // Handle other voting module events...
   }
 
-  // No action updates:
+  // No-action updates:
   // =============================================
-  // Update group contract address if it is set
+  // A single wasm event from a voting-module contract can emit any of
+  // group_contract_address / token_address / staking_contract — and the
+  // ExistingTokenAndStaking instantiation path emits BOTH token_address
+  // and staking_contract on the same event. Process all three in sequence
+  // (no early returns) so none gets dropped.
+
   const groupContractAddress = getWasmAttr(
     event.attributes,
     "group_contract_address",
-    true
+    true,
   );
   if (groupContractAddress) {
-    // Update total weight for this voting module
-    const totalWeight = await getDaoCw4SumWeightForGroupContract(
-      groupContractAddress
-    );
+    const totalWeight =
+      await getDaoCw4SumWeightForGroupContract(groupContractAddress);
     await updateDaoVotingModuleTotalWeight({
       address: contractAddress,
       total_weight: totalWeight.toString(),
     });
-    return await updateDaoVotingModuleGroupContractAddress({
+    await updateDaoVotingModuleGroupContractAddress({
       address: contractAddress,
       group_contract_address: groupContractAddress,
     });
   }
 
-  // Update token contract address if it is set
   const tokenContractAddress = getWasmAttr(
     event.attributes,
     "token_address",
-    true
+    true,
   );
   if (tokenContractAddress) {
-    return await updateDaoVotingModuleTokenContractAddress({
+    await updateDaoVotingModuleTokenContractAddress({
       address: contractAddress,
       token_address: tokenContractAddress,
     });
   }
 
-  // Update token staking contract address if it is set
   const tokenStakingContractAddress = getWasmAttr(
     event.attributes,
     "staking_contract",
-    true
+    true,
   );
   if (tokenStakingContractAddress) {
-    // Update unstaking duration for all voting modules using this cw20 staking contract
-    const stakingConfig = await cw20StakeConfigQuery(
-      blockHeight,
-      tokenStakingContractAddress
-    );
-    await updateDaoAllVotingModulesUnstakingDurationForCw20Contract(
-      tokenStakingContractAddress,
-      stakingConfig.unstaking_duration
-    );
-    // Update the total weight for this voting module
-    const totalWeight = await getDaoCw20StakersSumStakedForContract(
-      tokenStakingContractAddress
-    );
-    await updateDaoAllVotingModulesTotalWeightForCw20Contract(
-      tokenStakingContractAddress,
-      totalWeight.toString()
-    );
-    // Update token staking contract address for this voting module
-    return await updateDaoVotingModuleTokenStakingContractAddress({
+    // ExistingStaking case: the cw20-stake was deployed outside this DAO's
+    // instantiate tx so we may have never seen its `instantiate` event.
+    // Pre-register it so the FK from dao_voting_module.staking_contract
+    // resolves.
+    await ensureDaoCw20StakingContract(tokenStakingContractAddress);
+    // Set this voting module's staking_contract column FIRST so the
+    // "update all voting modules where staking_contract = X" calls below
+    // actually match this row. Without this ordering, the row still has
+    // staking_contract=NULL from createDaoVotingModule and the totals never
+    // settle until the next stake event (which never fires in the
+    // ExistingTokenAndStaking case where tokens were staked before the DAO
+    // came online).
+    await updateDaoVotingModuleTokenStakingContractAddress({
       address: contractAddress,
       staking_contract: tokenStakingContractAddress,
     });
+    const stakingConfig = await cw20StakeConfigQuery(
+      blockHeight,
+      tokenStakingContractAddress,
+    );
+    await updateDaoAllVotingModulesUnstakingDurationForCw20Contract(
+      tokenStakingContractAddress,
+      stakingConfig?.unstaking_duration,
+    );
+    const totalWeight = await getDaoCw20StakersSumStakedForContract(
+      tokenStakingContractAddress,
+    );
+    await updateDaoAllVotingModulesTotalWeightForCw20Contract(
+      tokenStakingContractAddress,
+      totalWeight.toString(),
+    );
   }
 };
 
@@ -608,6 +925,7 @@ const processDaoVotingEvent = async ({
 const processDaoPreProposeEvent = async ({
   event,
   timestamp,
+  contractInfo,
   blockHeight,
   action,
 }: ProcessDaoEventParams): Promise<void> => {
@@ -617,7 +935,7 @@ const processDaoPreProposeEvent = async ({
     case "instantiate":
       const conf1 = await daoPreProposalModuleConfigQuery(
         blockHeight,
-        contractAddress
+        contractAddress,
       );
       await createDaoPreProposeModule({
         address: contractAddress,
@@ -632,7 +950,7 @@ const processDaoPreProposeEvent = async ({
     case "update_config":
       const config = await daoPreProposalModuleConfigQuery(
         blockHeight,
-        contractAddress
+        contractAddress,
       );
       await updateDaoPreProposeModule({
         address: contractAddress,
@@ -640,6 +958,80 @@ const processDaoPreProposeEvent = async ({
         open_proposal_submission: config.open_proposal_submission,
       });
       break;
+  }
+
+  // ---------------------------------------------------------------
+  // dao-pre-propose-approval-single lifecycle.
+  //
+  // This contract uses `method` instead of `action` for its custom events
+  // (legacy convention from dao-pre-propose-base). It emits:
+  //   - method=pre-propose         { id }      — pending submission
+  //   - method=proposal_approved   { approval_id, proposal_id }
+  //   - method=proposal_rejected   { proposal, deposit_info }
+  //
+  // We only enter this path for the approval contract type — the regular
+  // pre-propose contracts don't carry these methods, so an unconditional
+  // method-read would still be safe but is unnecessary.
+  if (contractInfo.contractType === "dao_pre_propose_approval_single") {
+    const method = getWasmAttr(event.attributes, "method", true);
+    switch (method) {
+      case "pre-propose": {
+        const approvalIdStr = getWasmAttr(event.attributes, "id", true);
+        // The event only carries the approval_id; the proposer is the
+        // tx sender which doesn't make it into the wasm event. Query the
+        // chain for the freshly-saved PendingProposal entry — it stores
+        // the proposer address verbatim.
+        if (approvalIdStr) {
+          const pending = await daoPrePropseApprovalPendingQuery(
+            blockHeight,
+            contractAddress,
+            parseInt(approvalIdStr)
+          );
+          if (pending?.proposer) {
+            await createDaoPrePropseApproval({
+              pre_propose_module: contractAddress,
+              approval_id: approvalIdStr,
+              proposer: pending.proposer,
+              submitted_at: timestamp,
+              submitted_at_height: blockHeight,
+            });
+          }
+        }
+        break;
+      }
+      case "proposal_approved": {
+        const approvalIdStr = getWasmAttr(event.attributes, "approval_id", true);
+        const proposalIdStr = getWasmAttr(event.attributes, "proposal_id", true);
+        if (approvalIdStr) {
+          await resolveDaoPrePropseApproval({
+            pre_propose_module: contractAddress,
+            approval_id: approvalIdStr,
+            status: "approved",
+            proposal_id: proposalIdStr ?? null,
+            resolved_at: timestamp,
+            resolved_at_height: blockHeight,
+          });
+        }
+        break;
+      }
+      case "proposal_rejected": {
+        // The rejected variant uses `proposal` for the approval_id (the
+        // contract uses inconsistent attribute names — see contract.rs
+        // line 223 `add_attribute("proposal", id.to_string())`).
+        const approvalIdStr = getWasmAttr(event.attributes, "proposal", true);
+        if (approvalIdStr) {
+          await resolveDaoPrePropseApproval({
+            pre_propose_module: contractAddress,
+            approval_id: approvalIdStr,
+            status: "rejected",
+            proposal_id: null,
+            resolved_at: timestamp,
+            resolved_at_height: blockHeight,
+          });
+        }
+        break;
+      }
+    }
   }
 };
 
@@ -650,6 +1042,7 @@ const processDaoPreProposeEvent = async ({
 // staked amount, in future we can add all events to store staking history
 const processCw20StakeEvent = async ({
   event,
+  timestamp,
   blockHeight,
   action,
 }: ProcessDaoEventParams): Promise<void> => {
@@ -658,15 +1051,14 @@ const processCw20StakeEvent = async ({
   switch (action) {
     case "stake":
       const stakeAmount = parseInt(
-        getWasmAttr(event.attributes, "amount", true)
+        getWasmAttr(event.attributes, "amount", true),
       );
       const stakeFrom = getWasmAttr(event.attributes, "from", true);
       const stakedAmount1 = parseInt(
-        await getDaoCw20StakerStakedAmount(contractAddress, stakeFrom)
+        await getDaoCw20StakerStakedAmount(contractAddress, stakeFrom),
       );
-      const totalWeightBefore = await getDaoCw20StakersSumStakedForContract(
-        contractAddress
-      );
+      const totalWeightBefore =
+        await getDaoCw20StakersSumStakedForContract(contractAddress);
 
       await upsertDaoCw20Staker({
         staking_contract: contractAddress,
@@ -676,22 +1068,21 @@ const processCw20StakeEvent = async ({
       // Update the total weight for all voting modules using this cw20 staking contract
       await updateDaoAllVotingModulesTotalWeightForCw20Contract(
         contractAddress,
-        (totalWeightBefore + stakeAmount).toString()
+        (totalWeightBefore + stakeAmount).toString(),
       );
       break;
 
     case "unstake":
       const unstakeAmount = parseInt(
-        getWasmAttr(event.attributes, "amount", true)
+        getWasmAttr(event.attributes, "amount", true),
       );
       const unstakeFrom = getWasmAttr(event.attributes, "from", true);
       const stakedAmount2 = parseInt(
-        await getDaoCw20StakerStakedAmount(contractAddress, unstakeFrom)
+        await getDaoCw20StakerStakedAmount(contractAddress, unstakeFrom),
       );
       const newStakedAmount = stakedAmount2 - unstakeAmount;
-      const totalWeightBefore1 = await getDaoCw20StakersSumStakedForContract(
-        contractAddress
-      );
+      const totalWeightBefore1 =
+        await getDaoCw20StakersSumStakedForContract(contractAddress);
 
       if (!newStakedAmount) {
         await deleteDaoCw20Staker(contractAddress, unstakeFrom);
@@ -705,24 +1096,69 @@ const processCw20StakeEvent = async ({
       // Update the total weight for all voting modules using this cw20 staking contract
       await updateDaoAllVotingModulesTotalWeightForCw20Contract(
         contractAddress,
-        (totalWeightBefore1 - unstakeAmount).toString()
+        (totalWeightBefore1 - unstakeAmount).toString(),
       );
+      // If the staking contract has an unstaking_duration configured the
+      // unstake amount is queued into CLAIMS rather than being transferred
+      // immediately. claim_duration="None" on the event means no queue
+      // entry was created. We diff the chain's claims list against what
+      // we already have rather than just appending — the queued list is
+      // append-only on chain so the highest-release_at row that's not yet
+      // in our table is the one this unstake just created.
+      {
+        const claimDuration = getWasmAttr(
+          event.attributes,
+          "claim_duration",
+          true,
+        );
+        if (claimDuration && claimDuration !== "None") {
+          const claims = await cwStakingClaimsQuery(
+            blockHeight,
+            contractAddress,
+            unstakeFrom,
+          );
+          // Newest claim is the one we just created. (cw_controllers
+          // appends in order; release_at for the latest entry will be
+          // strictly >= existing entries when duration is positive.)
+          const newest = claims[claims.length - 1];
+          if (newest) {
+            await insertDaoStakingClaim({
+              kind: "cw20",
+              staking_contract: contractAddress,
+              staker_address: unstakeFrom,
+              amount: newest.amount,
+              release_at: releaseAtToDate(newest.release_at),
+              unstaked_at_height: blockHeight,
+            });
+          }
+        }
+      }
       break;
 
     case "update_config":
       const stakingConfig = await cw20StakeConfigQuery(
         blockHeight,
-        contractAddress
+        contractAddress,
       );
       await updateDaoAllVotingModulesUnstakingDurationForCw20Contract(
         contractAddress,
-        stakingConfig.unstaking_duration
+        stakingConfig.unstaking_duration,
       );
       break;
 
-    case "claim":
-      // In future we can add stake history, for now nothing
+    case "claim": {
+      const claimFrom = getWasmAttr(event.attributes, "from", true);
+      if (claimFrom) {
+        await markDaoStakingClaimsClaimed(
+          "cw20",
+          contractAddress,
+          claimFrom,
+          timestamp,
+          blockHeight,
+        );
+      }
       break;
+    }
 
     default:
       break;
@@ -745,7 +1181,7 @@ const processCw4GroupEvent = async ({
       // events on changes so have to do it manually
       const membersData = await cw4GroupMembersQuery(
         blockHeight,
-        contractAddress
+        contractAddress,
       );
 
       if (membersData?.length > 0) {
@@ -755,11 +1191,11 @@ const processCw4GroupEvent = async ({
       // Then update total_weight in all dao_voting_module tables
       const totalWeight = membersData.reduce(
         (acc, member) => acc + member.weight,
-        0
+        0,
       );
       await updateDaoAllVotingModulesTotalWeightForGroupContract(
         contractAddress,
-        totalWeight.toString()
+        totalWeight.toString(),
       );
       break;
     default:
@@ -779,13 +1215,16 @@ export const processDaodaoInstantiateEvent = async ({
   contractType: string;
   blockHeight: number;
 }): Promise<void> => {
+  // Same pre-cutoff guard as processDaoEvent — this handler hits the chain
+  // to pre-populate cw4 members and cw20-stake state, which panics pre-cutoff.
+  if (!isDaodaoIndexable(blockHeight)) return;
   switch (contractType) {
     case "cw4_group":
       await ensureDaoCw4GroupContract(contractAddress);
       // Get all members from the group contract
       const membersData = await cw4GroupMembersQuery(
         blockHeight,
-        contractAddress
+        contractAddress,
       );
       if (membersData?.length > 0) {
         await batchUpdateDaoCw4Members(contractAddress, membersData);

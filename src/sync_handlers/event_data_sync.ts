@@ -6,10 +6,18 @@ import {
   TokenSDKType,
 } from "@ixo/impactxclient-sdk/types/codegen/ixo/token/v1beta1/token";
 import {
+  AgentDepositBalanceSDKType,
   ClaimSDKType,
   CollectionSDKType,
   DisputeSDKType,
+  EvaluationSDKType,
+  MemberBudgetSDKType,
 } from "@ixo/impactxclient-sdk/types/codegen/ixo/claims/v1beta1/claims";
+import {
+  NameRecordSDKType,
+  NamespaceSDKType,
+} from "@ixo/impactxclient-sdk/types/codegen/ixo/names/v1beta1/names";
+import { PoolSDKType } from "@ixo/impactxclient-sdk/types/codegen/ixo/liquidstake/v1beta1/liquidstake";
 import { getDocFromAttributes, getValueFromAttributes } from "../util/helpers";
 import { ixo } from "@ixo/impactxclient-sdk";
 import {
@@ -25,9 +33,31 @@ import {
   createClaim,
   createClaimCollection,
   createDispute,
+  deleteAgentDepositBalance,
+  deleteMemberBudget,
+  insertEvaluation,
+  insertEvaluationHistory,
+  resolveDispute,
   updateClaim,
   updateClaimCollection,
+  setClaimCurrentEvaluation,
+  upsertAgentDepositBalance,
+  upsertMemberBudget,
 } from "../postgres/claim";
+import type { Evaluation } from "../postgres/claim";
+import {
+  applyNameStatus,
+  applyNameTransfer,
+  insertNameStatusChange,
+  insertNameTransfer,
+  upsertNameRecord,
+  upsertNamespace,
+} from "../postgres/names";
+import {
+  insertLiquidStakeTx,
+  upsertLiquidStakeModuleParams,
+  upsertLiquidStakePool,
+} from "../postgres/liquidstake";
 import {
   createBond,
   createBondAlpha,
@@ -160,62 +190,16 @@ export const syncEventData = async (event: EventCore, block: BlockCore) => {
           event.attributes,
           event.type
         );
-        await createClaimCollection({
-          id: cCollection.id,
-          entity: cCollection.entity,
-          admin: cCollection.admin,
-          protocol: cCollection.protocol,
-          startDate: cCollection.start_date as any,
-          endDate: cCollection.end_date as any,
-          quota: Number(cCollection.quota),
-          count: Number(cCollection.count),
-          evaluated: Number(cCollection.evaluated),
-          approved: Number(cCollection.approved),
-          rejected: Number(cCollection.rejected),
-          disputed: Number(cCollection.disputed),
-          invalidated: Number(cCollection.invalidated ?? 0),
-          state: ixo.claims.v1beta1.collectionStateFromJSON(cCollection.state),
-          payments: cCollection.payments,
-          escrowAccount: cCollection.escrow_account ?? undefined,
-          intents:
-            cCollection.intents != null
-              ? ixo.claims.v1beta1.collectionIntentOptionsFromJSON(
-                  cCollection.intents
-                )
-              : undefined,
-        });
+        await createClaimCollection(collectionFromSdk(cCollection));
         break;
       case EventTypes.updateCollection:
         const uCollection: CollectionSDKType = getDocFromAttributes(
           event.attributes,
           event.type
         );
-        await updateClaimCollection({
-          id: uCollection.id,
-          entity: uCollection.entity,
-          admin: uCollection.admin,
-          protocol: uCollection.protocol,
-          startDate: uCollection.start_date as any,
-          endDate: uCollection.end_date as any,
-          quota: Number(uCollection.quota),
-          count: Number(uCollection.count),
-          evaluated: Number(uCollection.evaluated),
-          approved: Number(uCollection.approved),
-          rejected: Number(uCollection.rejected),
-          disputed: Number(uCollection.disputed),
-          invalidated: Number(uCollection.invalidated ?? 0),
-          state: ixo.claims.v1beta1.collectionStateFromJSON(uCollection.state),
-          payments: uCollection.payments,
-          escrowAccount: uCollection.escrow_account ?? undefined,
-          intents:
-            uCollection.intents != null
-              ? ixo.claims.v1beta1.collectionIntentOptionsFromJSON(
-                  uCollection.intents
-                )
-              : undefined,
-        });
+        await updateClaimCollection(collectionFromSdk(uCollection));
         break;
-      case EventTypes.submitClaim:
+      case EventTypes.submitClaim: {
         const cClaim: ClaimSDKType = getDocFromAttributes(
           event.attributes,
           event.type
@@ -232,32 +216,23 @@ export const syncEventData = async (event: EventCore, block: BlockCore) => {
           cw20Payment: cClaim.cw20_payment,
           cw1155Payment: cClaim.cw1155_payment,
           cw1155IntentPayment: cClaim.cw1155_intent_payment,
+          memberAddress: cClaim.member_address || undefined,
         });
+        // A submitted claim has no evaluation yet, but evaluation_history
+        // may already be populated if this Claim was re-submitted after a
+        // prior cycle — replay everything we see (idempotent on conflict).
+        if (cClaim.evaluation_history?.length) {
+          await insertEvaluationHistory(
+            cClaim.evaluation_history.map((e) => evaluationFromSdk(e, cClaim.claim_id))
+          );
+        }
         break;
-      case EventTypes.updateClaim:
+      }
+      case EventTypes.updateClaim: {
         const uClaim: ClaimSDKType = getDocFromAttributes(
           event.attributes,
           event.type
         );
-        const evaluation = uClaim.evaluation
-          ? {
-              collectionId: uClaim.evaluation!.collection_id,
-              oracle: uClaim.evaluation!.oracle,
-              agentDid: uClaim.evaluation!.agent_did,
-              agentAddress: uClaim.evaluation!.agent_address,
-              status: ixo.claims.v1beta1.evaluationStatusFromJSON(
-                uClaim.evaluation!.status
-              ),
-              reason: uClaim.evaluation!.reason,
-              verificationProof: uClaim.evaluation!.verification_proof,
-              evaluationDate: uClaim.evaluation!.evaluation_date as any,
-              amount: uClaim.evaluation!.amount,
-              claimId: uClaim.claim_id,
-              cw20Payment: uClaim.evaluation?.cw20_payment,
-              cw1155Payment: uClaim.evaluation?.cw1155_payment,
-              cw1155IntentPayment: uClaim.evaluation?.cw1155_intent_payment,
-            }
-          : undefined;
         await updateClaim({
           claimId: uClaim.claim_id,
           collectionId: uClaim.collection_id,
@@ -265,26 +240,332 @@ export const syncEventData = async (event: EventCore, block: BlockCore) => {
           agentAddress: uClaim.agent_address,
           submissionDate: uClaim.submission_date as any,
           paymentsStatus: uClaim.payments_status,
-          evaluation,
           useIntent: uClaim.use_intent ?? undefined,
           amount: uClaim.amount?.length ? uClaim.amount : undefined,
           cw20Payment: uClaim.cw20_payment,
           cw1155Payment: uClaim.cw1155_payment,
           cw1155IntentPayment: uClaim.cw1155_intent_payment,
+          memberAddress: uClaim.member_address || undefined,
         });
+        // Insert each historical evaluation, then the current one. Order
+        // doesn't matter for correctness (the unique key dedupes), but
+        // doing history first keeps event order natural in case anyone
+        // later switches to a real `evaluationDate` tiebreak.
+        if (uClaim.evaluation_history?.length) {
+          await insertEvaluationHistory(
+            uClaim.evaluation_history.map((e) => evaluationFromSdk(e, uClaim.claim_id))
+          );
+        }
+        if (uClaim.evaluation) {
+          const id = await insertEvaluation(
+            evaluationFromSdk(uClaim.evaluation, uClaim.claim_id)
+          );
+          // Point Claim.currentEvaluationId at this row so the GraphQL
+          // singular `Claim.evaluation` keeps resolving to the latest.
+          await setClaimCurrentEvaluation(uClaim.claim_id, id);
+        }
         break;
-      case EventTypes.disputeClaim:
+      }
+      case EventTypes.disputeClaim: {
         const cDispute: DisputeSDKType = getDocFromAttributes(
           event.attributes,
           event.type
         );
+        // ClaimDisputedEvent always carries status=OPEN and no resolution;
+        // the DisputeResolution row is written by the disputeResolved
+        // handler below when the adjudicator settles.
         await createDispute({
-          proof: cDispute.data!.proof,
+          proof: cDispute.data?.proof,
           subjectId: cDispute.subject_id,
-          type: cDispute.type,
+          type: Number(cDispute.type ?? 0),
           data: cDispute.data,
+          targetRole: enumFrom(cDispute.target_role, DISPUTE_TARGET_ROLE_MAP),
+          disputerAddress: cDispute.disputer_address,
+          disputerDid: cDispute.disputer_did,
+          disputeDeposit: cDispute.dispute_deposit,
+          submittedAt: (cDispute.submitted_at as any) ?? block.time,
+          status: enumFrom(cDispute.status, DISPUTE_STATUS_MAP),
         });
         break;
+      }
+      case EventTypes.disputeResolved: {
+        const rDispute: DisputeSDKType = getDocFromAttributes(
+          event.attributes,
+          event.type
+        );
+        const res = rDispute.resolution;
+        if (!res) {
+          // Defensive: a resolved event without a resolution payload would
+          // mean the chain emitted an inconsistent state. Skip rather than
+          // write half a row.
+          break;
+        }
+        await resolveDispute({
+          subjectId: rDispute.subject_id,
+          targetRole: enumFrom(rDispute.target_role, DISPUTE_TARGET_ROLE_MAP),
+          status: enumFrom(rDispute.status, DISPUTE_STATUS_MAP),
+          data: rDispute.data,
+          resolution: {
+            adjudicatorDid: res.adjudicator_did,
+            adjudicatorAddress: res.adjudicator_address,
+            adjudicatorPayoutAddress: res.adjudicator_payout_address,
+            // resolved_at comes from the resolution payload (when
+            // adjudicated); fall back to block time so the column is never
+            // null on insert.
+            resolvedAt: (res.resolved_at as any) ?? block.time,
+            data: res.data,
+            intendedPenalty: res.intended_penalty,
+            actualPenaltyPaid: res.actual_penalty_paid,
+            winnerAmount: res.winner_amount,
+            adjudicatorAmount: res.adjudicator_amount,
+            winnerAddress: res.winner_address,
+            loserAddress: res.loser_address,
+          },
+        });
+        break;
+      }
+
+      // ==========================================================
+      // CLAIMS v7: MEMBER BUDGETS
+      // ==========================================================
+      case EventTypes.memberBudgetCreated:
+      case EventTypes.memberBudgetUpdated: {
+        const budget: MemberBudgetSDKType = getDocFromAttributes(
+          event.attributes,
+          event.type
+        );
+        await upsertMemberBudget({
+          collectionId: budget.collection_id,
+          memberAddress: budget.member_address,
+          periodNs: durationToNanos(budget.period as any),
+          periodSpendLimit: budget.period_spend_limit ?? [],
+          periodSpent: budget.period_spent ?? [],
+          periodCw20SpendLimit: budget.period_cw20_spend_limit,
+          periodCw20Spent: budget.period_cw20_spent,
+          periodResetAt: (budget.period_reset_at as any) ?? block.time,
+          updatedAtHeight: blockHeight,
+          updatedAt: block.time,
+        });
+        break;
+      }
+      case EventTypes.memberBudgetRemoved: {
+        const budget: MemberBudgetSDKType = getDocFromAttributes(
+          event.attributes,
+          event.type
+        );
+        await deleteMemberBudget(budget.collection_id, budget.member_address);
+        break;
+      }
+
+      // ==========================================================
+      // CLAIMS v7: AGENT PERFORMANCE DEPOSIT BALANCES
+      // ==========================================================
+      case EventTypes.agentDepositBalanceCreated:
+      case EventTypes.agentDepositBalanceUpdated: {
+        const balance: AgentDepositBalanceSDKType = getDocFromAttributes(
+          event.attributes,
+          event.type
+        );
+        await upsertAgentDepositBalance({
+          collectionId: balance.collection_id,
+          agentAddress: balance.agent_address,
+          amount: balance.amount ?? [],
+          withdrawableAt: (balance.withdrawable_at as any) ?? block.time,
+          updatedAtHeight: blockHeight,
+          updatedAt: block.time,
+        });
+        break;
+      }
+      case EventTypes.agentDepositBalanceRemoved: {
+        const balance: AgentDepositBalanceSDKType = getDocFromAttributes(
+          event.attributes,
+          event.type
+        );
+        await deleteAgentDepositBalance(
+          balance.collection_id,
+          balance.agent_address
+        );
+        break;
+      }
+
+      // ==========================================================
+      // NAMES MODULE (v7)
+      // ==========================================================
+      case EventTypes.namespaceCreated:
+      case EventTypes.namespaceUpdated: {
+        const ns: NamespaceSDKType = getDocFromAttributes(
+          event.attributes,
+          event.type
+        );
+        const authority = safeGet(event.attributes, "authority");
+        await upsertNamespace({
+          name: ns.name,
+          description: ns.description,
+          registrarAccounts: ns.registrar_accounts ?? [],
+          allowSelfRegister: ns.allow_self_register,
+          allowRegistrarOverride: ns.allow_registrar_override,
+          minLength: Number(ns.min_length ?? 0),
+          maxLength: Number(ns.max_length ?? 0),
+          regex: ns.regex,
+          allowExpiry: ns.allow_expiry,
+          authority: authority || undefined,
+          createdAtHeight:
+            event.type === EventTypes.namespaceCreated ? blockHeight : undefined,
+          createdAt:
+            event.type === EventTypes.namespaceCreated ? block.time : undefined,
+          updatedAtHeight: blockHeight,
+          updatedAt: block.time,
+        });
+        break;
+      }
+      case EventTypes.nameRegistered:
+      case EventTypes.nameUpdated: {
+        const record: NameRecordSDKType = getDocFromAttributes(
+          event.attributes,
+          event.type
+        );
+        await upsertNameRecord({
+          namespace: record.namespace,
+          normalizedName: record.normalized_name,
+          displayName: record.display_name,
+          ownerDid: record.owner_did,
+          verified: record.verified,
+          validUntil: Number(record.valid_until ?? 0),
+          status: nameStatusFrom(record.status),
+          verifiedBy: record.verified_by || undefined,
+          evidenceHash: record.evidence_hash || undefined,
+          source: record.source || undefined,
+          createdAtUnix: Number(record.created_at ?? 0),
+          updatedAtUnix: Number(record.updated_at ?? 0),
+          updatedAtHeight: blockHeight,
+        });
+        break;
+      }
+      case EventTypes.nameTransferred: {
+        const namespace = safeGet(event.attributes, "namespace");
+        const normalizedName = safeGet(event.attributes, "normalized_name");
+        const fromOwnerDid = safeGet(event.attributes, "from_owner_did");
+        const toOwnerDid = safeGet(event.attributes, "to_owner_did");
+        const transferredBy = safeGet(event.attributes, "transferred_by");
+        await applyNameTransfer({
+          namespace,
+          normalizedName,
+          toOwnerDid,
+          height: blockHeight,
+        });
+        await insertNameTransfer({
+          namespace,
+          normalizedName,
+          fromOwnerDid,
+          toOwnerDid,
+          transferredBy,
+          height: blockHeight,
+          timestamp: block.time,
+        });
+        break;
+      }
+      case EventTypes.nameStatusChanged: {
+        const namespace = safeGet(event.attributes, "namespace");
+        const normalizedName = safeGet(event.attributes, "normalized_name");
+        const oldStatus = nameStatusFrom(
+          safeGet(event.attributes, "old_status")
+        );
+        const newStatus = nameStatusFrom(
+          safeGet(event.attributes, "new_status")
+        );
+        const changedBy = safeGet(event.attributes, "changed_by");
+        const reason = safeGet(event.attributes, "reason");
+        await applyNameStatus({
+          namespace,
+          normalizedName,
+          newStatus,
+          height: blockHeight,
+        });
+        await insertNameStatusChange({
+          namespace,
+          normalizedName,
+          oldStatus,
+          newStatus,
+          changedBy,
+          reason: reason || undefined,
+          height: blockHeight,
+          timestamp: block.time,
+        });
+        break;
+      }
+
+      // ==========================================================
+      // LIQUIDSTAKE v7: multi-pool
+      // ==========================================================
+      case EventTypes.lsModuleParamsUpdated: {
+        const mp = getDocFromAttributes(event.attributes, event.type) as {
+          min_liquid_stake_amount: string;
+          module_paused: boolean;
+        };
+        await upsertLiquidStakeModuleParams({
+          minLiquidStakeAmount: mp.min_liquid_stake_amount,
+          modulePaused: mp.module_paused,
+          updatedAtHeight: blockHeight,
+          updatedAt: block.time,
+        });
+        break;
+      }
+      case EventTypes.lsPoolCreated:
+      case EventTypes.lsPoolUpdated: {
+        const pool: PoolSDKType = getDocFromAttributes(
+          event.attributes,
+          event.type
+        );
+        await upsertLiquidStakePool({
+          poolId: pool.pool_id,
+          liquidBondDenom: pool.liquid_bond_denom,
+          proxyAccountAddress: pool.proxy_account_address,
+          whitelistedValidators: pool.whitelisted_validators ?? [],
+          unstakeFeeRate: pool.unstake_fee_rate,
+          feeAccountAddress: pool.fee_account_address,
+          autocompoundFeeRate: pool.autocompound_fee_rate,
+          whitelistAdminAddress: pool.whitelist_admin_address,
+          paused: pool.paused,
+          weightedRewardsReceivers: pool.weighted_rewards_receivers ?? [],
+          createdAtHeight:
+            event.type === EventTypes.lsPoolCreated ? blockHeight : undefined,
+          updatedAtHeight: blockHeight,
+          updatedAt: block.time,
+        });
+        break;
+      }
+      case EventTypes.lsStake:
+      case EventTypes.lsUnstake:
+      case EventTypes.lsAutoCompound:
+      case EventTypes.lsRebalanced:
+      case EventTypes.lsAddLiquidValidator: {
+        // Per-tx pool activity — all share the same attribute shape (flat
+        // typed-event fields). We replay the whole event into `payload` so
+        // dashboards can pull denom-specific data without us having to
+        // model every field as a separate column.
+        const poolId = safeGet(event.attributes, "pool_id");
+        const delegator =
+          safeGet(event.attributes, "delegator") ||
+          safeGet(event.attributes, "validator");
+        const payload: Record<string, any> = {};
+        for (const attr of event.attributes) {
+          try {
+            payload[attr.key] = JSON.parse(attr.value);
+          } catch {
+            payload[attr.key] = attr.value;
+          }
+        }
+        await insertLiquidStakeTx({
+          kind: liquidStakeEventKind(event.type as EventTypes),
+          poolId,
+          delegator: delegator || undefined,
+          payload,
+          transactionHash: event.transactionHash,
+          height: blockHeight,
+          timestamp: block.time,
+        });
+        break;
+      }
 
       // ==========================================================
       // TOKEN
@@ -626,3 +907,176 @@ export const syncEventData = async (event: EventCore, block: BlockCore) => {
     throw error;
   }
 };
+
+// --------------------------------------------------------------------------
+// Helpers
+// --------------------------------------------------------------------------
+
+// `safeGet` returns the attribute value parsed as JSON when present, or an
+// empty string when missing — avoids throwing inside the switch when an
+// optional field (e.g. `reason` on NameStatusChange) is absent.
+function safeGet(attributes: any[], key: string): string {
+  const attr = attributes.find((a) => a.key === key);
+  if (!attr || attr.value == null || attr.value === "") return "";
+  try {
+    const parsed = JSON.parse(attr.value);
+    return parsed == null ? "" : String(parsed);
+  } catch {
+    return String(attr.value);
+  }
+}
+
+// Convert a cosmos-sdk typed-event Duration to nanoseconds. Duration may
+// arrive as either a `"30s"` style protojson string, or a `{seconds, nanos}`
+// object — handle both so we don't have to chase upstream changes.
+function durationToNanos(d: any): string {
+  if (!d) return "0";
+  if (typeof d === "string") {
+    // protojson form e.g. "30s", "120000s", "2592000s" (30 days)
+    const m = d.match(/^(\d+(?:\.\d+)?)s$/);
+    if (m) {
+      const seconds = Math.floor(Number(m[1]));
+      const nanos = Math.round((Number(m[1]) - seconds) * 1e9);
+      return (BigInt(seconds) * BigInt(1e9) + BigInt(nanos)).toString();
+    }
+    // fallback: assume already nanoseconds
+    return d;
+  }
+  const seconds = BigInt(d.seconds ?? 0);
+  const nanos = BigInt(d.nanos ?? 0);
+  return (seconds * BigInt(1e9) + nanos).toString();
+}
+
+// NameStatus may come as either the enum integer or its string name
+// ("NAME_STATUS_ACTIVE"). Normalise to the integer used in storage.
+const NAME_STATUS_MAP: Record<string, number> = {
+  NAME_STATUS_UNSPECIFIED: 0,
+  NAME_STATUS_ACTIVE: 1,
+  NAME_STATUS_SUSPENDED: 2,
+  NAME_STATUS_REVOKED: 3,
+  NAME_STATUS_TOMBSTONED: 4,
+};
+function nameStatusFrom(v: any): number {
+  if (typeof v === "number") return v;
+  if (typeof v === "string") {
+    if (NAME_STATUS_MAP[v] != null) return NAME_STATUS_MAP[v];
+    const n = Number(v);
+    if (!Number.isNaN(n)) return n;
+  }
+  return 0;
+}
+
+// Cosmos-sdk typed-event proto enums get JSON-encoded as their full PB string
+// name (e.g. "DISPUTE_TARGET_ROLE_EVALUATOR") — `Number(...)` would yield NaN
+// and crash the integer column, so map them explicitly.
+const DISPUTE_TARGET_ROLE_MAP: Record<string, number> = {
+  DISPUTE_TARGET_ROLE_UNSPECIFIED: 0,
+  DISPUTE_TARGET_ROLE_SUBMITTER: 1,
+  DISPUTE_TARGET_ROLE_EVALUATOR: 2,
+};
+const DISPUTE_STATUS_MAP: Record<string, number> = {
+  DISPUTE_STATUS_OPEN: 0,
+  DISPUTE_STATUS_AWARDED: 1,
+  DISPUTE_STATUS_DISMISSED: 2,
+};
+function enumFrom(v: any, map: Record<string, number>): number {
+  if (typeof v === "number") return v;
+  if (typeof v === "string") {
+    if (map[v] != null) return map[v];
+    const n = Number(v);
+    if (!Number.isNaN(n)) return n;
+  }
+  return 0;
+}
+
+// CollectionState/IntentOptions can arrive as enum integer or string name —
+// the existing helpers throw on unknown strings, so wrap defensively.
+function safeCollectionState(v: any): number {
+  if (typeof v === "number") return v;
+  try {
+    return ixo.claims.v1beta1.collectionStateFromJSON(v);
+  } catch {
+    return 0;
+  }
+}
+function safeCollectionIntents(v: any): number | undefined {
+  if (v == null) return undefined;
+  if (typeof v === "number") return v;
+  try {
+    return ixo.claims.v1beta1.collectionIntentOptionsFromJSON(v);
+  } catch {
+    return undefined;
+  }
+}
+
+export function collectionFromSdk(c: CollectionSDKType) {
+  return {
+    id: c.id,
+    entity: c.entity,
+    admin: c.admin,
+    protocol: c.protocol,
+    startDate: c.start_date as any,
+    endDate: c.end_date as any,
+    quota: Number(c.quota),
+    count: Number(c.count),
+    evaluated: Number(c.evaluated),
+    approved: Number(c.approved),
+    rejected: Number(c.rejected),
+    disputed: Number(c.disputed),
+    invalidated: Number(c.invalidated ?? 0),
+    state: safeCollectionState(c.state),
+    payments: c.payments,
+    escrowAccount: c.escrow_account ?? undefined,
+    intents: safeCollectionIntents(c.intents),
+    // v7 additions
+    flagged: Number((c as any).flagged ?? 0),
+    flaggedActive: Number((c as any).flagged_active ?? 0),
+    serviceAgentDepositRequired: (c as any).service_agent_deposit_required ?? [],
+    evaluatorDepositRequired: (c as any).evaluator_deposit_required ?? [],
+    disputeDepositAmount: (c as any).dispute_deposit_amount ?? [],
+    penaltyAmountPerDispute: (c as any).penalty_amount_per_dispute ?? [],
+    disputesOpen: Number((c as any).disputes_open ?? 0),
+    disputesAwarded: Number((c as any).disputes_awarded ?? 0),
+    disputesDismissed: Number((c as any).disputes_dismissed ?? 0),
+    minDepositPeriodNs: durationToNanos((c as any).min_deposit_period),
+    adjudicators: (c as any).adjudicators ?? [],
+  };
+}
+
+// Map a chain-emitted Evaluation (whether the "current" or one from
+// evaluation_history) onto the Evaluation row shape. claim_id is always
+// supplied by the caller because historical entries omit it.
+function evaluationFromSdk(e: EvaluationSDKType, claimId: string): Evaluation {
+  return {
+    collectionId: e.collection_id,
+    oracle: e.oracle,
+    agentDid: e.agent_did,
+    agentAddress: e.agent_address,
+    status: ixo.claims.v1beta1.evaluationStatusFromJSON(e.status),
+    reason: Number(e.reason ?? 0),
+    verificationProof: e.verification_proof,
+    evaluationDate: e.evaluation_date as any,
+    amount: e.amount ?? [],
+    claimId: e.claim_id || claimId,
+    cw20Payment: e.cw20_payment,
+    cw1155Payment: e.cw1155_payment,
+    cw1155IntentPayment: e.cw1155_intent_payment,
+  };
+}
+
+function liquidStakeEventKind(t: EventTypes): string {
+  switch (t) {
+    case EventTypes.lsStake:
+      return "stake";
+    case EventTypes.lsUnstake:
+      return "unstake";
+    case EventTypes.lsAutoCompound:
+      return "autocompound";
+    case EventTypes.lsRebalanced:
+      return "rebalance";
+    case EventTypes.lsAddLiquidValidator:
+      return "addValidator";
+    default:
+      return "unknown";
+  }
+}
