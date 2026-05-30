@@ -68,6 +68,8 @@
     "semantic-release": "22"
   },
   "resolutions": {
+    "@types/express": "4.17.17",
+    "@types/express-serve-static-core": "4.19.0",
     "cipher-base": "1.0.5",
     "elliptic": "6.6.1",
     "form-data": "4.0.4",
