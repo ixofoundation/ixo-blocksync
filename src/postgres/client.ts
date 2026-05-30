@@ -7,7 +7,7 @@ export const pool = new Pool({
   connectionString: DATABASE_URL,
   // maximum number of clients the pool should contain
   // by default this is set to 10.
-  max: 30,
+  max: 100,
   min: 3,
   // number of milliseconds a client must sit idle in the pool and not be checked out
   // before it is disconnected from the backend and discarded
@@ -15,14 +15,14 @@ export const pool = new Pool({
   // idleTimeoutMillis: 10000,
   // number of milliseconds to wait before timing out when connecting a new client
   // by default this is 0 which means no timeout
-  connectionTimeoutMillis: 4000,
+  connectionTimeoutMillis: 8000,
   ...(DATABASE_USE_SSL && { ssl: { rejectUnauthorized: false } }), // Use SSL (recommended
 });
 
 // helper function that manages connection transaction start and commit and rollback
 // on fail, user can just pass a function that takes a client as argument
 export const withTransaction = async (
-  fn: (client: PoolClient) => Promise<any>
+  fn: (client: PoolClient) => Promise<any>,
 ) => {
   const client = await pool.connect();
   try {

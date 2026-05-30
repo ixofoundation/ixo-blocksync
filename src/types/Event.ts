@@ -11,6 +11,30 @@ export enum EventTypes {
   submitClaim = "ixo.claims.v1beta1.ClaimSubmittedEvent",
   updateClaim = "ixo.claims.v1beta1.ClaimUpdatedEvent",
   disputeClaim = "ixo.claims.v1beta1.ClaimDisputedEvent",
+  // claims v7
+  disputeResolved = "ixo.claims.v1beta1.DisputeResolvedEvent",
+  memberBudgetCreated = "ixo.claims.v1beta1.MemberBudgetCreatedEvent",
+  memberBudgetUpdated = "ixo.claims.v1beta1.MemberBudgetUpdatedEvent",
+  memberBudgetRemoved = "ixo.claims.v1beta1.MemberBudgetRemovedEvent",
+  agentDepositBalanceCreated = "ixo.claims.v1beta1.AgentDepositBalanceCreatedEvent",
+  agentDepositBalanceUpdated = "ixo.claims.v1beta1.AgentDepositBalanceUpdatedEvent",
+  agentDepositBalanceRemoved = "ixo.claims.v1beta1.AgentDepositBalanceRemovedEvent",
+  // names v7
+  namespaceCreated = "ixo.names.v1beta1.NamespaceCreatedEvent",
+  namespaceUpdated = "ixo.names.v1beta1.NamespaceUpdatedEvent",
+  nameRegistered = "ixo.names.v1beta1.NameRegisteredEvent",
+  nameUpdated = "ixo.names.v1beta1.NameUpdatedEvent",
+  nameTransferred = "ixo.names.v1beta1.NameTransferredEvent",
+  nameStatusChanged = "ixo.names.v1beta1.NameStatusChangedEvent",
+  // liquidstake v7
+  lsModuleParamsUpdated = "ixo.liquidstake.v1beta1.ModuleParamsUpdatedEvent",
+  lsPoolCreated = "ixo.liquidstake.v1beta1.PoolCreatedEvent",
+  lsPoolUpdated = "ixo.liquidstake.v1beta1.PoolUpdatedEvent",
+  lsStake = "ixo.liquidstake.v1beta1.LiquidStakeEvent",
+  lsUnstake = "ixo.liquidstake.v1beta1.LiquidUnstakeEvent",
+  lsAddLiquidValidator = "ixo.liquidstake.v1beta1.AddLiquidValidatorEvent",
+  lsRebalanced = "ixo.liquidstake.v1beta1.RebalancedLiquidStakeEvent",
+  lsAutoCompound = "ixo.liquidstake.v1beta1.AutocompoundStakingRewardsEvent",
   // token
   createToken = "ixo.token.v1beta1.TokenCreatedEvent",
   updateToken = "ixo.token.v1beta1.TokenUpdatedEvent",
@@ -39,6 +63,34 @@ export const EventTypesAttributeKey: { [key in EventTypes]: string } = {
   [EventTypes.submitClaim]: "claim",
   [EventTypes.updateClaim]: "claim",
   [EventTypes.disputeClaim]: "dispute",
+  // claims v7
+  [EventTypes.disputeResolved]: "dispute",
+  [EventTypes.memberBudgetCreated]: "budget",
+  [EventTypes.memberBudgetUpdated]: "budget",
+  [EventTypes.memberBudgetRemoved]: "budget",
+  [EventTypes.agentDepositBalanceCreated]: "balance",
+  [EventTypes.agentDepositBalanceUpdated]: "balance",
+  [EventTypes.agentDepositBalanceRemoved]: "balance",
+  // names v7
+  [EventTypes.namespaceCreated]: "namespace",
+  [EventTypes.namespaceUpdated]: "namespace",
+  [EventTypes.nameRegistered]: "record",
+  [EventTypes.nameUpdated]: "record",
+  // NameTransferredEvent / NameStatusChangedEvent emit flat scalar attrs, no
+  // wrapped doc — handlers read them via getValueFromAttributes instead.
+  [EventTypes.nameTransferred]: "namespace",
+  [EventTypes.nameStatusChanged]: "namespace",
+  // liquidstake v7
+  [EventTypes.lsModuleParamsUpdated]: "module_params",
+  [EventTypes.lsPoolCreated]: "pool",
+  [EventTypes.lsPoolUpdated]: "pool",
+  // Stake/Unstake/Autocompound/Rebalance/AddValidator emit flat attrs read
+  // individually in the handler; the entry below is for completeness only.
+  [EventTypes.lsStake]: "delegator",
+  [EventTypes.lsUnstake]: "delegator",
+  [EventTypes.lsAddLiquidValidator]: "validator",
+  [EventTypes.lsRebalanced]: "delegator",
+  [EventTypes.lsAutoCompound]: "delegator",
   [EventTypes.createToken]: "token",
   [EventTypes.updateToken]: "token",
   [EventTypes.mintToken]: "tokenProperties",

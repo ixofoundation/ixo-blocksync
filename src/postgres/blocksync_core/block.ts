@@ -14,41 +14,49 @@ export type TransactionCore = {
   gasUsed: string;
   gasWanted: string;
   memo: string;
+  feePayer?: string;
+  signerInfos?: any; // JSON - raw signer info array from authInfo
+  nonCriticalExtensionOptions?: any; // JSON - raw extension options (contains TxExtension for smart accounts)
   messages: MessageCore[];
 };
 
 export type MessageCore = {
   typeUrl: string;
   value: any; // JSON
+  index: number;
 };
 
 export type EventCore = {
   type: string;
   attributes: any[]; // JSON
+  transactionHash?: string;
 };
 
 const sqlTransactions = `
-SELECT   
+SELECT
   t."hash",
   t."code",
   t."fee",
   t."gasUsed",
   t."gasWanted",
   t."memo",
-  json_agg(json_build_object('typeUrl', "m"."typeUrl", 'value', m.value)) AS messages
+  t."feePayer",
+  t."signerInfos",
+  t."nonCriticalExtensionOptions",
+  json_agg(json_build_object('typeUrl', "m"."typeUrl", 'value', m.value, 'index', m."index")) AS messages
 FROM "TransactionCore" as t
-LEFT OUTER JOIN "MessageCore" as m ON t.hash = m."transactionHash" 
+LEFT OUTER JOIN "MessageCore" as m ON m."transactionId" = t.id
 WHERE t."blockHeight" = $1
-Group By t.hash;
+Group By t.id, t.hash;
 `;
 const sqlEvents = `
 SELECT
   b."height",
   b."time",
-  json_agg(json_build_object('type', e.type, 'attributes', e.attributes)) AS events
+  json_agg(json_build_object('type', e.type, 'attributes', e.attributes, 'transactionHash', e."transactionHash")) AS events
 FROM "BlockCore" as b
 LEFT OUTER JOIN (
-  SELECT "type", attributes
+  SELECT "type", attributes, "transactionHash"
     from "EventCore"
     where "blockHeight" = $1
     order by id asc
@@ -56,35 +64,36 @@ LEFT OUTER JOIN (
 WHERE b.height = $1
 GROUP BY b.height, b."time"
 `;
+
 export const getCoreBlock = async (
   blockHeight: number
 ): Promise<BlockCore | null> => {
-  try {
-    let blockAndEvents: any = await corePool.query(sqlEvents, [blockHeight]);
-    // If no block is found, return null before querying transactions
-    if (blockAndEvents.rows.length === 0) return null;
-    let transactions: any = await corePool.query(sqlTransactions, [
-      blockHeight,
-    ]);
+  let blockAndEvents: any = await corePool.query(sqlEvents, [blockHeight]);
+  // If no block is found, return null before querying transactions
+  if (blockAndEvents.rows.length === 0) return null;
 
-    blockAndEvents = blockAndEvents.rows[0];
-    transactions = transactions.rows.map((row: any) => ({
-      hash: row.hash,
-      code: row.code,
-      fee: row.fee,
-      gasUsed: row.gasUsed,
-      gasWanted: row.gasWanted,
-      memo: row.memo,
-      messages: row.messages,
-    }));
+  const transactionsResult = await corePool.query(sqlTransactions, [
+    blockHeight,
+  ]);
 
-    return {
-      height: blockAndEvents.height,
-      time: blockAndEvents.time,
-      transactions,
-      events: blockAndEvents.events,
-    };
-  } catch (error) {
-    throw error;
-  }
+  blockAndEvents = blockAndEvents.rows[0];
+  const transactions = transactionsResult.rows.map((row: any) => ({
+    hash: row.hash,
+    code: row.code,
+    fee: row.fee,
+    gasUsed: row.gasUsed,
+    gasWanted: row.gasWanted,
+    memo: row.memo,
+    feePayer: row.feePayer,
+    signerInfos: row.signerInfos,
+    nonCriticalExtensionOptions: row.nonCriticalExtensionOptions,
+    messages: row.messages,
+  }));
+
+  return {
+    height: blockAndEvents.height,
+    time: blockAndEvents.time,
+    transactions,
+    events: blockAndEvents.events,
+  };
 };

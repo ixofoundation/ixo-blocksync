@@ -24,28 +24,24 @@ INSERT INTO "IID" ( "id", "context", "controller", "verificationMethod", "servic
 VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16 );
 `;
 export const createIid = async (p: Iid): Promise<void> => {
-  try {
-    await dbQuery(createIidSql, [
-      p.id,
-      JSON.stringify(p.context),
-      p.controller,
-      JSON.stringify(p.verificationMethod),
-      JSON.stringify(p.service),
-      p.authentication,
-      p.assertionMethod,
-      p.keyAgreement,
-      p.capabilityInvocation,
-      p.capabilityDelegation,
-      JSON.stringify(p.linkedResource),
-      JSON.stringify(p.linkedClaim),
-      JSON.stringify(p.accordedRight),
-      JSON.stringify(p.linkedEntity),
-      p.alsoKnownAs,
-      JSON.stringify(p.metadata),
-    ]);
-  } catch (error) {
-    throw error;
-  }
+  await dbQuery(createIidSql, [
+    p.id,
+    JSON.stringify(p.context),
+    p.controller,
+    JSON.stringify(p.verificationMethod),
+    JSON.stringify(p.service),
+    p.authentication,
+    p.assertionMethod,
+    p.keyAgreement,
+    p.capabilityInvocation,
+    p.capabilityDelegation,
+    JSON.stringify(p.linkedResource),
+    JSON.stringify(p.linkedClaim),
+    JSON.stringify(p.accordedRight),
+    JSON.stringify(p.linkedEntity),
+    p.alsoKnownAs,
+    JSON.stringify(p.metadata),
+  ]);
 };
 
 const updateIidSql = `
@@ -70,26 +66,22 @@ WHERE
 	                  "id" = $16;
 `;
 export const updateIid = async (p: Iid): Promise<void> => {
-  try {
-    await dbQuery(updateIidSql, [
-      JSON.stringify(p.context),
-      p.controller,
-      JSON.stringify(p.verificationMethod),
-      JSON.stringify(p.service),
-      p.authentication,
-      p.assertionMethod,
-      p.keyAgreement,
-      p.capabilityInvocation,
-      p.capabilityDelegation,
-      JSON.stringify(p.linkedResource),
-      JSON.stringify(p.linkedClaim),
-      JSON.stringify(p.accordedRight),
-      JSON.stringify(p.linkedEntity),
-      p.alsoKnownAs,
-      JSON.stringify(p.metadata),
-      p.id,
-    ]);
-  } catch (error) {
-    throw error;
-  }
+  await dbQuery(updateIidSql, [
+    JSON.stringify(p.context),
+    p.controller,
+    JSON.stringify(p.verificationMethod),
+    JSON.stringify(p.service),
+    p.authentication,
+    p.assertionMethod,
+    p.keyAgreement,
+    p.capabilityInvocation,
+    p.capabilityDelegation,
+    JSON.stringify(p.linkedResource),
+    JSON.stringify(p.linkedClaim),
+    JSON.stringify(p.accordedRight),
+    JSON.stringify(p.linkedEntity),
+    p.alsoKnownAs,
+    JSON.stringify(p.metadata),
+    p.id,
+  ]);
 };

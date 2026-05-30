@@ -30,8 +30,15 @@ export const getValueFromAttributes = (
 /**
  * Gets the value of the wasm event attribute with the given key
  */
-export const getWasmAttr = (attributes: any[], key: string): string => {
-  return attributes.find((attr) => attr.key === key)?.value || "";
+export const getWasmAttr = (
+  attributes: any[],
+  key: string,
+  emptyNull = false
+): string => {
+  return (
+    attributes.find((attr) => attr.key === key)?.value ||
+    (emptyNull ? null : "")
+  );
 };
 
 export const base64ToJson = (base64String: string) => {

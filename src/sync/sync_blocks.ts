@@ -1,11 +1,14 @@
 import { sleep } from "../util/sleep";
-import * as TransactionSyncHandler from "../sync_handlers/transaction_sync_handler";
-import * as EventSyncHandler from "../sync_handlers/event_sync_handler";
+import * as TransactionSyncHandler from "../sync_handlers/transaction_sync";
+import * as EventSyncHandler from "../sync_handlers/event_sync";
 import { currentChain } from "./sync_chain";
 import { getCoreBlock } from "../postgres/blocksync_core/block";
 import { getChain, updateChain } from "../postgres/chain";
 import { withTransaction } from "../postgres/client";
 import { PoolClient } from "pg";
+import { flushBroadcasts, clearQueue } from "../websocket/broadcast_queue";
+import { ensureDaodaoSnapshot } from "./daodao_snapshot";
+import { ensureV7Snapshot } from "./v7_snapshot";
 
 let syncing: boolean;
 
@@ -14,6 +17,14 @@ const logFetchTime = false;
 const logSync1000Time = true;
 
 export let currentPool: PoolClient | undefined;
+
+// Setter for the per-block transaction client. ES module imports are
+// read-only bindings from the outside, so anything outside this module
+// (e.g. the snapshot routines) needs this setter to thread its own
+// transaction client through `dbQuery`.
+export const setCurrentPool = (c: PoolClient | undefined) => {
+  currentPool = c;
+};
 
 export const startSync = async () => {
   syncing = true;
@@ -28,7 +39,7 @@ export const startSync = async () => {
 
   if (logSync1000Time) console.time("sync");
   while (syncing) {
-    currentPool = undefined;
+    setCurrentPool(undefined);
     // if (currentBlock === 460) return;
     try {
       if (logFetchTime) console.time("fetch");
@@ -40,22 +51,40 @@ export const startSync = async () => {
       if (block) {
         if (logIndexTime) console.time("index");
 
+        // First time we reach the chain's wasm-cutoff height, take a
+        // one-shot daodao state snapshot BEFORE indexing this block.
+        // This runs once per blocksync DB (tracked in
+        // daodao_snapshot_state). It needs to run outside the per-block
+        // transaction so its many archive-API calls and per-DAO writes
+        // aren't held in a single long-lived txn.
+        await ensureDaodaoSnapshot(block.height);
+
+        // Same idea for the v7 chain upgrade — at the upgrade block the
+        // chain performs silent KV writes (liquidstake multi-pool reshape,
+        // claims dispute migration) that don't surface as events. We
+        // mirror them once via ensureV7Snapshot. No-op when
+        // V7_UPGRADE_HEIGHT is 0 (i.e. v7 not yet applied on this
+        // network).
+        await ensureV7Snapshot(block.height);
+
         await withTransaction(async (client) => {
-          currentPool = client;
-          await Promise.all([
-            EventSyncHandler.syncEvents(block.events, block.height, block.time),
-            TransactionSyncHandler.syncTransactions(
-              block.transactions,
-              block.height,
-              block.time
-            ),
-            updateChain({
-              chainId: currentChain.chainId,
-              blockHeight: block.height,
-            }),
-          ]);
-          currentPool = undefined;
+          setCurrentPool(client);
+          try {
+            await Promise.all([
+              EventSyncHandler.syncEvents(block),
+              TransactionSyncHandler.syncTransactions(block),
+              updateChain({
+                chainId: currentChain.chainId,
+                blockHeight: block.height,
+              }),
+            ]);
+          } finally {
+            setCurrentPool(undefined);
+          }
         });
+
+        // Flush all queued broadcasts after successful transaction
+        flushBroadcasts();
 
         if (currentBlock % 1000 === 0) {
           console.log(`Synced Block ${currentBlock}`);
@@ -78,10 +107,12 @@ export const startSync = async () => {
         }
         await sleep(1000);
       }
-      errorCount = 0;
     } catch (error) {
       count = 0;
       errorCount++;
+
+      // Clear queued broadcasts on transaction failure
+      clearQueue();
 
       // if error, log error and sleep for 2 seconds, to attempt self healing and retry
       console.error(`ERROR::Adding Block ${currentBlock}:: ${error}`);

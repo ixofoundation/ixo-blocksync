@@ -1,6 +1,8 @@
 export const PORT = Number(process.env.PORT) || 8080;
 export const SENTRYDSN = process.env.SENTRYDSN || undefined;
 export const RPC = process.env.RPC || "http://localhost:26657";
+export const IXO_ARCHIVE_NODE_REST_API =
+  process.env.IXO_ARCHIVE_NODE_REST_API || "http://localhost:1317";
 export const DATABASE_URL = process.env.DATABASE_URL;
 export const DATABASE_URL_CORE = process.env.DATABASE_URL_CORE;
 export const MIGRATE_DB_PROGRAMATICALLY =
@@ -12,3 +14,4 @@ export const IPFS_SERVICE_MAPPING = process.env.IPFS_SERVICE_MAPPING || "";
 export const DATABASE_USE_SSL =
   Number(process.env.DATABASE_USE_SSL ?? "0") || 0;
 export const STATIC_CHAIN_ID = process.env.STATIC_CHAIN_ID;
+export const NETWORK = process.env.NETWORK || "devnet";
