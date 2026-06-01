@@ -20,15 +20,14 @@ import { NETWORK } from "../util/secrets";
  * fields on existing rows (e.g. `LiquidStakeTx.poolId = "zero"` for txs
  * recorded with empty poolId pre-v7).
  *
- * **Status:** as of 2026-05-27, v7 has not yet been applied on any of the
- * three networks (`applied_plan/v7 = 0` everywhere). The values here are
- * therefore `0` (disabled). Update the appropriate entry once the chain
- * upgrade goes live, OR set `V7_UPGRADE_HEIGHT` env var to override at
- * deploy time.
+ * **Status:** devnet v7 ("Opus") upgrade applied 2026-05-31 at height
+ * 13_646_508 (set below). testnet + mainnet not yet applied (`0` = disabled);
+ * update each entry once the chain upgrade goes live there, OR set the
+ * `V7_UPGRADE_HEIGHT` env var to override at deploy time.
  */
 export const V7_UPGRADE_HEIGHTS: Record<string, number> = {
-  devnet: 0,
-  testnet: 0,
+  devnet: 13_646_508,
+  testnet: 17_598_648,
   mainnet: 0,
 };
 
