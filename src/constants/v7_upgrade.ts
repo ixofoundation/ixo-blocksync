@@ -28,7 +28,7 @@ import { NETWORK } from "../util/secrets";
 export const V7_UPGRADE_HEIGHTS: Record<string, number> = {
   devnet: 13_646_508,
   testnet: 17_598_648,
-  mainnet: 0,
+  mainnet: 17_655_000,
 };
 
 // Env override. Same shape as DAODAO_CUTOFF_HEIGHT — set to a positive
