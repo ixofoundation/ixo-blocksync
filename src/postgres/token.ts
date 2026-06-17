@@ -18,10 +18,52 @@ export type TokenTransaction = {
 const createTokenTransactionSql = `
 INSERT INTO "TokenTransaction" ("from", "to", amount, "tokenId") VALUES ($1, $2, $3, $4);
 `;
+
+// Accumulate a signed delta onto an address's running balance for a token, and
+// return the resulting balance. Inserts the row on first sight, otherwise adds
+// to the existing balance. Runs on the same connection (currentPool) as the
+// TokenTransaction insert, so the ledger row and the balance update commit
+// atomically within the per-block transaction.
+const upsertTokenBalanceSql = `
+INSERT INTO "TokenBalance" ("address", "tokenId", "amount") VALUES ($1, $2, $3)
+ON CONFLICT ("address", "tokenId")
+DO UPDATE SET "amount" = "TokenBalance"."amount" + EXCLUDED."amount"
+RETURNING "amount";
+`;
+
+const deleteTokenBalanceSql = `
+DELETE FROM "TokenBalance" WHERE "address" = $1 AND "tokenId" = $2;
+`;
+
+// A row in "TokenBalance" means "this address currently holds this token", so a
+// balance that nets to zero is removed rather than kept around. The delete only
+// fires on the rare drain-to-zero (detected via RETURNING), so the common
+// transfer path stays a single statement.
+const applyTokenBalanceDelta = async (
+  address: string,
+  tokenId: string,
+  delta: bigint
+): Promise<void> => {
+  const res = await dbQuery(upsertTokenBalanceSql, [address, tokenId, delta]);
+  if (BigInt(res.rows[0].amount) === 0n) {
+    await dbQuery(deleteTokenBalanceSql, [address, tokenId]);
+  }
+};
+
 export const createTokenTransaction = async (
   t: TokenTransaction
 ): Promise<void> => {
   await dbQuery(createTokenTransactionSql, [t.from, t.to, t.amount, t.tokenId]);
+
+  // Keep "TokenBalance" in sync with the ledger: credit the recipient, debit
+  // the sender. `from`/`to` are empty strings for mints/retires, so the empty
+  // side is skipped. Self-transfers never reach here (filtered upstream).
+  if (t.to) {
+    await applyTokenBalanceDelta(t.to, t.tokenId, t.amount);
+  }
+  if (t.from) {
+    await applyTokenBalanceDelta(t.from, t.tokenId, -t.amount);
+  }
 };
 
 const getTokenClassContractAddressSql = `
