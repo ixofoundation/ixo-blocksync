@@ -5,8 +5,8 @@ import PgAggregatesPlugin from "@graphile/pg-aggregates";
 import { DATABASE_URL, DATABASE_USE_SSL } from "./util/secrets";
 import {
   EntityPlugin,
-  createFullEntityLoader,
-  createParentEntityLoader,
+  createIidLoader,
+  createResolvedEntityLoader,
 } from "./graphql/entity";
 import { ClaimsPlugin } from "./graphql/claims";
 import {
@@ -65,9 +65,11 @@ export const Postgraphile = postgraphile(
     ignoreRBAC: false,
     disableDefaultMutations: true,
     additionalGraphQLContextFromRequest: async (req, res) => {
-      const parentEntityLoader = createParentEntityLoader();
+      // Fresh per-request DataLoaders so each request batches its own entity
+      // field resolution into single set-based queries (see src/graphql/entity.ts).
       return {
-        entityLoader: createFullEntityLoader(parentEntityLoader),
+        iidLoader: createIidLoader(),
+        resolvedEntityLoader: createResolvedEntityLoader(),
         getAccountTransactionsLoader: createGetAccountTransactionsLoader(),
       };
     },
