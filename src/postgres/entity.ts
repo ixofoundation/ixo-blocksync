@@ -115,27 +115,6 @@ export const getEntityService = async (id: string): Promise<any> => {
   return res.rows[0];
 };
 
-const getEntityParentIidSql = `
-SELECT i."service", i."context", i."linkedResource", i."linkedEntity", i."linkedClaim"
-FROM "IID" AS i
-WHERE i.id = $1;
-`;
-export const getEntityParentIid = async (
-  id: string
-): Promise<
-  | {
-      service: any;
-      context: any;
-      linkedResource: any;
-      linkedEntity: any;
-      linkedClaim: any;
-    }
-  | undefined
-> => {
-  const res = await pool.query(getEntityParentIidSql, [id]);
-  return res.rows[0];
-};
-
 export type EntityAndIid = Entity & Iid;
 
 const getEntityAndIidSql = `
@@ -164,6 +143,89 @@ export const getEntityAndIid = async (
 ): Promise<EntityAndIid | undefined> => {
   const res = await pool.query(getEntityAndIidSql, [id]);
   return res.rows[0];
+};
+
+// The 12 "passthrough" DID fields that are returned verbatim from an entity's
+// own IID row (no class-inheritance involved). `service` / `linkedResource` are
+// intentionally excluded here — those are resolved with inheritance via
+// getEntityInheritanceChains below.
+export type IidPassthrough = {
+  id: string;
+  context: any;
+  controller: string[] | null;
+  verificationMethod: any;
+  authentication: string[] | null;
+  assertionMethod: string[] | null;
+  keyAgreement: string[] | null;
+  capabilityInvocation: string[] | null;
+  capabilityDelegation: string[] | null;
+  linkedClaim: any;
+  accordedRight: any;
+  linkedEntity: any;
+  alsoKnownAs: string;
+};
+
+const getIidsByIdsSql = `
+SELECT i."id", i."context", i."controller", i."verificationMethod",
+       i."authentication", i."assertionMethod", i."keyAgreement",
+       i."capabilityInvocation", i."capabilityDelegation",
+       i."linkedClaim", i."accordedRight", i."linkedEntity", i."alsoKnownAs"
+FROM "IID" i
+WHERE i."id" = ANY($1::text[]);
+`;
+// Batched read of the passthrough fields for many entities in one round-trip.
+export const getIidsByIds = async (
+  ids: string[]
+): Promise<IidPassthrough[]> => {
+  if (!ids.length) return [];
+  const res = await pool.query(getIidsByIdsSql, [ids]);
+  return res.rows;
+};
+
+export type EntityChainRow = {
+  rootId: string;
+  depth: number;
+  service: any[];
+  linkedResource: any[];
+};
+
+// For each requested entity id, walk its `class` inheritance chain entirely in
+// the database (one recursive query for the whole batch) and return one row per
+// (entity, ancestor) carrying that ancestor's service / linkedResource. Rows are
+// ordered by depth ascending (depth 0 = the entity itself, then its class, its
+// class's class, ...) so the caller can merge child-first. `class` is read from
+// the IID `context` array (the element with key = 'class'). Guards: a non-array
+// context is treated as empty; depth is capped to prevent runaway/cyclic chains.
+const getEntityInheritanceChainsSql = `
+WITH RECURSIVE chain AS (
+  SELECT i."id" AS root_id, 0 AS depth,
+         i."context", i."service", i."linkedResource"
+  FROM "IID" i
+  WHERE i."id" = ANY($1::text[])
+  UNION ALL
+  SELECT c.root_id, c.depth + 1,
+         parent."context", parent."service", parent."linkedResource"
+  FROM chain c
+  JOIN "IID" parent ON parent."id" = (
+    SELECT elem->>'val'
+    FROM jsonb_array_elements(
+      CASE WHEN jsonb_typeof(c."context") = 'array' THEN c."context" ELSE '[]'::jsonb END
+    ) elem
+    WHERE elem->>'key' = 'class'
+    LIMIT 1
+  )
+  WHERE c.depth < 20
+)
+SELECT root_id AS "rootId", depth, "service", "linkedResource"
+FROM chain
+ORDER BY root_id, depth;
+`;
+export const getEntityInheritanceChains = async (
+  ids: string[]
+): Promise<EntityChainRow[]> => {
+  if (!ids.length) return [];
+  const res = await pool.query(getEntityInheritanceChainsSql, [ids]);
+  return res.rows;
 };
 
 const getEntityDeviceAccountsSql = `

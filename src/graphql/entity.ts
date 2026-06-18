@@ -2,24 +2,20 @@ import { makeExtendSchemaPlugin, gql } from "graphile-utils";
 import DataLoader from "dataloader";
 import * as EntityHandler from "../handlers/entity_handler";
 
-export type ParentEntityLoader = ReturnType<typeof createParentEntityLoader>;
-export const createParentEntityLoader = () => {
-  return new DataLoader(async (ids: string[]) => {
-    return ids.map(async (id) => await EntityHandler.getParentEntityById(id));
-  });
-};
+// One batched IID read per request → serves the 12 passthrough DID fields.
+export type IidLoader = ReturnType<typeof createIidLoader>;
+export const createIidLoader = () =>
+  new DataLoader<string, any>((ids) => EntityHandler.loadIidPassthrough(ids));
 
-export type FullEntityLoader = ReturnType<typeof createFullEntityLoader>;
-export const createFullEntityLoader = (
-  parentEntityLoader: ParentEntityLoader
-) => {
-  return new DataLoader(async (ids: string[]) => {
-    return ids.map(
-      async (id) =>
-        await EntityHandler.getFullEntityById(id, parentEntityLoader)
-    );
-  });
-};
+// One batched recursive read + in-memory inheritance merge per request → serves
+// the 3 inheritance-resolved fields (service, linkedResource, settings).
+export type ResolvedEntityLoader = ReturnType<
+  typeof createResolvedEntityLoader
+>;
+export const createResolvedEntityLoader = () =>
+  new DataLoader<string, any>((ids) =>
+    EntityHandler.loadResolvedEntities(ids)
+  );
 
 export const EntityPlugin = makeExtendSchemaPlugin((build) => {
   const { pgSql: sql, inflection } = build;
@@ -55,62 +51,64 @@ export const EntityPlugin = makeExtendSchemaPlugin((build) => {
         },
       },
       Entity: {
+        // --- 12 passthrough fields: served from the entity's own IID row ---
         context: async (entity, args, ctx, rInfo) => {
-          return (await ctx.entityLoader.load(entity.__identifiers[0])).context;
+          return (await ctx.iidLoader.load(entity.__identifiers[0]))?.context;
         },
         controller: async (entity, args, ctx, rInfo) => {
-          return (await ctx.entityLoader.load(entity.__identifiers[0]))
-            .controller;
+          return (await ctx.iidLoader.load(entity.__identifiers[0]))?.controller;
         },
         verificationMethod: async (entity, args, ctx, rInfo) => {
-          return (await ctx.entityLoader.load(entity.__identifiers[0]))
-            .verificationMethod;
-        },
-        service: async (entity, args, ctx, rInfo) => {
-          return (await ctx.entityLoader.load(entity.__identifiers[0])).service;
+          return (await ctx.iidLoader.load(entity.__identifiers[0]))
+            ?.verificationMethod;
         },
         authentication: async (entity, args, ctx, rInfo) => {
-          return (await ctx.entityLoader.load(entity.__identifiers[0]))
-            .authentication;
+          return (await ctx.iidLoader.load(entity.__identifiers[0]))
+            ?.authentication;
         },
         assertionMethod: async (entity, args, ctx, rInfo) => {
-          return (await ctx.entityLoader.load(entity.__identifiers[0]))
-            .assertionMethod;
+          return (await ctx.iidLoader.load(entity.__identifiers[0]))
+            ?.assertionMethod;
         },
         keyAgreement: async (entity, args, ctx, rInfo) => {
-          return (await ctx.entityLoader.load(entity.__identifiers[0]))
-            .keyAgreement;
+          return (await ctx.iidLoader.load(entity.__identifiers[0]))
+            ?.keyAgreement;
         },
         capabilityInvocation: async (entity, args, ctx, rInfo) => {
-          return (await ctx.entityLoader.load(entity.__identifiers[0]))
-            .capabilityInvocation;
+          return (await ctx.iidLoader.load(entity.__identifiers[0]))
+            ?.capabilityInvocation;
         },
         capabilityDelegation: async (entity, args, ctx, rInfo) => {
-          return (await ctx.entityLoader.load(entity.__identifiers[0]))
-            .capabilityDelegation;
-        },
-        linkedResource: async (entity, args, ctx, rInfo) => {
-          return (await ctx.entityLoader.load(entity.__identifiers[0]))
-            .linkedResource;
+          return (await ctx.iidLoader.load(entity.__identifiers[0]))
+            ?.capabilityDelegation;
         },
         linkedClaim: async (entity, args, ctx, rInfo) => {
-          return (await ctx.entityLoader.load(entity.__identifiers[0]))
-            .linkedClaim;
+          return (await ctx.iidLoader.load(entity.__identifiers[0]))
+            ?.linkedClaim;
         },
         accordedRight: async (entity, args, ctx, rInfo) => {
-          return (await ctx.entityLoader.load(entity.__identifiers[0]))
-            .accordedRight;
+          return (await ctx.iidLoader.load(entity.__identifiers[0]))
+            ?.accordedRight;
         },
         linkedEntity: async (entity, args, ctx, rInfo) => {
-          return (await ctx.entityLoader.load(entity.__identifiers[0]))
-            .linkedEntity;
+          return (await ctx.iidLoader.load(entity.__identifiers[0]))
+            ?.linkedEntity;
         },
         alsoKnownAs: async (entity, args, ctx, rInfo) => {
-          return (await ctx.entityLoader.load(entity.__identifiers[0]))
-            .alsoKnownAs;
+          return (await ctx.iidLoader.load(entity.__identifiers[0]))
+            ?.alsoKnownAs;
+        },
+        // --- 3 inheritance-resolved fields: merged up the class chain ---
+        service: async (entity, args, ctx, rInfo) => {
+          return (await ctx.resolvedEntityLoader.load(entity.__identifiers[0]))
+            .service;
+        },
+        linkedResource: async (entity, args, ctx, rInfo) => {
+          return (await ctx.resolvedEntityLoader.load(entity.__identifiers[0]))
+            .linkedResource;
         },
         settings: async (entity, args, ctx, rInfo) => {
-          return (await ctx.entityLoader.load(entity.__identifiers[0]))
+          return (await ctx.resolvedEntityLoader.load(entity.__identifiers[0]))
             .settings;
         },
       },
