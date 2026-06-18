@@ -4,8 +4,8 @@ import {
   getEntityDeviceAccounts,
 } from "../postgres/entity";
 import {
+  getAccountTokenBalances,
   getAccountTokensFromDb,
-  getTokenClass,
   getTokenRetiredAmountSUM,
   getTokenTransaction,
 } from "../postgres/token";
@@ -102,57 +102,32 @@ export const getAccountTokens = async (
   transactionLoader?: GetAccountTransactionsLoader,
   allEntityRetired?: boolean
 ) => {
-  let tokenTransactions = transactionLoader
+  // Read pre-aggregated per-(address, tokenId) balances directly from
+  // "TokenBalance" (one indexed lookup) instead of scanning + folding the whole
+  // transaction ledger. The loader batches multiple addresses (entity /
+  // collection fan-outs) into a single query.
+  const balances = transactionLoader
     ? await transactionLoader.load(
         createGetAccountTransactionsKey(address, name)
       )
-    : await getAccountTransactions(address, name);
+    : await getAccountTokenBalances(address, name);
 
   const tokens = {};
-  for (const curr of tokenTransactions) {
+  for (const curr of balances) {
     if (!tokens[curr.name]) {
-      const tokenClass = await getTokenClass(curr.name);
       tokens[curr.name] = {
-        contractAddress: tokenClass?.contractAddress,
-        description: tokenClass?.description,
-        image: tokenClass?.image,
+        contractAddress: curr.contractAddress,
+        description: curr.description,
+        image: curr.image,
         tokens: {},
       };
     }
-
-    // if from address is same it means it is an outgoing transaction in relation to the address
-    if (curr.from === address) {
-      if (tokens[curr.name].tokens[curr.tokenId]) {
-        tokens[curr.name].tokens[curr.tokenId].amount -= Number(curr.amount);
-      } else {
-        tokens[curr.name].tokens[curr.tokenId] = {
-          collection: curr.collection,
-          amount: -Number(curr.amount),
-          minted: 0,
-          retired: 0,
-        };
-      }
-      // if no to it means was retired from this address
-      if (!curr.to) {
-        tokens[curr.name].tokens[curr.tokenId].retired += Number(curr.amount);
-      }
-      // if to address is same it means it is an incoming transaction in relation to the address
-    } else {
-      if (tokens[curr.name].tokens[curr.tokenId]) {
-        tokens[curr.name].tokens[curr.tokenId].amount += Number(curr.amount);
-      } else {
-        tokens[curr.name].tokens[curr.tokenId] = {
-          collection: curr.collection,
-          amount: Number(curr.amount),
-          minted: 0,
-          retired: 0,
-        };
-      }
-      // if no from it means was minted to address
-      if (!curr.from) {
-        tokens[curr.name].tokens[curr.tokenId].minted += Number(curr.amount);
-      }
-    }
+    tokens[curr.name].tokens[curr.tokenId] = {
+      collection: curr.collection,
+      amount: Number(curr.amount),
+      minted: Number(curr.minted),
+      retired: Number(curr.retired),
+    };
   }
 
   // if allEntityRetired is true then for retired values get all retired ever from

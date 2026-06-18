@@ -1,93 +1,119 @@
-import { ParentEntityLoader } from "../graphql/entity";
 import {
-  getEntityAndIid,
+  EntityChainRow,
   getEntityDeviceAndNoExternalId,
-  getEntityParentIid,
+  getEntityInheritanceChains,
+  getIidsByIds,
+  IidPassthrough,
   updateEntityExternalId,
 } from "../postgres/entity";
 import { chunkArray } from "../util/helpers";
 import { IPFS_SERVICE_MAPPING } from "../util/secrets";
 import { getIpfsDocument } from "./ipfs_handler";
 
-export const getParentEntityById = async (id: string) => {
-  return await getEntityParentIid(id);
+// --------------------------------------------------------------------------------
+// Batched entity-field loaders (DataLoader batch functions)
+//
+// These power the custom Entity DID fields exposed by src/graphql/entity.ts.
+// Both take the full set of entity ids selected in a single GraphQL request and
+// resolve them in ONE database round-trip, instead of the previous per-entity
+// query + sequential parent-chain walk (which was O(entities x chain-depth)
+// single-row queries and timed out on large lists).
+//
+// Each returns an array aligned 1:1 with the input ids (DataLoader contract).
+// --------------------------------------------------------------------------------
+
+// Serves the 12 passthrough DID fields (context, controller, verificationMethod,
+// authentication, assertionMethod, keyAgreement, capabilityInvocation,
+// capabilityDelegation, linkedClaim, accordedRight, linkedEntity, alsoKnownAs) —
+// returned verbatim from each entity's own IID row, no inheritance.
+export const loadIidPassthrough = async (
+  ids: readonly string[]
+): Promise<(IidPassthrough | null)[]> => {
+  const rows = await getIidsByIds(ids as string[]);
+  const byId = new Map(rows.map((r) => [r.id, r]));
+  // align to input order; null is a can't-happen (every Entity has an IID)
+  return ids.map((id) => byId.get(id) ?? null);
 };
 
-// Helper function to fetch an entity and all its parents and add it's parents service,
-// linkedResource, linkedEntity, linkedClaim to the entity as it inherits them.
-export const getFullEntityById = async (
-  id: string,
-  parentEntityLoader?: ParentEntityLoader
-) => {
-  const baseEntity = await getEntityAndIid(id);
-  if (!baseEntity) throw new Error("ERROR::getFullEntityById");
+export type ResolvedEntity = {
+  service: any[];
+  linkedResource: any[];
+  settings: Record<string, any>;
+};
 
-  // Use Sets instead of arrays for O(1) lookup performance
-  const serviceIdSet = new Set(baseEntity.service.map((s) => s.id));
-  const linkedResourceIdSet = new Set(
-    baseEntity.linkedResource.map((r) => r.id)
-  );
+// Serves the 3 inheritance-resolved fields: service, linkedResource, settings.
+// Fetches every requested entity's full class chain in one recursive query, then
+// merges service + linkedResource child-first (entity's own entries win, parents
+// only fill in ids not already present), splits Settings resources out of
+// linkedResource, and applies the IPFS endpoint mapping — mirroring the previous
+// getFullEntityById logic exactly, but for the whole batch at once.
+export const loadResolvedEntities = async (
+  ids: readonly string[]
+): Promise<ResolvedEntity[]> => {
+  const rows = await getEntityInheritanceChains(ids as string[]);
 
-  // Process parent entities and inherit their properties
-  let classVal = baseEntity.context.find((c) => c.key === "class")?.val;
-  if (classVal) {
-    while (true) {
-      const record = parentEntityLoader
-        ? await parentEntityLoader.load(classVal)
-        : await getParentEntityById(classVal);
-      if (!record) break;
+  // group chain rows by root entity; SQL already orders by (root_id, depth),
+  // so each group is ordered child-first.
+  const byRoot = new Map<string, EntityChainRow[]>();
+  for (const row of rows) {
+    const list = byRoot.get(row.rootId);
+    if (list) list.push(row);
+    else byRoot.set(row.rootId, [row]);
+  }
 
-      // Add parent services if not already present
-      for (const service of record.service) {
-        if (!serviceIdSet.has(service.id)) {
-          baseEntity.service.push(service);
-          serviceIdSet.add(service.id);
+  return ids.map((id) => {
+    const chain = byRoot.get(id);
+    if (!chain) return { service: [], linkedResource: [], settings: {} };
+
+    // merge across the chain, child-first, dedup by id
+    const service: any[] = [];
+    const serviceIds = new Set<string>();
+    const linkedResource: any[] = [];
+    const linkedResourceIds = new Set<string>();
+    for (const node of chain) {
+      for (const s of node.service ?? []) {
+        if (!serviceIds.has(s.id)) {
+          serviceIds.add(s.id);
+          service.push(s);
         }
       }
-
-      // Add parent linked resources if not already present
-      for (const linkedResource of record.linkedResource) {
-        if (!linkedResourceIdSet.has(linkedResource.id)) {
-          baseEntity.linkedResource.push(linkedResource);
-          linkedResourceIdSet.add(linkedResource.id);
+      for (const r of node.linkedResource ?? []) {
+        if (!linkedResourceIds.has(r.id)) {
+          linkedResourceIds.add(r.id);
+          linkedResource.push(r);
         }
       }
-
-      // Check for next parent in the chain
-      const newClassVal = record.context.find((c) => c.key === "class")?.val;
-      if (!newClassVal) break;
-      classVal = newClassVal;
     }
-  }
 
-  // Process settings in a single pass
-  const settings: any = {};
-  const nonSettingsResources: any[] = [];
-
-  for (const resource of baseEntity.linkedResource) {
-    if (resource.type === "Settings") {
-      // only add settings if not already added, otherwise parents will override childs
-      if (!settings[resource.description]) {
-        settings[resource.description] = resource;
+    // split Settings resources out of linkedResource (child wins, as child
+    // entries come first in the merged array)
+    const settings: Record<string, any> = {};
+    const nonSettingsResources: any[] = [];
+    for (const resource of linkedResource) {
+      if (resource.type === "Settings") {
+        if (!settings[resource.description]) {
+          settings[resource.description] = resource;
+        }
+      } else {
+        nonSettingsResources.push(resource);
       }
-    } else {
-      nonSettingsResources.push(resource);
     }
-  }
 
-  baseEntity.linkedResource = nonSettingsResources;
-  baseEntity["settings"] = settings;
+    // custom IPFS endpoint mapping (unchanged behaviour)
+    const finalService = IPFS_SERVICE_MAPPING
+      ? service.map((s) =>
+          s.id?.includes("ipfs")
+            ? { ...s, serviceEndpoint: IPFS_SERVICE_MAPPING }
+            : s
+        )
+      : service;
 
-  // Custom
-  if (IPFS_SERVICE_MAPPING) {
-    baseEntity.service = baseEntity.service.map((s) =>
-      s.id.includes("ipfs")
-        ? { ...s, serviceEndpoint: IPFS_SERVICE_MAPPING }
-        : s
-    );
-  }
-
-  return baseEntity;
+    return {
+      service: finalService,
+      linkedResource: nonSettingsResources,
+      settings,
+    };
+  });
 };
 
 export const deviceExternalIdsLoaded = async () => {
