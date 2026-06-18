@@ -19,33 +19,55 @@ const createTokenTransactionSql = `
 INSERT INTO "TokenTransaction" ("from", "to", amount, "tokenId") VALUES ($1, $2, $3, $4);
 `;
 
-// Accumulate a signed delta onto an address's running balance for a token, and
-// return the resulting balance. Inserts the row on first sight, otherwise adds
-// to the existing balance. Runs on the same connection (currentPool) as the
+// Accumulate signed deltas onto an address's running totals for a token, and
+// return the resulting row. Inserts on first sight, otherwise adds to the
+// existing totals. Runs on the same connection (currentPool) as the
 // TokenTransaction insert, so the ledger row and the balance update commit
 // atomically within the per-block transaction.
+//
+//   amount  = net holdings (credits - debits)
+//   minted  = cumulative minted TO this address (monotonic)
+//   retired = cumulative retired BY this address (monotonic)
 const upsertTokenBalanceSql = `
-INSERT INTO "TokenBalance" ("address", "tokenId", "amount") VALUES ($1, $2, $3)
+INSERT INTO "TokenBalance" ("address", "tokenId", "amount", "minted", "retired")
+VALUES ($1, $2, $3, $4, $5)
 ON CONFLICT ("address", "tokenId")
-DO UPDATE SET "amount" = "TokenBalance"."amount" + EXCLUDED."amount"
-RETURNING "amount";
+DO UPDATE SET
+  "amount"  = "TokenBalance"."amount"  + EXCLUDED."amount",
+  "minted"  = "TokenBalance"."minted"  + EXCLUDED."minted",
+  "retired" = "TokenBalance"."retired" + EXCLUDED."retired"
+RETURNING "amount", "minted", "retired";
 `;
 
 const deleteTokenBalanceSql = `
 DELETE FROM "TokenBalance" WHERE "address" = $1 AND "tokenId" = $2;
 `;
 
-// A row in "TokenBalance" means "this address currently holds this token", so a
-// balance that nets to zero is removed rather than kept around. The delete only
-// fires on the rare drain-to-zero (detected via RETURNING), so the common
-// transfer path stays a single statement.
+// A row in "TokenBalance" means the address has a non-trivial relationship with
+// the token, matching token_handler's keep-condition exactly: a row is removed
+// only when amount, minted AND retired are all zero (a pure pass-through that
+// netted to nothing). minted/retired are monotonic, so this delete only fires
+// for transfer-through accounts that drained to zero.
 const applyTokenBalanceDelta = async (
   address: string,
   tokenId: string,
-  delta: bigint
+  amount: bigint,
+  minted: bigint,
+  retired: bigint
 ): Promise<void> => {
-  const res = await dbQuery(upsertTokenBalanceSql, [address, tokenId, delta]);
-  if (BigInt(res.rows[0].amount) === 0n) {
+  const res = await dbQuery(upsertTokenBalanceSql, [
+    address,
+    tokenId,
+    amount,
+    minted,
+    retired,
+  ]);
+  const row = res.rows[0];
+  if (
+    BigInt(row.amount) === 0n &&
+    BigInt(row.minted) === 0n &&
+    BigInt(row.retired) === 0n
+  ) {
     await dbQuery(deleteTokenBalanceSql, [address, tokenId]);
   }
 };
@@ -59,11 +81,71 @@ export const createTokenTransaction = async (
   // the sender. `from`/`to` are empty strings for mints/retires, so the empty
   // side is skipped. Self-transfers never reach here (filtered upstream).
   if (t.to) {
-    await applyTokenBalanceDelta(t.to, t.tokenId, t.amount);
+    // empty `from` => this credit is a mint to the recipient
+    const minted = t.from ? 0n : t.amount;
+    await applyTokenBalanceDelta(t.to, t.tokenId, t.amount, minted, 0n);
   }
   if (t.from) {
-    await applyTokenBalanceDelta(t.from, t.tokenId, -t.amount);
+    // empty `to` => this debit is a retire by the sender
+    const retired = t.to ? 0n : t.amount;
+    await applyTokenBalanceDelta(t.from, t.tokenId, -t.amount, 0n, retired);
   }
+};
+
+export type AccountTokenBalance = {
+  tokenId: string;
+  amount: bigint;
+  minted: bigint;
+  retired: bigint;
+  name: string;
+  collection: string;
+  contractAddress: string;
+  description: string;
+  image: string;
+};
+
+// Single indexed read of an address's full holdings, joined to the token /
+// token-class metadata the resolvers need. Replaces scanning + folding the
+// whole TokenTransaction ledger: cost is O(distinct tokens held), and every
+// row is already a "real" entry (zero rows are never stored).
+const getAccountTokenBalancesSql = `
+SELECT b."address", b."tokenId", b."amount", b."minted", b."retired",
+       t."name", t."collection",
+       tc."contractAddress", tc."description", tc."image"
+FROM "TokenBalance" b
+JOIN "Token" t       ON t."id"   = b."tokenId"
+JOIN "TokenClass" tc ON tc."name" = t."name"
+WHERE b."address" = ANY($1::text[])
+  AND ($2::text IS NULL OR t."name" = $2);
+`;
+
+// Batch variant: resolves many addresses in one round-trip (for the entity /
+// collection fan-out resolvers). Returns rows for all addresses; the caller
+// groups by address.
+export const getAccountTokenBalancesBatch = async (
+  addresses: string[],
+  name?: string | null
+): Promise<(AccountTokenBalance & { address: string })[]> => {
+  if (!addresses.length) return [];
+  // Read on the shared pool (not dbQuery/currentPool, which is reserved for the
+  // sync block transaction), matching the other read helpers in this file.
+  const res = await pool.query(getAccountTokenBalancesSql, [
+    addresses,
+    name ?? null,
+  ]);
+  return res.rows;
+};
+
+export const getAccountTokenBalances = async (
+  address: string,
+  name?: string | null
+): Promise<AccountTokenBalance[]> => {
+  if (!address) return [];
+  const res = await pool.query(getAccountTokenBalancesSql, [
+    [address],
+    name ?? null,
+  ]);
+  return res.rows;
 };
 
 const getTokenClassContractAddressSql = `
