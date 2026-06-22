@@ -13,6 +13,8 @@ import {
   daoProposalModuleProposalCreationPolicyQuery,
   daoPreProposalModuleConfigQuery,
   daoVotingModuleActiveThresholdQuery,
+  daoVotingCw4GroupContractQuery,
+  daoVotingCw20StakingContractQuery,
   cw4GroupMembersQuery,
   cw20StakeConfigQuery,
   cw721StakeConfigQuery,
@@ -294,12 +296,35 @@ const snapshotVotingModule = async (
     unstakingDuration = cfg?.unstaking_duration;
   }
 
-  // Note: token_address / staking_contract / group_contract_address are
-  // populated AFTER this row exists, via the post-pass that walks the
-  // dao_core dump_state output (which tells us which voting module
-  // belongs to which DAO + what its underlying contracts are). For now
-  // we write the bare row; the dao_core pass + member/staker passes fill
-  // in the rest.
+  // Link this voting module to its underlying member/staker contract.
+  // dao_core dump_state (Pass 4) gives us the voting_module address but NOT its
+  // cw4-group / cw20-stake contract — that needs a per-module smart-query, the
+  // same `group_contract` / `staking_contract` lookup the live instantiate
+  // handler does (it reads them from event attributes; the snapshot has no
+  // event). Without this link the members/stakers Pass 7 writes (keyed by the
+  // group/staking contract) are unreachable via the
+  // dao_core → voting_module → group/staking → members traversal.
+  let groupContractAddress: string | undefined;
+  let stakingContract: string | undefined;
+  if (contractType === "dao_voting_cw4") {
+    const g = await daoVotingCw4GroupContractQuery(ctx.snapshotHeight, address);
+    if (g) {
+      // Ensure the FK target exists even if the group was instantiated outside
+      // the tracked daodao code-ids (idempotent; Pass 1 also ensures these).
+      await ensureDaoCw4GroupContract(g);
+      groupContractAddress = g;
+    }
+  } else if (contractType === "dao_voting_cw20_staked") {
+    const s = await daoVotingCw20StakingContractQuery(
+      ctx.snapshotHeight,
+      address
+    );
+    if (s) {
+      await ensureDaoCw20StakingContract(s);
+      stakingContract = s;
+    }
+  }
+
   await createDaoVotingModule({
     address,
     module_type: contractType,
@@ -307,6 +332,8 @@ const snapshotVotingModule = async (
     block_height: ctx.snapshotHeight,
     active_threshold: activeThreshold,
     nft_contract: undefined,
+    group_contract_address: groupContractAddress,
+    staking_contract: stakingContract,
     unstaking_duration: unstakingDuration,
     total_weight: "0",
     native_denom: nativeDenom ?? undefined,
