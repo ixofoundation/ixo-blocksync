@@ -511,6 +511,36 @@ export const daoVotingModuleActiveThresholdQuery = async (
   return result?.data?.active_threshold;
 };
 
+// dao-voting-cw4: GroupContract {} → the cw4-group contract address (Addr).
+// The live instantiate handler reads this from the `group_contract_address`
+// event attribute; the snapshot has no event, so it queries it directly.
+export const daoVotingCw4GroupContractQuery = async (
+  height: number,
+  contractAddress: string
+): Promise<string | null> => {
+  const query = jsonToBase64({ group_contract: {} });
+  const result = await queryArchiveApi(
+    `/cosmwasm/wasm/v1/contract/${contractAddress}/smart/${query}`,
+    height
+  );
+  // Example return: { "data": "ixo1...groupcontract" }
+  return typeof result?.data === "string" ? result.data : null;
+};
+
+// dao-voting-cw20-staked: StakingContract {} → the cw20-stake contract address (Addr).
+export const daoVotingCw20StakingContractQuery = async (
+  height: number,
+  contractAddress: string
+): Promise<string | null> => {
+  const query = jsonToBase64({ staking_contract: {} });
+  const result = await queryArchiveApi(
+    `/cosmwasm/wasm/v1/contract/${contractAddress}/smart/${query}`,
+    height
+  );
+  // Example return: { "data": "ixo1...stakingcontract" }
+  return typeof result?.data === "string" ? result.data : null;
+};
+
 // ======================================
 // CW721 Staking Queries
 // ======================================
