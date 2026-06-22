@@ -8,6 +8,7 @@
     "build": "tsc",
     "dev": "npx ts-node src/index.ts",
     "swagger-gen": "npx ts-node ./src/swagger.ts",
+    "backfill:daodao-contracts": "npx ts-node ./src/scripts/backfill_daodao_voting_contracts.ts",
     "docs-gen": "npx typedoc src/* src/*/*",
     "migrate:up": "node-pg-migrate up -m ./src/postgres/migrations",
     "migrate:down": "node-pg-migrate down  -m ./src/postgres/migrations",
