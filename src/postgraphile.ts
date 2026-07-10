@@ -1,8 +1,13 @@
 import postgraphile from "postgraphile";
+import { Pool } from "pg";
 import PgSimplifyInflectorPlugin from "@graphile-contrib/pg-simplify-inflector";
 import ConnectionFilterPlugin from "postgraphile-plugin-connection-filter";
 import PgAggregatesPlugin from "@graphile/pg-aggregates";
-import { DATABASE_URL, DATABASE_USE_SSL } from "./util/secrets";
+import {
+  DATABASE_URL,
+  DATABASE_USE_SSL,
+  GRAPHQL_POOL_MAX,
+} from "./util/secrets";
 import {
   EntityPlugin,
   createIidLoader,
@@ -19,23 +24,32 @@ import { SmartTagsPlugin } from "./graphql/smart_tags_plugin";
 const isProd = process.env.NODE_ENV === "production";
 console.log("isProd: ", isProd);
 
+// Explicit pool (instead of a config object) so we can attach an error
+// handler - an errored idle client must never crash the process.
+const graphqlPool = new Pool({
+  application_name: "Blocksync-graphql",
+  connectionString: DATABASE_URL,
+  // maximum number of clients the pool should contain
+  // (the cluster's max_connections is shared with every other service;
+  // requests queue briefly for a free client instead of stampeding postgres)
+  max: GRAPHQL_POOL_MAX,
+  // number of milliseconds a client must sit idle in the pool and not be checked out
+  // before it is disconnected from the backend and discarded
+  idleTimeoutMillis: 30000,
+  // TCP keepalive so idle clients survive LB/tunnel idle-connection drops
+  keepAlive: true,
+  // number of milliseconds to wait before timing out when connecting a new client
+  // by default this is 0 which means no timeout
+  connectionTimeoutMillis: 8000,
+  ...(DATABASE_USE_SSL && { ssl: { rejectUnauthorized: false } }), // Use SSL (recommended
+});
+
+graphqlPool.on("error", (err) => {
+  console.error("ERROR::graphqlPgPool::", err.message);
+});
+
 export const Postgraphile = postgraphile(
-  {
-    application_name: "Blocksync-graphql",
-    connectionString: DATABASE_URL,
-    // maximum number of clients the pool should contain
-    // by default this is set to 10.
-    max: 100,
-    // min: 3,
-    // number of milliseconds a client must sit idle in the pool and not be checked out
-    // before it is disconnected from the backend and discarded
-    // default is 10000 (10 seconds) - set to 0 to disable auto-disconnection of idle clients
-    // idleTimeoutMillis: 10000,
-    // number of milliseconds to wait before timing out when connecting a new client
-    // by default this is 0 which means no timeout
-    connectionTimeoutMillis: 8000,
-    ...(DATABASE_USE_SSL && { ssl: { rejectUnauthorized: false } }), // Use SSL (recommended
-  },
+  graphqlPool,
   "public",
   {
     ...(isProd
