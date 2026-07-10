@@ -1,4 +1,10 @@
 name: Build and Release
+
+permissions:
+  contents: write
+  packages: write
+  security-events: write
+
 on:
   push:
     branches:
