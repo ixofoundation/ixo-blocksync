@@ -8,7 +8,11 @@ import * as EntityHandler from "./handlers/entity_handler";
 import * as IpfsHandler from "./handlers/ipfs_handler";
 import * as ClaimsHandler from "./handlers/claims_handler";
 import * as TokenomicsHandler from "./handlers/tokenomics_handler";
-import { SENTRYDSN, TRUST_PROXY } from "./util/secrets";
+import {
+  SENTRYDSN,
+  SENTRY_TRACES_SAMPLE_RATE,
+  TRUST_PROXY,
+} from "./util/secrets";
 import swaggerUi from "swagger-ui-express";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
@@ -28,7 +32,9 @@ const limiter = rateLimit({
 export const app = express();
 app.set("trust proxy", TRUST_PROXY);
 
-Sentry.init({ dsn: SENTRYDSN, tracesSampleRate: 1.0 });
+// Sample traces instead of tracing every request (1.0 added measurable
+// per-request overhead in prod); error capture is unaffected.
+Sentry.init({ dsn: SENTRYDSN, tracesSampleRate: SENTRY_TRACES_SAMPLE_RATE });
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
