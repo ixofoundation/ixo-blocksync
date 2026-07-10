@@ -1,22 +1,34 @@
 import { Pool, PoolClient } from "pg";
-import { DATABASE_URL, DATABASE_USE_SSL } from "../util/secrets";
+import {
+  DATABASE_POOL_MAX,
+  DATABASE_URL,
+  DATABASE_USE_SSL,
+} from "../util/secrets";
 import { currentPool } from "../sync/sync_blocks";
 
 export const pool = new Pool({
   application_name: "Blocksync",
   connectionString: DATABASE_URL,
   // maximum number of clients the pool should contain
-  // by default this is set to 10.
-  max: 100,
+  // (the cluster's max_connections is shared with every other service;
+  // requests queue briefly for a free client instead of stampeding postgres)
+  max: DATABASE_POOL_MAX,
   min: 3,
   // number of milliseconds a client must sit idle in the pool and not be checked out
   // before it is disconnected from the backend and discarded
-  // default is 10000 (10 seconds) - set to 0 to disable auto-disconnection of idle clients
-  // idleTimeoutMillis: 10000,
+  idleTimeoutMillis: 30000,
+  // TCP keepalive so idle clients survive LB/tunnel idle-connection drops
+  keepAlive: true,
   // number of milliseconds to wait before timing out when connecting a new client
   // by default this is 0 which means no timeout
   connectionTimeoutMillis: 8000,
   ...(DATABASE_USE_SSL && { ssl: { rejectUnauthorized: false } }), // Use SSL (recommended
+});
+
+// An errored idle client must never crash the process (idle connections
+// dropped by load balancers / tunnels surface here).
+pool.on("error", (err) => {
+  console.error("ERROR::pgpool::", err.message);
 });
 
 // helper function that manages connection transaction start and commit and rollback

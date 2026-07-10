@@ -11,10 +11,17 @@ export const corePool = new Pool({
   // before it is disconnected from the backend and discarded
   // default is 10000 (10 seconds) - set to 0 to disable auto-disconnection of idle clients
   idleTimeoutMillis: 10000,
+  // TCP keepalive so idle clients survive LB/tunnel idle-connection drops
+  keepAlive: true,
   // number of milliseconds to wait before timing out when connecting a new client
   // by default this is 0 which means no timeout
   connectionTimeoutMillis: 1000,
   ...(DATABASE_USE_SSL && { ssl: { rejectUnauthorized: false } }), // Use SSL (recommended
+});
+
+// An errored idle client must never crash the process.
+corePool.on("error", (err) => {
+  console.error("ERROR::corePgPool::", err.message);
 });
 
 // helper function that manages connect to pool and release,

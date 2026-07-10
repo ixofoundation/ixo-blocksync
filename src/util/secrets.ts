@@ -15,3 +15,20 @@ export const DATABASE_USE_SSL =
   Number(process.env.DATABASE_USE_SSL ?? "0") || 0;
 export const STATIC_CHAIN_ID = process.env.STATIC_CHAIN_ID;
 export const NETWORK = process.env.NETWORK || "devnet";
+
+// Max clients for the shared app/sync pg pool. The cluster's max_connections
+// is shared by every service, and a pg connection is a whole backend process;
+// small pools that queue briefly under load outperform large ones that
+// stampede the database.
+export const DATABASE_POOL_MAX =
+  Number(process.env.DATABASE_POOL_MAX ?? "20") || 20;
+// Max clients for Postgraphile's GraphQL pool.
+export const GRAPHQL_POOL_MAX =
+  Number(process.env.GRAPHQL_POOL_MAX ?? "30") || 30;
+
+// Fraction of requests Sentry traces (1.0 traced every request in prod,
+// which adds per-request overhead and quota burn).
+const sentryRate = Number(process.env.SENTRY_TRACES_SAMPLE_RATE);
+export const SENTRY_TRACES_SAMPLE_RATE = Number.isFinite(sentryRate)
+  ? sentryRate
+  : 0.1;
