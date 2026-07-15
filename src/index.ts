@@ -3,34 +3,34 @@ require("dotenv").config();
 
 import "./util/long";
 import http from "http";
+import * as Sentry from "@sentry/node";
 import * as SyncBlocks from "./sync/sync_blocks";
-import { DATABASE_URL, PORT, MIGRATE_DB_PROGRAMATICALLY } from "./util/secrets";
 import * as SyncChain from "./sync/sync_chain";
 import { postgresMigrate } from "./postgres/migrations";
-import { initWebSocketServer } from "./websocket/server";
+import {
+  DATABASE_URL,
+  MIGRATE_DB_PROGRAMATICALLY,
+  PORT,
+  SENTRYDSN,
+} from "./util/secrets";
+import { app } from "./app";
+import { startCrons } from "./crons";
 
 (async () => {
+  // Error capture for the sync process (uncaught exceptions/rejections);
+  // no request tracing - there is no request traffic to trace.
+  Sentry.init({ dsn: SENTRYDSN });
+
   // first apply db migrations if env var set, for prod dbs where no access to shell
   if (MIGRATE_DB_PROGRAMATICALLY) {
     console.log("MIGRATE_DB_PROGRAMATICALLY: ", MIGRATE_DB_PROGRAMATICALLY);
     await postgresMigrate(DATABASE_URL || "");
   }
 
-  // Dynamic import of `./app` so Postgraphile's eager schema introspection
-  // happens AFTER migrations have run. Static `import { app }` at the top
-  // of the file would resolve before this async function fires, leaving
-  // Postgraphile's GraphQL schema cached against a pre-migration (empty)
-  // DB on a fresh boot. See:
-  // https://github.com/graphile/postgraphile/issues/919
-  const { app } = await import("./app");
-
-  // server setup and start logic
   SyncChain.syncChain().then(() => SyncBlocks.startSync());
+  startCrons();
 
-  const server = http.createServer(app);
-
-  // Initialize WebSocket server on the same HTTP server
-  initWebSocketServer(server);
-
-  server.listen(PORT, () => console.log(`Listening on ${PORT}`));
+  http
+    .createServer(app)
+    .listen(PORT, () => console.log(`Listening on ${PORT}`));
 })();

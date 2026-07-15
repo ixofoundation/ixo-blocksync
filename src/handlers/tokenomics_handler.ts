@@ -3,51 +3,8 @@ import { queryClient, registry } from "../sync/sync_chain";
 import { sleep } from "../util/sleep";
 import { upsertTokenomicsAccount } from "../postgres/tokenomics_account";
 
-export const supplyTotal = async () => {
-  let supply: any[] = [];
-  let key: Uint8Array | undefined;
-  const query = async (key?: Uint8Array) =>
-    await queryClient.cosmos.bank.v1beta1.totalSupply({
-      pagination: {
-        // @ts-ignore
-        key: key || [],
-        limit: Long.fromNumber(1000),
-        offset: Long.fromNumber(0),
-      },
-    });
-
-  while (true) {
-    const res = await query(key);
-    supply = [...supply, ...res.supply];
-    key = res.pagination?.nextKey || undefined;
-    if (!key?.length) break;
-  }
-
-  // convert all ibc denoms to traces to see the original denom
-  for (const sup of supply) {
-    if (sup.denom.includes("ibc/")) {
-      const trace = await queryClient.ibc.applications.transfer.v1.denomTrace({
-        hash: sup.denom.split("/")[1],
-      });
-      sup.trace = trace.denomTrace;
-    }
-  }
-
-  return supply;
-};
-
-export const supplyIBC = async () => {
-  const escrows = await getIBCEscrows(true);
-
-  let total = 0;
-  escrows.forEach((e) => {
-    total += Number(e.balance);
-  });
-
-  return total;
-};
-
-const getIBCEscrows = async (includeBalance = false) => {
+// IBC escrow accounts get tagged with type "ibc_escrow" in the accounts table
+const getIBCEscrows = async () => {
   // get all ibc channels
   const channels = await queryClient.ibc.core.channel.v1.channels({
     pagination: {
@@ -66,34 +23,10 @@ const getIBCEscrows = async (includeBalance = false) => {
           portId: c.portId,
           channelId: c.channelId,
         });
-      // get balance for the escrow account
-      const escrowBalance = includeBalance
-        ? await queryClient.cosmos.bank.v1beta1.balance({
-            address: escrowAcc.escrowAddress,
-            denom: "uixo",
-          })
-        : undefined;
-      return {
-        account: escrowAcc.escrowAddress,
-        balance: escrowBalance?.balance?.amount ?? "0",
-      };
+      return escrowAcc.escrowAddress;
     })
   );
   return escrows;
-};
-
-export const supplyStaked = async () => {
-  const res = await queryClient.cosmos.staking.v1beta1.pool({});
-  return res.pool;
-};
-
-export const supplyCommunityPool = async () => {
-  const res = await queryClient.cosmos.distribution.v1beta1.communityPool();
-  return res.pool.map((c) => ({ ...c, amount: c.amount.slice(0, -18) }));
-};
-
-export const inflation = async () => {
-  return 0.05;
 };
 
 // Get all accounts and balances for tokenomics
@@ -101,7 +34,7 @@ export const getAccountsAndBalances = async () => {
   const start = Date.now();
   let skippedSomeUpload = false;
   try {
-    let ibcEscrows = (await getIBCEscrows()).map((e) => e.account);
+    let ibcEscrows = await getIBCEscrows();
 
     let accounts: any[] = [];
     let key: Uint8Array | undefined;
@@ -147,10 +80,8 @@ export const getAccountsAndBalances = async () => {
       " accounts"
     );
 
-    let i = 0;
     // get balances for each account
     for (const acc of accounts) {
-      // console.log("fetch acc balance", i++, acc.address);
       await sleep(70);
       const [availBalance, delegationsBalance, rewardsBalance] =
         await Promise.all([
