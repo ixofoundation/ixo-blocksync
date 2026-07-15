@@ -10,7 +10,6 @@ export const MIGRATE_DB_PROGRAMATICALLY =
 export const TRUST_PROXY = process.env.TRUST_PROXY || 1;
 export const ENTITY_MODULE_CONTRACT_ADDRESS =
   process.env.ENTITY_MODULE_CONTRACT_ADDRESS || "";
-export const IPFS_SERVICE_MAPPING = process.env.IPFS_SERVICE_MAPPING || "";
 export const DATABASE_USE_SSL =
   Number(process.env.DATABASE_USE_SSL ?? "0") || 0;
 export const STATIC_CHAIN_ID = process.env.STATIC_CHAIN_ID;
@@ -22,13 +21,3 @@ export const NETWORK = process.env.NETWORK || "devnet";
 // stampede the database.
 export const DATABASE_POOL_MAX =
   Number(process.env.DATABASE_POOL_MAX ?? "20") || 20;
-// Max clients for Postgraphile's GraphQL pool.
-export const GRAPHQL_POOL_MAX =
-  Number(process.env.GRAPHQL_POOL_MAX ?? "30") || 30;
-
-// Fraction of requests Sentry traces (1.0 traced every request in prod,
-// which adds per-request overhead and quota burn).
-const sentryRate = Number(process.env.SENTRY_TRACES_SAMPLE_RATE);
-export const SENTRY_TRACES_SAMPLE_RATE = Number.isFinite(sentryRate)
-  ? sentryRate
-  : 0.1;

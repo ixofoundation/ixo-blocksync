@@ -1,99 +1,12 @@
 import { customQueries } from "@ixo/impactxclient-sdk";
 import { chunkArray } from "../util/helpers";
 import {
-  getCollectionClaimsByType,
   getCollectionClaimsTypeNull,
   getCollectionsClaimTypeNull,
   getCollectionEntity,
   updateClaimSchema,
 } from "../postgres/claim";
 import { getEntityService } from "../postgres/entity";
-
-/**
- * Will return empty list if not all claims schemaTypes have been fetched from cellnode
- * if empty list, call getCollectionClaims again after 1 minute to avoid cellnode rate limit
- */
-export const getCollectionClaims = async (
-  id: string,
-  status?: string,
-  type?: string,
-  take?: string,
-  cursor?: string,
-  orderBy: "asc" | "desc" = "asc"
-) => {
-  const cleanStatus = status ? parseInt(status) : undefined;
-  const cleanTake = Number(take || 1000);
-
-  const query = async (take: number, type?: string | null, cursor?: string) =>
-    await getCollectionClaimsByType({
-      collectionId: id,
-      includeType: type !== undefined,
-      type: type ?? null,
-      includeStatus: cleanStatus !== undefined,
-      status: cleanStatus ?? null,
-      orderBy: orderBy,
-      take: take || 1000,
-      cursor: cursor ?? null,
-    });
-
-  // get claims with schemaType null and fetch schemaType from cellnode if claims exist
-  let claims = await query(1, null);
-  if (claims.length && !!type) {
-    await getClaimTypesFromCellnode(id);
-
-    // if any more claims with schemaType null, return empty list
-    claims = await query(1, null);
-  }
-
-  if (claims.length && !!type) {
-    return {
-      data: [],
-      metaData: {
-        cursor: null,
-        hasNextPage: false,
-        schemaTypesLoaded: false,
-        message:
-          "Schema types for claims not loaded yet, please try again after 1 minute",
-      },
-    };
-  }
-
-  // plus 1 to check if there is a next page
-  claims = await query(cleanTake + 1, type, cursor);
-
-  // if no claims then return empty list
-  if (claims.length == 0) {
-    return {
-      data: [],
-      metaData: {
-        cursor: null,
-        hasNextPage: false,
-        schemaTypesLoaded: true,
-        message: "No claims found",
-      },
-    };
-  }
-
-  const hasNextPage = claims.length > cleanTake;
-  // data returned is all claims, except the last one if there is a next page
-  if (hasNextPage) claims.pop();
-
-  return {
-    data: claims,
-    metaData: {
-      cursor: claims[claims.length - 1].claimId,
-      hasNextPage: hasNextPage,
-      schemaTypesLoaded: true,
-      message: "Success",
-    },
-  };
-};
-
-export const getCollectionClaimSchemaTypesLoaded = async (id?: string) => {
-  if (!id) return false;
-  const claims = await getCollectionClaimsTypeNull(id, 1);
-  return claims.length == 0;
-};
 
 let isFetchingClaimsSchemaTypes = false;
 // Helper  function to get all collections with claims that have no schemaType
