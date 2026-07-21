@@ -8,6 +8,10 @@ RUN apt-get update \
   && apt-get -y --no-install-recommends install ca-certificates \
   && rm -rf /var/lib/apt/lists/*
 
+# The npm bundled with the base image ships a vulnerable node-tar
+# (CVE-2026-59873); npm 12 bundles the fixed tar >=7.5.19.
+RUN npm install -g npm@12 && npm cache clean --force
+
 WORKDIR /usr/src/app
 
 # Install app dependencies
