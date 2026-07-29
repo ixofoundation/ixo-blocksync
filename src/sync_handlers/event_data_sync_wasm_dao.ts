@@ -126,6 +126,11 @@ export const processDaoEvent = async (
       case "dao_pre_propose_single":
       case "dao_pre_propose_multiple":
       case "dao_pre_propose_approval_single":
+      case "dao_pre_propose_approval_multiple":
+      // The approver contract is itself a pre-propose module on the approver
+      // DAO's proposal module — it MUST get a dao_pre_propose_module row or
+      // the proposal module's pre_propose_module FK breaks on wire-up.
+      case "dao_pre_propose_approver":
         return await processDaoPreProposeEvent(p);
 
       case "cw20_stake":
@@ -141,7 +146,6 @@ export const processDaoEvent = async (
       case "cw_admin_factory":
       case "cw_payroll_factory":
       case "dao_migrator":
-      case "dao_pre_propose_approver":
       case "cw_vesting":
       case "cw20_base":
       case "cw721_base":
@@ -235,9 +239,11 @@ const processDaoCoreEvent = async ({
 
     case "execute_update_proposal_modules": {
       // Governance added/disabled proposal modules. Re-query dump_state
-      // and patch the prefix+status of every module the DAO now reports.
-      // Brand-new modules will get their own instantiate event later in
-      // the same tx → handled by processDaoProposalEvent.instantiate.
+      // and upsert the prefix+status of every module the DAO now reports.
+      // Brand-new modules are already listed by dump_state at this height
+      // even though their instantiate events only arrive later in the same
+      // tx — the upsert stubs their rows (address/dao_address/prefix/
+      // status) and processDaoProposalEvent.instantiate fills in the rest.
       const conf = await daoCoreDumpStateQuery(blockHeight, contractAddress);
       const mods = (conf?.proposal_modules ?? []) as Array<{
         address: string;
@@ -245,7 +251,12 @@ const processDaoCoreEvent = async ({
         status?: string;
       }>;
       if (mods.length) {
-        await refreshDaoProposalModulesFromDumpState(mods);
+        await refreshDaoProposalModulesFromDumpState(
+          mods,
+          contractAddress,
+          timestamp,
+          blockHeight,
+        );
       }
       break;
     }
@@ -483,6 +494,13 @@ const processDaoProposalEvent = async ({
 
     case "execute":
     case "close":
+    // v2.7.1: a vetoer vetoed the proposal (either during the veto
+    // timelock or an open proposal with early-veto enabled). Re-query the
+    // proposal at height and mirror its new status — normally "vetoed",
+    // or "executed"/"closed" when the veto config routes it there.
+    // Status normalization (incl. the object-shaped
+    // { veto_timelock: {...} } status) happens in updateDaoProposalStatus.
+    case "veto":
       const prop2 = await daoProposalInfoQuery(
         blockHeight,
         contractAddress,
@@ -932,6 +950,11 @@ const processDaoPreProposeEvent = async ({
   const contractAddress = getWasmAttr(event.attributes, "_contract_address");
 
   switch (action) {
+    // v2.0.3 configs carry `open_proposal_submission` (boolean); v2.7.1
+    // replaced it with `submission_policy` ({ anyone: ... } | { specific:
+    // ... }). Both are passed through — the postgres layer stores
+    // submission_policy verbatim and derives the legacy boolean when only
+    // the policy exists (anyone → true, specific → false).
     case "instantiate":
       const conf1 = await daoPreProposalModuleConfigQuery(
         blockHeight,
@@ -942,6 +965,7 @@ const processDaoPreProposeEvent = async ({
         proposal_module: getWasmAttr(event.attributes, "proposal_module", true),
         deposit_info: conf1.deposit_info,
         open_proposal_submission: conf1.open_proposal_submission,
+        submission_policy: conf1.submission_policy,
         created_at: timestamp,
         block_height: blockHeight,
       });
@@ -956,23 +980,28 @@ const processDaoPreProposeEvent = async ({
         address: contractAddress,
         deposit_info: config.deposit_info,
         open_proposal_submission: config.open_proposal_submission,
+        submission_policy: config.submission_policy,
       });
       break;
   }
 
   // ---------------------------------------------------------------
-  // dao-pre-propose-approval-single lifecycle.
+  // dao-pre-propose-approval-single/-multiple lifecycle.
   //
-  // This contract uses `method` instead of `action` for its custom events
-  // (legacy convention from dao-pre-propose-base). It emits:
+  // These contracts use `method` instead of `action` for their custom events
+  // (legacy convention from dao-pre-propose-base). Both variants emit the
+  // exact same attributes (verified in v2.7.1 contract.rs of each):
   //   - method=pre-propose         { id }      — pending submission
   //   - method=proposal_approved   { approval_id, proposal_id }
   //   - method=proposal_rejected   { proposal, deposit_info }
   //
-  // We only enter this path for the approval contract type — the regular
+  // We only enter this path for the approval contract types — the regular
   // pre-propose contracts don't carry these methods, so an unconditional
   // method-read would still be safe but is unnecessary.
-  if (contractInfo.contractType === "dao_pre_propose_approval_single") {
+  if (
+    contractInfo.contractType === "dao_pre_propose_approval_single" ||
+    contractInfo.contractType === "dao_pre_propose_approval_multiple"
+  ) {
     const method = getWasmAttr(event.attributes, "method", true);
     switch (method) {
       case "pre-propose": {

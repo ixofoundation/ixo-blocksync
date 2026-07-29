@@ -293,6 +293,7 @@ export const daoPreProposalModuleConfigQuery = async (
     `/cosmwasm/wasm/v1/contract/${contractAddress}/smart/${query}`,
     height
   );
+  // v2.0.3 example return
   // {
   //     "data": {
   //         "deposit_info": {
@@ -305,6 +306,23 @@ export const daoPreProposalModuleConfigQuery = async (
   //         "open_proposal_submission": false
   //     }
   // }
+  //
+  // v2.7.1 replaced open_proposal_submission with submission_policy:
+  // {
+  //     "data": {
+  //         "deposit_info": null,
+  //         "submission_policy": {
+  //             "specific": {
+  //                 "dao_members": true,
+  //                 "allowlist": [],
+  //                 "denylist": []
+  //             }
+  //         }
+  //     }
+  // }
+  // (or "submission_policy": { "anyone": { "denylist": [] } } for open
+  // submission). The full data object is returned unchanged so consumers
+  // see whichever fields the contract version provides.
   return config?.data;
 };
 

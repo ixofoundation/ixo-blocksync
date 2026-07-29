@@ -143,14 +143,40 @@ export const deleteDaoCoreItem = async (
 // Bulk-refresh proposal-modules statuses from dao_core dump_state. Called
 // after execute_update_proposal_modules — a passed proposal can add new
 // proposal modules to a DAO and/or mark existing ones as 'disabled'.
+//
+// UPSERT, not UPDATE: dump_state at the event's height already lists a
+// brand-NEW module even though its own instantiate event only arrives
+// later in the same tx — so we stub a row (address, dao_address, prefix,
+// status; other columns NULL) that the subsequent instantiate handling
+// fills in via createDaoProposalModule's ON CONFLICT DO UPDATE.
 // =============================================
 export const refreshDaoProposalModulesFromDumpState = async (
-  proposal_modules: Array<{ address: string; prefix?: string; status?: string }>
+  proposal_modules: Array<{
+    address: string;
+    prefix?: string;
+    status?: string;
+  }>,
+  dao_address: string,
+  created_at: Date,
+  block_height: number
 ): Promise<void> => {
   for (const m of proposal_modules) {
     await dbQuery(
-      "UPDATE dao_proposal_module SET prefix = $2, status = $3 WHERE address = $1;",
-      [m.address, m.prefix ?? null, m.status ?? null]
+      `INSERT INTO dao_proposal_module (
+         address, dao_address, prefix, status, created_at, block_height
+       ) VALUES ($1, $2, $3, $4, $5, $6)
+       ON CONFLICT (address) DO UPDATE SET
+         prefix = EXCLUDED.prefix,
+         status = EXCLUDED.status,
+         dao_address = EXCLUDED.dao_address;`,
+      [
+        m.address,
+        dao_address,
+        m.prefix ?? null,
+        m.status ?? null,
+        created_at,
+        block_height,
+      ]
     );
   }
 };
@@ -158,6 +184,25 @@ export const refreshDaoProposalModulesFromDumpState = async (
 // =============================================
 // DAO Proposal Operations
 // =============================================
+
+// Normalize a proposal status coming off the chain into a plain string for
+// the TEXT column. dao-proposal contracts serialize `Status` as a string
+// for unit variants ("open", "passed", "executed", "vetoed", ...) but
+// v2.7.1's veto timelock variant carries data, so serde emits an OBJECT:
+//   { "veto_timelock": { "expiration": ... } }  →  "veto_timelock"
+// Generic single-key extraction keeps any future data-carrying variant from
+// ever writing "[object Object]" or a JSON blob into the column.
+export const normalizeProposalStatus = (
+  status: string | Record<string, unknown> | null | undefined
+): string | null => {
+  if (status === null || status === undefined) return null;
+  if (typeof status === "string") return status;
+  if (typeof status === "object") {
+    const keys = Object.keys(status);
+    if (keys.length > 0) return keys[0];
+  }
+  return null;
+};
 
 export type DaoProposal = {
   id: string;
@@ -172,7 +217,9 @@ export type DaoProposal = {
   total_power?: string;
   allow_revoting?: boolean;
   msgs?: any;
-  status?: string;
+  // May arrive as the raw chain value (string or data-carrying object) —
+  // normalizeProposalStatus is applied on every write.
+  status?: string | Record<string, unknown>;
   votes?: any;
   created_at: Date;
   block_height: number;
@@ -194,7 +241,7 @@ export const createDaoProposal = async (data: DaoProposal): Promise<void> => {
     data.title,
     data.description,
     data.proposer,
-    data.status,
+    normalizeProposalStatus(data.status),
     data.msgs ? JSON.stringify(data.msgs) : null,
     data.start_height,
     data.min_voting_period ? JSON.stringify(data.min_voting_period) : null,
@@ -215,12 +262,12 @@ UPDATE dao_proposal SET status = $3 WHERE proposal_module = $1 AND id = $2;
 export const updateDaoProposalStatus = async (data: {
   proposal_module: string;
   id: string;
-  status: string;
+  status: string | Record<string, unknown>;
 }): Promise<void> => {
   await dbQuery(updateDaoProposalStatusSql, [
     data.proposal_module,
     data.id,
-    data.status,
+    normalizeProposalStatus(data.status),
   ]);
 };
 
@@ -231,13 +278,13 @@ UPDATE dao_proposal SET status = $3, votes = $4 WHERE proposal_module = $1 AND i
 export const updateDaoProposalStatusAndVotes = async (data: {
   proposal_module: string;
   id: string;
-  status: string;
+  status: string | Record<string, unknown>;
   votes: any;
 }): Promise<void> => {
   await dbQuery(updateDaoProposalStatusAndVotesSql, [
     data.proposal_module,
     data.id,
-    data.status,
+    normalizeProposalStatus(data.status),
     data.votes ? JSON.stringify(data.votes) : null,
   ]);
 };
@@ -298,12 +345,31 @@ export type DaoProposalModule = {
   config?: any;
 };
 
+// ON CONFLICT DO UPDATE (not DO NOTHING): when a governance proposal swaps
+// proposal modules (execute_update_proposal_modules), the dump_state
+// refresh stubs a row for the new module BEFORE its instantiate event is
+// processed — the instantiate must then fill in module_type/config/etc.
+// COALESCE keeps a re-run (e.g. the one-shot snapshot after a prior live
+// index) from wiping already-populated columns with NULLs when a lookup
+// (dao_core dump_state, config query) came back empty. created_at /
+// block_height / pre_propose_module are intentionally untouched — the
+// original stamps win and pre_propose_module is wired separately via
+// updateDaoProposalModulePreProposeModule once the FK target row exists.
 const createDaoProposalModuleSql = `
 INSERT INTO dao_proposal_module (
   address, dao_address, module_type, prefix, status, created_at, block_height,
   proposal_creation_policy, config
 ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-ON CONFLICT (address) DO NOTHING;
+ON CONFLICT (address) DO UPDATE SET
+  dao_address = COALESCE(EXCLUDED.dao_address, dao_proposal_module.dao_address),
+  module_type = COALESCE(EXCLUDED.module_type, dao_proposal_module.module_type),
+  prefix = COALESCE(EXCLUDED.prefix, dao_proposal_module.prefix),
+  status = COALESCE(EXCLUDED.status, dao_proposal_module.status),
+  proposal_creation_policy = COALESCE(
+    EXCLUDED.proposal_creation_policy,
+    dao_proposal_module.proposal_creation_policy
+  ),
+  config = COALESCE(EXCLUDED.config, dao_proposal_module.config);
 `;
 
 export const createDaoProposalModule = async (
@@ -547,11 +613,36 @@ export const updateDaoAllVotingModulesUnstakingDurationForCw20Contract = async (
 // DAO Pre-Propose Module Operations
 // =============================================
 
+// v2.7.1 replaced the pre-propose config's `open_proposal_submission`
+// boolean with a structured `submission_policy`:
+//   { "anyone":   { denylist: [...] } }                              — open
+//   { "specific": { dao_members, allowlist, denylist } }             — gated
+// We store submission_policy verbatim (JSONB) and keep the legacy boolean
+// column populated so old API consumers keep working: legacy configs still
+// provide the boolean directly; for v2.7.1 configs we derive it
+// (anyone → true, specific → false).
+export const deriveOpenProposalSubmission = (
+  open_proposal_submission: boolean | undefined | null,
+  submission_policy: any
+): boolean => {
+  if (typeof open_proposal_submission === "boolean") {
+    return open_proposal_submission;
+  }
+  if (submission_policy && typeof submission_policy === "object") {
+    return "anyone" in submission_policy;
+  }
+  return false;
+};
+
 export type DaoPreProposeModule = {
   address: string;
   proposal_module: string;
   deposit_info?: any;
-  open_proposal_submission: boolean;
+  // Legacy (v2.0.3) configs carry the boolean; v2.7.1 configs omit it and
+  // carry submission_policy instead — the stored boolean is then derived.
+  open_proposal_submission?: boolean;
+  // v2.7.1 structured policy; null/undefined for legacy configs.
+  submission_policy?: any;
   created_at: Date;
   block_height: number;
 };
@@ -559,8 +650,8 @@ export type DaoPreProposeModule = {
 const createDaoPreProposeModuleSql = `
 INSERT INTO dao_pre_propose_module (
   address, proposal_module, deposit_info,
-  open_proposal_submission, created_at, block_height
-) VALUES ($1, $2, $3, $4, $5, $6)
+  open_proposal_submission, submission_policy, created_at, block_height
+) VALUES ($1, $2, $3, $4, $5, $6, $7)
 ON CONFLICT (address) DO NOTHING;
 `;
 
@@ -571,7 +662,11 @@ export const createDaoPreProposeModule = async (
     data.address,
     data.proposal_module,
     data.deposit_info ? JSON.stringify(data.deposit_info) : null,
-    data.open_proposal_submission,
+    deriveOpenProposalSubmission(
+      data.open_proposal_submission,
+      data.submission_policy
+    ),
+    data.submission_policy ? JSON.stringify(data.submission_policy) : null,
     data.created_at,
     data.block_height,
   ]);
@@ -580,19 +675,25 @@ export const createDaoPreProposeModule = async (
 const updateDaoPreProposeModuleSql = `
 UPDATE dao_pre_propose_module SET
   deposit_info = $2,
-  open_proposal_submission = $3
+  open_proposal_submission = $3,
+  submission_policy = $4
 WHERE address = $1;
 `;
 
 export const updateDaoPreProposeModule = async (data: {
   address: string;
   deposit_info?: any;
-  open_proposal_submission: boolean;
+  open_proposal_submission?: boolean;
+  submission_policy?: any;
 }): Promise<void> => {
   await dbQuery(updateDaoPreProposeModuleSql, [
     data.address,
     data.deposit_info ? JSON.stringify(data.deposit_info) : null,
-    data.open_proposal_submission,
+    deriveOpenProposalSubmission(
+      data.open_proposal_submission,
+      data.submission_policy
+    ),
+    data.submission_policy ? JSON.stringify(data.submission_policy) : null,
   ]);
 };
 

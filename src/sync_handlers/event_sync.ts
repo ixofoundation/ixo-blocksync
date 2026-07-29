@@ -15,7 +15,11 @@ export const syncEvents = async (block: BlockCore) => {
   for (const event of block.events) {
     let res: any = null;
     try {
-      if (event.type === "wasm" || event.type === "instantiate") {
+      if (
+        event.type === "wasm" ||
+        event.type === "instantiate" ||
+        event.type === "migrate"
+      ) {
         res = await syncWasmEventData(event, block);
       } else {
         await syncEventData(event, block);
