@@ -15,7 +15,10 @@ import {
   processIxoSwapEvent,
   processIxoSwapInstantiate,
 } from "./event_data_sync_wasm_ixoswap";
-import { createWasmInstantiate } from "../postgres/wasm";
+import {
+  createWasmInstantiate,
+  updateWasmContractCodeId,
+} from "../postgres/wasm";
 import { DAODAO_CONTRACT_CODE_IDS } from "../constants/wasm_code_ids";
 
 // TODO: re-design the whole getWasmAttr function and see if can make into Map so dont need to filter whole array every time looking for wasm action attributes
@@ -49,6 +52,22 @@ export const syncWasmEventData = async (
         contractType: DAODAO_CONTRACT_CODE_IDS.get(codeId) || "",
         blockHeight: block.height,
       });
+      return;
+    }
+
+    // --------------------------------------------------------------------------------
+    // Wasm Migrate
+    // --------------------------------------------------------------------------------
+    // MsgMigrateContract swaps a contract's code in place (e.g. DAO DAO
+    // v2.0.3 → v2.7.1). The wasm module emits a "migrate" event carrying
+    // _contract_address + code_id — mirror the new code_id onto the
+    // wasm_instantiate row so code-id-based classification stays correct.
+    // Unknown addresses are a no-op (the UPDATE matches zero rows).
+    if (event.type === "migrate") {
+      const codeId = parseInt(getWasmAttr(event.attributes, "code_id") || "0");
+      if (contractAddress && codeId > 0) {
+        await updateWasmContractCodeId(contractAddress, codeId);
+      }
       return;
     }
 
