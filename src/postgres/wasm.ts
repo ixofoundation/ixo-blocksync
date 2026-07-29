@@ -30,3 +30,18 @@ export const createWasmInstantiate = async (
     data.msg_index,
   ]);
 };
+
+// Called on wasm "migrate" events (MsgMigrateContract) — the contract keeps
+// its address but runs new code, so re-point the stored code_id used for
+// code-id-based classification. If the address was never indexed the UPDATE
+// matches zero rows and this is a no-op by design.
+const updateWasmContractCodeIdSql = `
+UPDATE wasm_instantiate SET code_id = $2 WHERE address = $1;
+`;
+
+export const updateWasmContractCodeId = async (
+  address: string,
+  codeId: number
+): Promise<void> => {
+  await dbQuery(updateWasmContractCodeIdSql, [address, codeId]);
+};

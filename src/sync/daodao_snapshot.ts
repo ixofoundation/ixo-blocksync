@@ -209,6 +209,10 @@ const runSnapshot = async (snapshotHeight: number, counts: Counts) => {
     "dao_pre_propose_single",
     "dao_pre_propose_multiple",
     "dao_pre_propose_approval_single",
+    "dao_pre_propose_approval_multiple",
+    // approver is itself a pre-propose module on the approver DAO's
+    // proposal module — it needs a row for the FK in Pass 5
+    "dao_pre_propose_approver",
   ]) {
     for (const addr of byType.get(t) ?? []) {
       await snapshotPreProposeModule(addr, baseCtx);
@@ -352,7 +356,11 @@ const snapshotPreProposeModule = async (address: string, ctx: BaseCtx) => {
     // (the reverse direction); leave NULL here.
     proposal_module: undefined as any,
     deposit_info: cfg.deposit_info,
+    // v2.0.3 configs carry the boolean, v2.7.1 configs carry
+    // submission_policy — pass both through; the postgres layer stores the
+    // policy and derives the legacy boolean when needed.
     open_proposal_submission: cfg.open_proposal_submission,
+    submission_policy: cfg.submission_policy,
     created_at: ctx.snapshotTimestamp,
     block_height: ctx.snapshotHeight,
   });
