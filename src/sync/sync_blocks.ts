@@ -1,6 +1,7 @@
 import { sleep } from "../util/sleep";
 import * as TransactionSyncHandler from "../sync_handlers/transaction_sync";
 import * as EventSyncHandler from "../sync_handlers/event_sync";
+import * as AuthzSyncHandler from "../sync_handlers/authz_sync";
 import { currentChain } from "./sync_chain";
 import { getCoreBlock } from "../postgres/blocksync_core/block";
 import { getChain, updateChain } from "../postgres/chain";
@@ -77,6 +78,9 @@ export const startSync = async () => {
                 blockHeight: block.height,
               }),
             ]);
+            // After event sync so entity-account granter resolution can see
+            // Entity rows written in this same block's transaction.
+            await AuthzSyncHandler.syncAuthz(block);
           } finally {
             setCurrentPool(undefined);
           }
