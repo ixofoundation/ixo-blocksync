@@ -151,6 +151,18 @@ export type Claim = {
   memberAddress?: string;
 };
 
+const getClaimAgentAddressSql = `
+SELECT "agentAddress" FROM "public"."Claim" WHERE "claimId" = $1;
+`;
+// Uses dbQuery so it sees Claim rows written earlier in the same per-block
+// transaction (authz_sync resolves the claim submitter for payment grants).
+export const getClaimAgentAddress = async (
+  claimId: string
+): Promise<string | undefined> => {
+  const res = await dbQuery(getClaimAgentAddressSql, [claimId]);
+  return res.rows[0]?.agentAddress;
+};
+
 const createClaimSql = `
 INSERT INTO "public"."Claim" ( "claimId", "agentDid", "agentAddress", "submissionDate", "paymentsStatus", "schemaType", "collectionId", "useIntent", "amount", "cw20Payment", "cw1155Payment", "cw1155IntentPayment", "memberAddress")
 VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13 );

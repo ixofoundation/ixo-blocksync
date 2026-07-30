@@ -113,3 +113,19 @@ export const getEntityService = async (id: string): Promise<any> => {
   const res = await pool.query(getEntityServiceSql, [id]);
   return res.rows[0];
 };
+
+const getEntityAccountsSql = `
+SELECT "accounts" FROM "Entity" WHERE "id" = $1;
+`;
+// Resolves an entity module account address by account name. Uses dbQuery so
+// it sees Entity rows written earlier in the same per-block transaction
+// (an entity can be created and granted authz within the same block).
+export const getEntityAccountAddress = async (
+  id: string,
+  name: string
+): Promise<string | undefined> => {
+  const res = await dbQuery(getEntityAccountsSql, [id]);
+  const accounts = res.rows[0]?.accounts;
+  if (!Array.isArray(accounts)) return undefined;
+  return accounts.find((a: any) => a?.name === name)?.address;
+};
