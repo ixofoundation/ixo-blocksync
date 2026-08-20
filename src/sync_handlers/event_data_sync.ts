@@ -45,6 +45,7 @@ import {
   upsertMemberBudget,
 } from "../postgres/claim";
 import type { Evaluation } from "../postgres/claim";
+import { getCollectionAdmin } from "../postgres/claim";
 import {
   applyNameStatus,
   applyNameTransfer,
@@ -79,6 +80,18 @@ import {
   removeAuthenticator,
 } from "../postgres/smart_account";
 import { epochStartedOrEnded } from "../postgres/epoch";
+import {
+  deleteAuthzGrant,
+  refreshAuthzGrantPayload,
+  upsertAuthzGrant,
+} from "../postgres/authz";
+import { AUTHZ_CONSTRAINT_REFRESH } from "../util/secrets";
+import {
+  decodeAuthorizationAny,
+  msgTypeUrlForAuthorization,
+  timestampToDate,
+} from "../util/authz";
+import { authzGrantsQuery } from "../util/archive-queries";
 import { smartAccountAuthenticatorQuery } from "../util/archive-queries";
 
 export const syncEventData = async (event: EventCore, block: BlockCore) => {
@@ -221,8 +234,45 @@ export const syncEventData = async (event: EventCore, block: BlockCore) => {
             cClaim.evaluation_history.map((e) => evaluationFromSdk(e, cClaim.claim_id))
           );
         }
+        // authz constraint consumption (agent_quota) is event-silent on
+        // chain - refresh the consumed SubmitClaimAuthorization
+        await refreshConsumedGrant(
+          blockHeight,
+          await getCollectionAdmin(cClaim.collection_id),
+          cClaim.agent_address,
+          "/ixo.claims.v1beta1.MsgSubmitClaim"
+        );
         break;
       }
+      case EventTypes.evaluateClaim: {
+        // evaluations themselves are indexed via ClaimUpdatedEvent; this
+        // event is consumed ONLY to refresh the evaluator's authorization
+        const evaluation: EvaluationSDKType = getDocFromAttributes(
+          event.attributes,
+          event.type
+        );
+        await refreshConsumedGrant(
+          blockHeight,
+          await getCollectionAdmin(evaluation.collection_id),
+          evaluation.agent_address,
+          "/ixo.claims.v1beta1.MsgEvaluateClaim"
+        );
+        break;
+      }
+
+      case EventTypes.claimAuthorizationCreated: {
+        // a creator spending their CreateClaimAuthorizationAuthorization
+        // quota (event-silent); quiet no-op when the collection owner created
+        // the authorization directly (no grant involved)
+        await refreshConsumedGrant(
+          blockHeight,
+          safeGet(event.attributes, "admin"),
+          safeGet(event.attributes, "creator"),
+          "/ixo.claims.v1beta1.MsgCreateClaimAuthorization"
+        );
+        break;
+      }
+
       case EventTypes.updateClaim: {
         const uClaim: ClaimSDKType = getDocFromAttributes(
           event.attributes,
@@ -379,6 +429,147 @@ export const syncEventData = async (event: EventCore, block: BlockCore) => {
         await deleteAgentDepositBalance(
           balance.collection_id,
           balance.agent_address
+        );
+        break;
+      }
+
+      // ==========================================================
+      // AUTHZ (active-only index; row present = capability exists)
+      // ==========================================================
+      case EventTypes.grantAuthz: {
+        const granter = safeGet(event.attributes, "granter");
+        const grantee = safeGet(event.attributes, "grantee");
+        const msgTypeUrl = safeGet(event.attributes, "msg_type_url");
+        const base = {
+          granter,
+          grantee,
+          msgTypeUrl,
+          height: blockHeight,
+          time: block.time,
+          txHash: event.transactionHash,
+        };
+
+        // Claims-module auto-grant (delayed payouts): created with nil
+        // expiration by construction; constraints omitted to avoid per-claim
+        // hydration during claim storms.
+        if (msgTypeUrl === "/ixo.claims.v1beta1.MsgWithdrawPayment") {
+          await upsertAuthzGrant({
+            ...base,
+            authorizationType: "/ixo.claims.v1beta1.WithdrawPaymentAuthorization",
+          });
+          break;
+        }
+
+        // Resolve the payload from the message the event points at (msg_index)
+        const msgIndex = Number(safeGet(event.attributes, "msg_index") || "0");
+        const tx = block.transactions.find(
+          (t) => t.hash === event.transactionHash
+        );
+        const msg = tx?.messages?.[msgIndex];
+
+        if (msg?.typeUrl === "/cosmos.authz.v1beta1.MsgGrant") {
+          const anyAuth = msg.value?.grant?.authorization;
+          const decoded = anyAuth?.typeUrl
+            ? decodeAuthorizationAny(anyAuth)
+            : undefined;
+          await upsertAuthzGrant({
+            ...base,
+            authorizationType: decoded?.type,
+            authorization: decoded?.value,
+            expiration: timestampToDate(msg.value?.grant?.expiration),
+          });
+          break;
+        }
+
+        // Entity-account authz / claim-authorization messages emit the richer
+        // EntityAccountAuthzCreatedEvent in the SAME tx, which carries the
+        // full payload - let that handler write the row.
+        if (
+          msg?.typeUrl === "/ixo.entity.v1beta1.MsgGrantEntityAccountAuthz" ||
+          msg?.typeUrl === "/ixo.claims.v1beta1.MsgCreateClaimAuthorization"
+        ) {
+          break;
+        }
+
+        // Grant dispatched from something we can't read the payload out of
+        // (wasm execute, MsgExec-wrapped grant, ICA, gov): hydrate this pair
+        // from the archive LCD at THIS height (end-of-block state), so
+        // resyncs/backfills store historically correct payloads.
+        try {
+          const live = await authzGrantsQuery(blockHeight, granter, grantee);
+          const match = live.find(
+            (g) =>
+              msgTypeUrlForAuthorization(
+                g.authorization["@type"],
+                g.authorization
+              ) === msgTypeUrl
+          );
+          if (match) {
+            await upsertAuthzGrant({
+              ...base,
+              authorizationType: match.authorization["@type"],
+              authorization: match.authorization,
+              expiration: match.expiration
+                ? new Date(match.expiration)
+                : undefined,
+            });
+            break;
+          }
+        } catch (error) {
+          console.error(
+            `ERROR::grantAuthz hydration (${granter}->${grantee} ${msgTypeUrl}):: `,
+            error.message
+          );
+        }
+        // fall back to a bare row rather than losing the grant
+        await upsertAuthzGrant(base);
+        break;
+      }
+
+      case EventTypes.revokeAuthz: {
+        // Explicit revoke AND exhaustion-deletion (same event on-chain).
+        await deleteAuthzGrant(
+          safeGet(event.attributes, "granter"),
+          safeGet(event.attributes, "grantee"),
+          safeGet(event.attributes, "msg_type_url")
+        );
+        break;
+      }
+
+      case EventTypes.entityAuthzCreated: {
+        // Rich companion to EventGrant: full grant payload + entity DID, with
+        // the granter already resolved to the entity module account.
+        const grant = getValueFromAttributes(event.attributes, "grant");
+        const auth = grant?.authorization;
+        if (!auth?.["@type"]) break;
+        const msgTypeUrl = msgTypeUrlForAuthorization(auth["@type"], auth);
+        if (!msgTypeUrl) {
+          console.warn(
+            `entityAuthzCreated: unmapped authorization type ${auth["@type"]}`
+          );
+          break;
+        }
+        await upsertAuthzGrant({
+          granter: safeGet(event.attributes, "granter"),
+          grantee: safeGet(event.attributes, "grantee"),
+          msgTypeUrl,
+          authorizationType: auth["@type"],
+          authorization: auth,
+          expiration: grant.expiration ? new Date(grant.expiration) : undefined,
+          entityId: safeGet(event.attributes, "id"),
+          height: blockHeight,
+          time: block.time,
+          txHash: event.transactionHash,
+        });
+        break;
+      }
+
+      case EventTypes.entityAuthzRevoked: {
+        // Companion to EventRevoke in the same tx; idempotent double-delete.
+        await deleteAuthzGrant(
+          safeGet(event.attributes, "granter"),
+          safeGet(event.attributes, "grantee"),
+          safeGet(event.attributes, "msg_type_url")
         );
         break;
       }
@@ -910,6 +1101,47 @@ export const syncEventData = async (event: EventCore, block: BlockCore) => {
 // `safeGet` returns the attribute value parsed as JSON when present, or an
 // empty string when missing — avoids throwing inside the switch when an
 // optional field (e.g. `reason` on NameStatusChange) is absent.
+// Interim constraint-consumption refresh (until the chain emits
+// authorization-update events, IXO-4233). The claim events tell us WHICH
+// grant was just consumed; re-fetch that pair's live authorization from the
+// archive LCD at THIS height (end-of-block state, so resyncs stay
+// historically correct) and overwrite the stored payload. Quiet no-ops:
+// grant absent from LCD (this consumption exhausted it - the trailing
+// EventRevoke in the same tx deletes the row) or no row to update (admin
+// acting directly without an authz grant). LCD errors log but do NOT fail
+// the block: existence/exhaustion/expiry stay event-accurate regardless;
+// only constraint freshness degrades until the pair is next touched.
+async function refreshConsumedGrant(
+  height: number,
+  granter: string | undefined,
+  grantee: string | undefined,
+  msgTypeUrl: string
+): Promise<void> {
+  if (!AUTHZ_CONSTRAINT_REFRESH || !granter || !grantee) return;
+  try {
+    const live = await authzGrantsQuery(height, granter, grantee);
+    const match = live.find(
+      (g) =>
+        msgTypeUrlForAuthorization(g.authorization["@type"], g.authorization) ===
+        msgTypeUrl
+    );
+    if (!match) return;
+    await refreshAuthzGrantPayload(
+      granter,
+      grantee,
+      msgTypeUrl,
+      match.authorization["@type"],
+      match.authorization,
+      match.expiration ? new Date(match.expiration) : undefined
+    );
+  } catch (error) {
+    console.error(
+      `ERROR::refreshConsumedGrant (${granter}->${grantee} ${msgTypeUrl}):: `,
+      error.message
+    );
+  }
+}
+
 function safeGet(attributes: any[], key: string): string {
   const attr = attributes.find((a) => a.key === key);
   if (!attr || attr.value == null || attr.value === "") return "";

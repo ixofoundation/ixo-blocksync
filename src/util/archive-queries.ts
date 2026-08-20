@@ -769,3 +769,48 @@ export const smartAccountAuthenticatorsQuery = async (
   // }
   return result?.account_authenticators;
 };
+
+// ==========================================================================================
+// Authz
+// ==========================================================================================
+export type LcdAuthzGrant = {
+  authorization: { "@type": string; [key: string]: any };
+  expiration: string | null;
+};
+
+// All grants for a (granter, grantee) pair at the given height (end-of-block
+// state). Used only as the hydration fallback for EventGrants whose payload
+// cannot be read from the emitting message (wasm/MsgExec-dispatched grants) —
+// height-pinned so historical resyncs hydrate historical state.
+export const authzGrantsQuery = async (
+  height: number,
+  granter: string,
+  grantee: string
+): Promise<LcdAuthzGrant[]> => {
+  const grants: LcdAuthzGrant[] = [];
+  let nextKey: string | undefined = undefined;
+  while (true) {
+    const path =
+      `/cosmos/authz/v1beta1/grants` +
+      `?granter=${encodeURIComponent(granter)}` +
+      `&grantee=${encodeURIComponent(grantee)}` +
+      `&pagination.limit=100` +
+      (nextKey ? `&pagination.key=${encodeURIComponent(nextKey)}` : "");
+    let r: any;
+    try {
+      r = await queryArchiveApi(path, height);
+    } catch (error: any) {
+      // Some SDK versions answer "no grants for this pair" with a NotFound
+      // envelope instead of an empty list. Match the specific authz message
+      // only — a broader /not found/ would also match an infra 404 and turn
+      // an outage into a silent "no grants".
+      if (/authorization not found/i.test(error?.message ?? "")) return grants;
+      throw error;
+    }
+    const batch = (r?.grants ?? []) as LcdAuthzGrant[];
+    grants.push(...batch);
+    nextKey = r?.pagination?.next_key ?? undefined;
+    if (!nextKey || batch.length === 0) break;
+  }
+  return grants;
+};
