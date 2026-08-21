@@ -769,3 +769,102 @@ export const smartAccountAuthenticatorsQuery = async (
   // }
   return result?.account_authenticators;
 };
+
+// ==========================================================================================
+// Authz
+// ==========================================================================================
+export type LcdAuthzGrant = {
+  authorization: { "@type": string; [key: string]: any };
+  expiration: string | null;
+};
+
+// Some environments' "archive" nodes prune historical state down to every
+// Nth version — testnet retains one in 100 (verified empirically: every
+// multiple-of-100 height serves, everything else returns "failed to load
+// state ... version mismatch on immutable IAVL tree"). When an exact-height
+// authz query hits such a pruned version, retry at the next RETAINED height:
+// exact chain state at most SNAP_INTERVAL-1 blocks later. For the authz
+// payload this is sound — constraints converge to latest-known either way,
+// and a grant that disappears inside the gap is deleted by its own
+// EventRevoke when the sync reaches that block. The snap is authz-only:
+// other archive queries (daodao snapshots etc.) need exact heights.
+const PRUNED_STATE_RE = /failed to load state at height/i;
+const SNAP_INTERVAL = 100;
+// Heights known pruned, so repeated events in the same block skip the
+// doomed exact query. Grows one entry per pruned claim-block — trivial.
+const prunedHeights = new Set<number>();
+// Snapped results keyed granter:grantee, scoped to one snap height at a
+// time (snap heights are non-decreasing while syncing forward).
+let snapCacheHeight = 0;
+const snapCache = new Map<string, LcdAuthzGrant[]>();
+
+// All grants for a (granter, grantee) pair at the given height (end-of-block
+// state). Used only as the hydration fallback for EventGrants whose payload
+// cannot be read from the emitting message (wasm/MsgExec-dispatched grants) —
+// height-pinned so historical resyncs hydrate historical state.
+export const authzGrantsQuery = async (
+  height: number,
+  granter: string,
+  grantee: string
+): Promise<LcdAuthzGrant[]> => {
+  const snapped = Math.ceil(height / SNAP_INTERVAL) * SNAP_INTERVAL;
+  if (prunedHeights.has(height)) {
+    return await authzGrantsAt(snapped, granter, grantee, true);
+  }
+  try {
+    return await authzGrantsAt(height, granter, grantee, false);
+  } catch (error: any) {
+    if (snapped === height || !PRUNED_STATE_RE.test(error?.message ?? "")) {
+      throw error;
+    }
+    prunedHeights.add(height);
+    return await authzGrantsAt(snapped, granter, grantee, true);
+  }
+};
+
+const authzGrantsAt = async (
+  height: number,
+  granter: string,
+  grantee: string,
+  isSnap: boolean
+): Promise<LcdAuthzGrant[]> => {
+  const cacheKey = `${granter}:${grantee}`;
+  if (isSnap) {
+    if (height !== snapCacheHeight) {
+      snapCache.clear();
+      snapCacheHeight = height;
+    }
+    const cached = snapCache.get(cacheKey);
+    if (cached !== undefined) return cached;
+  }
+  const grants: LcdAuthzGrant[] = [];
+  let nextKey: string | undefined = undefined;
+  while (true) {
+    const path =
+      `/cosmos/authz/v1beta1/grants` +
+      `?granter=${encodeURIComponent(granter)}` +
+      `&grantee=${encodeURIComponent(grantee)}` +
+      `&pagination.limit=100` +
+      (nextKey ? `&pagination.key=${encodeURIComponent(nextKey)}` : "");
+    let r: any;
+    try {
+      // the snapped height is AHEAD of the block being processed — bypass
+      // the shared height-scoped cache so its watermark stays consistent
+      // for exact-height consumers (see queryArchiveApi)
+      r = await queryArchiveApi(path, height, { bypassCache: isSnap });
+    } catch (error: any) {
+      // Some SDK versions answer "no grants for this pair" with a NotFound
+      // envelope instead of an empty list. Match the specific authz message
+      // only — a broader /not found/ would also match an infra 404 and turn
+      // an outage into a silent "no grants".
+      if (/authorization not found/i.test(error?.message ?? "")) break;
+      throw error;
+    }
+    const batch = (r?.grants ?? []) as LcdAuthzGrant[];
+    grants.push(...batch);
+    nextKey = r?.pagination?.next_key ?? undefined;
+    if (!nextKey || batch.length === 0) break;
+  }
+  if (isSnap) snapCache.set(cacheKey, grants);
+  return grants;
+};

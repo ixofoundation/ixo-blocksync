@@ -82,24 +82,36 @@ const isRetriable500Body = (body: any): boolean => {
 export const queryArchiveApi = async (
   path: string,
   height: number,
+  opts?: { bypassCache?: boolean },
 ): Promise<any> => {
-  cleanupOldHeights(height);
-
-  const cached = archiveApiCache.get(path);
-  if (cached !== undefined) return cached;
+  // bypassCache: neither reads nor writes the height-scoped cache, and does
+  // not advance its height watermark. Needed by callers that query AHEAD of
+  // the block being processed (authz pruned-height snapping) — advancing the
+  // watermark early would let entries cached at the future height be served
+  // to same-path queries at earlier heights.
+  if (!opts?.bypassCache) {
+    cleanupOldHeights(height);
+    const cached = archiveApiCache.get(path);
+    if (cached !== undefined) return cached;
+  }
 
   const url = new URL(path, getBaseUrl()).toString();
 
   // attempt 0 is the first try; attempt 1..3 are retries.
   for (let attempt = 0; attempt <= RETRY_BACKOFFS_MS.length; attempt++) {
     try {
+      // Hard timeout: a keep-alive connection that goes half-dead otherwise
+      // hangs this fetch FOREVER (observed against the mainnet archive) —
+      // the indexer then freezes silently with no error and no retry. A
+      // timeout rejection falls into the retriable-network-error path below.
       const response = await fetch(url, {
         headers: { "x-cosmos-block-height": height.toString() },
+        signal: AbortSignal.timeout(30_000),
       });
 
       if (response.ok) {
         const data = await response.json();
-        archiveApiCache.set(path, data);
+        if (!opts?.bypassCache) archiveApiCache.set(path, data);
         return data;
       }
 

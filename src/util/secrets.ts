@@ -19,5 +19,12 @@ export const NETWORK = process.env.NETWORK || "devnet";
 // is shared by every service, and a pg connection is a whole backend process;
 // small pools that queue briefly under load outperform large ones that
 // stampede the database.
+// Interim (until chain v9 emits authz-update events, IXO-4233): refresh a
+// grant's stored constraints from the archive LCD when claim events show it
+// was consumed. 0 disables; the index then keeps as-granted constraints
+// (existence/exhaustion/expiry stay event-accurate regardless).
+export const AUTHZ_CONSTRAINT_REFRESH =
+  Number(process.env.AUTHZ_CONSTRAINT_REFRESH ?? "1") || 0;
+
 export const DATABASE_POOL_MAX =
   Number(process.env.DATABASE_POOL_MAX ?? "20") || 20;

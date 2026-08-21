@@ -1,6 +1,7 @@
 import { sleep } from "../util/sleep";
 import * as TransactionSyncHandler from "../sync_handlers/transaction_sync";
 import * as EventSyncHandler from "../sync_handlers/event_sync";
+import * as AuthzPostgres from "../postgres/authz";
 import { currentChain } from "./sync_chain";
 import { getCoreBlock } from "../postgres/blocksync_core/block";
 import { getChain, updateChain } from "../postgres/chain";
@@ -77,6 +78,11 @@ export const startSync = async () => {
                 blockHeight: block.height,
               }),
             ]);
+
+            // Per-block authz expiry sweep: on-chain expiry pruning emits no
+            // event, so mirror it here against the BLOCK time (not wall
+            // clock) - correct for live sync and historical resyncs alike.
+            await AuthzPostgres.deleteExpiredAuthzGrants(block.time);
           } finally {
             setCurrentPool(undefined);
           }

@@ -132,6 +132,18 @@ export const updateClaimCollection = async (
   await dbQuery(upsertClaimCollectionSql, upsertClaimCollectionParams(p));
 };
 
+const getCollectionAdminSql = `
+SELECT "admin" FROM "public"."ClaimCollection" WHERE "id" = $1;
+`;
+// Uses dbQuery so it sees a ClaimCollection created earlier in this same
+// per-block transaction (authz constraint refresh resolves the granter).
+export const getCollectionAdmin = async (
+  id: string
+): Promise<string | undefined> => {
+  const res = await dbQuery(getCollectionAdminSql, [id]);
+  return res.rows[0]?.admin;
+};
+
 export type Claim = {
   claimId: string;
   agentDid: string;
