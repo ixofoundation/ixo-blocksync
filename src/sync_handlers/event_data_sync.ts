@@ -88,6 +88,7 @@ import {
 import { AUTHZ_CONSTRAINT_REFRESH } from "../util/secrets";
 import {
   decodeAuthorizationAny,
+  execChainGrantee,
   msgTypeUrlForAuthorization,
   timestampToDate,
 } from "../util/authz";
@@ -239,7 +240,12 @@ export const syncEventData = async (event: EventCore, block: BlockCore) => {
         await refreshConsumedGrant(
           blockHeight,
           await getCollectionAdmin(cClaim.collection_id),
-          cClaim.agent_address,
+          execConsumer(
+            block,
+            event,
+            "/ixo.claims.v1beta1.MsgSubmitClaim",
+            cClaim.claim_id
+          ) ?? cClaim.agent_address,
           "/ixo.claims.v1beta1.MsgSubmitClaim"
         );
         break;
@@ -254,7 +260,12 @@ export const syncEventData = async (event: EventCore, block: BlockCore) => {
         await refreshConsumedGrant(
           blockHeight,
           await getCollectionAdmin(evaluation.collection_id),
-          evaluation.agent_address,
+          execConsumer(
+            block,
+            event,
+            "/ixo.claims.v1beta1.MsgEvaluateClaim",
+            evaluation.claim_id
+          ) ?? evaluation.agent_address,
           "/ixo.claims.v1beta1.MsgEvaluateClaim"
         );
         break;
@@ -267,7 +278,11 @@ export const syncEventData = async (event: EventCore, block: BlockCore) => {
         await refreshConsumedGrant(
           blockHeight,
           safeGet(event.attributes, "admin"),
-          safeGet(event.attributes, "creator"),
+          execConsumer(
+            block,
+            event,
+            "/ixo.claims.v1beta1.MsgCreateClaimAuthorization"
+          ) ?? safeGet(event.attributes, "creator"),
           "/ixo.claims.v1beta1.MsgCreateClaimAuthorization"
         );
         break;
@@ -1111,6 +1126,27 @@ export const syncEventData = async (event: EventCore, block: BlockCore) => {
 // acting directly without an authz grant). LCD errors log but do NOT fail
 // the block: existence/exhaustion/expiry stay event-accurate regardless;
 // only constraint freshness degrades until the pair is next touched.
+// Resolves which account's authorization a claim event actually consumed:
+// the grantee of the MsgExec directly wrapping the claim message, read from
+// the event's originating message (local core data, no network). Claim events
+// carry an agent/creator address that matches this only by client convention —
+// legacy oracle clients evaluated under their own grant while filling
+// agent_address with the claim's submitter, which would key the refresh at a
+// pair that consumed nothing. undefined = no exec wrapper (admin acting
+// directly / undecodable) — callers fall back to the event's address.
+function execConsumer(
+  block: BlockCore,
+  event: EventCore,
+  claimMsgTypeUrl: string,
+  claimId?: string
+): string | undefined {
+  const msgIndex = Number(safeGet(event.attributes, "msg_index") || "0");
+  const tx = block.transactions?.find(
+    (t) => t.hash === event.transactionHash
+  );
+  return execChainGrantee(tx?.messages?.[msgIndex], claimMsgTypeUrl, claimId);
+}
+
 async function refreshConsumedGrant(
   height: number,
   granter: string | undefined,

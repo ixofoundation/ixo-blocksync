@@ -110,6 +110,62 @@ export const decodeAuthorizationAny = (auth: {
   };
 };
 
+// Claim-message codecs for walking MsgExec chains (consumption attribution).
+const claimMsgCodecs: { [typeUrl: string]: { decode: (b: Uint8Array) => any } } = {
+  "/ixo.claims.v1beta1.MsgSubmitClaim": ixo.claims.v1beta1.MsgSubmitClaim,
+  "/ixo.claims.v1beta1.MsgEvaluateClaim": ixo.claims.v1beta1.MsgEvaluateClaim,
+  "/ixo.claims.v1beta1.MsgCreateClaimAuthorization":
+    ixo.claims.v1beta1.MsgCreateClaimAuthorization,
+};
+
+// The account whose authorization a claim message actually consumed: the
+// grantee of the MsgExec DIRECTLY wrapping the claim message. Claim events
+// carry an agent/creator address that usually matches it, but only by client
+// convention — legacy oracle clients filled agent_address with the claim's
+// submitter while evaluating under their own grant, so the event alone can
+// attribute consumption to the wrong pair. MsgExec chains nest (delegated
+// verdicts run exec-in-exec); each level consumes its own grant and the
+// claims-typed grant belongs to the INNERMOST wrapper. Returns undefined when
+// the top-level message is not a MsgExec (admin acting directly — no grant
+// consumed) or the chain cannot be decoded.
+export const execChainGrantee = (
+  topMsg: { typeUrl?: string; value?: any } | undefined,
+  claimMsgTypeUrl: string,
+  claimId?: string
+): string | undefined => {
+  if (topMsg?.typeUrl !== "/cosmos.authz.v1beta1.MsgExec") return undefined;
+  const walk = (exec: any): string | undefined => {
+    const grantee = exec?.grantee;
+    if (!grantee) return undefined;
+    for (const any of exec?.msgs ?? []) {
+      const typeUrl = any?.typeUrl ?? any?.type_url;
+      try {
+        if (typeUrl === "/cosmos.authz.v1beta1.MsgExec") {
+          const found = walk(
+            cosmos.authz.v1beta1.MsgExec.decode(toBytes(any.value))
+          );
+          if (found) return found;
+        } else if (typeUrl === claimMsgTypeUrl) {
+          // A single exec can batch several claim messages, and nested
+          // branches can carry different grantees — match on claim id when
+          // one is available so the right branch wins.
+          if (!claimId) return grantee;
+          const decoded = claimMsgCodecs[typeUrl]?.decode(toBytes(any.value));
+          if (!decoded || decoded.claimId === claimId) return grantee;
+        }
+      } catch {
+        // undecodable branch — keep scanning the remaining messages
+      }
+    }
+    return undefined;
+  };
+  try {
+    return walk(topMsg.value);
+  } catch {
+    return undefined;
+  }
+};
+
 const stakeAuthzMsgByType: { [k: string]: string } = {
   AUTHORIZATION_TYPE_DELEGATE: "/cosmos.staking.v1beta1.MsgDelegate",
   AUTHORIZATION_TYPE_UNDELEGATE: "/cosmos.staking.v1beta1.MsgUndelegate",
