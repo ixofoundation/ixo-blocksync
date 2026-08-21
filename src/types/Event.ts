@@ -11,6 +11,10 @@ export enum EventTypes {
   submitClaim = "ixo.claims.v1beta1.ClaimSubmittedEvent",
   updateClaim = "ixo.claims.v1beta1.ClaimUpdatedEvent",
   disputeClaim = "ixo.claims.v1beta1.ClaimDisputedEvent",
+  // consumed ONLY for authz constraint refresh (evaluations themselves are
+  // indexed via ClaimUpdatedEvent)
+  evaluateClaim = "ixo.claims.v1beta1.ClaimEvaluatedEvent",
+  claimAuthorizationCreated = "ixo.claims.v1beta1.ClaimAuthorizationCreatedEvent",
   // claims v7
   disputeResolved = "ixo.claims.v1beta1.DisputeResolvedEvent",
   memberBudgetCreated = "ixo.claims.v1beta1.MemberBudgetCreatedEvent",
@@ -35,6 +39,17 @@ export enum EventTypes {
   lsAddLiquidValidator = "ixo.liquidstake.v1beta1.AddLiquidValidatorEvent",
   lsRebalanced = "ixo.liquidstake.v1beta1.RebalancedLiquidStakeEvent",
   lsAutoCompound = "ixo.liquidstake.v1beta1.AutocompoundStakingRewardsEvent",
+  // authz (cosmos-sdk typed events; keeper-level, so all grant paths emit
+  // them incl. entity-account authz, claims auto-grants and wasm/gov. Flat
+  // scalar attrs (granter/grantee/msg_type_url), read via safeGet - no doc).
+  grantAuthz = "cosmos.authz.v1beta1.EventGrant",
+  revokeAuthz = "cosmos.authz.v1beta1.EventRevoke",
+  // richer ixo companions to EventGrant/EventRevoke for entity-account authz:
+  // carry the FULL grant payload (authorization + constraints + expiration),
+  // the entity DID and the resolved module-account granter. Also emitted by
+  // MsgCreateClaimAuthorization (routes through the same entity msg server).
+  entityAuthzCreated = "ixo.entity.v1beta1.EntityAccountAuthzCreatedEvent",
+  entityAuthzRevoked = "ixo.entity.v1beta1.EntityAccountAuthzRevokedEvent",
   // token
   createToken = "ixo.token.v1beta1.TokenCreatedEvent",
   updateToken = "ixo.token.v1beta1.TokenUpdatedEvent",
@@ -63,6 +78,9 @@ export const EventTypesAttributeKey: { [key in EventTypes]: string } = {
   [EventTypes.submitClaim]: "claim",
   [EventTypes.updateClaim]: "claim",
   [EventTypes.disputeClaim]: "dispute",
+  [EventTypes.evaluateClaim]: "evaluation",
+  // flat scalar attrs, read via safeGet
+  [EventTypes.claimAuthorizationCreated]: "creator",
   // claims v7
   [EventTypes.disputeResolved]: "dispute",
   [EventTypes.memberBudgetCreated]: "budget",
@@ -91,6 +109,12 @@ export const EventTypesAttributeKey: { [key in EventTypes]: string } = {
   [EventTypes.lsAddLiquidValidator]: "validator",
   [EventTypes.lsRebalanced]: "delegator",
   [EventTypes.lsAutoCompound]: "delegator",
+  // authz events emit flat scalar attrs, no wrapped doc - handlers read them
+  // via safeGet; entries below are for completeness only.
+  [EventTypes.grantAuthz]: "granter",
+  [EventTypes.revokeAuthz]: "granter",
+  [EventTypes.entityAuthzCreated]: "grant",
+  [EventTypes.entityAuthzRevoked]: "msg_type_url",
   [EventTypes.createToken]: "token",
   [EventTypes.updateToken]: "token",
   [EventTypes.mintToken]: "tokenProperties",
