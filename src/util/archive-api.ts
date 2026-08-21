@@ -100,8 +100,13 @@ export const queryArchiveApi = async (
   // attempt 0 is the first try; attempt 1..3 are retries.
   for (let attempt = 0; attempt <= RETRY_BACKOFFS_MS.length; attempt++) {
     try {
+      // Hard timeout: a keep-alive connection that goes half-dead otherwise
+      // hangs this fetch FOREVER (observed against the mainnet archive) —
+      // the indexer then freezes silently with no error and no retry. A
+      // timeout rejection falls into the retriable-network-error path below.
       const response = await fetch(url, {
         headers: { "x-cosmos-block-height": height.toString() },
+        signal: AbortSignal.timeout(30_000),
       });
 
       if (response.ok) {
