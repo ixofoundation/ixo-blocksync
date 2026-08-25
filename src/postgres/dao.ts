@@ -424,6 +424,20 @@ export const updateDaoProposalModulePreProposeModule = async (data: {
   ]);
 };
 
+// Does the FK target row for dao_proposal_module.pre_propose_module exist
+// yet? Within an update_pre_propose_config tx the proposal module's
+// update_proposal_creation_policy event precedes the new module's
+// instantiate event, so at that moment the answer can legitimately be no.
+export const hasDaoPreProposeModule = async (
+  address: string
+): Promise<boolean> => {
+  const r = await dbQuery(
+    "SELECT 1 FROM dao_pre_propose_module WHERE address = $1;",
+    [address]
+  );
+  return r.rows.length > 0;
+};
+
 const updateDaoProposalModuleProposalCreationPolicySql = `
 UPDATE dao_proposal_module SET proposal_creation_policy = $2 WHERE address = $1;
 `;
