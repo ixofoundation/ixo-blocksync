@@ -6,6 +6,7 @@ import { currentChain } from "./sync_chain";
 import { getCoreBlock } from "../postgres/blocksync_core/block";
 import { getChain, updateChain } from "../postgres/chain";
 import { withTransaction } from "../postgres/client";
+import { SLOW_BLOCK_LOG_MS } from "../util/secrets";
 import { PoolClient } from "pg";
 import { ensureDaodaoSnapshot } from "./daodao_snapshot";
 import { ensureV7Snapshot } from "./v7_snapshot";
@@ -45,7 +46,9 @@ export const startSync = async () => {
       if (logFetchTime) console.time("fetch");
       // console.log("wait then get block:", currentBlock, getMemoryUsage().rss);
       // await sleep(2000);
+      const fetchStart = Date.now();
       const block = await getCoreBlock(currentBlock);
+      const fetchMs = Date.now() - fetchStart;
       if (logFetchTime) console.timeEnd("fetch");
 
       if (block) {
@@ -87,6 +90,22 @@ export const startSync = async () => {
             setCurrentPool(undefined);
           }
         });
+
+        // fetch = core-DB block read; index = snapshots (one-shot, usually
+        // no-ops) + event/tx handlers + commit — archive-API lookups in the
+        // handlers land in index, so the split shows where a slow block
+        // actually spent its time.
+        const totalMs = Date.now() - fetchStart;
+        if (SLOW_BLOCK_LOG_MS > 0 && totalMs > SLOW_BLOCK_LOG_MS) {
+          console.log(
+            `SLOW BLOCK::${block.height} took ${(totalMs / 1000).toFixed(
+              2
+            )}s (fetch ${(fetchMs / 1000).toFixed(2)}s, index ${(
+              (totalMs - fetchMs) /
+              1000
+            ).toFixed(2)}s)`
+          );
+        }
 
         if (currentBlock % 1000 === 0) {
           console.log(`Synced Block ${currentBlock}`);
