@@ -191,3 +191,21 @@ export const queryArchiveApi = async (
     `archive query unreachable code reached for ${path}@${height}`,
   );
 };
+
+// A deterministic contract-state deserialization failure: the contract's
+// stored state cannot be parsed by the code that was live at the queried
+// height (e.g. a proposal module in-place-migrated to a version whose schema
+// added a required field with no serde default). Such a query fails
+// identically at that height FOREVER — retrying or crash-restarting can never
+// index it. Deliberately narrow: all three markers must be present, so
+// network errors, fetch timeouts, exhausted retries ("archive query failed
+// after"), pruned heights, "no such contract" and contract panics do NOT
+// match and keep aborting the block as before.
+export const isDeterministicWasmParseError = (error: unknown): boolean => {
+  const msg = error instanceof Error ? error.message : String(error);
+  return (
+    msg.includes("archive query non-retriable") &&
+    msg.includes("query wasm contract failed") &&
+    msg.includes("Error parsing into type")
+  );
+};

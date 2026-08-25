@@ -1,4 +1,5 @@
 import { getWasmAttr } from "../util/helpers";
+import { isDeterministicWasmParseError } from "../util/archive-api";
 import { DelayedFunction } from "./event_sync";
 import { EventCore } from "../postgres/blocksync_core/block";
 import { isDaodaoIndexable } from "../constants/daodao_cutoff";
@@ -157,6 +158,21 @@ export const processDaoEvent = async (
         break;
     }
   } catch (error) {
+    // A bricked contract (stored state unparseable by its live code, e.g. a
+    // proposal module in-place-migrated across a schema change — seen on
+    // devnet Aug 2026) fails this event's queries deterministically at this
+    // height forever; rethrowing would crash-loop the whole indexer on one
+    // poison event. Skip JUST this event and keep syncing — the rest of the
+    // block is unaffected. Every other error still aborts the block.
+    if (isDeterministicWasmParseError(error)) {
+      console.error(
+        `SKIP::processDaoEvent:: deterministic wasm parse failure — skipping ` +
+          `${p.action} on ${p.contractInfo.contractType} ` +
+          `${getWasmAttr(p.event.attributes, "_contract_address", true)} at ` +
+          `height ${p.blockHeight}: ${error.message}`,
+      );
+      return;
+    }
     console.error("ERROR::processDaoEvent:: ", error.message);
     throw error;
   }
