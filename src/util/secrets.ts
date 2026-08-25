@@ -28,3 +28,6 @@ export const AUTHZ_CONSTRAINT_REFRESH =
 
 export const DATABASE_POOL_MAX =
   Number(process.env.DATABASE_POOL_MAX ?? "20") || 20;
+
+// log blocks whose fetch+index time exceeds this many milliseconds (0 disables)
+export const SLOW_BLOCK_LOG_MS = Number(process.env.SLOW_BLOCK_LOG_MS ?? "8000");

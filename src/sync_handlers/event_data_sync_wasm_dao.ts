@@ -1,4 +1,5 @@
 import { getWasmAttr } from "../util/helpers";
+import { isDeterministicWasmParseError } from "../util/archive-api";
 import { DelayedFunction } from "./event_sync";
 import { EventCore } from "../postgres/blocksync_core/block";
 import { isDaodaoIndexable } from "../constants/daodao_cutoff";
@@ -15,6 +16,7 @@ import {
   updateDaoCoreVotingModule,
   updateDaoVotingModuleGroupContractAddress,
   updateDaoProposalModulePreProposeModule,
+  hasDaoPreProposeModule,
   updateDaoPreProposeModule,
   updateDaoProposalModuleConfig,
   updateDaoProposalModuleProposalCreationPolicy,
@@ -157,6 +159,21 @@ export const processDaoEvent = async (
         break;
     }
   } catch (error) {
+    // A bricked contract (stored state unparseable by its live code, e.g. a
+    // proposal module in-place-migrated across a schema change — seen on
+    // devnet Aug 2026) fails this event's queries deterministically at this
+    // height forever; rethrowing would crash-loop the whole indexer on one
+    // poison event. Skip JUST this event and keep syncing — the rest of the
+    // block is unaffected. Every other error still aborts the block.
+    if (isDeterministicWasmParseError(error)) {
+      console.error(
+        `SKIP::processDaoEvent:: deterministic wasm parse failure — skipping ` +
+          `${p.action} on ${p.contractInfo.contractType} ` +
+          `${getWasmAttr(p.event.attributes, "_contract_address", true)} at ` +
+          `height ${p.blockHeight}: ${error.message}`,
+      );
+      return;
+    }
     console.error("ERROR::processDaoEvent:: ", error.message);
     throw error;
   }
@@ -408,13 +425,26 @@ const processDaoProposalEvent = async ({
       // Keep pre_propose_module column in sync with the new policy.
       //   { module: { addr: X } } → set to X
       //   { anyone: {} }          → set to NULL (no pre-propose module)
-      // When switching to a *new* Module(...), a subsequent wasm event with
-      // `update_pre_propose_module=<new_addr>` also fires from the proposal
-      // module's reply handler, so the no-action update path further down
-      // re-confirms the new address. Both code paths are idempotent.
+      // The end-of-block policy can name a module whose row does NOT exist
+      // yet: within an update_pre_propose_config tx this event precedes the
+      // new module's instantiate event, so writing the FK here would crash
+      // the sync. When the row is missing, defer — the contract guarantees
+      // (v2.0.3 and v2.7.x, both reply arms) that whenever the stored policy
+      // ends up Module{addr}, the instantiation reply fired a later
+      // `update_pre_propose_module=<addr>` event in the SAME tx, and the
+      // no-action update path further down wires the FK once the row exists.
+      const newPreProposeAddr = conf3?.module?.addr ?? null;
+      if (newPreProposeAddr && !(await hasDaoPreProposeModule(newPreProposeAddr))) {
+        console.log(
+          `DEFER::processDaoProposalEvent:: pre_propose_module ${newPreProposeAddr} ` +
+            `for ${contractAddress} at height ${blockHeight} not indexed yet — ` +
+            `deferring FK write to the update_pre_propose_module event later in this tx`,
+        );
+        break;
+      }
       await updateDaoProposalModulePreProposeModule({
         address: contractAddress,
-        pre_propose_module: conf3?.module?.addr ?? null,
+        pre_propose_module: newPreProposeAddr,
       });
       break;
 
