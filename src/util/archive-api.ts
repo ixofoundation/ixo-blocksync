@@ -60,10 +60,18 @@ const isRetriableStatus = (status: number): boolean => {
 // These are *deterministic* — retrying won't help. A bare 500 with no
 // JSON envelope (or one without a code field) is a real server fault
 // and SHOULD be retried.
+//
+// One enveloped error is NOT deterministic and must be retried anyway:
+//   - { "code": 2, "message": "codespace sdk code 26: invalid height:
+//     cannot query with height in the future" }
+// The archive node is momentarily BEHIND the chain head (blocksync indexes
+// a block the archive hasn't ingested yet) — a short backoff lets it catch
+// up. Seen on mainnet Aug 25 2026: 7 authz hydrations failed for it.
+const RETRIABLE_ENVELOPE_RE = /cannot query with height in the future/i;
 const isRetriable500Body = (body: any): boolean => {
   if (body == null || typeof body !== "object") return true; // unknown shape → retry
   if (typeof body.code === "number" && typeof body.message === "string") {
-    return false; // deterministic gRPC-style error → don't retry
+    return RETRIABLE_ENVELOPE_RE.test(body.message); // deterministic gRPC-style error → don't retry
   }
   return true;
 };
