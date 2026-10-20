@@ -141,5 +141,13 @@ database, ~250 ms end to end through the API, stable at 20 concurrent requests.
 
 Sizes: the index is roughly 4× the stored size of what it covers (devnet
 1 GB; mainnet ≈ 4 GB without the headers, ≈ 29 GB with them, which is why they
-are excluded). A proper "message references" table is planned to replace this
+are excluded). **Plans:** every client must let Postgres plan each statement with its bind
+values (`plan_cache_mode = force_custom_plan`; ixo-blocksync-api sets it per
+transaction in `pgSettings`, and the `blocksync` role carries it in all three
+environments as a backstop). A generic plan cannot prove the partial index's
+predicate from a `$n` parameter, walks the primary key instead and hits the
+statement timeout: on mainnet, 2026-10-20, every containment query through the
+API failed at 8 s until the setting was applied; 0.4 s after.
+
+A proper "message references" table is planned to replace this
 (Linear IXO-5676).
