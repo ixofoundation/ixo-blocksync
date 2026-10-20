@@ -73,3 +73,73 @@ The only public endpoints are for health monitoring:
 | --- | --- |
 | `GET /` | Plain liveness text ("Indexer is Running") — used by k8s probes |
 | `GET /healthz` | DB round-trip returning the latest indexed `chainId` + `blockHeight`, so monitoring can verify the indexer is alive **and** progressing |
+
+## Database migrations and indexes
+
+Schema changes are SQL files in `src/postgres/migrations/`, run by
+[node-pg-migrate](https://github.com/salsita/node-pg-migrate) (`yarn migrate:up`,
+`migrate:down`, `migrate:create`). With `MIGRATE_DB_PROGRAMATICALLY=1` (set in
+every deployed environment) the indexer applies pending migrations **at
+startup, before it opens its HTTP port**. The k8s liveness probe on `GET /`
+allows roughly 35 seconds, so a migration that takes longer than that restarts
+the pod, rolls back, and crashloops.
+
+**Rule for large indexes:** on an existing environment, build the index by hand
+first, then deploy. `CREATE INDEX CONCURRENTLY` does not block the indexer's
+writes, and the migration's `CREATE INDEX IF NOT EXISTS` is then a no-op that
+records itself in `pgmigrations`. From the primary Postgres pod:
+
+```sql
+SET maintenance_work_mem = '512MB';
+CREATE INDEX CONCURRENTLY IF NOT EXISTS "<name>" ON "<table>" ...;  -- same name and definition as the migration
+```
+
+Watch `pg_stat_progress_create_index`; confirm `indisvalid` in `pg_index` before
+deploying. Never give a migration a name that would drop and rebuild a
+hand-built index at startup.
+
+### `Message.value` containment index
+
+`Message.value` (JSONB, the full message content) has a GIN index,
+`Message_value_nonibc_gin_idx` (`jsonb_path_ops`), so "every message that
+mentions object X" is an index lookup instead of a scan of the whole table.
+It serves the `@>` operator only, which is the API's `value: { contains: … }`
+filter; `containsKey` and friends are not indexed.
+
+The index is **partial**: it skips `/ibc.core.client.v1.MsgUpdateClient` (IBC
+light-client headers: validator sets and signatures, ~100 kB each, 86% of the
+table's bytes on mainnet and never searched by content). Those rows stay stored
+and queryable by `typeUrl`, height and sender; every other message type,
+including IBC transfers, packets and acknowledgements, is fully indexed.
+
+Postgres only uses a partial index when the query's `WHERE` implies the index
+predicate, so **a containment query must also say**
+`"typeUrl" <> '/ibc.core.client.v1.MsgUpdateClient'`. Through
+[ixo-blocksync-api](https://github.com/ixofoundation/ixo-blocksync-api):
+
+```graphql
+query MessagesMentioning($id: String!) {
+  messages(
+    filter: {
+      typeUrl: { notEqualTo: "/ibc.core.client.v1.MsgUpdateClient" }
+      value: { contains: { id: $id } }
+    }
+    first: 100
+    orderBy: ID_DESC
+  ) {
+    totalCount
+    nodes { id typeUrl transactionHash transactionByTransactionHash { height time } }
+  }
+}
+```
+
+Shapes that work the same way: `{ entity: "<did>" }`, `{ collectionId: "<id>" }`,
+and `{ msgs: [{ id: "<did>" }] }` for messages wrapped in an authz `MsgExec`.
+Without the `typeUrl` clause the same query is a sequential scan that times out
+on mainnet. Measured on devnet (84k messages): 4 s → under 5 ms in the
+database, ~250 ms end to end through the API, stable at 20 concurrent requests.
+
+Sizes: the index is roughly 4× the stored size of what it covers (devnet
+1 GB; mainnet ≈ 4 GB without the headers, ≈ 29 GB with them, which is why they
+are excluded). A proper "message references" table is planned to replace this
+(Linear IXO-5676).
