@@ -21,6 +21,9 @@
  * -----
  *   npx ts-node src/scripts/backfill_daodao_voting_contracts.ts [--dry-run]
  *
+ * Inside the Docker image (no npx/ts-node there), run the compiled script:
+ *   node build/dist/scripts/backfill_daodao_voting_contracts.js [--dry-run]
+ *
  * Env: DATABASE_URL, IXO_ARCHIVE_NODE_REST_API, NETWORK (same as the indexer).
  *      BACKFILL_HEIGHT — override the archive query height (defaults to the
  *      stored snapshot height, else the network's daodao cutoff height).
