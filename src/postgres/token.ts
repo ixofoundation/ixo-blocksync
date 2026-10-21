@@ -177,23 +177,24 @@ export type TokenClass = {
   cancelled?: TokenCancelled[];
 };
 
-// x/token accepts any string as a token class, but TokenClass.class carries a
-// foreign key to Entity.id (it is what GraphQL's TokenClass.entityByClass is
-// built from). A class that names no indexed entity is stored as NULL rather
-// than failing the whole block (testnet block 19847428, 2026-10-21: class =
-// the minter's account DID). Looked up inside the block's transaction, so an
+// x/token accepts any string as a token class or a token's collection, but
+// TokenClass.class and Token.collection carry foreign keys to Entity.id (they
+// are what GraphQL's entityByClass / entityByCollection are built from). A
+// value that names no indexed entity is stored as NULL rather than failing the
+// whole block (testnet blocks 19847428/19847430, 2026-10-21: the minter's
+// account DID in both fields). Looked up inside the block's transaction, so an
 // entity created earlier in the same block counts.
-const classOrNull = async (
-  cls: string | null,
-  contractAddress: string,
+const entityIdOrNull = async (
+  id: string | null,
+  what: string,
 ): Promise<string | null> => {
-  if (!cls) return null;
+  if (!id) return null;
   const res = await dbQuery('SELECT 1 FROM "public"."Entity" WHERE "id" = $1', [
-    cls,
+    id,
   ]);
-  if (res.rowCount) return cls;
+  if (res.rowCount) return id;
   console.warn(
-    `WARN::tokenClass:: class ${cls} of ${contractAddress} is not an indexed Entity, storing NULL`,
+    `WARN::token:: ${what} ${id} is not an indexed Entity, storing NULL`,
   );
   return null;
 };
@@ -206,7 +207,7 @@ export const createTokenClass = async (p: TokenClass): Promise<void> => {
   await dbQuery(createTokenClassSql, [
     p.contractAddress,
     p.minter,
-    await classOrNull(p.class, p.contractAddress),
+    await entityIdOrNull(p.class, `class of ${p.contractAddress}`),
     p.name,
     p.description,
     p.image,
@@ -237,7 +238,7 @@ WHERE
 export const updateTokenClass = async (p: TokenClass): Promise<void> => {
   await dbQuery(updateTokenClassSql, [
     p.minter,
-    await classOrNull(p.class, p.contractAddress),
+    await entityIdOrNull(p.class, `class of ${p.contractAddress}`),
     p.name,
     p.description,
     p.image,
@@ -300,7 +301,8 @@ export type Token = {
   id: string;
   index: string;
   name: string;
-  collection: string;
+  /** The entity the token's collection names, or null when it is not an indexed Entity. */
+  collection: string | null;
   tokenData?: TokenData[];
 };
 
@@ -309,7 +311,12 @@ INSERT INTO "public"."Token" ( "id", "index", "name", "collection")
 VALUES ( $1, $2, $3, $4 );
 `;
 export const createToken = async (p: Token): Promise<void> => {
-  await dbQuery(createTokenSql, [p.id, p.index, p.name, p.collection]);
+  await dbQuery(createTokenSql, [
+    p.id,
+    p.index,
+    p.name,
+    await entityIdOrNull(p.collection, `collection of token ${p.id}`),
+  ]);
 
   if (p.tokenData?.length) {
     await dbQuery(createTokenDataSql, [JSON.stringify(p.tokenData), p.id]);
