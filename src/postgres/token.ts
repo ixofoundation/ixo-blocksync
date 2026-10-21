@@ -163,7 +163,8 @@ export const getTokenClassContractAddress = async (
 export type TokenClass = {
   contractAddress: string;
   minter: string;
-  class: string;
+  /** The entity the class names, or null when the chain's class string is not an indexed Entity. */
+  class: string | null;
   name: string;
   description: string;
   image: string;
@@ -176,6 +177,27 @@ export type TokenClass = {
   cancelled?: TokenCancelled[];
 };
 
+// x/token accepts any string as a token class, but TokenClass.class carries a
+// foreign key to Entity.id (it is what GraphQL's TokenClass.entityByClass is
+// built from). A class that names no indexed entity is stored as NULL rather
+// than failing the whole block (testnet block 19847428, 2026-10-21: class =
+// the minter's account DID). Looked up inside the block's transaction, so an
+// entity created earlier in the same block counts.
+const classOrNull = async (
+  cls: string | null,
+  contractAddress: string,
+): Promise<string | null> => {
+  if (!cls) return null;
+  const res = await dbQuery('SELECT 1 FROM "public"."Entity" WHERE "id" = $1', [
+    cls,
+  ]);
+  if (res.rowCount) return cls;
+  console.warn(
+    `WARN::tokenClass:: class ${cls} of ${contractAddress} is not an indexed Entity, storing NULL`,
+  );
+  return null;
+};
+
 const createTokenClassSql = `
 INSERT INTO "public"."TokenClass" ( "contractAddress", "minter", "class", "name", "description", "image", "type", "cap", "supply", "paused", "stopped")
 VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11 );
@@ -184,7 +206,7 @@ export const createTokenClass = async (p: TokenClass): Promise<void> => {
   await dbQuery(createTokenClassSql, [
     p.contractAddress,
     p.minter,
-    p.class,
+    await classOrNull(p.class, p.contractAddress),
     p.name,
     p.description,
     p.image,
@@ -215,7 +237,7 @@ WHERE
 export const updateTokenClass = async (p: TokenClass): Promise<void> => {
   await dbQuery(updateTokenClassSql, [
     p.minter,
-    p.class,
+    await classOrNull(p.class, p.contractAddress),
     p.name,
     p.description,
     p.image,
