@@ -15,6 +15,22 @@ import { ixo } from "@ixo/impactxclient-sdk";
 
 const TX_EXTENSION_TYPE_URL = "/ixo.smartaccount.v1beta1.TxExtension";
 
+/**
+ * Message types that are never written to "Message" (or "TransactionSigner").
+ *
+ * /ibc.core.client.v1.MsgUpdateClient carries IBC light-client headers
+ * (validator sets and signatures, ~100 kB each). On mainnet they were 86% of
+ * the Message table's bytes (63,602 rows, 6.1 GB, 2026-10-30) and nobody
+ * queries them. Keeping them out lets "Message".value have one ordinary GIN
+ * index, so `value: { contains: … }` needs no extra typeUrl clause.
+ * The raw messages stay in blocksync-core ("MessageCore") and on chain.
+ * Existing rows were removed by migration
+ * 20261030100000000_drop-ibc-update-client-messages.
+ */
+export const SKIPPED_MESSAGE_TYPE_URLS: ReadonlySet<string> = new Set([
+  "/ibc.core.client.v1.MsgUpdateClient",
+]);
+
 export const syncTransactions = async (block: BlockCore) => {
   if (block.transactions.length === 0) return;
 
@@ -31,6 +47,10 @@ export const syncTransactions = async (block: BlockCore) => {
 
     // Extract and map messages to their decoded form
     for (const m of transaction.messages) {
+      // The transaction row is still written; only this message and its
+      // signer row are skipped. The other messages keep their original index.
+      if (SKIPPED_MESSAGE_TYPE_URLS.has(m.typeUrl)) continue;
+
       const value = await decodeAndProcessMessage(m, transaction.hash, txIndex);
       if (value) {
         allMessages.push(value);

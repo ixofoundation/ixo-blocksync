@@ -76,57 +76,40 @@ The only public endpoints are for health monitoring:
 
 ## Database migrations and indexes
 
-Schema changes are SQL files in `src/postgres/migrations/`, run by
+Schema changes are files in `src/postgres/migrations/`, run by
 [node-pg-migrate](https://github.com/salsita/node-pg-migrate) (`yarn migrate:up`,
 `migrate:down`, `migrate:create`). With `MIGRATE_DB_PROGRAMATICALLY=1` (set in
 every deployed environment) the indexer applies pending migrations **at
-startup, before it opens its HTTP port**. The k8s liveness probe on `GET /`
-allows roughly 35 seconds, so a migration that takes longer than that restarts
-the pod, rolls back, and crashloops.
+startup**. Order (`src/index.ts`): the HTTP port opens first, so the k8s
+liveness probe on `GET /` keeps passing however long a migration takes; then
+migrations run; only then do block sync and the cron jobs start, so nothing
+writes to the database while a migration runs. A failed migration exits the
+process and Kubernetes restarts the pod.
 
-**Rule for large indexes:** on an existing environment, build the index by hand
-first, then deploy. `CREATE INDEX CONCURRENTLY` does not block the indexer's
-writes, and the migration's `CREATE INDEX IF NOT EXISTS` is then a no-op that
-records itself in `pgmigrations`. From the primary Postgres pod:
+Everything a database needs comes from these files: a fresh, empty database
+reaches the current schema by starting the indexer, with no manual steps.
 
-```sql
-SET maintenance_work_mem = '512MB';
-CREATE INDEX CONCURRENTLY IF NOT EXISTS "<name>" ON "<table>" ...;  -- same name and definition as the migration
-```
-
-Watch `pg_stat_progress_create_index`; confirm `indisvalid` in `pg_index` before
-deploying. Never give a migration a name that would drop and rebuild a
-hand-built index at startup.
+**Large indexes on existing tables:** a plain `CREATE INDEX` blocks writes for
+the whole build. Use a JavaScript migration that calls `pgm.noTransaction()`
+and runs `CREATE INDEX CONCURRENTLY IF NOT EXISTS`, dropping an INVALID
+leftover of the same name first so an interrupted build retries cleanly
+(example: `20261030100100000_message-value-gin-full.js`). Do not `SET`
+session parameters such as `maintenance_work_mem` there: the indexer connects
+through pgbouncer in transaction mode, where a session `SET` leaks onto a
+pooled connection. Indexes built by hand before this pattern existed are
+covered by `IF NOT EXISTS` and stay no-ops.
 
 ### `Message.value` containment index
 
-`Message.value` (JSONB, the full message content) has a GIN index,
-`Message_value_nonibc_gin_idx` (`jsonb_path_ops`), so "every message that
-mentions object X" is an index lookup instead of a scan of the whole table.
-It serves the `@>` operator only, which is the API's `value: { contains: … }`
-filter; `containsKey` and friends are not indexed.
-
-The index is **partial**: it skips `/ibc.core.client.v1.MsgUpdateClient` (IBC
-light-client headers: validator sets and signatures, ~100 kB each, 86% of the
-table's bytes on mainnet and never searched by content). Those rows stay stored
-and queryable by `typeUrl`, height and sender; every other message type,
-including IBC transfers, packets and acknowledgements, is fully indexed.
-
-Postgres only uses a partial index when the query's `WHERE` implies the index
-predicate, so **a containment query must also say**
-`"typeUrl" <> '/ibc.core.client.v1.MsgUpdateClient'`. Through
-[ixo-blocksync-api](https://github.com/ixofoundation/ixo-blocksync-api):
+`Message.value` (JSONB, the full message content) has an ordinary GIN index,
+`Message_value_gin_idx` (`jsonb_path_ops`), so "every message that mentions
+object X" is an index lookup instead of a scan of the whole table. It serves
+the `@>` operator only, which is the API's `value: { contains: … }` filter;
+`containsKey` and friends are not indexed.
 
 ```graphql
 query MessagesMentioning($id: String!) {
-  messages(
-    filter: {
-      typeUrl: { notEqualTo: "/ibc.core.client.v1.MsgUpdateClient" }
-      value: { contains: { id: $id } }
-    }
-    first: 100
-    orderBy: ID_DESC
-  ) {
+  messages(filter: { value: { contains: { id: $id } } }, first: 100, orderBy: ID_DESC) {
     totalCount
     nodes { id typeUrl transactionHash transactionByTransactionHash { height time } }
   }
@@ -135,19 +118,32 @@ query MessagesMentioning($id: String!) {
 
 Shapes that work the same way: `{ entity: "<did>" }`, `{ collectionId: "<id>" }`,
 and `{ msgs: [{ id: "<did>" }] }` for messages wrapped in an authz `MsgExec`.
-Without the `typeUrl` clause the same query is a sequential scan that times out
-on mainnet. Measured on devnet (84k messages): 4 s → under 5 ms in the
-database, ~250 ms end to end through the API, stable at 20 concurrent requests.
 
-Sizes: the index is roughly 4× the stored size of what it covers (devnet
-1 GB; mainnet ≈ 4 GB without the headers, ≈ 29 GB with them, which is why they
-are excluded). **Plans:** every client must let Postgres plan each statement with its bind
-values (`plan_cache_mode = force_custom_plan`; ixo-blocksync-api sets it per
-transaction in `pgSettings`, and the `blocksync` role carries it in all three
-environments as a backstop). A generic plan cannot prove the partial index's
-predicate from a `$n` parameter, walks the primary key instead and hits the
-statement timeout: on mainnet, 2026-10-20, every containment query through the
-API failed at 8 s until the setting was applied; 0.4 s after.
+**`/ibc.core.client.v1.MsgUpdateClient` is not stored in `Message`** (nor its
+`TransactionSigner` row). Those are IBC light-client headers (validator sets
+and signatures, ~100 kB each): on mainnet 63,602 rows and 6.1 GB, 86% of the
+table's bytes, never searched by content. The indexer skips them
+(`SKIPPED_MESSAGE_TYPE_URLS` in `src/sync_handlers/transaction_sync.ts`); the
+raw messages stay in blocksync-core (`MessageCore`) and on chain. The
+transaction row is still written, and the other messages keep their original
+`index`, so an IBC relay transaction shows one message fewer than on chain.
+Migration `20261030100000000_drop-ibc-update-client-messages` removed the rows
+already stored; `20261030100100000_message-value-gin-full` then replaced the
+earlier partial index (`Message_value_nonibc_gin_idx`, which only served
+queries that also said `typeUrl: { notEqualTo: "/ibc.core.client.v1.MsgUpdateClient" }`)
+with this one, built `CONCURRENTLY` at startup. Queries that still send that
+clause keep working; it is no longer needed.
+
+Limit: GIN containment finds every match before ordering, so "newest N
+messages mentioning X" is slow for an X that hundreds of thousands of messages
+mention (for example mainnet claim collections 5 and 6). The fix for that is a
+message-references table (Linear IXO-5676).
+
+**Plans:** keep `plan_cache_mode = force_custom_plan` (the `blocksync` role has
+it in all three environments and ixo-blocksync-api sets it per transaction). A
+generic plan cannot estimate how selective a `$n` containment value is and
+walks the primary key with a filter instead of using this index; with the
+value planned in, Postgres uses the index.
 
 A proper "message references" table is planned to replace this
 (Linear IXO-5676).
