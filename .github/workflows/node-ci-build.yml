@@ -13,6 +13,17 @@ on:
       - main
       - develop
 
+# The shared workflow tags releases, pushes the image, uploads the scan and
+# comments on issues and pull requests. The organisation's default token is
+# read-only, and a called workflow cannot ask for more than its caller grants
+# (the run fails at startup), so the grants are spelled out here.
+permissions:
+  contents: write
+  packages: write
+  security-events: write
+  issues: write
+  pull-requests: write
+
 jobs:
   build-and-release:
     uses: ixofoundation/ixo-github-actions/.github/workflows/node-ci-build.yml@main
