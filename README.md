@@ -99,6 +99,14 @@ through pgbouncer in transaction mode, where a session `SET` leaks onto a
 pooled connection. Indexes built by hand before this pattern existed are
 covered by `IF NOT EXISTS` and stay no-ops.
 
+**Time columns are `TIMESTAMPTZ(3)`.** Every time the indexer stores is UTC.
+Since the `20261110100000000`–`20261110100003000` migrations the columns say so,
+and the API returns `2026-11-10T05:16:47.319+00:00` where it used to return
+`2026-11-10T05:16:47.319` (which browsers read as local time). Declare any new
+time column as `TIMESTAMPTZ(3)`, never `TIMESTAMP`. After a migration that
+changes a column's type, restart `ixo-blocksync-api`: it reads column types
+once at boot.
+
 ### `Message.value` containment index
 
 `Message.value` (JSONB, the full message content) has an ordinary GIN index,
