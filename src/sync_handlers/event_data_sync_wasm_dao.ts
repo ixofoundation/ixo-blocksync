@@ -897,11 +897,12 @@ const processDaoVotingEvent = async ({
   // and staking_contract on the same event. Process all three in sequence
   // (no early returns) so none gets dropped.
 
-  const groupContractAddress = getWasmAttr(
-    event.attributes,
-    "group_contract_address",
-    true,
-  );
+  // dao-voting-cw4 v2.0.x names this attribute `group_contract_address`;
+  // v2.7.1 renamed it to `group_contract`. Without the second name a v2.7.1
+  // group is indexed with no cw4 group link and a total weight of 0.
+  const groupContractAddress =
+    getWasmAttr(event.attributes, "group_contract_address", true) ||
+    getWasmAttr(event.attributes, "group_contract", true);
   if (groupContractAddress) {
     const totalWeight =
       await getDaoCw4SumWeightForGroupContract(groupContractAddress);
