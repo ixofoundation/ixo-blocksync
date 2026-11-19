@@ -123,6 +123,7 @@ export const syncWasmEventData = async (
           to,
           amount: BigInt(getWasmAttr(message, "amount") ?? 0),
           tokenId: getWasmAttr(message, "token_id"),
+          contractAddress,
         };
         if (from) {
           await createTokenTransaction(tokenTransaction);
