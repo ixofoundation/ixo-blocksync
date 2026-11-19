@@ -13,7 +13,15 @@ export type TokenTransaction = {
   to: string;
   amount: bigint;
   tokenId: string;
+  contractAddress?: string;
 };
+
+const getTokenContractAddressSql = `
+SELECT tc."contractAddress"
+FROM "Token" t
+JOIN "TokenClass" tc ON tc."name" = t."name"
+WHERE t."id" = $1;
+`;
 
 const createTokenTransactionSql = `
 INSERT INTO "TokenTransaction" ("from", "to", amount, "tokenId") VALUES ($1, $2, $3, $4);
@@ -75,6 +83,13 @@ const applyTokenBalanceDelta = async (
 export const createTokenTransaction = async (
   t: TokenTransaction
 ): Promise<void> => {
+  // a token id belongs to the contract of the token that first minted it
+  if (t.contractAddress) {
+    const res = await dbQuery(getTokenContractAddressSql, [t.tokenId]);
+    const owner = res.rows[0]?.contractAddress;
+    if (owner && owner !== t.contractAddress) return;
+  }
+
   await dbQuery(createTokenTransactionSql, [t.from, t.to, t.amount, t.tokenId]);
 
   // Keep "TokenBalance" in sync with the ledger: credit the recipient, debit
@@ -278,7 +293,8 @@ DELETE FROM "TokenRetired" WHERE "name" = $1;
 const createTokenRetiredSql = `
 INSERT INTO "public"."TokenRetired" ( "id", "reason", "jurisdiction", "amount", "owner", "name")
 SELECT tr.id, tr.reason, tr.jurisdiction, tr.amount, tr.owner, $2
-FROM jsonb_to_recordset($1) AS tr(id text, reason text, jurisdiction text, amount bigint, owner text);
+FROM jsonb_to_recordset($1) AS tr(id text, reason text, jurisdiction text, amount bigint, owner text)
+WHERE NOT EXISTS (SELECT 1 FROM "Token" t WHERE t."id" = tr.id AND t."name" <> $2);
 `;
 
 export type TokenCancelled = {
@@ -294,7 +310,8 @@ DELETE FROM "TokenCancelled" WHERE "name" = $1;
 const createTokenCancelledSql = `
 INSERT INTO "public"."TokenCancelled" ( "id", "reason", "amount", "owner", "name")
 SELECT tc.id, tc.reason, tc.amount, tc.owner, $2
-FROM jsonb_to_recordset($1) AS tc(id text, reason text, amount bigint, owner text);
+FROM jsonb_to_recordset($1) AS tc(id text, reason text, amount bigint, owner text)
+WHERE NOT EXISTS (SELECT 1 FROM "Token" t WHERE t."id" = tc.id AND t."name" <> $2);
 `;
 
 export type Token = {
@@ -308,15 +325,33 @@ export type Token = {
 
 const createTokenSql = `
 INSERT INTO "public"."Token" ( "id", "index", "name", "collection")
+VALUES ( $1, $2, $3, $4 )
+ON CONFLICT ("id") DO NOTHING
+RETURNING "id";
+`;
+const createTokenConflictSql = `
+INSERT INTO "public"."TokenConflict" ( "id", "index", "name", "collection")
 VALUES ( $1, $2, $3, $4 );
 `;
 export const createToken = async (p: Token): Promise<void> => {
-  await dbQuery(createTokenSql, [
+  const res = await dbQuery(createTokenSql, [
     p.id,
     p.index,
     p.name,
     await entityIdOrNull(p.collection, `collection of token ${p.id}`),
   ]);
+
+  // the id is already taken: the first token keeps it
+  if (!res.rowCount) {
+    console.warn(`WARN::token:: id ${p.id} already exists, ${p.name} not stored`);
+    await dbQuery(createTokenConflictSql, [
+      p.id,
+      p.index,
+      p.name,
+      p.collection,
+    ]);
+    return;
+  }
 
   if (p.tokenData?.length) {
     await dbQuery(createTokenDataSql, [JSON.stringify(p.tokenData), p.id]);
